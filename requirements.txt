@@ -1,0 +1,6 @@
+pyopenms
+bokeh
+plotly
+# testing
+pytest
+syrupy
