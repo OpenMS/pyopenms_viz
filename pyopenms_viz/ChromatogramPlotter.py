@@ -37,7 +37,7 @@ class ChromatogramPlotter(_BasePlotter):
         from bokeh.plotting import figure, show
         from bokeh.models import ColumnDataSource, Legend
         from bokeh.palettes import Category10
-
+        
         # Tooltips for interactive information
         TOOLTIPS = [
                 ("index", "$index"),
@@ -92,9 +92,68 @@ class ChromatogramPlotter(_BasePlotter):
         else:
             return p
 
-    def _plotPlotly(self, chromatogram: MSChromatogram):
-        ##TODO
-        pass  
+    def _plotPlotly(self, data: DataFrame):
+        import plotly.graph_objects as go
+
+        if "Annotation" not in data.columns:
+            data = data.copy()
+            data.loc[:, "Annotation"] = "Unknown"
+
+        # Create a trace for each unique annotation
+        traces = []
+        colors = self.generate_colors(len(data["Annotation"].unique()))
+        for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+            trace = go.Scatter(
+                x=group_df["rt"],
+                y=group_df["int"],
+                mode='lines',
+                name=annotation,
+                line=dict(
+                    color=colors[i],
+                    width=2,
+                    dash='solid'
+                )
+            )
+            traces.append(trace)
+
+        # Create the Plotly figure
+        fig = go.Figure(data=traces)
+        fig.update_layout(
+            title=self.config.title,
+            xaxis_title=self.config.xlabel,
+            yaxis_title=self.config.ylabel,
+            width=self.config.width,
+            height=self.config.height,
+            legend_title="Transition",
+            legend_font_size=10
+        )
+
+        # Add tooltips
+        fig.update_traces(
+            hovertemplate=(
+                "Index: %{customdata[0]}<br>" +
+                "Retention Time: %{x:.2f}<br>" +
+                "Intensity: %{y:.2f}<br>" +
+                "m/z: %{customdata[1]:.4f}<br>" +
+                "Annotation: %{customdata[2]}"
+            ),
+            customdata=list(zip(data.index, data["mz"], data["Annotation"]))
+        )
+
+        # Customize the plot
+        fig.update_layout(
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            xaxis_zeroline=False,
+            yaxis_zeroline=False
+        )
+
+        if self.config.show_plot:
+            fig.show()
+        else:
+            return fig 
     
     def plot(self, data, **kwargs):
         if self.config.engine_enum == Engine.PLOTLY:
