@@ -154,12 +154,50 @@ class ChromatogramPlotter(_BasePlotter):
             fig.show()
         else:
             return fig 
+        
+    def _plotMatplotlib(self, data: DataFrame):
+
+        # Create a figure and axis
+        fig, ax = plt.subplots(figsize=(self.config.width/100, self.config.height/100), dpi=100)
+
+        # Set plot title and axis labels
+        ax.set_title(self.config.title)
+        ax.set_xlabel(self.config.xlabel)
+        ax.set_ylabel(self.config.ylabel)
+
+        # Create a legend
+        legend_lines = []
+        legend_labels = []
+
+        # Plot each unique annotation
+        colors = self.generate_colors(len(data["Annotation"].unique()))
+        for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+            line, = ax.plot(group_df["rt"], group_df["int"], color=colors[i], linewidth=2, alpha=0.5, linestyle='solid')
+            legend_lines.append(line)
+            legend_labels.append(annotation)
+
+        # Add legend
+        legend = ax.legend(legend_lines, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5), title="Transition", prop={'size': 10})
+        legend.get_title().set_fontsize('10')
+
+        # Customize the plot
+        ax.grid(False)
+        ax.set_xlim(data["rt"].min(), data["rt"].max())
+        ax.set_ylim(data["int"].min(), data["int"].max())
+
+        if self.config.show_plot:
+            plt.show()
+        else:
+            return fig
+
     
     def plot(self, data, **kwargs):
         if self.config.engine_enum == Engine.PLOTLY:
             return self._plotPlotly(data, **kwargs)
-        else: # self.config.engine_enum == Engine.BOKEH:
+        elif self.config.engine_enum == Engine.BOKEH:
             return self._plotBokeh(data, **kwargs)
+        else: # self.config.engine_enum == Engine.MATPLOTLIB:
+            return self._plotMatplotlib(data, **kwargs)
 
 
 # ============================================================================= #
@@ -173,7 +211,7 @@ def plotChromatogram(chromatogram: MSChromatogram,
                      ion_mobility: bool = False,
                      width: int = 500,
                      height: int = 500,
-                     engine: Literal['PLOTLY', 'BOKEH'] = 'PLOTLY'):
+                     engine: Literal['PLOTLY', 'BOKEH', 'MATPLOTLIB'] = 'PLOTLY'):
     """
     Plot a Chromatogram from a MSChromatogram Object
 
