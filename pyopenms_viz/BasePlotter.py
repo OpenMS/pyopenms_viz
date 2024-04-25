@@ -24,8 +24,8 @@ class _BasePlotterConfig(ABC):
 
 # Abstract Class for Plotting
 class _BasePlotter(ABC):
-    def __init__(self, **kwargs) -> None:
-        self.config = _BasePlotterConfig(**kwargs)
+    def __init__(self, config: _BasePlotterConfig) -> None:
+        self.config = config
         self.fig = None # holds the figure object
 
     def updateConfig(self, **kwargs):
