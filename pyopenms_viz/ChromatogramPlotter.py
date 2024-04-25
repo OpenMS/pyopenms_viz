@@ -1,5 +1,7 @@
-from .BasePlotter import _BasePlotter, _BasePlotterConfig
+from .BasePlotter import _BasePlotter, _BasePlotterConfig, Engine
 from pandas import DataFrame
+import matplotlib.pyplot as plt
+import numpy as np
 from pyopenms import MSChromatogram
 from dataclasses import dataclass
 from typing import Literal
@@ -17,8 +19,19 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     ion_mobility: bool = False # if True, plot ion mobility as well in a heatmap
 
 class ChromatogramPlotter(_BasePlotter):
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self, config: _BasePlotterConfig, **kwargs) -> None:
+        super().__init__(config, **kwargs)
+        
+    @staticmethod
+    def generate_colors(n):
+        # Use Matplotlib's built-in color palettes
+        cmap = plt.get_cmap('tab20', n)
+        colors = cmap(np.linspace(0, 1, n))
+        
+        # Convert colors to hex format
+        hex_colors = ['#{:02X}{:02X}{:02X}'.format(int(r*255), int(g*255), int(b*255)) for r, g, b, _ in colors]
+        
+        return hex_colors
     
     def _plotBokeh(self, data: DataFrame):
         from bokeh.plotting import figure, show
@@ -36,21 +49,21 @@ class ChromatogramPlotter(_BasePlotter):
         if "Annotation" in data.columns:
             TOOLTIPS.append(("Annotation", "@Annotation"))
         else:
-            TOOLTIPS.append(("Annotation", "Unknown"))
-            data["Annotation"] = "Unknown"
+            TOOLTIPS.append(("Annotation", "@Annotation"))
+            data = data.copy()
+            data.loc[:, "Annotation"] = "Unknown"
         if "product_mz" in data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
         
         # Create the Bokeh plot
-        p = figure(title="Chromatogram", x_axis_label="Retention Time (min)", y_axis_label="Intensity", plot_width=self.config.width, plot_height=self.config.height, tooltips=TOOLTIPS)
+        p = figure(title=self.config.title, x_axis_label=self.config.xlabel, y_axis_label=self.config.ylabel, width=self.config.width, height=self.config.height, tooltips=TOOLTIPS)
 
         # Create a legend
         legend = Legend()
 
         # Create a list to store legend items
         legend_items = []
-
-        colors = Category10[len(data["Annotation"].unique())]
+        colors = self.generate_colors(len(data["Annotation"].unique()))
         i = 0
         for annotation, group_df in data.groupby('Annotation'):
             source = ColumnDataSource(group_df)
@@ -82,6 +95,12 @@ class ChromatogramPlotter(_BasePlotter):
     def _plotPlotly(self, chromatogram: MSChromatogram):
         ##TODO
         pass  
+    
+    def plot(self, data, **kwargs):
+        if self.config.engine_enum == Engine.PLOTLY:
+            return self._plotPlotly(data, **kwargs)
+        else: # self.config.engine_enum == Engine.BOKEH:
+            return self._plotBokeh(data, **kwargs)
 
 
 # ============================================================================= #
@@ -90,6 +109,8 @@ class ChromatogramPlotter(_BasePlotter):
 
 def plotChromatogram(chromatogram: MSChromatogram, 
                      title: str = "Chromatogram Plot",
+                     show_legend: bool = True,
+                     show_plot: bool = True,
                      ion_mobility: bool = False,
                      width: int = 500,
                      height: int = 500,
@@ -100,6 +121,8 @@ def plotChromatogram(chromatogram: MSChromatogram,
     Args:
         chromatogram (MSChromatogram): OpenMS chromatogram object
         title (str, optional): title of plot. Defaults to "Chromatogram Plot".
+        show_legend (bool, optional): If True, shows the legend. Defaults to True.
+        show_plot (bool, optional): If True, shows the plot. Defaults to True.
         ion_mobility (bool, optional): If True, plots a heatmap of Retention Time vs ion mobility with intensity as the color. Defaults to False.
         width (int, optional): width of the figure. Defaults to 500.
         height (int, optional): height of the figure. Defaults to 500.
@@ -109,7 +132,7 @@ def plotChromatogram(chromatogram: MSChromatogram,
         PLOTLY figure or BOKEH figure depending on engine
     """
 
-    config = ChromatogramPlotterConfig(title=title, ion_mobility=ion_mobility, width=width, height=height, engine=engine)
+    config = ChromatogramPlotterConfig(title=title, show_legend=show_legend, show_plot=show_plot, ion_mobility=ion_mobility, width=width, height=height, engine=engine)
     plotter = ChromatogramPlotter(config)
     return plotter.plot(chromatogram)
 
