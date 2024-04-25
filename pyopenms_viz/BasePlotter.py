@@ -15,6 +15,8 @@ class _BasePlotterConfig(ABC):
     engine: Literal["PLOTLY", "BOKEH"] = 'PLOTLY'
     height: int = 500
     width: int = 500
+    show_legend: bool = True
+    show_plot: bool = True
 
     @property
     def engine_enum(self):
