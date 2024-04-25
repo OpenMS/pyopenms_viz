@@ -157,6 +157,10 @@ class ChromatogramPlotter(_BasePlotter):
         
     def _plotMatplotlib(self, data: DataFrame):
 
+        if "Annotation" not in data.columns:
+            data = data.copy()
+            data.loc[:, "Annotation"] = "Unknown"
+
         # Create a figure and axis
         fig, ax = plt.subplots(figsize=(self.config.width/100, self.config.height/100), dpi=100)
 
