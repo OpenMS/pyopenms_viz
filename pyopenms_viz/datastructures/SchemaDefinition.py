@@ -19,7 +19,7 @@ class ColumnSchema:
                  description: str = None, 
                  columnType: ColumnType = ColumnType.OPTIONAL):
 
-        """Define a column schema for a table, although 
+        """Define a column schema 
 
         Args:
             name (str): Name of column
@@ -109,7 +109,7 @@ MULTIPLE_CHROMATOGRAMS = DataFrameSchema(name='multiple chromatograms', columns=
 ############################################################################################################
 #### DEFINED SPECTRUM SCHEMAS ####
 ############################################################################################################
-REQUIRED_SPECTRUM_COLUMNS = [
+SPECTRUM_COLUMNS = [
     ColumnSchema("mz",
                  dataType=DataType.NUMERIC,
                  description="Numeric column representing the mass-to-charge ratio (m/z) values of the peaks in the mass spectrum.",
@@ -119,14 +119,19 @@ REQUIRED_SPECTRUM_COLUMNS = [
                  dataType=DataType.NUMERIC,
                  description="Numeric column representing the intensity (abundance) of the peaks in the mass spectrum.",
                  columnType=ColumnType.REQUIRED),
+
+    ColumnSchema("annotation",
+                 dataType=DataType.STRING,
+                 description="String column representing the annotation of the spectrum, such as the fragment ion series.",
+                 columnType=ColumnType.OPTIONAL)
 ]
 
-MULTIPLE_SPECTRA_COLUMNS = REQUIRED_SPECTRUM_COLUMNS + [ ColumnSchema(name=["label", "native_id"],
+MULTIPLE_SPECTRA_COLUMNS = SPECTRUM_COLUMNS + [ ColumnSchema(name=["label", "native_id"],
                                                                       dataType=DataType.STRING,
                                                                       description="Spectrum label, necessary if multiple spectra are in the same dataframe. This column is used to label the spectra", columnType=ColumnType.REQUIRED)]
 
-SPECTRUM = DataFrameSchema(name='spectrum', columns=REQUIRED_SPECTRUM_COLUMNS, description="Base spectrum schema, only a single spectrum is present")
-MULTIPLE_SPECTRA = DataFrameSchema(name='multiple spectra', columns=REQUIRED_SPECTRUM_COLUMNS + REQUIRED_SPECTRUM_COLUMNS, description="Multiple spectra in a single DataFrame")
+SPECTRUM = DataFrameSchema(name='spectrum', columns=SPECTRUM_COLUMNS, description="Base spectrum schema, only a single spectrum is present")
+MULTIPLE_SPECTRA = DataFrameSchema(name='multiple spectra', columns=SPECTRUM_COLUMNS + SPECTRUM_COLUMNS, description="Multiple spectra in a single DataFrame")
 
 ############################################################################################################
 #### DEFINED CHROMATOGRAM FEATURE SCHEMAS ####
@@ -172,14 +177,4 @@ CHROMATOGRAM_FEATURE = DataFrameSchema(name='chromatogram feature',
 ############################################################################################################
 #### DEFINED SPECTRUM FEATURE SCHEMAS ####
 ############################################################################################################
-##TODO, someone more familiar with the data should fill this in
-OPTIONAL_METADATA_SPECTRUM_DATAFRAME_COLUMNS = {
-    "sequence": "String column representing the peptide sequence.",
-    "modified_sequence": "String column representing the modified peptide sequence.",
-    "precursor_mz": "Numeric column representing the mass-to-charge ratio (m/z) of the precursor ion.",
-    "precursor_charge": "Integer column representing the charge state of the precursor ion.",
-    "product_mz": "Numeric column representing the mass-to-charge ratio (m/z) of the product ion.",
-    "product_charge": "Integer column representing the charge state of the product ion.",
-    "annotation": "String column representing the annotation of the spectrum, such as the fragment ion series."
-}
-
+##TODO, Is this needed?
