@@ -16,5 +16,5 @@ OPTIONAL_METADATA_SPECTRUM_DATAFRAME_COLUMNS = {
     "precursor_charge": "Integer column representing the charge state of the precursor ion.",
     "product_mz": "Numeric column representing the mass-to-charge ratio (m/z) of the product ion.",
     "product_charge": "Integer column representing the charge state of the product ion.",
-    "annotation": "String column representing the annotation of the spectrum, such as the fragment ion series."
+    "annotation": "String column representing the annotation of the peak, such as the fragment ion series."
 }
