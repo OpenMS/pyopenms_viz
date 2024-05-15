@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
+import matplotlib.pyplot as plt
 
 
 @dataclass(kw_only=True)
@@ -15,16 +16,17 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
     annotate_mz: bool = False
     annotate_ions: bool = False
     annotate_sequence: bool = False
-    mirror_spectrum: bool = False,
-    custom_peak_color: bool = False,
-    custom_annotation_color: bool = False,
+    mirror_spectrum: bool = (False,)
+    custom_peak_color: bool = (False,)
+    custom_annotation_color: bool = (False,)
     custom_annotation_text: bool = False
+
 
 class SpectrumPlotter(_BasePlotter):
     def __init__(self, config: SpectrumPlotterConfig, **kwargs) -> None:
         super().__init__(config=config, **kwargs)
 
-    def _get_ion_color_annotation(self, annotation):
+    def _get_ion_color_annotation(self, annotation: str) -> str:
         """
         Retrieve the color associated with a specific ion annotation from a predefined colormap.
 
@@ -72,6 +74,114 @@ class SpectrumPlotter(_BasePlotter):
                 return colormap[annotation[0]]
         return Colors["DARKGRAY"]
 
+    def _get_annotation_text(self, peak: pd.Series) -> str:
+        if "custom_annotation" in peak.index and self.config.custom_annotation_text:
+            text = peak["custom_annotation"]
+        else:
+            text = ""
+            if self.config.annotate_ions:
+                if peak["ion_annotation"] != "none":
+                    text = f"{peak['ion_annotation']}"
+            if self.config.annotate_sequence:
+                if peak["sequence"]:
+                    if text:
+                        text += "<br>"
+                    text += peak["sequence"]
+            if self.config.annotate_mz:
+                if text:
+                    text += "<br>"
+                text += str(peak["mz"])
+        return text
+
+
+    def _get_annotation_color(self, peak: pd.Series, fallback_color: str = "black") -> str:
+        if "color_annotation" in peak.index and self.config.custom_annotation_color:
+            color = peak["color_annotation"]
+        elif self.config.annotate_ions:
+            color = self._get_ion_color_annotation(peak["ion_annotation"])
+        else:
+            return fallback_color if not self.config.custom_peak_color else peak["color_peak"]
+        return color
+
+    def _plotMatplotlib(
+        self,
+        spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
+        reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
+    ):
+        if not isinstance(spectrum, list):
+            spectrum = [spectrum]
+        if not isinstance(reference_spectrum, list) and isinstance(
+            reference_spectrum, pd.DataFrame
+        ):
+            reference_spectrum = [reference_spectrum]
+        else:
+            reference_spectrum = []
+
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            for df in spectrum + reference_spectrum:
+                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+
+        fig, ax = plt.subplots(
+            figsize=(self.config.width / 100, self.config.height / 100)
+        )
+
+        def plot_spectrum(ax, df, color, mirror=False):
+            for i, peak in df.iterrows():
+                intensity = -peak["intensity"] if mirror else peak["intensity"]
+                peak_color = (
+                    color
+                    if not (
+                        self.config.custom_peak_color and "color_peak" in peak.index
+                    )
+                    else peak["color_peak"]
+                )
+                ax.plot(
+                    [peak["mz"], peak["mz"]],
+                    [0, intensity],
+                    color=peak_color,
+                    linewidth=1.5,
+                    label=peak["native_id"] if i == 0 else None,
+                )
+                if (
+                    self.config.annotate_mz
+                    or self.config.annotate_ions
+                    or self.config.annotate_sequence
+                    or self.config.custom_annotation_text
+                ):
+                    text = self._get_annotation_text(peak).replace("<br>", "\n")
+                    annotation_color = self._get_annotation_color(peak, peak_color)
+                    ax.annotate(
+                        text,
+                        xy=(peak["mz"], intensity),
+                        xytext=(1, 0),
+                        textcoords="offset points",
+                        fontsize=8,
+                        color=annotation_color,
+                    )
+
+        colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+        for spec in spectrum:
+            plot_spectrum(ax, spec, next(colors))
+
+        if self.config.mirror_spectrum:
+            colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+            for ref_spec in reference_spectrum:
+                plot_spectrum(ax, ref_spec, next(colors), mirror=True)
+
+        ax.set_title(self.config.title, fontsize=12, loc="left", pad=30)
+        ax.set_xlabel(self.config.xlabel, fontsize=10, color=Colors["DARKGRAY"])
+        ax.set_ylabel(self.config.ylabel, fontsize=10, color=Colors["DARKGRAY"])
+        ax.xaxis.label.set_color(Colors["DARKGRAY"])
+        ax.tick_params(axis="x", colors=Colors["DARKGRAY"])
+        ax.yaxis.label.set_color(Colors["DARKGRAY"])
+        ax.tick_params(axis="y", colors=Colors["DARKGRAY"])
+        ax.set_ylim([0 if not self.config.mirror_spectrum else None, None])
+        ax.ticklabel_format(axis="both", style="sci", useMathText=True)
+        ax.spines[["right", "top"]].set_visible(False)
+        ax.legend(loc="best") if self.config.show_legend else None
+
+        return fig
+
     def _plotBokeh(
         self,
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
@@ -95,7 +205,14 @@ class SpectrumPlotter(_BasePlotter):
                     x=[peak["mz"]] * 2,
                     y=[0, intensity_direction * peak["intensity"]],
                     mode="lines",
-                    line=dict(color=peak["color_peak"] if "color_peak" in peak.index and self.config.custom_peak_color else line_color),
+                    line=dict(
+                        color=(
+                            peak["color_peak"]
+                            if "color_peak" in peak.index
+                            and self.config.custom_peak_color
+                            else line_color
+                        )
+                    ),
                     name=peak["native_id"],
                     text=f"m/z: {peak['mz']}<br>intensity: {peak['intensity']}<br>{peak['native_id']}",
                     hoverinfo="text",
@@ -108,26 +225,19 @@ class SpectrumPlotter(_BasePlotter):
             spectra: List[pd.DataFrame],
             intensity_sign: Literal[1, -1] = 1,
         ) -> List[dict]:
-            if not self.config.annotate_mz and not self.config.annotate_ions:
+            if (
+                not self.config.annotate_mz
+                and not self.config.annotate_ions
+                and not self.config.annotate_sequence
+                and not self.config.custom_annotation_text
+            ):
                 return []
             annotations = []
+            colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
             for spectrum in spectra:
                 for _, peak in spectrum.iterrows():
-                    text = ""
-                    if self.config.annotate_mz:
-                        color = "black"
-                        text += f"{peak['mz']}"
-                    if self.config.annotate_ions:
-                        color = self._get_ion_color_annotation(peak["ion_annotation"])
-                        if peak["ion_annotation"] != "none":
-                            text = f"{peak['ion_annotation']}<br>" + text
-                    if self.config.annotate_sequence:
-                        if peak["sequence"]:
-                            text += f"<br>{peak['sequence']}"
-                    if "color_annotation" in peak.index and self.config.custom_annotation_color:
-                        color = peak["color_annotation"]
-                    if "custom_annotation" in peak.index and self.config.custom_annotation_text:
-                        text = peak["custom_annotation"]
+                    text = self._get_annotation_text(peak)
+                    color = self._get_annotation_color(peak, next(colors))
                     annotations.append(
                         dict(
                             x=peak["mz"],
@@ -147,8 +257,12 @@ class SpectrumPlotter(_BasePlotter):
         # Make sure both spectrum and reference spectrum are lists containing DataFrames.
         if not isinstance(spectrum, list):
             spectrum = [spectrum]
-        if not isinstance(reference_spectrum, list):
+        if not isinstance(reference_spectrum, list) and isinstance(
+            reference_spectrum, pd.DataFrame
+        ):
             reference_spectrum = [reference_spectrum]
+        else:
+            reference_spectrum = []
 
         # If relative intensity is set, convert intensity values for all DataFrames.
         if self.config.relative_intensity or self.config.mirror_spectrum:
@@ -159,15 +273,21 @@ class SpectrumPlotter(_BasePlotter):
 
         # Create figure with initial layout
         layout = go.Layout(
-            title=self.config.title,
+            title=dict(text=self.config.title),
             xaxis=dict(
-                title="m/z",
-                autorangeoptions=dict(include=[min([min(df["mz"]) for df in spectrum + reference_spectrum])-1,
-                                               max([max(df["mz"]) for df in spectrum + reference_spectrum])+1]),
+                title=self.config.xlabel,
+                autorangeoptions=dict(
+                    include=[
+                        min([min(df["mz"]) for df in spectrum + reference_spectrum])
+                        - 1,
+                        max([max(df["mz"]) for df in spectrum + reference_spectrum])
+                        + 1,
+                    ]
+                ),
                 constrain="domain",  # Optional, ensures that the range cannot be changed by user zoom
             ),
             yaxis=dict(
-                title="Intensity",
+                title=self.config.ylabel,
                 constrain="domain",  # Optional, ensures that the range cannot be changed by user zoom
             ),
             showlegend=self.config.show_legend,
@@ -198,6 +318,7 @@ class SpectrumPlotter(_BasePlotter):
 
         return fig
 
+
 # ============================================================================= #
 ## FUNCTIONAL API ##
 # ============================================================================= #
@@ -205,8 +326,7 @@ class SpectrumPlotter(_BasePlotter):
 
 def plotSpectrum(
     spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
-    reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame]] = pd.DataFrame,
-    title: str = "Spectrum Plot",
+    reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame]] = None,
     ion_mobility: bool = False,
     annotate_mz: bool = False,
     annotate_ions: bool = False,
@@ -216,8 +336,11 @@ def plotSpectrum(
     custom_peak_color: bool = False,
     custom_annotation_text: bool = False,
     custom_annotation_color: bool = False,
-    width: int = 500,
+    width: int = 750,
     height: int = 500,
+    title: str = "Spectrum Plot",
+    xlabel: str = "m/z",
+    ylabel: str = "intensity",
     show_legend: bool = False,
     engine: Literal["PLOTLY", "BOKEH"] = "PLOTLY",
 ):
@@ -227,7 +350,6 @@ def plotSpectrum(
     Args:
         spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): OpenMS MSSpectrum Object
         reference_spectrum (Union[pd.DataFrame, List[pd.DataFrame]], optional): Optional OpenMS Spectrum object to plot in mirror or used in annotation. Defaults to None.
-        title (str, optional): Plot title. Defaults to "Spectrum Plot".
         ion_mobility (bool, optional): If true, plots a heatmap of m/z vs ion mobility with intensity as color. Defaults to False.
         annotate_mz (bool, optional): If true, annotate peaks with m/z values. Defaults to False.
         annotate_ions (bool, optional): If true, annotate fragment ions. Defaults to False.
@@ -239,13 +361,15 @@ def plotSpectrum(
         custom_annotation_color (bool, optional): If true, plot annotations with colors from "color_annotation" column.
         width (int, optional): Width of plot. Defaults to 500px.
         height (int, optional): Height of plot. Defaults to 500px.
+        title (str, optional): Plot title. Defaults to "Spectrum Plot".
+        xlabel (str, optional): X-axis label. Defaults to "m/z".
+        ylabel (str, optional): Y-axis label. Defaults to "intensity".
         show_legend (int, optional): Show legend. Defaults to False.
         engine (Literal['PLOTLY', 'BOKEH'], optional): Plotting engine to use. Defaults to 'PLOTLY' can be either 'PLOTLY' or 'BOKEH'
 
     Returns:
     """
     config = SpectrumPlotterConfig(
-        title=title,
         ion_mobility=ion_mobility,
         annotate_mz=annotate_mz,
         mirror_spectrum=mirror_spectrum,
@@ -257,6 +381,9 @@ def plotSpectrum(
         custom_annotation_color=custom_annotation_color,
         width=width,
         height=height,
+        title=title,
+        xlabel=xlabel,
+        ylabel=ylabel,
         show_legend=show_legend,
         engine=engine,
     )

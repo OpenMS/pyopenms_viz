@@ -7,6 +7,7 @@ from typing import Literal
 class Engine(Enum):
     PLOTLY = 1
     BOKEH = 2
+    MATPLOTLIB = 3
 
 
 # A colorset suitable for color blindness
@@ -18,7 +19,7 @@ class Colors(str, Enum):
     PURPLE = "#7B2C65"
     YELLOW = "#FCCF53"
     DARKGRAY = "#555555"
-    LIGHTGRAY = "#DDDDDD"
+    LIGHTGRAY = "#BBBBBB"
 
 
 @dataclass(kw_only=True)
@@ -26,7 +27,7 @@ class _BasePlotterConfig(ABC):
     title: str = "1D Plot"
     xlabel: str = "X-axis"
     ylabel: str = "Y-axis"
-    engine: Literal["PLOTLY", "BOKEH"] = "PLOTLY"
+    engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY"
     height: int = 500
     width: int = 500
     relative_intensity: bool = False
@@ -53,8 +54,14 @@ class _BasePlotter(ABC):
     def plot(self, data, **kwargs):
         if self.config.engine_enum == Engine.PLOTLY:
             return self._plotPlotly(data, **kwargs)
+        elif self.config.engine_enum == Engine.MATPLOTLIB:
+            return self._plotMatplotlib(data, **kwargs)
         else:  # self.config.engine_enum == Engine.BOKEH:
             return self._plotBokeh(data, **kwargs)
+
+    @abstractmethod
+    def _plotMatplotlib(self, data, **kwargs):
+        pass
 
     @abstractmethod
     def _plotBokeh(self, data, **kwargs):
