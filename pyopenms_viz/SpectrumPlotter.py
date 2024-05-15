@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
 import matplotlib.pyplot as plt
-
+import streamlit as st
 
 @dataclass(kw_only=True)
 class SpectrumPlotterConfig(_BasePlotterConfig):
@@ -110,11 +110,9 @@ class SpectrumPlotter(_BasePlotter):
     ):
         if not isinstance(spectrum, list):
             spectrum = [spectrum]
-        if not isinstance(reference_spectrum, list) and isinstance(
-            reference_spectrum, pd.DataFrame
-        ):
+        if (not isinstance(reference_spectrum, list)) and reference_spectrum is not None:
             reference_spectrum = [reference_spectrum]
-        else:
+        elif reference_spectrum is None:
             reference_spectrum = []
 
         if self.config.relative_intensity or self.config.mirror_spectrum:
@@ -158,13 +156,13 @@ class SpectrumPlotter(_BasePlotter):
                         fontsize=8,
                         color=annotation_color,
                     )
-
-        colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+        gs_colors = self._get_n_grayscale_colors(max([len(spectrum), len(reference_spectrum)]))
+        colors = cycle(gs_colors)
         for spec in spectrum:
             plot_spectrum(ax, spec, next(colors))
 
         if self.config.mirror_spectrum:
-            colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+            colors = cycle(gs_colors)
             for ref_spec in reference_spectrum:
                 plot_spectrum(ax, ref_spec, next(colors), mirror=True)
 
@@ -233,7 +231,7 @@ class SpectrumPlotter(_BasePlotter):
             ):
                 return []
             annotations = []
-            colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+            colors = cycle(self.gs_colors)
             for spectrum in spectra:
                 for _, peak in spectrum.iterrows():
                     text = self._get_annotation_text(peak)
@@ -257,11 +255,9 @@ class SpectrumPlotter(_BasePlotter):
         # Make sure both spectrum and reference spectrum are lists containing DataFrames.
         if not isinstance(spectrum, list):
             spectrum = [spectrum]
-        if not isinstance(reference_spectrum, list) and isinstance(
-            reference_spectrum, pd.DataFrame
-        ):
+        if (not isinstance(reference_spectrum, list)) and reference_spectrum is not None:
             reference_spectrum = [reference_spectrum]
-        else:
+        elif reference_spectrum is None:
             reference_spectrum = []
 
         # If relative intensity is set, convert intensity values for all DataFrames.
@@ -295,16 +291,18 @@ class SpectrumPlotter(_BasePlotter):
         )
         fig = go.Figure(layout=layout)
 
+        # Get grayscale colors for maximum number of spectra on one axis
+        self.gs_colors = self._get_n_grayscale_colors(max([len(spectrum), len(reference_spectrum)]))
         # Peak traces
         traces = []
         # Spectra
-        colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+        colors = cycle(self.gs_colors)
         for spec in spectrum:
             color = next(colors)
             traces += _create_peak_traces(spec, color)
         # Mirror spectra
         if self.config.mirror_spectrum:
-            colors = cycle([Colors["DARKGRAY"], Colors["LIGHTGRAY"]])
+            colors = cycle(self.gs_colors)
             for spec in reference_spectrum:
                 color = next(colors)
                 traces += _create_peak_traces(spec, color, intensity_direction=-1)

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Literal
-
+from typing import Literal, List
+import numpy as np
 
 class Engine(Enum):
     PLOTLY = 1
@@ -50,6 +50,16 @@ class _BasePlotter(ABC):
                 setattr(self.config, key, value)
             else:
                 raise ValueError(f"Invalid config setting: {key}")
+
+    def _get_n_grayscale_colors(self, n: int) -> List[str]:
+        """Returns n evenly spaced grayscale colors in hex format."""
+        hex_list = []
+        for v in np.linspace(50, 200, n):
+            hex = "#"
+            for _ in range(3):
+                hex += f"{int(round(v)):02x}"
+            hex_list.append(hex)
+        return hex_list
 
     def plot(self, data, **kwargs):
         if self.config.engine_enum == Engine.PLOTLY:
