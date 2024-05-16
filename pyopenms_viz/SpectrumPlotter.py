@@ -8,8 +8,9 @@ import plotly.graph_objects as go
 
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
 import matplotlib.pyplot as plt
+from bokeh.plotting import figure
+from bokeh.models import Span, Label, Range1d
 import streamlit as st
-
 @dataclass(kw_only=True)
 class SpectrumPlotterConfig(_BasePlotterConfig):
     ion_mobility: bool = False
@@ -54,8 +55,8 @@ class SpectrumPlotter(_BasePlotter):
         '#EF553B'  # Assuming '#EF553B' is the color assigned to 'y' type ions
         """
         colormap = {
-            "a": Colors["BLUE"],
-            "b": Colors["PURPLE"],
+            "a": Colors["PURPLE"],
+            "b": Colors["BLUE"],
             "c": Colors["LIGHTBLUE"],
             "x": Colors["YELLOW"],
             "y": Colors["RED"],
@@ -69,7 +70,7 @@ class SpectrumPlotter(_BasePlotter):
             if annotation == key:
                 return colormap[key]
             # Fragment ions via regex
-            x = re.search(r"^[abcxyz]{1}[0-9]+[+-]$", annotation)
+            x = re.search(r"^[abcxyz]{1}[0-9]*[+-]$", annotation)
             if x:
                 return colormap[annotation[0]]
         return Colors["DARKGRAY"]
@@ -174,7 +175,7 @@ class SpectrumPlotter(_BasePlotter):
             for ref_spec in reference_spectrum:
                 plot_spectrum(ax, ref_spec, next(colors), mirror=True)
             # Plot zero line
-            plt.plot(ax.get_xlim(), [0, 0], color=Colors["LIGHTGRAY"])
+            plt.plot(ax.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
         
         # Format y-axis
         if self.config.relative_intensity or self.config.mirror_spectrum:
@@ -184,8 +185,8 @@ class SpectrumPlotter(_BasePlotter):
         else:
             ax.ticklabel_format(axis="both", style="sci", useMathText=True)
 
-        ax.set_title(self.config.title, fontsize=12, loc="left", pad=30)
-        ax.set_xlabel(self.config.xlabel, fontsize=10, color=Colors["DARKGRAY"])
+        ax.set_title(self.config.title, fontsize=12, loc="left", pad=20)
+        ax.set_xlabel(self.config.xlabel, fontsize=10, style="italic", color=Colors["DARKGRAY"])
         ax.set_ylabel(self.config.ylabel, fontsize=10, color=Colors["DARKGRAY"])
         ax.xaxis.label.set_color(Colors["DARKGRAY"])
         ax.tick_params(axis="x", colors=Colors["DARKGRAY"])
@@ -202,8 +203,104 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
-        ##TODO
-        pass
+        if not isinstance(spectrum, list):
+            spectrum = [spectrum]
+        if (not isinstance(reference_spectrum, list)) and reference_spectrum is not None:
+            reference_spectrum = [reference_spectrum]
+        elif reference_spectrum is None:
+            reference_spectrum = []
+
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            for df in spectrum + reference_spectrum:
+                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+        # Initialize figure
+        p = figure(
+            title=self.config.title,
+            x_axis_label=self.config.xlabel,
+            y_axis_label=self.config.ylabel,
+            width=self.config.width,
+            height=self.config.height,
+        )
+
+        def plot_spectrum(p, df, color, mirror=False):
+            for i, peak in df.iterrows():
+                intensity = -peak["intensity"] if mirror else peak["intensity"]
+                peak_color = (
+                    color
+                    if not (self.config.custom_peak_color and "color_peak" in peak.index)
+                    else peak["color_peak"]
+                )
+                if i == 0:
+                    p.line(
+                        [peak["mz"], peak["mz"]],
+                        [0, intensity],
+                        line_color=peak_color,
+                        line_width=2,
+                        legend_label=peak["native_id"],
+                    )
+                else:
+                    p.line(
+                        [peak["mz"], peak["mz"]],
+                        [0, intensity],
+                        line_color=peak_color,
+                        line_width=2,
+                    )
+                if (
+                    self.config.annotate_mz
+                    or self.config.annotate_ions
+                    or self.config.annotate_sequence
+                    or self.config.custom_annotation_text
+                ):
+                    text = self._get_annotation_text(peak).replace("<br>", "\n")
+                    annotation_color = self._get_annotation_color(peak, peak_color)
+                    label = Label(
+                        x=peak["mz"],
+                        y=intensity,
+                        text=text,
+                        text_font_size="8pt",
+                        text_color=annotation_color,
+                        x_offset=1,
+                        y_offset=0,
+                    )
+                    p.add_layout(label)
+
+        # Plot spectra with annotations
+        gs_colors = self._get_n_grayscale_colors(max([len(spectrum), len(reference_spectrum)]))
+        colors = cycle(gs_colors)
+        for spec in spectrum:
+            plot_spectrum(p, spec, next(colors))
+        # Plot mirror spectra with annotations
+        if self.config.mirror_spectrum:
+            colors = cycle(gs_colors)
+            for ref_spec in reference_spectrum:
+                plot_spectrum(p, ref_spec, next(colors), mirror=True)
+            # Plot zero line
+            zero_line = Span(location=0, dimension='width', line_color='#EEEEEE', line_width=1.5)
+            p.add_layout(zero_line)
+
+        # Format y-axis
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            ticks, labels = self._get_relative_intensity_ticks()
+            p.yaxis.ticker = ticks
+            p.yaxis.major_label_overrides = {tick: label for tick, label in zip(ticks, labels)}
+        else:
+            p.yaxis.formatter.use_scientific = True
+        
+        # Set y-axis limits
+        if self.config.mirror_spectrum:
+            p.y_range.start = -110
+        else:
+            p.y_range.start = 0
+            
+        p.grid.grid_line_color = None
+
+        # Show legend if configured
+        if self.config.show_legend:
+            p.legend.location = "top_right"
+        else:
+            p.legend.visible = False
+
+        return p
 
     def _plotPlotly(
         self,
@@ -298,16 +395,17 @@ class SpectrumPlotter(_BasePlotter):
                     ]
                 ),
                 constrain="domain",  # Optional, ensures that the range cannot be changed by user zoom
+                title_standoff=5,
             ),
             yaxis=dict(
                 title=self.config.ylabel,
                 constrain="domain",  # Optional, ensures that the range cannot be changed by user zoom
+                title_standoff=10,
             ),
             showlegend=self.config.show_legend,
-            template="plotly_white",
+            template="simple_white",
         )
         fig = go.Figure(layout=layout)
-
         # Get grayscale colors for maximum number of spectra on one axis
         self.gs_colors = self._get_n_grayscale_colors(max([len(spectrum), len(reference_spectrum)]))
         # Peak traces
@@ -330,10 +428,15 @@ class SpectrumPlotter(_BasePlotter):
         if self.config.mirror_spectrum:
             for annotation in _create_annotations(reference_spectrum, -1):
                 fig.add_annotation(annotation)
+            # Draw horizontal line
+            fig.add_hline(y=0, line_color=Colors["LIGHTGRAY"], line_width=2)
         # Format y-axis
         if self.config.relative_intensity or self.config.mirror_spectrum:
             ticks, labels = self._get_relative_intensity_ticks()
-            fig.update_layout(yaxis=dict(tickmode="array", tickvals=ticks, ticktext=labels))
+            fig.update_layout(yaxis=dict(tickmode="array", tickvals=ticks, ticktext=labels), yaxis_range=[-110 if self.config.mirror_spectrum else 0,110])
+        else:
+            fig.update_layout(yaxis=dict(range=[0, None]))
+
         return fig
 
 
