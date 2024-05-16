@@ -75,6 +75,14 @@ class SpectrumPlotter(_BasePlotter):
                 return colormap[annotation[0]]
         return Colors["DARKGRAY"]
 
+    def _get_peak_color(self, default_color: str, peak: pd.Series) -> str:
+        if self.config.custom_peak_color and "color_peak" in peak.index:
+            return peak["color_peak"]
+        elif self.config.annotate_ions:
+            return self._get_annotation_color(peak, default_color)
+        else:
+            return default_color
+
     def _get_annotation_text(self, peak: pd.Series) -> str:
         if "custom_annotation" in peak.index and self.config.custom_annotation_text:
             text = peak["custom_annotation"]
@@ -135,13 +143,7 @@ class SpectrumPlotter(_BasePlotter):
         def plot_spectrum(ax, df, color, mirror=False):
             for i, peak in df.iterrows():
                 intensity = -peak["intensity"] if mirror else peak["intensity"]
-                peak_color = (
-                    color
-                    if not (
-                        self.config.custom_peak_color and "color_peak" in peak.index
-                    )
-                    else peak["color_peak"]
-                )
+                peak_color = self._get_peak_color(color, peak)
                 ax.plot(
                     [peak["mz"], peak["mz"]],
                     [0, intensity],
@@ -225,11 +227,7 @@ class SpectrumPlotter(_BasePlotter):
         def plot_spectrum(p, df, color, mirror=False):
             for i, peak in df.iterrows():
                 intensity = -peak["intensity"] if mirror else peak["intensity"]
-                peak_color = (
-                    color
-                    if not (self.config.custom_peak_color and "color_peak" in peak.index)
-                    else peak["color_peak"]
-                )
+                peak_color = self._get_peak_color(color, peak)
                 if i == 0:
                     p.line(
                         [peak["mz"], peak["mz"]],
@@ -318,12 +316,7 @@ class SpectrumPlotter(_BasePlotter):
                     y=[0, intensity_direction * peak["intensity"]],
                     mode="lines",
                     line=dict(
-                        color=(
-                            peak["color_peak"]
-                            if "color_peak" in peak.index
-                            and self.config.custom_peak_color
-                            else line_color
-                        )
+                        color=self._get_peak_color(line_color, peak)
                     ),
                     name=peak["native_id"],
                     text=f"m/z: {peak['mz']}<br>intensity: {peak['intensity']}<br>{peak['native_id']}",
@@ -435,8 +428,7 @@ class SpectrumPlotter(_BasePlotter):
             ticks, labels = self._get_relative_intensity_ticks()
             fig.update_layout(yaxis=dict(tickmode="array", tickvals=ticks, ticktext=labels), yaxis_range=[-110 if self.config.mirror_spectrum else 0,110])
         else:
-            fig.update_layout(yaxis=dict(range=[0, None]))
-
+            fig.update_yaxes(range=(0, None))
         return fig
 
 
