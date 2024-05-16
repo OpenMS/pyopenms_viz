@@ -103,6 +103,14 @@ class SpectrumPlotter(_BasePlotter):
             return fallback_color if not self.config.custom_peak_color else peak["color_peak"]
         return color
 
+    def _get_relative_intensity_ticks(self) -> tuple[List[int], List[str]]:
+        ticks = [0, 25, 50, 75, 100]
+        labels = ["0%", "25%", "50%", "75%", "100%"]
+        if self.config.mirror_spectrum:
+            ticks = [-100, -75, -50, -25] + ticks
+            labels = labels[-4:][::-1] + labels
+        return ticks, labels
+
     def _plotMatplotlib(
         self,
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
@@ -165,6 +173,16 @@ class SpectrumPlotter(_BasePlotter):
             colors = cycle(gs_colors)
             for ref_spec in reference_spectrum:
                 plot_spectrum(ax, ref_spec, next(colors), mirror=True)
+            # Plot zero line
+            plt.plot(ax.get_xlim(), [0, 0], color=Colors["LIGHTGRAY"])
+        
+        # Format y-axis
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            ticks, labels = self._get_relative_intensity_ticks()
+            ax.set_yticks(ticks)
+            ax.set_yticklabels(labels)
+        else:
+            ax.ticklabel_format(axis="both", style="sci", useMathText=True)
 
         ax.set_title(self.config.title, fontsize=12, loc="left", pad=30)
         ax.set_xlabel(self.config.xlabel, fontsize=10, color=Colors["DARKGRAY"])
@@ -174,7 +192,6 @@ class SpectrumPlotter(_BasePlotter):
         ax.yaxis.label.set_color(Colors["DARKGRAY"])
         ax.tick_params(axis="y", colors=Colors["DARKGRAY"])
         ax.set_ylim([0 if not self.config.mirror_spectrum else None, None])
-        ax.ticklabel_format(axis="both", style="sci", useMathText=True)
         ax.spines[["right", "top"]].set_visible(False)
         ax.legend(loc="best") if self.config.show_legend else None
 
@@ -313,7 +330,10 @@ class SpectrumPlotter(_BasePlotter):
         if self.config.mirror_spectrum:
             for annotation in _create_annotations(reference_spectrum, -1):
                 fig.add_annotation(annotation)
-
+        # Format y-axis
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            ticks, labels = self._get_relative_intensity_ticks()
+            fig.update_layout(yaxis=dict(tickmode="array", tickvals=ticks, ticktext=labels))
         return fig
 
 
