@@ -2,9 +2,15 @@ from .BasePlotter import _BasePlotter, _BasePlotterConfig, Engine
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
-from pyopenms import MSChromatogram
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
+
+@dataclass(kw_only=True)
+class ChromatogramFeatureConfig:
+    show_legend: bool = True
+    show_plot: bool = True
+    colormap: str = "viridis"
+    boundary_width: float = 0.1
 
 @dataclass(kw_only=True)
 class ChromatogramPlotterConfig(_BasePlotterConfig):
@@ -14,14 +20,16 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     ylabel: str = "Intensity"
     show_legend: bool = True
     show_plot: bool = True
-    
+    featureConfig: ChromatogramFeatureConfig = field(default_factory=ChromatogramFeatureConfig)
+
     # Data Specific Attributes
     ion_mobility: bool = False # if True, plot ion mobility as well in a heatmap
+
 
 class ChromatogramPlotter(_BasePlotter):
     def __init__(self, config: _BasePlotterConfig, **kwargs) -> None:
         super().__init__(config, **kwargs)
-        
+
     @staticmethod
     def generate_colors(n):
         # Use Matplotlib's built-in color palettes
@@ -32,11 +40,42 @@ class ChromatogramPlotter(_BasePlotter):
         hex_colors = ['#{:02X}{:02X}{:02X}'.format(int(r*255), int(g*255), int(b*255)) for r, g, b, _ in colors]
         
         return hex_colors
-    
-    def _plotBokeh(self, data: DataFrame):
+
+    ### assume that the chromatogram have the following columns: intensity, time 
+    ### optional column to be used: annotation
+    ### assume that the chromatogramFeatures have the following columns: left_width, right_width (optional columns: area, q_value)
+    def plot(self, chromatogram, chromatogramFeatures = None, **kwargs):
+        #### General Data Processing before plotting ####
+        # sort by q_value if available
+        if chromatogramFeatures is not None:
+            if "q_value" in chromatogramFeatures.columns:
+                chromatogramFeatures = chromatogramFeatures.sort_values(by="q_value")
+
+        #### compute apex intensity for features if not already computed 
+        if chromatogramFeatures is not None:
+            if "apexIntensity" not in chromatogramFeatures.columns:
+                all_apexIntensity = []
+                for _, feature in chromatogramFeatures.iterrows():
+                    apexIntensity = 0
+                    for _, row in chromatogram.iterrows():
+                        if row["rt"] >= feature["leftWidth"] and row["rt"] <= feature["rightWidth"] and row["int"] > apexIntensity:
+                            apexIntensity = row["int"]
+                    all_apexIntensity.append(apexIntensity)
+
+                chromatogramFeatures["apexIntensity"] = all_apexIntensity
+
+        if self.config.engine_enum == Engine.PLOTLY:
+            return self._plotPlotly(chromatogram, chromatogramFeatures, **kwargs)
+        elif self.config.engine_enum == Engine.BOKEH:
+            return self._plotBokeh(chromatogram, chromatogramFeatures, **kwargs)
+        else: # self.config.engine_enum == Engine.MATPLOTLIB:
+            return self._plotMatplotlib(chromatogram, chromatogramFeatures, **kwargs)
+
+    def _plotBokeh(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
         from bokeh.plotting import figure, show
         from bokeh.models import ColumnDataSource, Legend
         from bokeh.palettes import Category10
+
         
         # Tooltips for interactive information
         TOOLTIPS = [
@@ -87,12 +126,35 @@ class ChromatogramPlotter(_BasePlotter):
         p.grid.visible = True
         p.toolbar_location = "above"
         
+       
+        ##### Plotting chromatogram features #####
+        if chromatogramFeatures is not None:
+            #create a palette for the features
+            feature_palette = self.generate_colors(len(chromatogramFeatures))
+
+            for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+
+                leftWidth_line = p.vbar(x=feature['leftWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=feature_palette[idx])
+                rightWidth_line = p.vbar(x=feature['rightWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=feature_palette[idx])
+
+                if self.config.featureConfig.show_legend:
+                    feature_legend_items = []
+                    if "q_value" in chromatogramFeatures.columns:
+                        legend_msg = f'Feature {idx} (q={feature["q_value"]:.2f})'
+                    else:
+                        legend_msg = f'Feature {idx}'
+                    feature_legend_items.append((legend_msg, [leftWidth_line]))
+
+                    legend = Legend(items=feature_legend_items, title='ChromatogramFeatures', glyph_width=1 )
+                    p.add_layout(legend, 'above')
+
         if self.config.show_plot:
             show(p)
+            return p
         else:
             return p
-
-    def _plotPlotly(self, data: DataFrame):
+  
+    def _plotPlotly(self, data: DataFrame, chromatogramFeatures: DataFrame):
         import plotly.graph_objects as go
 
         if "Annotation" not in data.columns:
@@ -112,7 +174,9 @@ class ChromatogramPlotter(_BasePlotter):
                     color=colors[i],
                     width=2,
                     dash='solid'
-                )
+                ),
+                legendgrouptitle_text='Transitions',
+                legendgroup='transitions'
             )
             traces.append(trace)
 
@@ -124,7 +188,6 @@ class ChromatogramPlotter(_BasePlotter):
             yaxis_title=self.config.ylabel,
             width=self.config.width,
             height=self.config.height,
-            legend_title="Transition",
             legend_font_size=10
         )
 
@@ -150,12 +213,45 @@ class ChromatogramPlotter(_BasePlotter):
             yaxis_zeroline=False
         )
 
+        ##### Plotting chromatogram features #####
+        if chromatogramFeatures is not None:
+            feature_palette = self.generate_colors(len(chromatogramFeatures))
+
+            for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+
+                leftWidth_line = fig.add_shape(type='line', 
+                                               x0=feature['leftWidth'], 
+                                               y0=0, 
+                                               x1=feature['leftWidth'], 
+                                               y1=feature['apexIntensity'], 
+                                               line=dict(
+                                                   color=feature_palette[idx],
+                                                   width=self.config.featureConfig.boundary_width * 10) # boundary width in different units then bokeh so scale
+                )
+
+                rightWidth_line = fig.add_shape(type='line', 
+                                                x0=feature['rightWidth'], 
+                                                y0=0, 
+                                                x1=feature['rightWidth'], 
+                                                y1=feature['apexIntensity'],
+                                                legendgroup="features",
+                                                legendgrouptitle_text="Features",
+                                                showlegend=self.config.featureConfig.show_legend,
+                                                name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
+                                                line=dict(
+                                                   color=feature_palette[idx],
+                                                   width=self.config.featureConfig.boundary_width * 10)
+                )
+
         if self.config.show_plot:
             fig.show()
+            return fig
         else:
             return fig 
         
-    def _plotMatplotlib(self, data: DataFrame):
+    def _plotMatplotlib(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
+        import matplotlib.pyplot as plt
+        from matplotlib.lines import Line2D
 
         if "Annotation" not in data.columns:
             data = data.copy()
@@ -183,32 +279,45 @@ class ChromatogramPlotter(_BasePlotter):
         # Add legend
         legend = ax.legend(legend_lines, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5), title="Transition", prop={'size': 10})
         legend.get_title().set_fontsize('10')
+        ax.add_artist(legend)
 
         # Customize the plot
         ax.grid(False)
         ax.set_xlim(data["rt"].min(), data["rt"].max())
         ax.set_ylim(data["int"].min(), data["int"].max())
 
+        ##### Plotting chromatogram features #####
+        if chromatogramFeatures is not None:
+
+            feature_palette = self.generate_colors(len(chromatogramFeatures))
+
+            for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+
+                ax.axvline(x=feature['leftWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=feature_palette[idx])
+                ax.axvline(x=feature['rightWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=feature_palette[idx])
+
+                if self.config.featureConfig.show_legend:
+                    custom_lines = [Line2D([0], [0], color=feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
+                    if "q_value" in chromatogramFeatures.columns:
+                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, feature in enumerate(chromatogramFeatures.iterrows())]
+                    else:
+                        legend_labels = [f'Feature {i}' for i in range(len(chromatogramFeatures))]
+
+            if self.config.featureConfig.show_legend:
+                ax.legend(custom_lines, legend_labels, loc='upper right', bbox_to_anchor=(1.2, 1), title="Features")
+
         if self.config.show_plot:
             plt.show()
+            return fig
         else:
             return fig
-
-    
-    def plot(self, data, **kwargs):
-        if self.config.engine_enum == Engine.PLOTLY:
-            return self._plotPlotly(data, **kwargs)
-        elif self.config.engine_enum == Engine.BOKEH:
-            return self._plotBokeh(data, **kwargs)
-        else: # self.config.engine_enum == Engine.MATPLOTLIB:
-            return self._plotMatplotlib(data, **kwargs)
-
 
 # ============================================================================= #
 ## FUNCTIONAL API ##
 # ============================================================================= #
-
+from pyopenms import MSChromatogram
 def plotChromatogram(chromatogram: MSChromatogram, 
+                     chromatogram_features: DataFrame = None,
                      title: str = "Chromatogram Plot",
                      show_legend: bool = True,
                      show_plot: bool = True,
@@ -221,6 +330,7 @@ def plotChromatogram(chromatogram: MSChromatogram,
 
     Args:
         chromatogram (MSChromatogram): OpenMS chromatogram object
+        chromatogram_features (DataFrame, optional): DataFrame containing chromatogram features. Defaults to None.
         title (str, optional): title of plot. Defaults to "Chromatogram Plot".
         show_legend (bool, optional): If True, shows the legend. Defaults to True.
         show_plot (bool, optional): If True, shows the plot. Defaults to True.
@@ -235,5 +345,5 @@ def plotChromatogram(chromatogram: MSChromatogram,
 
     config = ChromatogramPlotterConfig(title=title, show_legend=show_legend, show_plot=show_plot, ion_mobility=ion_mobility, width=width, height=height, engine=engine)
     plotter = ChromatogramPlotter(config)
-    return plotter.plot(chromatogram)
+    return plotter.plot(chromatogram, chromatogram_features)
 
