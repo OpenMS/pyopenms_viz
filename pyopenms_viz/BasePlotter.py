@@ -1,5 +1,5 @@
-from typing import Literal
-from dataclasses import dataclass
+from typing import Literal, Tuple
+from dataclasses import dataclass, field
 from enum import Enum
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
@@ -12,6 +12,23 @@ class Engine(Enum):
     MATPLOTLIB = 3
 
 @dataclass(kw_only=True)
+class LegendConfig:
+    loc: str = 'right'
+    title: str = 'Legend'
+    fontsize: int = 10
+    show: bool = True
+    onClick: Literal["hide", "mute"] = 'mute' # legend click policy, only valid for bokeh
+    bbox_to_anchor: Tuple[float, float] = (1.2, 0.5) # for fine control legend positioning in matplotlib
+
+    @staticmethod
+    def _matplotlibLegendLocationMapper(loc):
+        '''
+        Maps the legend location to the matplotlib equivalent
+        '''
+        loc_mapper = {'right':'center right', 'left':'center left', 'above':'upper center', 'below':'lower center'}
+        return loc_mapper[loc]
+ 
+@dataclass(kw_only=True)
 class _BasePlotterConfig(ABC):
     title: str = "1D Plot"
     xlabel: str = "X-axis"
@@ -19,13 +36,15 @@ class _BasePlotterConfig(ABC):
     engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = 'PLOTLY'
     height: int = 500
     width: int = 500
-    show_legend: bool = True
-    show_plot: bool = True
+    show: bool = True
     colormap: str = 'viridis'
+    legend: LegendConfig = field(default_factory=LegendConfig)
+    grid: bool = True
 
     @property
     def engine_enum(self):
         return Engine[self.engine]
+    
 
 # Abstract Class for Plotting
 class _BasePlotter(ABC):
@@ -78,4 +97,3 @@ class _BasePlotter(ABC):
     @abstractmethod
     def _plotMatplotlib(self, data, **kwargs):
         pass
-
