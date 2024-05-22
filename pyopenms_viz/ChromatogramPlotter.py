@@ -30,17 +30,6 @@ class ChromatogramPlotter(_BasePlotter):
     def __init__(self, config: _BasePlotterConfig, **kwargs) -> None:
         super().__init__(config, **kwargs)
 
-    @staticmethod
-    def generate_colors(n):
-        # Use Matplotlib's built-in color palettes
-        cmap = plt.get_cmap('tab20', n)
-        colors = cmap(np.linspace(0, 1, n))
-        
-        # Convert colors to hex format
-        hex_colors = ['#{:02X}{:02X}{:02X}'.format(int(r*255), int(g*255), int(b*255)) for r, g, b, _ in colors]
-        
-        return hex_colors
-
     ### assume that the chromatogram have the following columns: intensity, time 
     ### optional column to be used: annotation
     ### assume that the chromatogramFeatures have the following columns: left_width, right_width (optional columns: area, q_value)
@@ -64,18 +53,15 @@ class ChromatogramPlotter(_BasePlotter):
 
                 chromatogramFeatures["apexIntensity"] = all_apexIntensity
 
-        if self.config.engine_enum == Engine.PLOTLY:
-            return self._plotPlotly(chromatogram, chromatogramFeatures, **kwargs)
-        elif self.config.engine_enum == Engine.BOKEH:
-            return self._plotBokeh(chromatogram, chromatogramFeatures, **kwargs)
-        else: # self.config.engine_enum == Engine.MATPLOTLIB:
-            return self._plotMatplotlib(chromatogram, chromatogramFeatures, **kwargs)
+        # compute colormaps based on the number of transitions and features
+        self.main_palette = self.generate_colors(self.config.colormap, len(chromatogram["Annotation"].unique()) if 'Annotation' in chromatogram.columns else 1)
+        self.feature_palette = self.generate_colors(self.config.featureConfig.colormap, len(chromatogramFeatures)) if chromatogramFeatures is not None else None
+
+        return super().plot(chromatogram, chromatogramFeatures, **kwargs)
 
     def _plotBokeh(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
         from bokeh.plotting import figure, show
         from bokeh.models import ColumnDataSource, Legend
-        from bokeh.palettes import Category10
-
         
         # Tooltips for interactive information
         TOOLTIPS = [
@@ -87,10 +73,6 @@ class ChromatogramPlotter(_BasePlotter):
         
         if "Annotation" in data.columns:
             TOOLTIPS.append(("Annotation", "@Annotation"))
-        else:
-            TOOLTIPS.append(("Annotation", "@Annotation"))
-            data = data.copy()
-            data.loc[:, "Annotation"] = "Unknown"
         if "product_mz" in data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
         
@@ -101,27 +83,30 @@ class ChromatogramPlotter(_BasePlotter):
         legend = Legend()
 
         # Create a list to store legend items
-        legend_items = []
-        colors = self.generate_colors(len(data["Annotation"].unique()))
-        i = 0
-        for annotation, group_df in data.groupby('Annotation'):
-            source = ColumnDataSource(group_df)
-            line = p.line(x="rt", y="int", source=source, line_width=2, line_color=colors[i], line_alpha=0.5, line_dash='solid')
-            legend_items.append((annotation, [line]))
-            i+=1
+        if 'Annotation' in data.columns:
+            legend_items = []
+            i = 0
+            for annotation, group_df in data.groupby('Annotation'):
+                source = ColumnDataSource(group_df)
+                line = p.line(x="rt", y="int", source=source, line_width=2, line_color=self.main_palette[i], line_alpha=0.5, line_dash='solid')
+                legend_items.append((annotation, [line]))
+                i+=1
+                
+            # Add legend items to the legend
+            legend.items = legend_items
 
-        # Add legend items to the legend
-        legend.items = legend_items
+            # Add the legend to the plot
+            p.add_layout(legend, 'right')
 
-        # Add the legend to the plot
-        p.add_layout(legend, 'right')
+            p.legend.location = "top_left"
+            # p.legend.click_policy="hide"
+            p.legend.click_policy="mute"
+            p.legend.title = "Transition"
+            p.legend.label_text_font_size = "10pt"
 
-        p.legend.location = "top_left"
-        # p.legend.click_policy="hide"
-        p.legend.click_policy="mute"
-        p.legend.title = "Transition"
-        p.legend.label_text_font_size = "10pt"
-
+        else:
+            source = ColumnDataSource(data)
+            line = p.line(x="rt", y="int", source=source, line_width=2, line_color=self.main_palette[0], line_alpha=0.5, line_dash='solid')
         # Customize the plot
         p.grid.visible = True
         p.toolbar_location = "above"
@@ -129,13 +114,11 @@ class ChromatogramPlotter(_BasePlotter):
        
         ##### Plotting chromatogram features #####
         if chromatogramFeatures is not None:
-            #create a palette for the features
-            feature_palette = self.generate_colors(len(chromatogramFeatures))
 
             for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
 
-                leftWidth_line = p.vbar(x=feature['leftWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=feature_palette[idx])
-                rightWidth_line = p.vbar(x=feature['rightWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=feature_palette[idx])
+                leftWidth_line = p.vbar(x=feature['leftWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=self.feature_palette[idx])
+                rightWidth_line = p.vbar(x=feature['rightWidth'], bottom=0, top=feature['apexIntensity'], width=self.config.featureConfig.boundary_width, color=self.feature_palette[idx])
 
                 if self.config.featureConfig.show_legend:
                     feature_legend_items = []
@@ -163,22 +146,35 @@ class ChromatogramPlotter(_BasePlotter):
 
         # Create a trace for each unique annotation
         traces = []
-        colors = self.generate_colors(len(data["Annotation"].unique()))
-        for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+        if "Annotation" in data.columns:
+            for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+                trace = go.Scatter(
+                    x=group_df["rt"],
+                    y=group_df["int"],
+                    mode='lines',
+                    name=annotation,
+                    line=dict(
+                        color=self.main_palette[i],
+                        width=2,
+                        dash='solid'
+                    ),
+                    legendgrouptitle_text='Transitions',
+                    legendgroup='transitions'
+                )
+                traces.append(trace)
+        else:
             trace = go.Scatter(
-                x=group_df["rt"],
-                y=group_df["int"],
+                x=data["rt"],
+                y=data["int"],
                 mode='lines',
-                name=annotation,
+                name="Transition",
                 line=dict(
-                    color=colors[i],
+                    color=self.main_palette[0],
                     width=2,
                     dash='solid'
-                ),
-                legendgrouptitle_text='Transitions',
-                legendgroup='transitions'
-            )
+                ))
             traces.append(trace)
+
 
         # Create the Plotly figure
         fig = go.Figure(data=traces)
@@ -191,17 +187,26 @@ class ChromatogramPlotter(_BasePlotter):
             legend_font_size=10
         )
 
-        # Add tooltips
-        fig.update_traces(
-            hovertemplate=(
-                "Index: %{customdata[0]}<br>" +
-                "Retention Time: %{x:.2f}<br>" +
-                "Intensity: %{y:.2f}<br>" +
-                "m/z: %{customdata[1]:.4f}<br>" +
-                "Annotation: %{customdata[2]}"
-            ),
-            customdata=list(zip(data.index, data["mz"], data["Annotation"]))
-        )
+        if "Annotation" in data.columns:
+            # Add tooltips
+            fig.update_traces(
+                hovertemplate=(
+                    "Index: %{customdata[0]}<br>" +
+                    "Retention Time: %{x:.2f}<br>" +
+                    "Intensity: %{y:.2f}<br>" +
+                    "m/z: %{customdata[1]:.4f}<br>" +
+                    "Annotation: %{customdata[2]}"
+                ),
+                customdata=list(zip(data.index, data["mz"], data["Annotation"])))
+        else:
+            # Add tooltips
+            fig.update_traces( hovertemplate=( 
+                    "Index: %{customdata[0]}<br>" +
+                    "Retention Time: %{x:.2f}<br>" +
+                    "Intensity: %{y:.2f}<br>" +
+                    "m/z: %{customdata[1]:.4f}<br>"
+                ),
+                customdata=list(zip(data.index, data["mz"])))
 
         # Customize the plot
         fig.update_layout(
@@ -215,8 +220,6 @@ class ChromatogramPlotter(_BasePlotter):
 
         ##### Plotting chromatogram features #####
         if chromatogramFeatures is not None:
-            feature_palette = self.generate_colors(len(chromatogramFeatures))
-
             for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
 
                 leftWidth_line = fig.add_shape(type='line', 
@@ -225,7 +228,7 @@ class ChromatogramPlotter(_BasePlotter):
                                                x1=feature['leftWidth'], 
                                                y1=feature['apexIntensity'], 
                                                line=dict(
-                                                   color=feature_palette[idx],
+                                                   color=self.feature_palette[idx],
                                                    width=self.config.featureConfig.boundary_width * 10) # boundary width in different units then bokeh so scale
                 )
 
@@ -239,7 +242,7 @@ class ChromatogramPlotter(_BasePlotter):
                                                 showlegend=self.config.featureConfig.show_legend,
                                                 name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
                                                 line=dict(
-                                                   color=feature_palette[idx],
+                                                   color=self.feature_palette[idx],
                                                    width=self.config.featureConfig.boundary_width * 10)
                 )
 
@@ -270,34 +273,38 @@ class ChromatogramPlotter(_BasePlotter):
         legend_labels = []
 
         # Plot each unique annotation
-        colors = self.generate_colors(len(data["Annotation"].unique()))
-        for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
-            line, = ax.plot(group_df["rt"], group_df["int"], color=colors[i], linewidth=2, alpha=0.5, linestyle='solid')
-            legend_lines.append(line)
-            legend_labels.append(annotation)
+        if "Annotation" in data.columns:
+            for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+                line, = ax.plot(group_df["rt"], group_df["int"], color=self.main_palette[i], linewidth=2, alpha=0.5, linestyle='solid')
+                legend_lines.append(line)
+                legend_labels.append(annotation)
 
-        # Add legend
-        legend = ax.legend(legend_lines, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5), title="Transition", prop={'size': 10})
-        legend.get_title().set_fontsize('10')
-        ax.add_artist(legend)
+                # Add legend
+                legend = ax.legend(legend_lines, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5), title="Transition", prop={'size': 10})
+                legend.get_title().set_fontsize('10')
+
+        else: # only one transition
+            line, = ax.plot(data["rt"], data["int"], color=self.main_palette[0], linewidth=2, alpha=0.5, linestyle='solid')
 
         # Customize the plot
         ax.grid(False)
+
+        ## add 10% padding to the plot
+        padding = (data['int'].max() - data['int'].min() ) * 0.1
         ax.set_xlim(data["rt"].min(), data["rt"].max())
-        ax.set_ylim(data["int"].min(), data["int"].max())
+        ax.set_ylim(data["int"].min(), data["int"].max() + padding)
 
         ##### Plotting chromatogram features #####
         if chromatogramFeatures is not None:
-
-            feature_palette = self.generate_colors(len(chromatogramFeatures))
+            ax.add_artist(legend)
 
             for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
 
-                ax.axvline(x=feature['leftWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=feature_palette[idx])
-                ax.axvline(x=feature['rightWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=feature_palette[idx])
+                ax.vlines(x=feature['leftWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=self.feature_palette[idx])
+                ax.vlines(x=feature['rightWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.boundary_width * 10, color=self.feature_palette[idx])
 
                 if self.config.featureConfig.show_legend:
-                    custom_lines = [Line2D([0], [0], color=feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
+                    custom_lines = [Line2D([0], [0], color=self.feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
                     if "q_value" in chromatogramFeatures.columns:
                         legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, feature in enumerate(chromatogramFeatures.iterrows())]
                     else:
