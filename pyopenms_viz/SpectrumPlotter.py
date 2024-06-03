@@ -1,19 +1,18 @@
 import re
 from dataclasses import dataclass
 from itertools import cycle
-from typing import List, Literal, Optional, Union, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
+from bokeh.models import ColorBar, ColumnDataSource, HoverTool, Label, Span
+from bokeh.palettes import Plasma256
+from bokeh.plotting import figure
+from bokeh.transform import linear_cmap
 
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
-import matplotlib.pyplot as plt
-from bokeh.plotting import figure
-from bokeh.models import Span, Label, ColorBar, ColumnDataSource, HoverTool
-from bokeh.transform import linear_cmap
-from bokeh.palettes import Plasma256
-import streamlit as st
 
 
 @dataclass(kw_only=True)
@@ -30,6 +29,13 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
 
 class SpectrumPlotter(_BasePlotter):
     def __init__(self, config: SpectrumPlotterConfig, **kwargs) -> None:
+        """
+        Initialize the SpectrumPlotter with a given configuration and optional parameters.
+
+        Args:
+            config (SpectrumPlotterConfig): Configuration settings for the spectrum plotter.
+            **kwargs: Additional keyword arguments for customization.
+        """
         super().__init__(config=config, **kwargs)
         # If y-axis label is default ("intensity") and ion_mobility is True, update label
         if self.config.ylabel == "intensity" and self.config.ion_mobility:
@@ -39,28 +45,11 @@ class SpectrumPlotter(_BasePlotter):
         """
         Retrieve the color associated with a specific ion annotation from a predefined colormap.
 
-        This function maps a given ion annotation type to its corresponding color. The mapping is based on
-        conventional color assignments used in mass spectrometry to differentiate between various ion types.
-        If the provided annotation does not exactly match any predefined type, the function attempts to match
-        based on the first character of the annotation. If no matches are found, a default color is returned.
-
-        Parameters:
-        - annotation (str): The ion annotation for which the color needs to be retrieved. This could be a
-        single character representing the type of ion (e.g., 'a', 'b', 'x', etc.), or a more complex
-        string from which the first character will be extracted to determine the ion type.
+        Args:
+            annotation (str): The ion annotation for which the color needs to be retrieved.
 
         Returns:
-        - str: A hexadecimal color code as a string. This color is associated with the type of ion in the
-        provided annotation. If the annotation cannot be matched, a default color ("#555555") is returned.
-
-        Raises:
-        - KeyError: If the first character of a complex annotation string does not match any predefined keys
-        and is not handled by the function. However, the function is designed to handle unmatchable cases by
-        returning a default color, so this exception would typically not be raised.
-
-        Example usage:
-        >>> _get_ion_color_annotation("y")
-        '#EF553B'  # Assuming '#EF553B' is the color assigned to 'y' type ions
+            str: A hexadecimal color code associated with the ion type.
         """
         colormap = {
             "a": Colors["PURPLE"],
@@ -84,6 +73,16 @@ class SpectrumPlotter(_BasePlotter):
         return Colors["DARKGRAY"]
 
     def _get_peak_color(self, default_color: str, peak: pd.Series) -> str:
+        """
+        Determine the color of a peak based on custom settings or annotation.
+
+        Args:
+            default_color (str): The default color for peaks.
+            peak (pd.Series): The peak data.
+
+        Returns:
+            str: The color of the peak.
+        """
         if self.config.custom_peak_color and "color_peak" in peak.index:
             return peak["color_peak"]
         elif self.config.annotate_ions:
@@ -92,6 +91,15 @@ class SpectrumPlotter(_BasePlotter):
             return default_color
 
     def _get_annotation_text(self, peak: pd.Series) -> str:
+        """
+        Generate the annotation text for a given peak based on the configuration.
+
+        Args:
+            peak (pd.Series): The peak data.
+
+        Returns:
+            str: The annotation text.
+        """
         if "custom_annotation" in peak.index and self.config.custom_annotation_text:
             text = peak["custom_annotation"]
         else:
@@ -113,6 +121,16 @@ class SpectrumPlotter(_BasePlotter):
     def _get_annotation_color(
         self, peak: pd.Series, fallback_color: str = "black"
     ) -> str:
+        """
+        Determine the color for annotations based on custom settings or ion type.
+
+        Args:
+            peak (pd.Series): The peak data.
+            fallback_color (str, optional): The fallback color if no custom color is set. Defaults to "black".
+
+        Returns:
+            str: The color of the annotation.
+        """
         if "color_annotation" in peak.index and self.config.custom_annotation_color:
             color = peak["color_annotation"]
         elif self.config.annotate_ions:
@@ -126,6 +144,12 @@ class SpectrumPlotter(_BasePlotter):
         return color
 
     def _get_relative_intensity_ticks(self) -> tuple[List[int], List[str]]:
+        """
+        Generate the ticks and labels for relative intensity on the y-axis.
+
+        Returns:
+            tuple[List[int], List[str]]: The ticks and corresponding labels.
+        """
         ticks = [0, 25, 50, 75, 100]
         labels = ["0%", "25%", "50%", "75%", "100%"]
         if self.config.mirror_spectrum:
@@ -138,7 +162,16 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame], None],
     ) -> Tuple[List, List]:
-        """Makes sure input spectra and reference spectra dataframes are inside a list."""
+        """
+        Ensure that the input spectra and reference spectra are in list format.
+
+        Args:
+            spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): The main spectrum data.
+            reference_spectrum (Union[pd.DataFrame, List[pd.DataFrame], None]): The reference spectrum data.
+
+        Returns:
+            Tuple[List, List]: The spectra and reference spectra in list format.
+        """
         if not isinstance(spectrum, list):
             spectrum = [spectrum]
         if (
@@ -148,13 +181,22 @@ class SpectrumPlotter(_BasePlotter):
         elif reference_spectrum is None:
             reference_spectrum = []
         return spectrum, reference_spectrum
-    
+
     def _check_relative_intensity(
         self,
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame], None],
     ) -> Tuple[List, List]:
-        """Makes sure intensities are converted to relative intensities if necessary."""
+        """
+        Convert intensities to relative intensities if necessary.
+
+        Args:
+            spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): The main spectrum data.
+            reference_spectrum (Union[pd.DataFrame, List[pd.DataFrame], None]): The reference spectrum data.
+
+        Returns:
+            Tuple[List, List]: The spectra and reference spectra with relative intensities if configured.
+        """
         if self.config.relative_intensity or self.config.mirror_spectrum:
             for df in spectrum + reference_spectrum:
                 df["intensity"] = df["intensity"] / df["intensity"].max() * 100
@@ -163,6 +205,15 @@ class SpectrumPlotter(_BasePlotter):
     def _combine_sort_spectra_by_intensity(
         self, spectra: List[pd.DataFrame]
     ) -> pd.DataFrame:
+        """
+        Combine and sort spectra by intensity.
+
+        Args:
+            spectra (List[pd.DataFrame]): List of spectra dataframes.
+
+        Returns:
+            pd.DataFrame: Combined and sorted spectrum dataframe.
+        """
         df = pd.concat(spectra).reset_index()
         sort = np.argsort(df["intensity"])
         df["intensity"] = df["intensity"][sort]
@@ -175,6 +226,17 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
+        """
+        Plot the spectrum using Matplotlib.
+
+        Args:
+            spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): The main spectrum data.
+            reference_spectrum (Optional[Union[pd.DataFrame, List[pd.DataFrame]]], optional): The reference spectrum data. Defaults to None.
+
+        Returns:
+            plt.Figure: The Matplotlib figure object.
+        """
+
         def plot_spectrum(ax, df, color, mirror=False):
             for i, peak in df.iterrows():
                 intensity = -peak["intensity"] if mirror else peak["intensity"]
@@ -273,6 +335,17 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
+        """
+        Plot the spectrum using Bokeh.
+
+        Args:
+            spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): The main spectrum data.
+            reference_spectrum (Optional[Union[pd.DataFrame, List[pd.DataFrame]]], optional): The reference spectrum data. Defaults to None.
+
+        Returns:
+            bokeh.plotting.figure: The Bokeh figure object.
+        """
+
         def plot_spectrum(p, df, color, mirror=False):
             for i, peak in df.iterrows():
                 intensity = -peak["intensity"] if mirror else peak["intensity"]
@@ -416,6 +489,17 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
+        """
+        Plot the spectrum using Plotly.
+
+        Args:
+            spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): The main spectrum data.
+            reference_spectrum (Optional[Union[pd.DataFrame, List[pd.DataFrame]]], optional): The reference spectrum data. Defaults to None.
+
+        Returns:
+            go.Figure: The Plotly figure object.
+        """
+
         def _create_peak_traces(
             spectrum: pd.DataFrame,
             line_color: str,
@@ -640,6 +724,7 @@ def plotSpectrum(
         engine (Literal['PLOTLY', 'BOKEH'], optional): Plotting engine to use. Defaults to 'PLOTLY' can be either 'PLOTLY' or 'BOKEH'
 
     Returns:
+        Plot: The generated plot using the specified engine.
     """
     config = SpectrumPlotterConfig(
         ion_mobility=ion_mobility,
