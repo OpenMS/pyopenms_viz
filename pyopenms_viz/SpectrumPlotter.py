@@ -10,7 +10,9 @@ import plotly.graph_objects as go
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure
-from bokeh.models import Span, Label
+from bokeh.models import Span, Label, ColorBar, ColumnDataSource, HoverTool
+from bokeh.transform import linear_cmap
+from bokeh.palettes import Plasma256
 import streamlit as st
 
 
@@ -29,7 +31,7 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
 class SpectrumPlotter(_BasePlotter):
     def __init__(self, config: SpectrumPlotterConfig, **kwargs) -> None:
         super().__init__(config=config, **kwargs)
-        # If y-axis label is default ("Intensity") and ion_mobility is True, update label
+        # If y-axis label is default ("intensity") and ion_mobility is True, update label
         if self.config.ylabel == "intensity" and self.config.ion_mobility:
             self.config.ylabel = "ion mobility"
 
@@ -146,8 +148,21 @@ class SpectrumPlotter(_BasePlotter):
         elif reference_spectrum is None:
             reference_spectrum = []
         return spectrum, reference_spectrum
+    
+    def _check_relative_intensity(
+        self,
+        spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
+        reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame], None],
+    ) -> Tuple[List, List]:
+        """Makes sure intensities are converted to relative intensities if necessary."""
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            for df in spectrum + reference_spectrum:
+                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+        return spectrum, reference_spectrum
 
-    def _combine_sort_spectra_by_intensity(self, spectra: List[pd.DataFrame]) -> pd.DataFrame:
+    def _combine_sort_spectra_by_intensity(
+        self, spectra: List[pd.DataFrame]
+    ) -> pd.DataFrame:
         df = pd.concat(spectra).reset_index()
         sort = np.argsort(df["intensity"])
         df["intensity"] = df["intensity"][sort]
@@ -192,6 +207,10 @@ class SpectrumPlotter(_BasePlotter):
             spectrum, reference_spectrum
         )
 
+        spectrum, reference_spectrum = self._check_relative_intensity(
+            spectrum, reference_spectrum
+        )
+
         fig, ax = plt.subplots(
             figsize=(self.config.width / 100, self.config.height / 100)
         )
@@ -214,19 +233,14 @@ class SpectrumPlotter(_BasePlotter):
                 c=df["intensity"],
                 cmap="plasma_r",
                 s=20,
-                marker="s"
+                marker="s",
             )
             # Color bar
             if self.config.show_legend:
                 cb = plt.colorbar(aspect=40)
                 cb.outline.set_visible(False)
-                cb.ax.tick_params(size=0)
             return fig
         else:
-            if self.config.relative_intensity or self.config.mirror_spectrum:
-                for df in spectrum + reference_spectrum:
-                    df["intensity"] = df["intensity"] / df["intensity"].max() * 100
-
             gs_colors = self._get_n_grayscale_colors(
                 max([len(spectrum), len(reference_spectrum)])
             )
@@ -301,9 +315,9 @@ class SpectrumPlotter(_BasePlotter):
             spectrum, reference_spectrum
         )
 
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            for df in spectrum + reference_spectrum:
-                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+        spectrum, reference_spectrum = self._check_relative_intensity(
+            spectrum, reference_spectrum
+        )
 
         # Initialize figure
         p = figure(
@@ -326,8 +340,40 @@ class SpectrumPlotter(_BasePlotter):
         p.outline_line_color = None
 
         if self.config.ion_mobility:
-            for df in spectrum:
-                p.scatter()
+            df = self._combine_sort_spectra_by_intensity(spectrum)
+            mapper = linear_cmap(
+                field_name="intensity",
+                palette=Plasma256[::-1],
+                low=df["intensity"].min(),
+                high=df["intensity"].max(),
+            )
+            # Add hover text
+            df["hover_text"] = df.apply(
+                lambda x: f"{x['native_id']}<br>m/z: {x['mz']}<br>ion mobility: {x['ion_mobility']}<br>intensity: {x['intensity']}",
+                axis=1,
+            )
+            source = ColumnDataSource(df)
+            p.scatter(
+                x="mz",
+                y="ion_mobility",
+                size=6,
+                source=source,
+                color=mapper,
+                marker="square",
+            )
+            hover = HoverTool(
+                tooltips="""
+                <div>
+                    <span>@hover_text{safe}</span>
+                </div>
+            """
+            )
+            p.add_tools(hover)
+            if self.config.show_legend:
+                color_bar = ColorBar(
+                    color_mapper=mapper["transform"], width=8, location=(0, 0)
+                )
+                p.add_layout(color_bar, "right")
             return p
         else:
             # Plot spectra with annotations
@@ -382,7 +428,7 @@ class SpectrumPlotter(_BasePlotter):
                     mode="lines",
                     line=dict(color=self._get_peak_color(line_color, peak)),
                     name=peak["native_id"],
-                    text=f"m/z: {peak['mz']}<br>intensity: {peak['intensity']}<br>{peak['native_id']}",
+                    text=f"{peak['native_id']}<br>m/z: {peak['mz']}<br>intensity: {peak['intensity']}",
                     hoverinfo="text",
                     showlegend=True if i == 0 else False,
                 )
@@ -422,17 +468,13 @@ class SpectrumPlotter(_BasePlotter):
                     )
             return annotations
 
-        # Make sure both spectrum and reference spectrum are lists containing DataFrames.
         spectrum, reference_spectrum = self._ensure_list_format(
             spectrum, reference_spectrum
         )
 
-        # If relative intensity is set, convert intensity values for all DataFrames.
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            for df in spectrum + reference_spectrum:
-                df["intensity"] = df["intensity"].apply(
-                    lambda x: x / max(df["intensity"]) * 100
-                )
+        spectrum, reference_spectrum = self._check_relative_intensity(
+            spectrum, reference_spectrum
+        )
 
         # Create figure with initial layout
         layout = go.Layout(
@@ -452,7 +494,7 @@ class SpectrumPlotter(_BasePlotter):
             df = self._combine_sort_spectra_by_intensity(spectrum)
             # Annotation text
             df["hover_text"] = df.apply(
-                lambda x: f"{x['native_id']}<br>m/z: {x['mz']}<br>ion mobility: {x['ion_mobility']}<br>Intensity: {x['intensity']}",
+                lambda x: f"{x['native_id']}<br>m/z: {x['mz']}<br>ion mobility: {x['ion_mobility']}<br>intensity: {x['intensity']}",
                 axis=1,
             )
             # Use Scattergl (webgl) for efficient scatter plot
@@ -468,8 +510,14 @@ class SpectrumPlotter(_BasePlotter):
                     marker_symbol="square",
                     hovertext=df["hover_text"],
                     hoverinfo="text",
-                    marker=dict(colorbar=dict(thickness=8, outlinewidth=0) if self.config.show_legend else None),
-                    showlegend=False
+                    marker=dict(
+                        colorbar=(
+                            dict(thickness=8, outlinewidth=0)
+                            if self.config.show_legend
+                            else None
+                        )
+                    ),
+                    showlegend=False,
                 )
             )
             return fig
