@@ -293,7 +293,7 @@ class ChromatogramPlotter(_BasePlotter):
                 if self.config.featureConfig.legend.show:
                     custom_lines = [Line2D([0], [0], color=self.feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
                     if "q_value" in chromatogramFeatures.columns:
-                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, feature in enumerate(chromatogramFeatures.iterrows())]
+                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, (_,feature) in enumerate(chromatogramFeatures.iterrows())]
                     else:
                         legend_labels = [f'Feature {i}' for i in range(len(chromatogramFeatures))]
 
