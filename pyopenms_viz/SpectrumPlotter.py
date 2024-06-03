@@ -465,11 +465,7 @@ class SpectrumPlotter(_BasePlotter):
                         y=df["ion_mobility"],
                         mode="markers",
                         marker_color=df["intensity"],
-                        marker_colorscale=(
-                            "sunset"
-                            if not self.config.custom_peak_color
-                            else df["color_peak"]
-                        ),
+                        marker_colorscale=("sunset"),
                         marker_size=8,
                         marker_symbol="square",
                         hovertext=df["hover_text"],
@@ -479,25 +475,20 @@ class SpectrumPlotter(_BasePlotter):
                 # Instead of legend show colorbar
                 if self.config.show_legend:
                     fig.update_layout(showlegend=False)
-                    if not self.config.custom_peak_color:
-                        colorbar_trace = go.Scatter(
-                            x=[None],
-                            y=[None],
-                            mode="markers",
-                            marker=dict(
-                                colorscale=(
-                                    "sunset"
-                                    if not self.config.custom_peak_color
-                                    else df["color_peak"]
-                                ),
-                                showscale=True,
-                                cmin=min([min(df["intensity"]) for df in spectrum]),
-                                cmax=max([max(df["intensity"]) for df in spectrum]),
-                                colorbar=dict(thickness=8, outlinewidth=0),
-                            ),
-                            hoverinfo="none",
-                        )
-                        fig.add_trace(colorbar_trace)
+                    colorbar_trace = go.Scatter(
+                        x=[None],
+                        y=[None],
+                        mode="markers",
+                        marker=dict(
+                            colorscale=( "sunset"),
+                            showscale=True,
+                            cmin=min([min(df["intensity"]) for df in spectrum]),
+                            cmax=max([max(df["intensity"]) for df in spectrum]),
+                            colorbar=dict(thickness=8, outlinewidth=0),
+                        ),
+                        hoverinfo="none",
+                    )
+                    fig.add_trace(colorbar_trace)
 
             return fig
         # Classic spectrum plot
@@ -601,7 +592,7 @@ def plotSpectrum(
     Args:
         spectrum (Union[pd.DataFrame, List[pd.DataFrame]]): OpenMS MSSpectrum Object
         reference_spectrum (Union[pd.DataFrame, List[pd.DataFrame]], optional): Optional OpenMS Spectrum object to plot in mirror or used in annotation. Defaults to None.
-        ion_mobility (bool, optional): If true, plots spectra (not including reference spectra) as heatmap of m/z vs ion mobility with intensity or custom peak color as color. Defaults to False.
+        ion_mobility (bool, optional): If true, plots spectra (not including reference spectra) as heatmap of m/z vs ion mobility with intensity as color. Defaults to False.
         annotate_mz (bool, optional): If true, annotate peaks with m/z values. Defaults to False.
         annotate_ions (bool, optional): If true, annotate fragment ions. Defaults to False.
         annotate_sequence (bool, optional): Annotate peaks based on sequence provided. Defaults to False
