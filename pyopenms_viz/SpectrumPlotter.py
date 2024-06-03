@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from .BasePlotter import Colors, _BasePlotter, _BasePlotterConfig
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure
-from bokeh.models import Span, Label, Range1d
+from bokeh.models import Span, Label
 import streamlit as st
 
 
@@ -177,38 +177,13 @@ class SpectrumPlotter(_BasePlotter):
                         color=annotation_color,
                     )
 
-        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
-
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            for df in spectrum + reference_spectrum:
-                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+        spectrum, reference_spectrum = self._ensure_list_format(
+            spectrum, reference_spectrum
+        )
 
         fig, ax = plt.subplots(
             figsize=(self.config.width / 100, self.config.height / 100)
         )
-
-        gs_colors = self._get_n_grayscale_colors(
-            max([len(spectrum), len(reference_spectrum)])
-        )
-        colors = cycle(gs_colors)
-        for spec in spectrum:
-            plot_spectrum(ax, spec, next(colors))
-
-        if self.config.mirror_spectrum:
-            colors = cycle(gs_colors)
-            for ref_spec in reference_spectrum:
-                plot_spectrum(ax, ref_spec, next(colors), mirror=True)
-            # Plot zero line
-            plt.plot(ax.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
-
-        # Format y-axis
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            ticks, labels = self._get_relative_intensity_ticks()
-            ax.set_yticks(ticks)
-            ax.set_yticklabels(labels)
-        else:
-            ax.ticklabel_format(axis="both", style="sci", useMathText=True)
-
         ax.set_title(self.config.title, fontsize=12, loc="left", pad=20)
         ax.set_xlabel(
             self.config.xlabel, fontsize=10, style="italic", color=Colors["DARKGRAY"]
@@ -218,18 +193,79 @@ class SpectrumPlotter(_BasePlotter):
         ax.tick_params(axis="x", colors=Colors["DARKGRAY"])
         ax.yaxis.label.set_color(Colors["DARKGRAY"])
         ax.tick_params(axis="y", colors=Colors["DARKGRAY"])
-        ax.set_ylim([0 if not self.config.mirror_spectrum else None, None])
         ax.spines[["right", "top"]].set_visible(False)
-        ax.legend(loc="best") if self.config.show_legend else None
 
-        return fig
+        if self.config.ion_mobility:
+            for df in spectrum:
+                ax.scatter(
+                    df["mz"],
+                    df["ion_mobility"],
+                    c=df["intensity"],
+                    cmap="plasma_r",
+                    s=20,
+                    marker="s",  # Square markers
+                )
+            # Color bar
+            if self.config.show_legend:
+                dummy_mz = min([min(df["mz"]) for df in spectrum])
+                dummy_ion_mobility = min([min(df["ion_mobility"]) for df in spectrum])
+                cb = plt.colorbar(
+                    ax.scatter(
+                        x=[dummy_mz]*2,
+                        y=[dummy_ion_mobility]*2,
+                        c=[
+                            min([min(df["intensity"]) for df in spectrum]),
+                            max([max(df["intensity"]) for df in spectrum]),
+                        ],
+                        s=0,
+                        cmap="plasma_r"
+                    ),
+                    ax=ax,
+                    aspect=40,
+                )
+                cb.outline.set_visible(False)
+                cb.ax.tick_params(size=0)
+            return fig
+        else:
+            if self.config.relative_intensity or self.config.mirror_spectrum:
+                for df in spectrum + reference_spectrum:
+                    df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+
+            gs_colors = self._get_n_grayscale_colors(
+                max([len(spectrum), len(reference_spectrum)])
+            )
+            colors = cycle(gs_colors)
+            for spec in spectrum:
+                plot_spectrum(ax, spec, next(colors))
+
+            if self.config.mirror_spectrum:
+                colors = cycle(gs_colors)
+                for ref_spec in reference_spectrum:
+                    plot_spectrum(ax, ref_spec, next(colors), mirror=True)
+                # Plot zero line
+                plt.plot(ax.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
+
+            # Format y-axis
+            ax.set_ylim([0 if not self.config.mirror_spectrum else None, None])
+            if self.config.relative_intensity or self.config.mirror_spectrum:
+                ticks, labels = self._get_relative_intensity_ticks()
+                ax.set_yticks(ticks)
+                ax.set_yticklabels(labels)
+            else:
+                ax.ticklabel_format(axis="both", style="sci", useMathText=True)
+
+            ax.legend(loc="best") if self.config.show_legend else None
+
+            return fig
 
     def _plotBokeh(
         self,
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
-        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
+        spectrum, reference_spectrum = self._ensure_list_format(
+            spectrum, reference_spectrum
+        )
 
         if self.config.relative_intensity or self.config.mirror_spectrum:
             for df in spectrum + reference_spectrum:
@@ -385,7 +421,9 @@ class SpectrumPlotter(_BasePlotter):
             return annotations
 
         # Make sure both spectrum and reference spectrum are lists containing DataFrames.
-        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
+        spectrum, reference_spectrum = self._ensure_list_format(
+            spectrum, reference_spectrum
+        )
 
         # If relative intensity is set, convert intensity values for all DataFrames.
         if self.config.relative_intensity or self.config.mirror_spectrum:
