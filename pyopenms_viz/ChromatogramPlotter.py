@@ -1,4 +1,4 @@
-from .BasePlotter import _BasePlotter, _BasePlotterConfig, Engine, LegendConfig
+from pyopenms_viz.BasePlotter import _BasePlotter, _BasePlotterConfig, Engine, LegendConfig
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,6 +26,8 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     xlabel: str = "Retention Time"
     ylabel: str = "Intensity"
     show: bool = True
+    lineWidth: float = 1
+    lineStyle: str = 'solid'
     featureConfig: ChromatogramFeatureConfig = field(default_factory=ChromatogramFeatureConfig)
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
