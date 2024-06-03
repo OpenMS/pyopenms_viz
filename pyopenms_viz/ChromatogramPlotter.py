@@ -221,24 +221,14 @@ class ChromatogramPlotter(_BasePlotter):
         ##### Plotting chromatogram features #####
         if chromatogramFeatures is not None:
             for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+                feature_group = f"Feature {idx}"
 
-                leftWidth_line = fig.add_shape(type='line', 
-                                               x0=feature['leftWidth'], 
-                                               y0=0, 
-                                               x1=feature['leftWidth'], 
-                                               y1=feature['apexIntensity'], 
-                                               line=dict(
-                                                   color=self.feature_palette[idx],
-                                                   width=self.config.featureConfig.lineWidth,
-                                                    dash=self.config.featureConfig.lineStyle)
-                )
-
-                rightWidth_line = fig.add_shape(type='line', 
-                                                x0=feature['rightWidth'], 
+                feature_boundary_box = fig.add_shape(type='rect', 
+                                                x0=feature['leftWidth'], 
                                                 y0=0, 
                                                 x1=feature['rightWidth'], 
                                                 y1=feature['apexIntensity'],
-                                                legendgroup="features",
+                                                legendgroup=feature_group,
                                                 legendgrouptitle_text="Features",
                                                 showlegend=self.config.featureConfig.legend.show,
                                                 name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
