@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from itertools import cycle
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional, Union, Tuple
 
 import pandas as pd
 import numpy as np
@@ -128,11 +128,12 @@ class SpectrumPlotter(_BasePlotter):
             labels = labels[-4:][::-1] + labels
         return ticks, labels
 
-    def _plotMatplotlib(
+    def _ensure_list_format(
         self,
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
-        reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
-    ):
+        reference_spectrum: Union[pd.DataFrame, List[pd.DataFrame], None],
+    ) -> Tuple[List, List]:
+        """Makes sure input spectra and reference spectra dataframes are inside a list."""
         if not isinstance(spectrum, list):
             spectrum = [spectrum]
         if (
@@ -141,15 +142,13 @@ class SpectrumPlotter(_BasePlotter):
             reference_spectrum = [reference_spectrum]
         elif reference_spectrum is None:
             reference_spectrum = []
+        return spectrum, reference_spectrum
 
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            for df in spectrum + reference_spectrum:
-                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
-
-        fig, ax = plt.subplots(
-            figsize=(self.config.width / 100, self.config.height / 100)
-        )
-
+    def _plotMatplotlib(
+        self,
+        spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
+        reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
+    ):
         def plot_spectrum(ax, df, color, mirror=False):
             for i, peak in df.iterrows():
                 intensity = -peak["intensity"] if mirror else peak["intensity"]
@@ -177,6 +176,16 @@ class SpectrumPlotter(_BasePlotter):
                         fontsize=8,
                         color=annotation_color,
                     )
+
+        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
+
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            for df in spectrum + reference_spectrum:
+                df["intensity"] = df["intensity"] / df["intensity"].max() * 100
+
+        fig, ax = plt.subplots(
+            figsize=(self.config.width / 100, self.config.height / 100)
+        )
 
         gs_colors = self._get_n_grayscale_colors(
             max([len(spectrum), len(reference_spectrum)])
@@ -220,14 +229,7 @@ class SpectrumPlotter(_BasePlotter):
         spectrum: Union[pd.DataFrame, List[pd.DataFrame]],
         reference_spectrum: Optional[Union[pd.DataFrame, List[pd.DataFrame]]] = None,
     ):
-        if not isinstance(spectrum, list):
-            spectrum = [spectrum]
-        if (
-            not isinstance(reference_spectrum, list)
-        ) and reference_spectrum is not None:
-            reference_spectrum = [reference_spectrum]
-        elif reference_spectrum is None:
-            reference_spectrum = []
+        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
 
         if self.config.relative_intensity or self.config.mirror_spectrum:
             for df in spectrum + reference_spectrum:
@@ -383,14 +385,7 @@ class SpectrumPlotter(_BasePlotter):
             return annotations
 
         # Make sure both spectrum and reference spectrum are lists containing DataFrames.
-        if not isinstance(spectrum, list):
-            spectrum = [spectrum]
-        if (
-            not isinstance(reference_spectrum, list)
-        ) and reference_spectrum is not None:
-            reference_spectrum = [reference_spectrum]
-        elif reference_spectrum is None:
-            reference_spectrum = []
+        spectrum, reference_spectrum = self._ensure_list_format(spectrum, reference_spectrum)
 
         # If relative intensity is set, convert intensity values for all DataFrames.
         if self.config.relative_intensity or self.config.mirror_spectrum:
@@ -402,9 +397,7 @@ class SpectrumPlotter(_BasePlotter):
         # Create figure with initial layout
         layout = go.Layout(
             title=dict(text=self.config.title),
-            xaxis=dict(
-                title=self.config.xlabel
-            ),
+            xaxis=dict(title=self.config.xlabel),
             yaxis=dict(
                 title=self.config.ylabel,
             ),
@@ -422,7 +415,10 @@ class SpectrumPlotter(_BasePlotter):
                 df["mz"] = df["mz"][sort]
                 df["ion_mobility"] = df["ion_mobility"][sort]
                 # Annotation text
-                df["hover_text"] = df.apply(lambda x: f"{x['native_id']}<br>m/z: {x['mz']}<br>ion mobility: {x['ion_mobility']}<br>Intensity: {x['intensity']}", axis=1)
+                df["hover_text"] = df.apply(
+                    lambda x: f"{x['native_id']}<br>m/z: {x['mz']}<br>ion mobility: {x['ion_mobility']}<br>Intensity: {x['intensity']}",
+                    axis=1,
+                )
                 # Use Scattergl (webgl) for efficient scatter plot
                 fig.add_trace(
                     go.Scattergl(
@@ -431,7 +427,11 @@ class SpectrumPlotter(_BasePlotter):
                         y=df["ion_mobility"],
                         mode="markers",
                         marker_color=df["intensity"],
-                        marker_colorscale="sunset" if not self.config.custom_peak_color else df["color_peak"],
+                        marker_colorscale=(
+                            "sunset"
+                            if not self.config.custom_peak_color
+                            else df["color_peak"]
+                        ),
                         marker_size=8,
                         marker_symbol="square",
                         hovertext=df["hover_text"],
@@ -442,20 +442,25 @@ class SpectrumPlotter(_BasePlotter):
                 if self.config.show_legend:
                     fig.update_layout(showlegend=False)
                     if not self.config.custom_peak_color:
-                        colorbar_trace  = go.Scatter(x=[None],
-                                y=[None],
-                                mode='markers',
-                                marker=dict(
-                                    colorscale="sunset" if not self.config.custom_peak_color else df["color_peak"], 
-                                    showscale=True,
-                                    cmin=min([min(df["intensity"]) for df in spectrum]),
-                                    cmax=max([max(df["intensity"]) for df in spectrum]),
-                                    colorbar=dict(thickness=8, outlinewidth=0)
+                        colorbar_trace = go.Scatter(
+                            x=[None],
+                            y=[None],
+                            mode="markers",
+                            marker=dict(
+                                colorscale=(
+                                    "sunset"
+                                    if not self.config.custom_peak_color
+                                    else df["color_peak"]
                                 ),
-                                hoverinfo='none'
-                                )
+                                showscale=True,
+                                cmin=min([min(df["intensity"]) for df in spectrum]),
+                                cmax=max([max(df["intensity"]) for df in spectrum]),
+                                colorbar=dict(thickness=8, outlinewidth=0),
+                            ),
+                            hoverinfo="none",
+                        )
                         fig.add_trace(colorbar_trace)
-                
+
             return fig
         # Classic spectrum plot
         else:
