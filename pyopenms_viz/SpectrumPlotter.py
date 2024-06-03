@@ -29,6 +29,9 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
 class SpectrumPlotter(_BasePlotter):
     def __init__(self, config: SpectrumPlotterConfig, **kwargs) -> None:
         super().__init__(config=config, **kwargs)
+        # If y-axis label is default ("Intensity") and ion_mobility is True, update label
+        if self.config.ylabel == "intensity" and self.config.ion_mobility:
+            self.config.ylabel = "ion mobility"
 
     def _get_ion_color_annotation(self, annotation: str) -> str:
         """
@@ -605,7 +608,7 @@ def plotSpectrum(
         height (int, optional): Height of plot. Defaults to 500px.
         title (str, optional): Plot title. Defaults to "Spectrum Plot".
         xlabel (str, optional): X-axis label. Defaults to "m/z".
-        ylabel (str, optional): Y-axis label. Defaults to "intensity".
+        ylabel (str, optional): Y-axis label. Defaults to "intensity" or "ion mobility".
         show_legend (int, optional): Show legend. Defaults to False.
         engine (Literal['PLOTLY', 'BOKEH'], optional): Plotting engine to use. Defaults to 'PLOTLY' can be either 'PLOTLY' or 'BOKEH'
 
