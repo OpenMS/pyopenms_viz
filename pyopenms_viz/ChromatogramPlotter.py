@@ -158,9 +158,7 @@ class ChromatogramPlotter(_BasePlotter):
                         color=self.main_palette[i],
                         width=self.config.lineWidth,
                         dash=self.config.lineStyle
-                    ),
-                    legendgrouptitle_text='Transitions',
-                    legendgroup='transitions'
+                    )
                 )
                 traces.append(trace)
         else:
@@ -185,6 +183,7 @@ class ChromatogramPlotter(_BasePlotter):
             yaxis_title=self.config.ylabel,
             width=self.config.width,
             height=self.config.height,
+            legend_title="Transition",
             legend_font_size=self.config.legend.fontsize
         )
 
