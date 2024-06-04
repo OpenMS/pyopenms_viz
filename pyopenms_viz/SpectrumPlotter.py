@@ -604,7 +604,7 @@ def plotSpectrum(
     xlabel: str = "m/z",
     ylabel: str = "intensity",
     show_legend: bool = False,
-    engine: Literal["PLOTLY", "BOKEH"] = "PLOTLY",
+    engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY",
 ):
     """
     Plots a Spectrum from an MSSpectrum object
