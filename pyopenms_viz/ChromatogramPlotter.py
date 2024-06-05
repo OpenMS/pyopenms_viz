@@ -1,4 +1,4 @@
-from .BasePlotter import _BasePlotter, _BasePlotterConfig, Engine, LegendConfig
+from pyopenms_viz.BasePlotter import _BasePlotter, _BasePlotterConfig, Engine, LegendConfig
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,6 +26,8 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     xlabel: str = "Retention Time"
     ylabel: str = "Intensity"
     show: bool = True
+    lineWidth: float = 1
+    lineStyle: str = 'solid'
     featureConfig: ChromatogramFeatureConfig = field(default_factory=ChromatogramFeatureConfig)
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
@@ -156,9 +158,7 @@ class ChromatogramPlotter(_BasePlotter):
                         color=self.main_palette[i],
                         width=self.config.lineWidth,
                         dash=self.config.lineStyle
-                    ),
-                    legendgrouptitle_text='Transitions',
-                    legendgroup='transitions'
+                    )
                 )
                 traces.append(trace)
         else:
@@ -183,6 +183,7 @@ class ChromatogramPlotter(_BasePlotter):
             yaxis_title=self.config.ylabel,
             width=self.config.width,
             height=self.config.height,
+            legend_title="Transition",
             legend_font_size=self.config.legend.fontsize
         )
 
@@ -220,24 +221,14 @@ class ChromatogramPlotter(_BasePlotter):
         ##### Plotting chromatogram features #####
         if chromatogramFeatures is not None:
             for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+                feature_group = f"Feature {idx}"
 
-                leftWidth_line = fig.add_shape(type='line', 
-                                               x0=feature['leftWidth'], 
-                                               y0=0, 
-                                               x1=feature['leftWidth'], 
-                                               y1=feature['apexIntensity'], 
-                                               line=dict(
-                                                   color=self.feature_palette[idx],
-                                                   width=self.config.featureConfig.lineWidth,
-                                                    dash=self.config.featureConfig.lineStyle)
-                )
-
-                rightWidth_line = fig.add_shape(type='line', 
-                                                x0=feature['rightWidth'], 
+                feature_boundary_box = fig.add_shape(type='rect', 
+                                                x0=feature['leftWidth'], 
                                                 y0=0, 
                                                 x1=feature['rightWidth'], 
                                                 y1=feature['apexIntensity'],
-                                                legendgroup="features",
+                                                legendgroup=feature_group,
                                                 legendgrouptitle_text="Features",
                                                 showlegend=self.config.featureConfig.legend.show,
                                                 name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
@@ -302,7 +293,7 @@ class ChromatogramPlotter(_BasePlotter):
                 if self.config.featureConfig.legend.show:
                     custom_lines = [Line2D([0], [0], color=self.feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
                     if "q_value" in chromatogramFeatures.columns:
-                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, feature in enumerate(chromatogramFeatures.iterrows())]
+                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, (_,feature) in enumerate(chromatogramFeatures.iterrows())]
                     else:
                         legend_labels = [f'Feature {i}' for i in range(len(chromatogramFeatures))]
 
