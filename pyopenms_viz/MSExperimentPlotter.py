@@ -4,8 +4,7 @@ from typing import Literal, Union
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.graph_objects as go
-from bokeh.models import (ColorBar, ColumnDataSource, HoverTool,
-                          PrintfTickFormatter)
+from bokeh.models import ColorBar, ColumnDataSource, HoverTool, PrintfTickFormatter
 from bokeh.palettes import Plasma256
 from bokeh.plotting import figure
 from bokeh.transform import linear_cmap
@@ -33,7 +32,7 @@ class MSExperimentPlotter(_BasePlotter):
         super().__init__(config=config, **kwargs)
 
     def _prepare_data(self, exp: pd.DataFrame) -> pd.DataFrame:
-        if self.config.bin_peaks or (
+        if self.config.bin_peaks == True or (
             exp.shape[0] > self.config.num_mz_bins * self.config.num_RT_bins
             and self.config.bin_peaks == "auto"
         ):
@@ -49,6 +48,8 @@ class MSExperimentPlotter(_BasePlotter):
             exp["mz"] = exp["mz"].apply(lambda interval: interval.mid).astype(float)
             exp["RT"] = exp["RT"].apply(lambda interval: interval.mid).astype(float)
             exp = exp.fillna(0)
+        else:
+            self.config.bin_peaks = False
 
         if self.config.relative_intensity:
             exp["inty"] = exp["inty"] / max(exp["inty"]) * 100
@@ -218,6 +219,9 @@ class MSExperimentPlotter(_BasePlotter):
             yaxis=dict(title=self.config.ylabel),
             showlegend=self.config.show_legend,
             template="simple_white",
+            dragmode="select",
+            height=self.config.height,
+            width=self.config.width,
         )
         fig = go.Figure(layout=layout)
         fig.add_trace(

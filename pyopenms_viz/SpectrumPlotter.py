@@ -59,7 +59,15 @@ class SpectrumPlotter(_BasePlotter):
             "y": Colors["RED"],
             "z": Colors["ORANGE"],
         }
-        return colormap.get(annotation.lower(), Colors["DARKGRAY"])
+        for key in colormap.keys():
+            # Exact matches
+            if annotation == key:
+                return colormap[key]
+            # Fragment ions via regex
+            x = re.search(r"^[abcxyz]{1}[0-9]*[+-]$", annotation)
+            if x:
+                return colormap[annotation[0]]
+        return Colors["DARKGRAY"]
 
     def _get_peak_color(self, default_color: str, peak: pd.Series) -> str:
         """
@@ -241,6 +249,7 @@ class SpectrumPlotter(_BasePlotter):
                 if any([self.config.annotate_mz, self.config.annotate_ions, self.config.annotate_sequence, self.config.custom_annotation_text]):
                     text = self._get_annotation_text(peak).replace("<br>", "\n")
                     annotation_color = self._get_annotation_color(peak, peak_color)
+                    print(annotation_color)
                     ax.annotate(
                         text,
                         xy=(peak["mz"], intensity),
@@ -368,10 +377,9 @@ class SpectrumPlotter(_BasePlotter):
         p.border_fill_color = None
         p.outline_line_color = None
 
+        p.legend.visible = False
         if self.config.show_legend:
             p.legend.location = "top_right"
-        else:
-            p.legend.visible = False
 
         if self.config.ion_mobility:
             df = self._combine_sort_spectra_by_intensity(spectrum)
