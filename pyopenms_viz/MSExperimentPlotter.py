@@ -4,12 +4,8 @@ from typing import Literal, Union
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.graph_objects as go
-from bokeh.models import (
-    ColorBar,
-    ColumnDataSource,
-    HoverTool,
-    PrintfTickFormatter,
-)
+from bokeh.models import (ColorBar, ColumnDataSource, HoverTool,
+                          PrintfTickFormatter)
 from bokeh.palettes import Plasma256
 from bokeh.plotting import figure
 from bokeh.transform import linear_cmap
@@ -22,6 +18,7 @@ class MSExperimentPlotterConfig(_BasePlotterConfig):
     bin_peaks: Union[Literal["auto"], bool] = "auto"
     num_RT_bins: int = 50
     num_mz_bins: int = 50
+    plot3D: bool = False
 
 
 class MSExperimentPlotter(_BasePlotter):
@@ -44,7 +41,11 @@ class MSExperimentPlotter(_BasePlotter):
             exp["RT"] = pd.cut(exp["RT"], bins=self.config.num_RT_bins)
 
             # Group by x and y bins and calculate the mean intensity within each bin
-            exp = exp.groupby(["mz", "RT"]).agg({"inty": "mean"}).reset_index()
+            exp = (
+                exp.groupby(["mz", "RT"], observed=True)
+                .agg({"inty": "mean"})
+                .reset_index()
+            )
             exp["mz"] = exp["mz"].apply(lambda interval: interval.mid).astype(float)
             exp["RT"] = exp["RT"].apply(lambda interval: interval.mid).astype(float)
             exp = exp.fillna(0)
@@ -63,10 +64,62 @@ class MSExperimentPlotter(_BasePlotter):
         self,
         exp: pd.DataFrame,
     ) -> plt.Figure:
+        exp = self._prepare_data(exp)
+        if self.config.plot3D:
+            fig = plt.figure(
+                figsize=(self.config.width / 100, self.config.height / 100),
+                layout="constrained",
+            )
+            ax = fig.add_subplot(111, projection="3d")
+
+            if self.config.title:
+                ax.set_title(self.config.title, fontsize=12, loc="left")
+            ax.set_xlabel(
+                self.config.ylabel,
+                fontsize=9,
+                labelpad=-2,
+                color=Colors["DARKGRAY"],
+                style="italic",
+            )
+            ax.set_ylabel(
+                self.config.xlabel,
+                fontsize=9,
+                labelpad=-2,
+                color=Colors["DARKGRAY"],
+            )
+            ax.set_zlabel(
+                "intensity", fontsize=10, color=Colors["DARKGRAY"], labelpad=-2
+            )
+            for axis in ("x", "y", "z"):
+                ax.tick_params(
+                    axis=axis, labelsize=8, pad=-2, colors=Colors["DARKGRAY"]
+                )
+
+            ax.set_box_aspect(aspect=None, zoom=0.88)
+            ax.ticklabel_format(axis="z", style="sci", useMathText=True)
+            ax.grid(color="#FF0000", linewidth=0.8)
+            ax.xaxis.pane.fill = False
+            ax.yaxis.pane.fill = False
+            ax.zaxis.pane.fill = False
+            ax.view_init(elev=25, azim=-45, roll=0)
+
+            # Plot lines to the bottom with colored based on inty
+            for i in range(len(exp)):
+                ax.plot(
+                    [exp["RT"].iloc[i], exp["RT"].iloc[i]],
+                    [exp["inty"].iloc[i], 0],
+                    [exp["mz"].iloc[i], exp["mz"].iloc[i]],
+                    zdir="x",
+                    color=plt.cm.magma_r(exp["inty"].iloc[i] / exp["inty"].max()),
+                )
+            # fig.tight_layout()
+            return fig
+
         fig, ax = plt.subplots(
             figsize=(self.config.width / 100, self.config.height / 100)
         )
-        ax.set_title(self.config.title, fontsize=12, loc="left", pad=20)
+        if self.config.title:
+            ax.set_title(self.config.title, fontsize=12, loc="left", pad=20)
         ax.set_xlabel(self.config.xlabel, fontsize=10, color=Colors["DARKGRAY"])
         ax.set_ylabel(
             self.config.ylabel, fontsize=10, style="italic", color=Colors["DARKGRAY"]
@@ -76,8 +129,6 @@ class MSExperimentPlotter(_BasePlotter):
         ax.yaxis.label.set_color(Colors["DARKGRAY"])
         ax.tick_params(axis="y", colors=Colors["DARKGRAY"])
         ax.spines[["right", "top"]].set_visible(False)
-
-        exp = self._prepare_data(exp)
 
         scatter = ax.scatter(
             exp["RT"],
@@ -160,6 +211,7 @@ class MSExperimentPlotter(_BasePlotter):
         self,
         exp: pd.DataFrame,
     ) -> go.Figure:
+        exp = self._prepare_data(exp)
         layout = go.Layout(
             title=dict(text=self.config.title),
             xaxis=dict(title=self.config.xlabel),
@@ -167,7 +219,6 @@ class MSExperimentPlotter(_BasePlotter):
             showlegend=self.config.show_legend,
             template="simple_white",
         )
-        exp = self._prepare_data(exp)
         fig = go.Figure(layout=layout)
         fig.add_trace(
             go.Scattergl(
@@ -201,6 +252,7 @@ class MSExperimentPlotter(_BasePlotter):
 
 def plotMSExperiment(
     exp: pd.DataFrame,
+    plot3D: bool = False,
     relative_intensity: bool = False,
     bin_peaks: Union[Literal["auto"], bool] = "auto",
     num_RT_bins: int = 50,
@@ -218,6 +270,7 @@ def plotMSExperiment(
 
     Args:
         spectrum (pd.DataFrame): OpenMS MSSpectrum Object
+        plot3D: (bool = False, optional): Plot peak map 3D with peaks colored based on intensity. Disables colorbar legend. Works with "MATPLOTLIB" engine only. Defaults to False.
         relative_intensity (bool, optional): If true, plot relative intensity values. Defaults to False.
         bin_peaks: (Union[Literal["auto"], bool], optional): Bin peaks to reduce complexity and improve plotting speed. Hovertext disabled if activated. If set to "auto" any MSExperiment with more then num_RT_bins x num_mz_bins peaks will be binned. Defaults to "auto".
         num_RT_bins: (int, optional): Number of bins in RT dimension. Defaults to 50.
@@ -234,6 +287,7 @@ def plotMSExperiment(
         Plot: The generated plot using the specified engine.
     """
     config = MSExperimentPlotterConfig(
+        plot3D=plot3D,
         relative_intensity=relative_intensity,
         bin_peaks=bin_peaks,
         num_RT_bins=num_RT_bins,
