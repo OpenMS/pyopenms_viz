@@ -40,6 +40,8 @@ class _BasePlotterConfig(ABC):
     colormap: str = 'viridis'
     legend: LegendConfig = field(default_factory=LegendConfig)
     grid: bool = True
+    lineStyle: str = 'solid'
+    lineWidth: float = 1
 
     @property
     def engine_enum(self):
