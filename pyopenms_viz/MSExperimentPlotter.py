@@ -32,6 +32,7 @@ class MSExperimentPlotter(_BasePlotter):
         super().__init__(config=config, **kwargs)
 
     def _prepare_data(self, exp: pd.DataFrame) -> pd.DataFrame:
+        """Prepares data for plotting based on configuration (binning, relative intensity, hover text)."""
         if self.config.bin_peaks == True or (
             exp.shape[0] > self.config.num_mz_bins * self.config.num_RT_bins
             and self.config.bin_peaks == "auto"
@@ -61,61 +62,62 @@ class MSExperimentPlotter(_BasePlotter):
 
         return exp.sort_values("inty")
 
-    def _plotMatplotlib(
+    def _plotMatplotlib3D(
         self,
         exp: pd.DataFrame,
     ) -> plt.Figure:
-        exp = self._prepare_data(exp)
+        """Plot 3D peak map with mz, RT and intensity dimensions. Colored peaks based on intensity."""
+        fig = plt.figure(
+            figsize=(self.config.width / 100, self.config.height / 100),
+            layout="constrained",
+        )
+        ax = fig.add_subplot(111, projection="3d")
+
+        if self.config.title:
+            ax.set_title(self.config.title, fontsize=12, loc="left")
+        ax.set_xlabel(
+            self.config.ylabel,
+            fontsize=9,
+            labelpad=-2,
+            color=Colors["DARKGRAY"],
+            style="italic",
+        )
+        ax.set_ylabel(
+            self.config.xlabel,
+            fontsize=9,
+            labelpad=-2,
+            color=Colors["DARKGRAY"],
+        )
+        ax.set_zlabel("intensity", fontsize=10, color=Colors["DARKGRAY"], labelpad=-2)
+        for axis in ("x", "y", "z"):
+            ax.tick_params(axis=axis, labelsize=8, pad=-2, colors=Colors["DARKGRAY"])
+
+        ax.set_box_aspect(aspect=None, zoom=0.88)
+        ax.ticklabel_format(axis="z", style="sci", useMathText=True)
+        ax.grid(color="#FF0000", linewidth=0.8)
+        ax.xaxis.pane.fill = False
+        ax.yaxis.pane.fill = False
+        ax.zaxis.pane.fill = False
+        ax.view_init(elev=25, azim=-45, roll=0)
+
+        # Plot lines to the bottom with colored based on inty
+        for i in range(len(exp)):
+            ax.plot(
+                [exp["RT"].iloc[i], exp["RT"].iloc[i]],
+                [exp["inty"].iloc[i], 0],
+                [exp["mz"].iloc[i], exp["mz"].iloc[i]],
+                zdir="x",
+                color=plt.cm.magma_r(exp["inty"].iloc[i] / exp["inty"].max()),
+            )
+        return fig
+
+    def _plotMatplotlib2D(
+        self,
+        exp: pd.DataFrame,
+    ) -> plt.Figure:
+        """Plot 2D peak map with mz and RT dimensions. Colored peaks based on intensity."""
         if self.config.plot3D:
-            fig = plt.figure(
-                figsize=(self.config.width / 100, self.config.height / 100),
-                layout="constrained",
-            )
-            ax = fig.add_subplot(111, projection="3d")
-
-            if self.config.title:
-                ax.set_title(self.config.title, fontsize=12, loc="left")
-            ax.set_xlabel(
-                self.config.ylabel,
-                fontsize=9,
-                labelpad=-2,
-                color=Colors["DARKGRAY"],
-                style="italic",
-            )
-            ax.set_ylabel(
-                self.config.xlabel,
-                fontsize=9,
-                labelpad=-2,
-                color=Colors["DARKGRAY"],
-            )
-            ax.set_zlabel(
-                "intensity", fontsize=10, color=Colors["DARKGRAY"], labelpad=-2
-            )
-            for axis in ("x", "y", "z"):
-                ax.tick_params(
-                    axis=axis, labelsize=8, pad=-2, colors=Colors["DARKGRAY"]
-                )
-
-            ax.set_box_aspect(aspect=None, zoom=0.88)
-            ax.ticklabel_format(axis="z", style="sci", useMathText=True)
-            ax.grid(color="#FF0000", linewidth=0.8)
-            ax.xaxis.pane.fill = False
-            ax.yaxis.pane.fill = False
-            ax.zaxis.pane.fill = False
-            ax.view_init(elev=25, azim=-45, roll=0)
-
-            # Plot lines to the bottom with colored based on inty
-            for i in range(len(exp)):
-                ax.plot(
-                    [exp["RT"].iloc[i], exp["RT"].iloc[i]],
-                    [exp["inty"].iloc[i], 0],
-                    [exp["mz"].iloc[i], exp["mz"].iloc[i]],
-                    zdir="x",
-                    color=plt.cm.magma_r(exp["inty"].iloc[i] / exp["inty"].max()),
-                )
-            # fig.tight_layout()
-            return fig
-
+            return self._p
         fig, ax = plt.subplots(
             figsize=(self.config.width / 100, self.config.height / 100)
         )
@@ -149,14 +151,23 @@ class MSExperimentPlotter(_BasePlotter):
             else:
                 cb.formatter.set_powerlimits((0, 0))
                 cb.formatter.set_useMathText(True)
-
         return fig
 
-    def _plotBokeh(
+    def _plotMatplotlib(
+        self,
+        exp: pd.DataFrame,
+    ) -> plt.Figure:
+        """Prepares data and returns Matplotlib 2D or 3D plot."""
+        exp = self._prepare_data(exp)
+        if self.config.plot3D:
+            return self._plotMatplotlib3D(exp)
+        return self._plotMatplotlib2D(exp)
+
+    def _plotBokeh2D(
         self,
         exp: pd.DataFrame,
     ) -> figure:
-
+        """Plot 2D peak map with mz and RT dimensions. Colored peaks based on intensity."""
         # Initialize figure
         p = figure(
             title=self.config.title,
@@ -169,8 +180,6 @@ class MSExperimentPlotter(_BasePlotter):
         p.grid.grid_line_color = None
         p.border_fill_color = None
         p.outline_line_color = None
-
-        exp = self._prepare_data(exp)
 
         mapper = linear_cmap(
             field_name="inty",
@@ -208,11 +217,19 @@ class MSExperimentPlotter(_BasePlotter):
 
         return p
 
-    def _plotPlotly(
+    def _plotBokeh(
+        self,
+        exp: pd.DataFrame,
+    ) -> figure:
+        """Prepares data and returns Bokeh 2D plot."""
+        exp = self._prepare_data(exp)
+        return self._plotBokeh2D(exp)
+
+    def _plotPlotly2D(
         self,
         exp: pd.DataFrame,
     ) -> go.Figure:
-        exp = self._prepare_data(exp)
+        """Plot 2D peak map with mz and RT dimensions. Colored peaks based on intensity."""
         layout = go.Layout(
             title=dict(text=self.config.title),
             xaxis=dict(title=self.config.xlabel),
@@ -248,6 +265,13 @@ class MSExperimentPlotter(_BasePlotter):
         )
         return fig
 
+    def _plotPlotly(
+        self,
+        exp: pd.DataFrame,
+    ) -> go.Figure:
+        """Prepares data and returns Plotly 2D plot."""
+        exp = self._prepare_data(exp)
+        return self._plotPlotly2D(exp)
 
 # ============================================================================= #
 ## FUNCTIONAL API ##
@@ -285,7 +309,7 @@ def plotMSExperiment(
         xlabel (str, optional): X-axis label. Defaults to "m/z".
         ylabel (str, optional): Y-axis label. Defaults to "intensity" or "ion mobility".
         show_legend (int, optional): Show legend. Defaults to False.
-        engine (Literal['PLOTLY', 'BOKEH'], optional): Plotting engine to use. Defaults to 'PLOTLY' can be either 'PLOTLY' or 'BOKEH'
+        engine (Literal['PLOTLY', 'BOKEH', 'MATPLOTLIB'], optional): Plotting engine to use. Defaults to 'PLOTLY' can be either 'PLOTLY', 'BOKEH' or 'MATPLOTLIB'.
 
     Returns:
         Plot: The generated plot using the specified engine.

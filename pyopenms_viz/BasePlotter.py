@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Literal, List
 import numpy as np
 
+
 class Engine(Enum):
     PLOTLY = 1
     BOKEH = 2

@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from pyopenms_viz.MSExperimentPlotter import plotMSExperiment
 from pyopenms_viz.SpectrumPlotter import plotSpectrum
-import time
 import pyopenms as oms
 from urllib.request import urlretrieve
 
@@ -49,7 +48,6 @@ if demo == "MSExperiment":
         num_RT_bins = cols[1].number_input("num_RT_bins", 10, 100, 50, 10)
         num_mz_bins = cols[2].number_input("num_mz_bins", 10, 100, 50, 10)
         engine = cols[0].selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
-        # if cols[2].button("Update Plot", type="primary", use_container_width=True):
         if bin_peaks == "True":
             bin_peaks = True
         elif bin_peaks == "False":
@@ -111,7 +109,6 @@ if demo == "MSExperiment":
         )
 
     msexpdemo()
-    # st.write(st.session_state.msexp_selection.points)
     with st.expander("`exp.get_df(long=True)`", expanded=False):
         st.dataframe(st.session_state.exp_df)
     with st.expander("`plotMSExperiment()`", expanded=False):
@@ -150,23 +147,23 @@ elif demo == "MSSpectrum":
         custom_annotation_color = cols[2].checkbox("custom_annotation_color")
         annotate_mz = cols[0].checkbox("annotate_mz")
         engine = cols[0].selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
-        if cols[2].button("Update Plot", type="primary", use_container_width=True):
-            fig = plotSpectrum(
-                spec,
-                spec,
-                engine=engine,
-                relative_intensity=relative_intensity,
-                show_legend=show_legend,
-                ion_mobility=ion_mobility,
-                annotate_sequence=annotate_sequence,
-                mirror_spectrum=mirror_spectrum,
-                custom_annotation_text=custom_annotation_text,
-                custom_peak_color=custom_peak_color,
-                annotate_ions=annotate_ions,
-                custom_annotation_color=custom_annotation_color,
-                annotate_mz=annotate_mz,
-            )
-            display_fig(fig, engine)
+        # if cols[2].button("Update Plot", type="primary", use_container_width=True):
+        fig = plotSpectrum(
+            spec,
+            spec,
+            engine=engine,
+            relative_intensity=relative_intensity,
+            show_legend=show_legend,
+            ion_mobility=ion_mobility,
+            annotate_sequence=annotate_sequence,
+            mirror_spectrum=mirror_spectrum,
+            custom_annotation_text=custom_annotation_text,
+            custom_peak_color=custom_peak_color,
+            annotate_ions=annotate_ions,
+            custom_annotation_color=custom_annotation_color,
+            annotate_mz=annotate_mz,
+        )
+        display_fig(fig, engine)
 
     msspecdemo()
 
