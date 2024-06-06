@@ -6,8 +6,8 @@ from pyopenms_viz.SpectrumPlotter import plotSpectrum
 import pyopenms as oms
 from urllib.request import urlretrieve
 
-st.title("pyopenms-viz demo")
-
+with st.sidebar:
+    st.title("pyopenms-viz demo")
 
 def load_demo_mzML():
     with st.spinner("Loading example MSExperiment data..."):
@@ -24,48 +24,75 @@ def load_demo_mzML():
 
 def display_fig(fig, engine):
     if engine == "MATPLOTLIB":
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig)
     elif engine == "BOKEH":
-        st.bokeh_chart(fig, use_container_width=True)
+        st.bokeh_chart(fig)
     else:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig)
 
+
+def get_common_parameters():
+    params = {}
+    with st.sidebar:
+        params["engine"] = st.selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
+        params["width"] = st.number_input("width", 50, 1000, 500, 50)
+        params["height"] = st.number_input("height", 50, 1000, 500, 50)
+        params["title"] = st.text_input("title", "Title")
+        params["xlabel"] = st.text_input("xlabel", "x-label")
+        params["ylabel"] = st.text_input("xlabel", "y-label")
+        params["show_legend"] = st.checkbox("show_legend", False)
+    return params
+
+
+def get_MSExperiment_params():
+    params = {}
+    params["plot3D"] = st.checkbox("plot3D", False)
+    params["relative_intensity"] = st.checkbox("relative_intensity", False)
+    params["bin_peaks"] = st.selectbox("bin_peaks", ["auto", "True", "False"])
+    params["num_RT_bins"] = st.number_input("num_RT_bins", 10, 100, 50, 10)
+    params["num_mz_bins"] = st.number_input("num_mz_bins", 10, 100, 50, 10)
+    if params["bin_peaks"] == "True":
+        params["bin_peaks"] = True
+    elif params["bin_peaks"] == "False":
+        params["bin_peaks"] = False
+    return params
+
+def get_Spectrum_params():
+    params = {}
+    params["ion_mobility"] = st.checkbox("ion_mobility")
+    params["annotate_mz"] = st.checkbox("annotate_mz")
+    params["annotate_ions"] = st.checkbox("annotate_ions")
+    params["annotate_sequence"] = st.checkbox("annotate_sequence")
+    params["mirror_spectrum"] = st.checkbox("mirror_spectrum")
+    params["relative_intensity"] = st.checkbox("relative_intensity", False)
+    params["custom_peak_color"] = st.checkbox("custom_peak_color")
+    params["custom_annotation_text"] = st.checkbox("custom_annotation_text")
+    params["custom_annotation_color"] = st.checkbox("custom_annotation_color")
+    return params
 
 if "exp_df" not in st.session_state:
     load_demo_mzML()
 
-demo = st.selectbox("select demo", ["MSExperiment", "MSSpectrum"])
+with st.sidebar:
+    demo = st.selectbox("select demo", ["MSExperiment", "MSSpectrum"])
 
+tabs = st.tabs(["📊 **Figure**", "📂 **Data**", "📑 **API docs**"])
 if demo == "MSExperiment":
-
-    @st.experimental_fragment()
-    def msexpdemo():
-        cols = st.columns(3)
-        show_legend = cols[0].checkbox("show_legend", True)
-        relative_intensity = cols[1].checkbox("relative_intensity", False)
-        plot3D = cols[2].checkbox("plot3D", False)
-        bin_peaks = cols[0].selectbox("bin_peaks", ["auto", "True", "False"])
-        num_RT_bins = cols[1].number_input("num_RT_bins", 10, 100, 50, 10)
-        num_mz_bins = cols[2].number_input("num_mz_bins", 10, 100, 50, 10)
-        engine = cols[0].selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
-        if bin_peaks == "True":
-            bin_peaks = True
-        elif bin_peaks == "False":
-            bin_peaks = False
-        fig = plotMSExperiment(
-            st.session_state.exp_df,
-            engine=engine,
-            show_legend=show_legend,
-            relative_intensity=relative_intensity,
-            plot3D=plot3D,
-            num_RT_bins=num_RT_bins,
-            num_mz_bins=num_mz_bins,
-            bin_peaks=bin_peaks,
-            height=800
-        )
-        if engine != "PLOTLY":
-            display_fig(fig, engine)
-            return
+    with st.sidebar:
+        st.markdown("**MSExperiment Parameters**")
+        params = get_MSExperiment_params()
+        st.markdown("**Common Parameters**")
+        common_params = get_common_parameters()
+    if common_params["engine"] != "PLOTLY":
+        fig = plotMSExperiment(st.session_state.exp_df, **common_params, **params)
+        with tabs[0]:
+            display_fig(fig, common_params["engine"])
+    else:
+        with tabs[0]:
+            st.info(
+                "💡 Zoom in to reveals more details, the plot will update automatically."
+            )
+        df = st.session_state.exp_df
         if "msexp_selection" in st.session_state:
             points = st.session_state.msexp_selection.selection.points
             box = st.session_state.msexp_selection.selection.box
@@ -75,43 +102,31 @@ if demo == "MSExperiment":
                 df = df[df["mz"] > box[0]["y"][1]]
                 df = df[df["mz"] < box[0]["y"][0]]
                 df = df[df["RT"] < box[0]["x"][1]]
+        fig = plotMSExperiment(df, **common_params, **params)
+        with tabs[0]:
+            st.plotly_chart(
+                fig,
+                key="msexp_selection",
+                selection_mode=["points", "box"],
+                on_select="rerun",
+                config={
+                    "displaylogo": False,
+                    "modeBarButtonsToRemove": [
+                        "zoom",
+                        "pan",
+                        # "select",
+                        "lasso",
+                        "zoomin",
+                        "autoscale",
+                        "zoomout",
+                        "resetscale",
+                    ],
+                },
+            )
 
-                fig = plotMSExperiment(
-                    df,
-                    engine=engine,
-                    show_legend=show_legend,
-                    relative_intensity=relative_intensity,
-                    plot3D=plot3D,
-                    num_RT_bins=num_RT_bins,
-                    num_mz_bins=num_mz_bins,
-                    bin_peaks=bin_peaks,
-                    height=800
-                )
-        st.plotly_chart(
-            fig,
-            use_container_width=True,
-            key="msexp_selection",
-            selection_mode=["points", "box"],
-            on_select="rerun",
-            config={
-                "displaylogo": False,
-                "modeBarButtonsToRemove": [
-                    "zoom",
-                    "pan",
-                    # "select",
-                    "lasso",
-                    "zoomin",
-                    "autoscale",
-                    "zoomout",
-                    "resetscale",
-                ],
-            },
-        )
-
-    msexpdemo()
-    with st.expander("`exp.get_df(long=True)`", expanded=False):
+    with tabs[1]:
         st.dataframe(st.session_state.exp_df)
-    with st.expander("`plotMSExperiment()`", expanded=False):
+    with tabs[2]:
         st.write(plotMSExperiment)
 
 elif demo == "MSSpectrum":
@@ -133,41 +148,20 @@ elif demo == "MSSpectrum":
     spec["color_annotation"] = "blue"
     spec["sequence"] = "DMAGCH"
 
-    @st.experimental_fragment
-    def msspecdemo():
-        cols = st.columns(3)
-        show_legend = cols[0].checkbox("show_legend", True)
-        relative_intensity = cols[1].checkbox("relative_intensity", False)
-        ion_mobility = cols[2].checkbox("ion_mobility")
-        annotate_sequence = cols[0].checkbox("annotate_sequence")
-        mirror_spectrum = cols[1].checkbox("mirror_spectrum")
-        custom_annotation_text = cols[2].checkbox("custom_annotation_text")
-        custom_peak_color = cols[0].checkbox("custom_peak_color")
-        annotate_ions = cols[1].checkbox("annotate_ions")
-        custom_annotation_color = cols[2].checkbox("custom_annotation_color")
-        annotate_mz = cols[0].checkbox("annotate_mz")
-        engine = cols[0].selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
-        # if cols[2].button("Update Plot", type="primary", use_container_width=True):
-        fig = plotSpectrum(
-            spec,
-            spec,
-            engine=engine,
-            relative_intensity=relative_intensity,
-            show_legend=show_legend,
-            ion_mobility=ion_mobility,
-            annotate_sequence=annotate_sequence,
-            mirror_spectrum=mirror_spectrum,
-            custom_annotation_text=custom_annotation_text,
-            custom_peak_color=custom_peak_color,
-            annotate_ions=annotate_ions,
-            custom_annotation_color=custom_annotation_color,
-            annotate_mz=annotate_mz,
-        )
-        display_fig(fig, engine)
-
-    msspecdemo()
-
-    with st.expander("MSSpectrum df", expanded=False):
+    with st.sidebar:
+        st.markdown("**Spectrum Parameters**")
+        params = get_Spectrum_params()
+        st.markdown("**Common Parameters**")
+        common_params = get_common_parameters()
+    fig = plotSpectrum(
+        spec,
+        spec,
+        **params,
+        **common_params
+    )
+    with tabs[0]:
+        display_fig(fig, common_params["engine"])
+    with tabs[1]:
         st.dataframe(spec)
-    with st.expander("`plotSpectrum()`", expanded=False):
+    with tabs[2]:
         st.write(plotSpectrum)

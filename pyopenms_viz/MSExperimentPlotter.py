@@ -196,15 +196,15 @@ class MSExperimentPlotter(_BasePlotter):
             color=mapper,
             marker="square",
         )
-        if not self.config.bin_peaks:
-            hover = HoverTool(
-                tooltips="""
-                <div>
-                    <span>@hover_text{safe}</span>
-                </div>
-                """
-            )
-            p.add_tools(hover)
+        # if not self.config.bin_peaks:
+        hover = HoverTool(
+            tooltips="""
+            <div>
+                <span>@hover_text{safe}</span>
+            </div>
+            """
+        )
+        p.add_tools(hover)
         if self.config.show_legend:
             # Add color bar
             color_bar = ColorBar(
@@ -258,7 +258,7 @@ class MSExperimentPlotter(_BasePlotter):
                         else None
                     ),
                 ),
-                hovertext=exp["hover_text"] if not self.config.bin_peaks else None,
+                hovertext=exp["hover_text"],# if not self.config.bin_peaks else None,
                 hoverinfo="text",
                 showlegend=False,
             )
