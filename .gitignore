@@ -1,2 +1,5 @@
 __pycache__
 *~
+testing.ipynb
+peakmap.parquet
+ms_data.mzML
