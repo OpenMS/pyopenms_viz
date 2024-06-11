@@ -8,7 +8,7 @@ from dataclasses import dataclass, field, fields
 from typing import Literal
 
 from .BasePlotter import _BasePlotter, _BasePlotterConfig, Engine, LegendConfig
-from .util._decorators import filter_unexpected_fields
+# from .util._decorators import filter_unexpected_fields
 
 @dataclass(kw_only=True)
 class ChromatogramFeatureConfig:
@@ -20,7 +20,7 @@ class ChromatogramFeatureConfig:
     lineStyle: str = 'solid'
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
-@filter_unexpected_fields
+# @filter_unexpected_fields
 @dataclass(kw_only=True)
 class ChromatogramPlotterConfig(_BasePlotterConfig):
     def default_legend_factory():
