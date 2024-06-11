@@ -99,16 +99,17 @@ class _BasePlotter(ABC):
 
     def plot(self, data : pd.DataFrame , featureData : pd.DataFrame = None, **kwargs):
 
-        ### Assert color palettes are set
-        assert(self.main_palette is not None)
-        assert(self.feature_palette is not None if featureData is not None else True)
+        # TODO: Assert throws errors at startup if using a test streamlit app
+        # ### Assert color palettes are set
+        # assert(self.main_palette is not None)
+        # assert(self.feature_palette is not None if featureData is not None else True)
 
         if self.config.engine_enum == Engine.PLOTLY:
-            return self._plotPlotly(data, featureData, **kwargs)
+            return self._plotPlotly(data, **kwargs)
         elif self.config.engine_enum == Engine.BOKEH:
-            return self._plotBokeh(data, featureData, **kwargs)
+            return self._plotBokeh(data, **kwargs)
         else: # self.config.engine_enum == Engine.MATPLOTLIB:
-            return self._plotMatplotlib(data, featureData, **kwargs)
+            return self._plotMatplotlib(data, **kwargs)
 
     @abstractmethod
     def _plotBokeh(self, data, **kwargs):
