@@ -144,7 +144,7 @@ class ChromatogramPlotter(_BasePlotter):
         # compute colormaps based on the number of transitions and features
         self.main_palette = self.generate_colors(self.config.colormap, len(chromatogram["Annotation"].unique()) if 'Annotation' in chromatogram.columns else 1)
         self.feature_palette = self.generate_colors(self.config.featureConfig.colormap, len(chromatogramFeatures)) if chromatogramFeatures is not None else None
-
+        
         return super().plot(chromatogram, chromatogramFeatures, **kwargs)
 
     def _plotBokeh(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
@@ -358,7 +358,7 @@ class ChromatogramPlotter(_BasePlotter):
         else:
             raise ValueError(f"Invalid plot type: {type}")
   
-    def _plotPlotly(self, data: DataFrame, chromatogramFeatures: DataFrame):
+    def _plotPlotly(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
         
         def _plotLines(self, data: pd.DataFrame, chromatogramFeatures: DataFrame = None):
         
@@ -783,13 +783,13 @@ class ChromatogramPlotter(_BasePlotter):
 # ============================================================================= #
 def plotChromatogram(chromatogram: pd.DataFrame, 
                      chromatogram_features: pd.DataFrame = None,
+                     plot_type: str = "lineplot",
+                     add_marginals: bool = False,
                      title: str = "Chromatogram Plot",
                      show_plot: bool = True,
                      ion_mobility: bool = False,
                      width: int = 500,
                      height: int = 500,
-                     plot_type: str = "lineplot",
-                     add_marginals: bool = False,
                      engine: Literal['PLOTLY', 'BOKEH', 'MATPLOTLIB'] = 'PLOTLY',
                      **kwargs):
     """
@@ -798,6 +798,8 @@ def plotChromatogram(chromatogram: pd.DataFrame,
     Args:
         chromatogram (DataFrame): DataFrame containing chromatogram data 
         chromatogram_features (DataFrame, optional): DataFrame containing chromatogram features. Defaults to None.
+        plot_type (str, optional): Type of plot to generate. Defaults to "lineplot". Can be either "lineplot" or "heatmap".
+        add_marginals (bool, optional): If True, adds marginal plots for integrated ion chromatogram and ion mobilogram. Defaults to False.
         title (str, optional): title of plot. Defaults to "Chromatogram Plot".
         show_plot (bool, optional): If True, shows the plot. Defaults to True.
         ion_mobility (bool, optional): If True, plots a heatmap of Retention Time vs ion mobility with intensity as the color. Defaults to False.
@@ -808,14 +810,10 @@ def plotChromatogram(chromatogram: pd.DataFrame,
     Returns:
         PLOTLY figure or BOKEH figure depending on engine
     """
-    if ion_mobility and 'im' in chromatogram.columns:
-        x_axis_col = 'int'
-        y_axis_col = 'im'
-    else:
-        x_axis_col = 'rt'
-        y_axis_col = 'int'
-    config = ChromatogramPlotterConfig(title=title, x_axis_col=x_axis_col, y_axis_col=y_axis_col, show=show_plot, ion_mobility=ion_mobility, width=width, height=height, plot_type=plot_type, add_marginals=add_marginals, engine=engine, **kwargs)
+
+    
+    config = ChromatogramPlotterConfig(title=title, show=show_plot, ion_mobility=ion_mobility, width=width, height=height, plot_type=plot_type, add_marginals=add_marginals, engine=engine, **kwargs)
     
     plotter = ChromatogramPlotter(config)
-    return plotter.plot(chromatogram, chromatogram_features)
+    return plotter.plot(chromatogram=chromatogram, chromatogramFeatures=chromatogram_features)
 

@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from pyopenms_viz.MSExperimentPlotter import plotMSExperiment
 from pyopenms_viz.SpectrumPlotter import plotSpectrum
+from pyopenms_viz.ChromatogramPlotter import plotChromatogram
 import pyopenms as oms
 from urllib.request import urlretrieve
 
@@ -21,6 +22,25 @@ def load_demo_mzML():
         st.session_state.exp_df = exp.get_df(long=True)
     # exp.to_parquet("peakmap.parquet")
 
+def load_demo_chromatogram_xic():
+    with st.spinner("Loading example chromatogram data..."):
+        df = pd.read_csv("./test/test_data/ionMobilityTestChromatogramDf.tsv", sep="\t")
+        
+    with st.spinner("Loading example chromatogram feature boundaries..."):
+        df_feat = pd.read_csv("./test/test_data/ionMobilityTestChromatogramFeatures.tsv", sep="\t")
+    
+    st.session_state.chrom_df = df
+    st.session_state.chrom_feat_df = df_feat
+    
+def load_demo_diapasef_featuremap():
+    with st.spinner("Loading example feature map data..."):
+        df = pd.read_csv("./test/test_data/ionMobilityTestFeatureDf.tsv", sep="\t")
+        
+    with st.spinner("Loading example chromatogram feature boundaries..."):
+        df_feat = pd.read_csv("./test/test_data/ionMobilityTestChromatogramFeatures.tsv", sep="\t")
+    
+    st.session_state.chrom_df = df
+    st.session_state.chrom_feat_df = df_feat
 
 def display_fig(fig, engine):
     if engine == "MATPLOTLIB":
@@ -69,11 +89,18 @@ def get_Spectrum_params():
     params["custom_annotation_color"] = st.checkbox("custom_annotation_color", help="If true, plot annotations with colors from 'color_annotation' column.")
     return params
 
+def get_Chromatogram_params():
+    params = {}
+    params["plot_features"] = st.checkbox("plot_features", help="If true, plot feature boundaries. Defaults to False.")
+    params["plot_type"] = st.selectbox("plot_type", ["lineplot", "heatmap"], help="Type of plot to generate. Defaults to 'heatmap'.")
+    params["add_marginals"] = st.checkbox("add_marginal_plots", help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
+    return params
+
 if "exp_df" not in st.session_state:
     load_demo_mzML()
 
 with st.sidebar:
-    demo = st.selectbox("select demo", ["MSExperiment", "MSSpectrum"])
+    demo = st.selectbox("select demo", ["MSExperiment", "MSSpectrum", "MSChromatogram"])
 
 tabs = st.tabs(["📊 **Figure**", "📂 **Data**", "📑 **API docs**"])
 if demo == "MSExperiment":
@@ -164,3 +191,25 @@ elif demo == "MSSpectrum":
         st.dataframe(spec)
     with tabs[2]:
         st.write(plotSpectrum)
+
+elif demo == "MSChromatogram":
+    
+    with st.sidebar:
+        st.markdown("**Chromatogram Parameters**")
+        params = get_Chromatogram_params()
+        st.markdown("**Common Parameters**")
+        common_params = get_common_parameters()
+        
+    if "chrom_df" not in st.session_state or params['plot_type']=='lineplot':
+        load_demo_chromatogram_xic()
+    elif params['plot_type']=='heatmap':
+        load_demo_diapasef_featuremap()
+        
+    fig = plotChromatogram(chromatogram=st.session_state.chrom_df, chromatogram_features=st.session_state.chrom_feat_df if params['plot_features'] else None, show_plot=False, **params,  **common_params)
+    
+    with tabs[0]:
+        display_fig(fig, common_params["engine"])
+    with tabs[1]:
+        st.dataframe(st.session_state.chrom_df)
+    with tabs[2]:
+        st.write(plotChromatogram)
