@@ -1,7 +1,9 @@
-from typing import Literal, Tuple
+from abc import ABC, abstractmethod, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-from abc import ABC, abstractmethod
+from typing import Literal, List
+import numpy as np
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,6 +11,20 @@ import pandas as pd
 class Engine(Enum):
     PLOTLY = 1
     BOKEH = 2
+    MATPLOTLIB = 3
+
+
+# A colorset suitable for color blindness
+class Colors(str, Enum):
+    BLUE = "#4575B4"
+    RED = "#D73027"
+    LIGHTBLUE = "#91BFDB"
+    ORANGE = "#FC8D59"
+    PURPLE = "#7B2C65"
+    YELLOW = "#FCCF53"
+    DARKGRAY = "#555555"
+    LIGHTGRAY = "#BBBBBB"
+
     MATPLOTLIB = 3
 
 @dataclass(kw_only=True)
@@ -33,9 +49,11 @@ class _BasePlotterConfig(ABC):
     title: str = "1D Plot"
     xlabel: str = "X-axis"
     ylabel: str = "Y-axis"
-    engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = 'PLOTLY'
+    engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY"
     height: int = 500
     width: int = 500
+    relative_intensity: bool = False
+    show_legend: bool = True
     show: bool = True
     colormap: str = 'viridis'
     legend: LegendConfig = field(default_factory=LegendConfig)
@@ -46,7 +64,7 @@ class _BasePlotterConfig(ABC):
     @property
     def engine_enum(self):
         return Engine[self.engine]
-    
+
 
 # Abstract Class for Plotting
 class _BasePlotter(ABC):
@@ -74,7 +92,16 @@ class _BasePlotter(ABC):
 
         return hex_colors
 
-    @abstractmethod
+    def _get_n_grayscale_colors(self, n: int) -> List[str]:
+        """Returns n evenly spaced grayscale colors in hex format."""
+        hex_list = []
+        for v in np.linspace(50, 200, n):
+            hex = "#"
+            for _ in range(3):
+                hex += f"{int(round(v)):02x}"
+            hex_list.append(hex)
+        return hex_list
+
     def plot(self, data : pd.DataFrame , featureData : pd.DataFrame = None, **kwargs):
 
         ### Assert color palettes are set
