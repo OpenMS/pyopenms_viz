@@ -93,7 +93,8 @@ def get_Chromatogram_params():
     params = {}
     params["plot_features"] = st.checkbox("plot_features", help="If true, plot feature boundaries. Defaults to False.")
     params["plot_type"] = st.selectbox("plot_type", ["lineplot", "heatmap"], help="Type of plot to generate. Defaults to 'heatmap'.")
-    params["add_marginals"] = st.checkbox("add_marginal_plots", help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
+    if params["plot_type"] == "heatmap":
+        params["add_marginals"] = st.checkbox("add_marginal_plots", help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
     return params
 
 if "exp_df" not in st.session_state:
