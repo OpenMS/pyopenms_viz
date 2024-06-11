@@ -11,3 +11,7 @@ Organization
 - There is a class based API for developers and a functional API (catch all function of plot_spectrum and plot_chromatogram ) for users who do not want to deal with classes. Using classes is advantageous for plotting several spectra/chromatograms with the same configuration.
 - testing
     - with massdash code repository tests for plots are done using custom syrupy snapshottests. This testing framework has been added to this repository
+
+See jupyter notebooks for examples of how to use the different plotters.
+
+To run the demo streamlit app, run `streamlit run app.py` in the root directory of this repository.
