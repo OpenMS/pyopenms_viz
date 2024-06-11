@@ -360,104 +360,257 @@ class ChromatogramPlotter(_BasePlotter):
             raise ValueError(f"Invalid plot type: {type}")
   
     def _plotPlotly(self, data: DataFrame, chromatogramFeatures: DataFrame):
-        import plotly.graph_objects as go
+        
+        def _plotLines(self, data: pd.DataFrame, chromatogramFeatures: DataFrame = None):
+        
+            import plotly.graph_objects as go
 
-        # Create a trace for each unique annotation
-        traces = []
-        if "Annotation" in data.columns:
-            for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+            # Create a trace for each unique annotation
+            traces = []
+            if "Annotation" in data.columns:
+                for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+                    trace = go.Scatter(
+                        x=group_df[self.config.x_axis_col],
+                        y=group_df[self.config.y_axis_col],
+                        mode='lines',
+                        name=annotation,
+                        line=dict(
+                            color=self.main_palette[i],
+                            width=self.config.lineWidth,
+                            dash=self.config.lineStyle
+                        )
+                    )
+                    traces.append(trace)
+            else:
                 trace = go.Scatter(
-                    x=group_df["rt"],
-                    y=group_df["int"],
+                    x=data[self.config.x_axis_col],
+                    y=data[self.config.y_axis_col],
                     mode='lines',
-                    name=annotation,
+                    name="Transition",
                     line=dict(
-                        color=self.main_palette[i],
+                        color=self.main_palette[0],
                         width=self.config.lineWidth,
                         dash=self.config.lineStyle
-                    )
-                )
+                    ))
                 traces.append(trace)
-        else:
-            trace = go.Scatter(
-                x=data["rt"],
-                y=data["int"],
-                mode='lines',
-                name="Transition",
-                line=dict(
-                    color=self.main_palette[0],
-                    width=self.config.lineWidth,
-                    dash=self.config.lineStyle
-                ))
-            traces.append(trace)
 
 
-        # Create the Plotly figure
-        fig = go.Figure(data=traces)
-        fig.update_layout(
-            title=self.config.title,
-            xaxis_title=self.config.xlabel,
-            yaxis_title=self.config.ylabel,
-            width=self.config.width,
-            height=self.config.height,
-            legend_title="Transition",
-            legend_font_size=self.config.legend.fontsize
-        )
+            # Create the Plotly figure
+            fig = go.Figure(data=traces)
+            fig.update_layout(
+                title=self.config.title,
+                xaxis_title=self.config.xlabel,
+                yaxis_title=self.config.ylabel,
+                width=self.config.width,
+                height=self.config.height,
+                legend_title="Transition",
+                legend_font_size=self.config.legend.fontsize
+            )
 
-        if "Annotation" in data.columns:
-            # Add tooltips
+            available_columns = data.columns.tolist()
+            available_columns = data.columns.tolist()
+            custom_hover_data = [data[col] for col in ["index", "mz"] if col in available_columns]
+
+            hover_template_parts = [
+                "Index: %{customdata[0]}",
+                "Retention Time: %{x:.2f}",
+                "Intensity: %{y:.2f}",
+            ]
+
+            if "mz" in available_columns:
+                hover_template_parts.append("m/z: %{customdata[1]:.4f}")
+                custom_hover_data_index = 2
+            else:
+                custom_hover_data_index = 1
+
+            if "Annotation" in available_columns:
+                hover_template_parts.append("Annotation: %{customdata[" + str(custom_hover_data_index) + "]}")
+                custom_hover_data.append(data["Annotation"])
+
+            hovertemplate = "<br>".join(hover_template_parts)
+
             fig.update_traces(
-                hovertemplate=(
-                    "Index: %{customdata[0]}<br>" +
-                    "Retention Time: %{x:.2f}<br>" +
-                    "Intensity: %{y:.2f}<br>" +
-                    "m/z: %{customdata[1]:.4f}<br>" +
-                    "Annotation: %{customdata[2]}"
-                ),
-                customdata=list(zip(data.index, data["mz"], data["Annotation"])))
-        else:
-            # Add tooltips
-            fig.update_traces( hovertemplate=( 
-                    "Index: %{customdata[0]}<br>" +
-                    "Retention Time: %{x:.2f}<br>" +
-                    "Intensity: %{y:.2f}<br>" +
-                    "m/z: %{customdata[1]:.4f}<br>"
-                ),
-                customdata=list(zip(data.index, data["mz"])))
+                hovertemplate=hovertemplate,
+                customdata=np.column_stack(custom_hover_data)
+            )
 
-        # Customize the plot
-        fig.update_layout(
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            xaxis_zeroline=False,
-            yaxis_zeroline=False
-        )
+            # Customize the plot
+            fig.update_layout(
+                plot_bgcolor='white',
+                paper_bgcolor='white',
+                xaxis_showgrid=True,
+                yaxis_showgrid=True,
+                xaxis_zeroline=False,
+                yaxis_zeroline=False
+            )
 
-        ##### Plotting chromatogram features #####
-        if chromatogramFeatures is not None:
-            for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
-                feature_group = f"Feature {idx}"
+            ##### Plotting chromatogram features #####
+            if chromatogramFeatures is not None:
+                for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+                    feature_group = f"Feature {idx}"
 
-                feature_boundary_box = fig.add_shape(type='rect', 
-                                                x0=feature['leftWidth'], 
-                                                y0=0, 
-                                                x1=feature['rightWidth'], 
-                                                y1=feature['apexIntensity'],
-                                                legendgroup=feature_group,
-                                                legendgrouptitle_text="Features",
-                                                showlegend=self.config.featureConfig.legend.show,
-                                                name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
-                                                line=dict(
-                                                   color=self.feature_palette[idx],
-                                                   width=self.config.featureConfig.lineWidth,
-                                                   dash=self.config.featureConfig.lineStyle)
+                    feature_boundary_box = fig.add_shape(type='rect', 
+                                                    x0=feature['leftWidth'], 
+                                                    y0=0, 
+                                                    x1=feature['rightWidth'], 
+                                                    y1=feature['apexIntensity'],
+                                                    legendgroup=feature_group,
+                                                    legendgrouptitle_text="Features",
+                                                    showlegend=self.config.featureConfig.legend.show,
+                                                    name=f'Feature {idx}' if "q_value" not in chromatogramFeatures.columns else f'Feature {idx} (q={feature["q_value"]:.2f})',
+                                                    line=dict(
+                                                    color=self.feature_palette[idx],
+                                                    width=self.config.featureConfig.lineWidth,
+                                                    dash=self.config.featureConfig.lineStyle)
+                    )
+
+            if self.config.show:
+                fig.show()
+            return fig 
+        
+        def _plotHeatmap(self, data: pd.DataFrame):
+            import plotly.graph_objects as go
+            
+            AFMHOT_CMAP = [self.rgb_to_hex(cm.afmhot_r(i)[:3]) for i in range(256)]
+
+            # Get the data as a two-dimensional array
+            feat_arrs = self._get_data_as_two_dimenstional_array(data)
+
+            # Create the Plotly figure
+            fig = go.Figure()
+
+            # Create a trace for each unique annotation
+            for annotation, df_wide in feat_arrs.items():
+                arr = self._prepare_array(df_wide)
+                fig.add_trace(go.Heatmap(z=arr, x=df_wide.columns, y=df_wide.index, colorscale=AFMHOT_CMAP, coloraxis="coloraxis", name=annotation, showlegend=True))
+
+            fig.update_layout(coloraxis = {'colorscale':AFMHOT_CMAP})
+
+            # fig.update_traces(name="Transitions", showlegend=True)
+
+            # Customize the plot
+            fig.update_layout(
+                title=self.config.title,
+                xaxis_title=self.config.xlabel,
+                yaxis_title=self.config.ylabel,
+                width=self.config.width,
+                height=self.config.height,
+                legend=dict(
+                                orientation="h",  # Set the legend orientation to horizontal
+                                y=-0.2,  # Adjust the vertical position of the legend
+                                x=0.5,  # Adjust the horizontal position of the legend
+                                xanchor="center"  # Center the legend horizontally
+                            )
+            )
+
+            if self.config.add_marginals:
+                from plotly.subplots import make_subplots
+                
+                # Store original config values that need to be changed for marginals
+                show_org = self.config.show
+                self.config.show = False
+                
+                # Integrate the data along the retention time dimension
+                rt_integrated = self._integrate_data_along_dim(data, 'rt')
+                # Generate a lineplot for XIC
+                self.config.y_axis_location = "right"
+                fig_xic = _plotLines(self, rt_integrated, chromatogramFeatures)
+                fig_xic.update_layout(title="Integrated Ion Chromatogram")
+                fig_xic.update_xaxes(visible=False)
+
+                # Integrate the data along the ion mobility dimension
+                im_integrated = self._integrate_data_along_dim(data, 'im')
+                # Generate a lineplot for XIM
+                self.config.x_axis_col = 'int'
+                self.config.y_axis_col = 'im'
+                self.config.y_axis_location = "left"
+                fig_xim = _plotLines(self, im_integrated)
+                fig_xim.update_layout(title="Integrated Ion Mobilogram")
+                fig_xim.update_xaxes(range=[0, im_integrated['int'].max()])
+                fig_xim.update_yaxes(range=[im_integrated['im'].min(), im_integrated['im'].max()])
+                fig_xim.update_layout(xaxis_title="Intensity", yaxis_title="Ion Mobility")
+
+                # Create a figure with subplots
+                fig_m = make_subplots(
+                    rows=2, cols=2,
+                    shared_xaxes=True, shared_yaxes=True,
+                    vertical_spacing=0, horizontal_spacing=0,
+                    subplot_titles=(None, "Integrated Ion Chromatogram", "Integrated Ion Mobilogram", None),
+                    specs=[[{}, {"type": "xy", "rowspan": 1, "secondary_y":True}],
+                        [{"type": "xy", "rowspan": 1, "secondary_y":False},     {"type": "xy", "rowspan": 1, "secondary_y":False}]]
                 )
 
-        if self.config.show:
-            fig.show()
-        return fig 
+                # Add the heatmap to the first row
+                for trace in fig.data:
+                    trace.showlegend = False
+                    trace.legendgroup = trace.name
+                    fig_m.add_trace(trace, row=2, col=2, secondary_y=False)
+
+                # Update the heatmap layout
+                fig_m.update_layout(fig.layout)
+                fig_m.update_yaxes(row=2, col=2, secondary_y=False)
+
+                # Add the XIC plot to the second row
+                for trace in fig_xic.data:
+                    trace.legendgroup = trace.name
+                    fig_m.add_trace(trace, row=1, col=2, secondary_y=True)
+
+                # Update the XIC layout
+                fig_m.update_layout(fig_xic.layout)
+
+                # Make the y-axis of fig_xic independent
+                fig_m.update_yaxes(overwrite=True, row=1, col=2, secondary_y=True)
+                
+                # Manually adjust the domain of secondary y-axis to only span the first row of the subplot
+                fig_m['layout']['yaxis3']['domain'] = [0.5, 1.0]
+
+                # Add the XIM plot to the second row
+                for trace in fig_xim.data:
+                    trace.showlegend = False
+                    trace.legendgroup = trace.name
+                    fig_m.add_trace(trace, row=2, col=1)
+
+                # Update the XIM layout
+                fig_m.update_layout(fig_xim.layout)
+
+                # Make the x-axis of fig_xim independent
+                fig_m.update_xaxes(overwrite=True, row=2, col=1)
+
+                # Reverse the x-axis range for the XIM subplot
+                fig_m.update_xaxes(autorange="reversed", row=2, col=1)
+
+                # Update xaxis properties
+                fig_m.update_xaxes(title_text="Retention Time [sec]", row=2, col=2)
+                fig_m.update_xaxes(title_text="Intensity",  row=2, col=1)
+
+                # Update yaxis properties
+                fig_m.update_yaxes(title_text="Intensity", row=1, col=2)
+                fig_m.update_yaxes(title_text="Ion Mobility", row=2, col=1)
+
+                # Update the layout
+                fig_m.update_layout(
+                    height=800,
+                    width=1200,
+                    title=self.config.title
+                )
+
+                # Reset the config values to org
+                self.config.show = show_org
+                
+                if self.config.show:
+                    fig_m.show()
+                return fig_m
+
+            if self.config.show:
+                fig.show()
+            return fig
+        
+        if self.config.plot_type == "lineplot":
+            return _plotLines(self, data, chromatogramFeatures)
+        elif self.config.plot_type == "heatmap":
+            return _plotHeatmap(self, data)
+        else:
+            raise ValueError(f"Invalid plot type: {type}")
         
     def _plotMatplotlib(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
         import matplotlib.pyplot as plt
