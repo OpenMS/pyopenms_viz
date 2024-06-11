@@ -1,9 +1,7 @@
-from abc import ABC, abstractmethod, Tuple
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Literal, List
-import numpy as np
-
+from typing import Literal, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -12,7 +10,6 @@ class Engine(Enum):
     PLOTLY = 1
     BOKEH = 2
     MATPLOTLIB = 3
-
 
 # A colorset suitable for color blindness
 class Colors(str, Enum):
@@ -24,8 +21,6 @@ class Colors(str, Enum):
     YELLOW = "#FCCF53"
     DARKGRAY = "#555555"
     LIGHTGRAY = "#BBBBBB"
-
-    MATPLOTLIB = 3
 
 @dataclass(kw_only=True)
 class LegendConfig:
