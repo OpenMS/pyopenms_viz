@@ -240,7 +240,6 @@ class ChromatogramPlotter(_BasePlotter):
             feat_arrs = self._get_data_as_two_dimenstional_array(data)
             
             # Get the data ranges
-            # Calculate the max - min of 'im' for each group
             im_range = data.groupby('Annotation')['im'].agg(lambda x: x.max() - x.min())
             rt_range = data.groupby('Annotation')['rt'].agg(lambda x: x.max() - x.min())
                     
@@ -613,68 +612,171 @@ class ChromatogramPlotter(_BasePlotter):
             raise ValueError(f"Invalid plot type: {type}")
         
     def _plotMatplotlib(self, data: DataFrame, chromatogramFeatures: DataFrame = None):
-        import matplotlib.pyplot as plt
-        from matplotlib.lines import Line2D
+        
+        def _plotLines(self, data: pd.DataFrame, chromatogramFeatures: DataFrame = None, ax=None):
+            import matplotlib.pyplot as plt
+            from matplotlib.lines import Line2D
 
-        # Create a figure and axis
-        fig, ax = plt.subplots(figsize=(self.config.width/100, self.config.height/100), dpi=100)
+            # Create a figure and axis
+            if ax is None:
+                fig, ax = plt.subplots(figsize=(self.config.width/100, self.config.height/100), dpi=100)
+            else:
+                fig = ax.get_figure()
+            
 
-        # Set plot title and axis labels
-        ax.set_title(self.config.title)
-        ax.set_xlabel(self.config.xlabel)
-        ax.set_ylabel(self.config.ylabel)
+            # Set plot title and axis labels
+            ax.set_title(self.config.title)
+            ax.set_xlabel(self.config.xlabel)
+            ax.set_ylabel(self.config.ylabel)
 
-        # Create a legend
-        legend_lines = []
-        legend_labels = []
+            # Create a legend
+            legend_lines = []
+            legend_labels = []
 
-        # Plot each unique annotation
-        if "Annotation" in data.columns:
-            for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
-                line, = ax.plot(group_df["rt"], group_df["int"], color=self.main_palette[i], linewidth=self.config.lineWidth, ls=self.config.lineStyle)
-                legend_lines.append(line)
-                legend_labels.append(annotation)
+            # Plot each unique annotation
+            if "Annotation" in data.columns:
+                for i, (annotation, group_df) in enumerate(data.groupby('Annotation')):
+                    line, = ax.plot(group_df[self.config.x_axis_col], group_df[self.config.y_axis_col], color=self.main_palette[i], linewidth=self.config.lineWidth, ls=self.config.lineStyle)
+                    legend_lines.append(line)
+                    legend_labels.append(annotation)
 
-            # Add legend
-            matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.config.legend.loc)
-            legend = ax.legend(legend_lines, legend_labels, loc=matplotlibLegendLoc, bbox_to_anchor=self.config.legend.bbox_to_anchor, title=self.config.legend.title, prop={'size': self.config.legend.fontsize})
-            legend.get_title().set_fontsize(str(self.config.legend.fontsize))
+                # Add legend
+                matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.config.legend.loc)
+                legend = ax.legend(legend_lines, legend_labels, loc=matplotlibLegendLoc, bbox_to_anchor=self.config.legend.bbox_to_anchor, title=self.config.legend.title, prop={'size': self.config.legend.fontsize})
+                legend.get_title().set_fontsize(str(self.config.legend.fontsize))
 
-        else: # only one transition
-            line, = ax.plot(data["rt"], data["int"], color=self.main_palette[0], linewidth=self.config.lineWidth, ls=self.config.lineStyle)
+            else: # only one transition
+                line, = ax.plot(data[self.config.x_axis_col], data[self.config.y_axis_col], color=self.main_palette[0], linewidth=self.config.lineWidth, ls=self.config.lineStyle)
 
-        # Customize the plot
-        ax.grid(self.config.grid)
+            # Customize the plot
+            ax.grid(self.config.grid)
 
-        ## add 10% padding to the plot
-        padding = (data['int'].max() - data['int'].min() ) * 0.1
-        ax.set_xlim(data["rt"].min(), data["rt"].max())
-        ax.set_ylim(data["int"].min(), data["int"].max() + padding)
+            ## add 10% padding to the plot
+            padding = (data[self.config.y_axis_col].max() - data[self.config.y_axis_col].min() ) * 0.1
+            ax.set_xlim(data[self.config.x_axis_col].min(), data[self.config.x_axis_col].max())
+            ax.set_ylim(data[self.config.y_axis_col].min(), data[self.config.y_axis_col].max() + padding)
 
-        ##### Plotting chromatogram features #####
-        if chromatogramFeatures is not None:
-            ax.add_artist(legend)
+            ##### Plotting chromatogram features #####
+            if chromatogramFeatures is not None:
+                ax.add_artist(legend)
 
-            for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
+                for idx, (_, feature) in enumerate(chromatogramFeatures.iterrows()):
 
-                ax.vlines(x=feature['leftWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.lineWidth, color=self.feature_palette[idx], ls=self.config.featureConfig.lineStyle)
-                ax.vlines(x=feature['rightWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.lineWidth, color=self.feature_palette[idx], ls=self.config.featureConfig.lineStyle)
+                    ax.vlines(x=feature['leftWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.lineWidth, color=self.feature_palette[idx], ls=self.config.featureConfig.lineStyle)
+                    ax.vlines(x=feature['rightWidth'], ymin=0, ymax=feature['apexIntensity'], lw=self.config.featureConfig.lineWidth, color=self.feature_palette[idx], ls=self.config.featureConfig.lineStyle)
+
+                    if self.config.featureConfig.legend.show:
+                        custom_lines = [Line2D([0], [0], color=self.feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
+                        if "q_value" in chromatogramFeatures.columns:
+                            legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, (_,feature) in enumerate(chromatogramFeatures.iterrows())]
+                        else:
+                            legend_labels = [f'Feature {i}' for i in range(len(chromatogramFeatures))]
 
                 if self.config.featureConfig.legend.show:
-                    custom_lines = [Line2D([0], [0], color=self.feature_palette[i], lw=2) for i in range(len(chromatogramFeatures))]
-                    if "q_value" in chromatogramFeatures.columns:
-                        legend_labels = [f'Feature {i} (q={feature["q_value"]:.2f})' for i, (_,feature) in enumerate(chromatogramFeatures.iterrows())]
-                    else:
-                        legend_labels = [f'Feature {i}' for i in range(len(chromatogramFeatures))]
 
-            if self.config.featureConfig.legend.show:
+                    matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.config.featureConfig.legend.loc)
+                    ax.legend(custom_lines, legend_labels, loc=matplotlibLegendLoc, bbox_to_anchor=self.config.featureConfig.legend.bbox_to_anchor, title=self.config.featureConfig.legend.title)
 
-                matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.config.featureConfig.legend.loc)
-                ax.legend(custom_lines, legend_labels, loc=matplotlibLegendLoc, bbox_to_anchor=self.config.featureConfig.legend.bbox_to_anchor, title=self.config.featureConfig.legend.title)
+            if self.config.show:
+                plt.show()
+            return fig
 
-        if self.config.show:
-            plt.show()
-        return fig
+        def _plotHeatmap(self, data: pd.DataFrame):
+            import matplotlib.pyplot as plt
+
+            if not self.config.add_marginals:
+                # Create a figure and axis
+                fig, ax = plt.subplots(figsize=(self.config.width/100, self.config.height/100), dpi=200, constrained_layout=True)
+
+                # Plot each unique annotation
+                for annotation, df_group in data.groupby("Annotation"):
+                    x = df_group.rt
+                    y = df_group.im
+                    values = df_group.int
+
+                    scatter = ax.scatter(x, y, c=values, cmap='afmhot_r', marker='s', s=20, edgecolors='none')
+
+                # Customize the plot
+                ax.set_title(self.config.title)
+                ax.set_xlabel("Retention Time [sec]")
+                ax.set_ylabel("Ion Mobility")
+
+            else:
+                # Store original config values that need to be changed for marginals
+                show_org = self.config.show
+                self.config.show = False
+                
+                # Create a figure and axis
+                fig, ax = plt.subplots(2, 2, figsize=(self.config.width/100, self.config.height/100), dpi=200)
+
+                # Plot each unique annotation
+                for annotation, df_group in data.groupby("Annotation"):
+                    x = df_group.rt
+                    y = df_group.im
+                    values = df_group.int
+
+                    scatter = ax[1, 1].scatter(x, y, c=values, cmap='afmhot_r', marker='s', s=20, edgecolors='none')
+
+                # Customize the plot
+                ax[1, 1].set_title(None)
+                ax[1, 1].set_xlabel("Retention Time [sec]")
+                ax[1, 1].set_ylabel(None)
+                ax[1, 1].set_yticklabels([])
+                ax[1, 1].set_yticks([])
+
+                # Integrate the data along the retention time dimension
+                rt_integrated = self._integrate_data_along_dim(data, 'rt')
+                _plotLines(self, rt_integrated, chromatogramFeatures, ax=ax[0, 1])
+                # Generate a lineplot for XIC
+                # ax[0, 1].plot(rt_integrated['rt'], rt_integrated['int'])
+                # ax[0, 1].set_title("Integrated Ion Chromatogram")
+                ax[0, 1].set_title(None)
+                ax[0, 1].set_xlabel(None)
+                ax[0, 1].set_xticklabels([])
+                ax[0, 1].set_xticks([])
+                ax[0, 1].set_ylabel("Intensity")
+                ax[0, 1].yaxis.set_ticks_position('right')
+                ax[0, 1].yaxis.set_label_position('right')
+                ax[0, 1].yaxis.tick_right()
+                ax[0, 1].legend_ = None
+
+                # Integrate the data along the ion mobility dimension
+                im_integrated = self._integrate_data_along_dim(data, 'im')
+                self.config.x_axis_col = 'int'
+                self.config.y_axis_col = 'im'
+                self.config.legend.loc = 'below'
+                # self.config.y_axis_location = "left"
+                # self.config.legend.loc = 'below'
+                _plotLines(self, im_integrated, ax=ax[1, 0])
+                # Generate a lineplot for XIM
+                # ax[1, 0].plot(im_integrated['int'], im_integrated['im'])
+                ax[1, 0].invert_xaxis()
+                ax[1, 0].set_title(None)
+                ax[1, 0].set_xlabel("Intensity")
+                ax[1, 0].set_ylabel("Ion Mobility")
+                ax[1, 0].legend_ = None
+
+
+                # Hide the first subplot
+                ax[0, 0].axis('off')
+
+                # Adjust the layout
+                plt.subplots_adjust(wspace=0, hspace=0)
+                # plt.tight_layout()
+
+                # Reset the config values to org
+                self.config.show = show_org
+
+            if self.config.show:
+                plt.show()
+            return fig
+        
+        if self.config.plot_type == "lineplot":
+            return _plotLines(self, data, chromatogramFeatures)
+        elif self.config.plot_type == "heatmap":
+            return _plotHeatmap(self, data)
+        else:
+            raise ValueError(f"Invalid plot type: {type}")
 
 # ============================================================================= #
 ## FUNCTIONAL API ##
