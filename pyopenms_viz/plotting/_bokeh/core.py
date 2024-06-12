@@ -76,12 +76,14 @@ class BOKEHPlot(ABC):
                  height: int = 500,
                  width: int = 500,
                  grid: bool = False,
+                 toolbar_location: str | None = None,
                  fig = None,
                  title: str | None = None,
                  xlabel: str | None = None,
                  ylabel: str | None = None,
+                 x_axis_location: str | None = None,
+                 y_axis_location: str | None = None,
                  legend: bool = True,
-                 legend_loc: str | None = None,
                  config = None,
                  **kwds
                 ) -> None:
@@ -104,12 +106,14 @@ class BOKEHPlot(ABC):
         self.height = height
         self.width = width
         self.grid = grid
+        self.toolbar_location = toolbar_location
         self.fig = fig
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.x_axis_location = x_axis_location
+        self.y_axis_location = y_axis_location
         self.legend = legend
-        self.legend_loc = legend_loc
 
         if config is not None:
             self._update_from_config(config)
@@ -118,6 +122,8 @@ class BOKEHPlot(ABC):
             self.fig = figure(title=self.title,
                               x_axis_label=self.xlabel,
                               y_axis_label=self.ylabel,
+                              x_axis_location=self.x_axis_location,
+                              y_axis_location=self.y_axis_location,
                               width=self.width,
                               height=self.height
                              )
@@ -125,12 +131,43 @@ class BOKEHPlot(ABC):
     def _make_plot(self, fig: Figure) -> None:
         raise AbstractMethodError(self)
     
+    def _add_legend(self, fig, legend):
+        """
+        Add the legend
+        """
+        if self.legend.show:
+            fig.add_layout(legend, self.legend.loc)
+            fig.legend.orientation = self.legend.orientation
+            fig.legend.click_policy = self.legend.onClick
+            fig.legend.title = self.legend.title
+            fig.legend.label_text_font_size = str(self.legend.fontsize) + 'pt'
+    
+    def _update_plot_aes(self, fig, **kwargs):
+        """
+        Update the aesthetics of the plot
+        """
+        
+        fig.grid.visible = self.grid
+        fig.toolbar_location = self.toolbar_location
+    
+    def _add_tooltips(self, fig, tooltips):
+        """
+        Add tooltips to the plot
+        """
+        from bokeh.models import HoverTool
+        
+        hover = HoverTool()
+        hover.tooltips = tooltips
+        fig.add_tools(hover)
+    
     def generate(self, **kwargs):
         """
         Generate the plot
         """
         self._make_plot(self.fig, **kwargs)
         return self.fig
+    
+    
     
 class PlanePlot(BOKEHPlot, ABC):
     """
@@ -166,8 +203,19 @@ class LinePlot(PlanePlot):
         """
         Make a line plot
         """
-        newlines = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
-    
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        
+        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        
+        self._add_legend(newlines, legend)
+        
+        self._update_plot_aes(newlines, **kwargs)
+        
+        if tooltips is not None:
+            self._add_tooltips(newlines, tooltips)
+        
+        
     @classmethod
     def _plot(
         cls,
@@ -181,19 +229,26 @@ class LinePlot(PlanePlot):
         """
         Plot a line plot
         """
-        from bokeh.models import ColumnDataSource
+        from bokeh.models import ColumnDataSource, Legend
         
         if by is None:
             source = ColumnDataSource(data)
             line = fig.line(x=x, y=y, source=source, **kwargs)
         else:
             color_gen = kwargs.pop("line_color", None)
+            legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
                     kwargs["line_color"] = next(color_gen)
                 line = fig.line(x=x, y=y, source=source, **kwargs)
-    
+                legend_items.append((group, [line]))
+                
+            legend = Legend(items=legend_items)
+            
+            return fig, legend
+                    
+ 
 class VLinePlot(LinePlot):
     """
     Class for assembling a Bokeh vertical line plot
@@ -210,26 +265,41 @@ class VLinePlot(LinePlot):
         """
         Make a vertical line plot
         """
-        newlines = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        
+        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        
+        self._add_legend(newlines, legend)
+        self._update_plot_aes(newlines, **kwargs)
+        if tooltips is not None:
+            self._add_tooltips(newlines, tooltips)
         
     def _plot(self, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a vertical line
         """
-        from bokeh.models import ColumnDataSource
+        from bokeh.models import ColumnDataSource, Legend
         
         if by is None:
             source = ColumnDataSource(data)
             line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
         else:
             color_gen = kwargs.pop("line_color", None)
+            legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
                     kwargs["line_color"] = next(color_gen)
                 line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
+                legend_items.append((group, [line]))
+                
+            legend = Legend(items=legend_items)
 
+        return fig, legend
 
+    def _add_annotation(self, fig, data, x, y, **kwargs):
+        pass
 class ScatterPlot(PlanePlot):
     """
     Class for assembling a Bokeh scatter plot
