@@ -39,7 +39,6 @@ if TYPE_CHECKING:
 def holds_integer(column: Index) -> bool:
     return column.inferred_type in {"integer", "mixed-integer"}
 
-
 class BOKEHPlot(ABC):
     """
     Base class for assembling a Bokeh plot
@@ -243,6 +242,21 @@ class BOKEHPlot(ABC):
         self._make_plot(self.fig, **kwargs)
         return self.fig
 
+# class plot:
+#     """
+#     Factory class for creating Bokeh plots
+#     """
+
+#     def __init__(self, data, x, y, kind, **kwargs) -> None:
+#         self._kind = kind
+#         if kind == "line":
+#             return LinePlot(data, x, y, **kwargs)
+#         elif kind == "chromatogram":
+#             return ChromatogramPlot(data, x, y, **kwargs)
+#         # Add more cases for other plot kinds
+#         else:
+#             raise ValueError(f"Invalid plot kind: {kind}")
+    
 
 class PlanePlot(BOKEHPlot, ABC):
     """
@@ -409,18 +423,18 @@ class ChromatogramPlot(LinePlot):
     def _kind(self) -> Literal["chromatogram"]:
         return "chromatogram"
 
-    def __init__(self, data, feature_data: DataFrame | None = None, **kwargs) -> None:
-        super().__init__(data, "rt", "int", **kwargs)
+    def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
         
         self.feature_data = feature_data
         
-        self._plot()
+        self._plot(x, y)
         if self.show_plot:
             self.show()
 
-    def _plot(self, **kwargs) -> None:
+    def _plot(self, x, y, **kwargs) -> None:
 
-        plot_obj = LinePlot(self.data, "rt", "int", by=self.by, config=self.config)
+        plot_obj = LinePlot(self.data, x, y, by=self.by, config=self.config)
 
         color_gen = ColorGenerator()
 
@@ -480,7 +494,6 @@ class ChromatogramPlot(LinePlot):
             legend.orientation = self.feature_config.legend.orientation
             legend.label_text_font_size = str(self.feature_config.legend.fontsize) + "pt"
             self.fig.add_layout(legend, self.feature_config.legend.loc)
-
 
     def show(self):
         from bokeh.io import show
