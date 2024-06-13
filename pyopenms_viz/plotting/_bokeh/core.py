@@ -241,6 +241,14 @@ class BOKEHPlot(ABC):
         """
         self._make_plot(self.fig, **kwargs)
         return self.fig
+    
+    def show(self):
+        from bokeh.io import show
+
+        def app(doc):
+            doc.add_root(self.fig)
+
+        show(app)
 
 # class plot:
 #     """
@@ -495,14 +503,6 @@ class ChromatogramPlot(LinePlot):
             legend.label_text_font_size = str(self.feature_config.legend.fontsize) + "pt"
             self.fig.add_layout(legend, self.feature_config.legend.loc)
 
-    def show(self):
-        from bokeh.io import show
-
-        def app(doc):
-            doc.add_root(self.fig)
-
-        show(app)
-
     def get_manual_bounding_box_coords(self):
         # Get the original data source
         data_source = self.manual_bbox_renderer.data_source
@@ -522,3 +522,69 @@ class ChromatogramPlot(LinePlot):
             .rename(columns={"x": "leftWidth", "width": "base_to_base_width"})
             .drop(columns=["y", "height"])
         )
+
+
+class MobilogramPlot(ChromatogramPlot):
+    """
+    Class for assembling a Bokeh mobilogram plot
+    """
+
+    @property
+    def _kind(self) -> Literal["mobilogram"]:
+        return "mobilogram"
+
+    def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
+
+    def _plot(self, x, y, **kwargs) -> None:
+        super()._plot(x, y, **kwargs)
+
+        self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
+
+        self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+
+        if self.feature_data is not None:
+            self._add_peak_boundaries(self.feature_data)
+
+    def get_manual_bounding_box_coords(self):
+        return super().get_manual_bounding_box_coords()
+    
+    
+class SpectrumPlot(VLinePlot):
+    """
+    Class for assembling a Bokeh spectrum plot
+    """
+    
+    @property
+    def _kind(self) -> Literal["spectrum"]:
+        return "spectrum"
+    
+    def __init__(self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
+        
+        self.reference_spectrum = reference_spectrum
+        
+        self._plot(x, y)
+        if self.show_plot:
+            self.show()
+            
+    def _plot(self, x, y, **kwargs):
+        plot_obj = VLinePlot(self.data, x, y, by=self.by, config=self.config)
+        
+        color_gen = ColorGenerator()
+        
+        # Tooltips for interactive information
+        TOOLTIPS = [
+                ("index", "$index"),
+                ("Retention Time", "@rt{0.2f}"),
+                ("Intensity", "@int{0.2f}"),
+                ("m/z", "@mz{0.4f}")
+            ]
+
+        if "Annotation" in self.data.columns:
+            TOOLTIPS.append(("Annotation", "@Annotation"))
+        if "product_mz" in self.data.columns:
+            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
+        
+        self.fig = plot_obj.generate(line_color=color_gen, tooltips=TOOLTIPS)
+        
