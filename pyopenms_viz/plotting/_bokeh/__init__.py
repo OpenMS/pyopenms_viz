@@ -9,7 +9,8 @@ from pyopenms_viz.plotting._bokeh.core import (
     ScatterPlot,
     ChromatogramPlot,
     MobilogramPlot,
-    SpectrumPlot
+    SpectrumPlot,
+    FeatureHeatmapPlot
 )
 
 if TYPE_CHECKING:
@@ -21,7 +22,8 @@ PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "scatter": ScatterPlot,
     "chromatogram": ChromatogramPlot,
     "mobilogram": MobilogramPlot,
-    "spectrum": SpectrumPlot
+    "spectrum": SpectrumPlot,
+    "feature_heatmap": FeatureHeatmapPlot
 }
 
 

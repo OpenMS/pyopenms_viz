@@ -9,14 +9,19 @@ from typing import (
     TYPE_CHECKING,
     Literal,
     Tuple,
+    Optional,
+    Union
 )
 
 from bokeh.plotting import Figure
+from bokeh.palettes import Plasma256
+from bokeh.transform import linear_cmap
 from bokeh.models import (
     ColumnDataSource,
     Legend,
     Range1d,
-    BoxEditTool
+    BoxEditTool,
+    Span
 )
 
 from pandas.core.frame import DataFrame
@@ -75,6 +80,22 @@ class BOKEHPlot(ABC):
         for attr, value in config.__dict__.items():
             if value is not None and hasattr(self, attr):
                 setattr(self, attr, value)
+                
+    def _separate_class_kwargs(self, **kwargs):
+            """
+            Separates the keyword arguments into class-specific arguments and other arguments.
+
+            Parameters:
+                **kwargs: Keyword arguments passed to the method.
+
+            Returns:
+                class_kwargs: A dictionary containing the class-specific keyword arguments.
+                other_kwargs: A dictionary containing the remaining keyword arguments.
+
+            """
+            class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
+            other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
+            return class_kwargs, other_kwargs
 
     def __init__(
         self,
@@ -355,8 +376,9 @@ class VLinePlot(LinePlot):
         """
         # Check for tooltips in kwargs and pop
         tooltips = kwargs.pop("tooltips", None)
-
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        use_data = kwargs.pop("new_data", self.data)
+        
+        newlines, legend = self._plot(fig, use_data, self.x, self.y, self.by, **kwargs)
 
         self._add_legend(newlines, legend)
         self._update_plot_aes(newlines, **kwargs)
@@ -388,6 +410,7 @@ class VLinePlot(LinePlot):
     def _add_annotation(self, fig, data, x, y, **kwargs):
         pass
 
+    
 
 class ScatterPlot(PlanePlot):
     """
@@ -405,7 +428,10 @@ class ScatterPlot(PlanePlot):
         """
         Make a scatter plot
         """
-        newlines = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        
+        self._add_legend(newlines, legend)
+        self._update_plot_aes(newlines, **kwargs)
 
     @classmethod
     def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -417,9 +443,15 @@ class ScatterPlot(PlanePlot):
             source = ColumnDataSource(data)
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
         else:
+            color_gen = kwargs.pop("line_color", None)
+            legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
+                legend_items.append((group, [line]))
+            legend = Legend(items=legend_items)
+            
+        return fig, legend
 
 
 class ChromatogramPlot(LinePlot):
@@ -569,22 +601,96 @@ class SpectrumPlot(VLinePlot):
             self.show()
             
     def _plot(self, x, y, **kwargs):
-        plot_obj = VLinePlot(self.data, x, y, by=self.by, config=self.config)
         
-        color_gen = ColorGenerator()
+        spectrum, reference_spectrum = self._prepare_data(self.data, y, self.reference_spectrum)
         
-        # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("Retention Time", "@rt{0.2f}"),
-                ("Intensity", "@int{0.2f}"),
-                ("m/z", "@mz{0.4f}")
-            ]
+        for spec in spectrum:
+            plot_obj = VLinePlot(spec, x, y, by=self.by, config=self.config)
+        
+            color_gen = ColorGenerator()
+            
+            # Tooltips for interactive information
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("Retention Time", "@rt{0.2f}"),
+                    ("Intensity", "@int{0.2f}"),
+                    ("m/z", "@mz{0.4f}")
+                ]
 
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
+            if "Annotation" in self.data.columns:
+                TOOLTIPS.append(("Annotation", "@Annotation"))
+            if "product_mz" in self.data.columns:
+                TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
+            
+            self.fig = plot_obj.generate(line_color=color_gen, tooltips=TOOLTIPS)
+            
+            if self.config.mirror_spectrum:
+                color_gen = ColorGenerator()
+                for ref_spec in reference_spectrum:
+                    ref_spec[y] = ref_spec[y] * -1  
+                    self.add_mirror_spectrum(plot_obj, self.fig, new_data=ref_spec, line_color=color_gen)
+                    
         
-        self.fig = plot_obj.generate(line_color=color_gen, tooltips=TOOLTIPS)
+    def _prepare_data(
+        self,
+        spectrum: Union[DataFrame, list[DataFrame]],
+        y: str,
+        reference_spectrum: Union[DataFrame, list[DataFrame], None],
+    ) -> tuple[list, list]:
+        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
         
+        # Ensure input spectra dataframes are in lists
+        if not isinstance(spectrum, list):
+            spectrum = [spectrum]
+
+        if reference_spectrum is None:
+            reference_spectrum = []
+        elif not isinstance(reference_spectrum, list):
+            reference_spectrum = [reference_spectrum]
+        # Convert to relative intensity if required
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            combined_spectra = spectrum + (
+                reference_spectrum if reference_spectrum else []
+            )
+            for df in combined_spectra:
+                df[y] = df[y] / df[y].max() * 100
+        
+        return spectrum, reference_spectrum
+    
+    def add_mirror_spectrum(self, plot_obj, fig: Figure, new_data: DataFrame, **kwargs):
+        kwargs["new_data"] = new_data        
+        plot_obj._make_plot(fig,**kwargs)
+        zero_line = Span(location=0, dimension="width", line_color="#EEEEEE", line_width=1.5)
+        fig.add_layout(zero_line)
+        
+
+class FeatureHeatmapPlot(ScatterPlot):
+    """
+    Class for assembling a Bokeh feature heatmap plot
+    """
+    
+    @property
+    def _kind(self) -> Literal["feature_heatmap"]:
+        return "feature_heatmap"
+    
+    def __init__(self, data, x, y, z, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
+        
+        self._plot(x, y, z, **kwargs)
+        if self.show_plot:
+            self.show()
+            
+    def _plot(self, x, y, z, **kwargs):
+        
+        plot_obj = ScatterPlot(self.data, x, y, by=self.by, config=self.config)
+        
+        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+        
+        mapper = linear_cmap(
+                field_name=z,
+                palette=Plasma256[::-1],
+                low=self.data[z].min(),
+                high=self.data[z].max(),
+            )
+        
+        self.fig = plot_obj.generate(marker="square", color=mapper, **other_kwargs)

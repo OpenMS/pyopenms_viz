@@ -76,3 +76,13 @@ class _BasePlotterConfig(ABC):
         return Engine[self.engine]
 
 
+@dataclass(kw_only=True)
+class SpectrumPlotterConfig(_BasePlotterConfig):
+    ion_mobility: bool = False
+    annotate_mz: bool = False
+    annotate_ions: bool = False
+    annotate_sequence: bool = False
+    mirror_spectrum: bool = (False,)
+    custom_peak_color: bool = (False,)
+    custom_annotation_color: bool = (False,)
+    custom_annotation_text: bool = False
