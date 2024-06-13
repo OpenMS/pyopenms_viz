@@ -26,6 +26,9 @@ from pandas.core.dtypes.common import is_integer
 
 import os
 
+from pyopenms_viz.plotting._config import FeatureConfig
+from pyopenms_viz.plotting._misc import ColorGenerator
+
 __relativepath__ = os.path.dirname(__file__)
 
 if TYPE_CHECKING:
@@ -94,6 +97,7 @@ class BOKEHPlot(ABC):
         y_axis_location: str | None = None,
         show_plot: bool = True,
         legend: bool = True,
+        feature_config: FeatureConfig | None = None,
         config=None,
         **kwds,
     ) -> None:
@@ -127,6 +131,7 @@ class BOKEHPlot(ABC):
         self.y_axis_location = y_axis_location
         self.show_plot = show_plot
         self.legend = legend
+        self.feature_config = feature_config
         self.config = config
 
         if config is not None:
@@ -146,6 +151,14 @@ class BOKEHPlot(ABC):
     def _make_plot(self, fig: Figure) -> None:
         raise AbstractMethodError(self)
 
+    def _update_plot_aes(self, fig, **kwargs):
+        """
+        Update the aesthetics of the plot
+        """
+
+        fig.grid.visible = self.grid
+        fig.toolbar_location = self.toolbar_location
+
     def _add_legend(self, fig, legend):
         """
         Add the legend
@@ -157,14 +170,6 @@ class BOKEHPlot(ABC):
             fig.legend.title = self.legend.title
             fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
 
-    def _update_plot_aes(self, fig, **kwargs):
-        """
-        Update the aesthetics of the plot
-        """
-
-        fig.grid.visible = self.grid
-        fig.toolbar_location = self.toolbar_location
-
     def _add_tooltips(self, fig, tooltips):
         """
         Add tooltips to the plot
@@ -174,7 +179,29 @@ class BOKEHPlot(ABC):
         hover = HoverTool()
         hover.tooltips = tooltips
         fig.add_tools(hover)
+        
+    def _add_bounding_box_drawer(self, fig, **kwargs):
+        """
+        Add a BoxEditTool to the figure for drawing bounding boxes.
+        
+        Args:
+            fig (Figure): The Bokeh figure object to add the BoxEditTool to.
+            
+        Returns:
+            The renderer object that is used to draw the bounding box.
+        """
+        r = fig.rect([], [], [], [], alpha=0.4)
+        draw_tool = BoxEditTool(renderers=[r], empty_value=0)
+        # TODO: change how icon path is defined
+        draw_tool.custom_icon = (
+            __relativepath__ + "../../../assets/img/peak_boundary.png"
+        )
+        draw_tool.name = "Draw Peak Bondary Box"
 
+        # Add the tool to the figure
+        fig.add_tools(draw_tool)
+        return r
+    
     def _modify_x_range(
             self, x_range: Tuple[float, float], 
             padding: Tuple[float, float] | None = None
@@ -382,32 +409,20 @@ class ChromatogramPlot(LinePlot):
     def _kind(self) -> Literal["chromatogram"]:
         return "chromatogram"
 
-    def __init__(self, data, **kwargs) -> None:
+    def __init__(self, data, feature_data: DataFrame | None = None, **kwargs) -> None:
         super().__init__(data, "rt", "int", **kwargs)
+        
+        self.feature_data = feature_data
+        
         self._plot()
         if self.show_plot:
             self.show()
 
-    def _add_bounding_box_drawer(self, fig, **kwargs):
-        r = fig.rect([], [], [], [], alpha=0.5)
-        draw_tool = BoxEditTool(renderers=[r], empty_value=0)
-        # TODO: change how icon path is defined
-        draw_tool.custom_icon = (
-            __relativepath__ + "../../../assets/img/peak_boundary.png"
-        )
-        draw_tool.name = "Draw Peak Bondary Box"
-
-        # Add the tool to the figure
-        fig.add_tools(draw_tool)
-        return r
-
     def _plot(self, **kwargs) -> None:
-        from cycler import cycler
-        from pyopenms_viz.plotting._misc import color_generator
 
         plot_obj = LinePlot(self.data, "rt", "int", by=self.by, config=self.config)
 
-        color_gen = color_generator()
+        color_gen = ColorGenerator()
 
         # Tooltips for interactive information
         TOOLTIPS = [
@@ -426,6 +441,46 @@ class ChromatogramPlot(LinePlot):
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+        
+        if self.feature_data is not None:
+            self._add_peak_boundaries(self.feature_data)
+
+    def _add_peak_boundaries(self, feature_data):
+        """
+        Add peak boundaries to the plot.
+
+        Args:
+            feature_data (DataFrame): The feature data containing the peak boundaries.
+
+        Returns:
+            None
+        """
+        color_gen = ColorGenerator(colormap=self.feature_config.colormap, n=feature_data.shape[0])
+        legend_items = []
+        for idx, (_, feature) in enumerate(feature_data.iterrows()):
+            peak_boundary_lines = self.fig.segment(
+                x0=[feature["leftWidth"], feature['rightWidth']],
+                y0=[0, 0],
+                x1=[feature["leftWidth"], feature["rightWidth"]],
+                y1=[feature["apexIntensity"], feature["apexIntensity"]],
+                color=next(color_gen),
+                line_dash=self.feature_config.lineStyle,
+                line_width=self.feature_config.lineWidth,
+            )
+            if "q_value" in feature_data.columns:
+                legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_label = f"Feature {idx}"
+            legend_items.append((legend_label, [peak_boundary_lines]))
+        
+        if self.feature_config.legend.show:
+            legend = Legend(items=legend_items)
+            legend.click_policy = self.feature_config.legend.onClick
+            legend.title = self.feature_config.legend.title
+            legend.orientation = self.feature_config.legend.orientation
+            legend.label_text_font_size = str(self.feature_config.legend.fontsize) + "pt"
+            self.fig.add_layout(legend, self.feature_config.legend.loc)
+
 
     def show(self):
         from bokeh.io import show
