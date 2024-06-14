@@ -68,8 +68,6 @@ class _BasePlotterConfig(ABC):
     lineStyle: str = "solid"
     lineWidth: float = 1
     toolbar_location: str = "above"
-    legend: LegendConfig = field(default_factory=LegendConfig)
-    feature_config: FeatureConfig = field(default_factory=FeatureConfig)
 
     @property
     def engine_enum(self):
@@ -78,6 +76,8 @@ class _BasePlotterConfig(ABC):
 
 @dataclass(kw_only=True)
 class SpectrumPlotterConfig(_BasePlotterConfig):
+    def default_legend_factory():
+        return LegendConfig(title="Transitions")
     ion_mobility: bool = False
     annotate_mz: bool = False
     annotate_ions: bool = False
@@ -86,3 +86,52 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
     custom_peak_color: bool = (False,)
     custom_annotation_color: bool = (False,)
     custom_annotation_text: bool = False
+    legend: LegendConfig = field(default_factory=default_legend_factory)
+    
+
+@dataclass(kw_only=True)
+class ChromatogramPlotterConfig(_BasePlotterConfig):
+    def default_legend_factory():
+        return LegendConfig(title="Transitions")
+    
+    # Plot Aesthetics
+    title: str = "Chromatogram Plot"
+    xlabel: str = "Retention Time"
+    ylabel: str = "Intensity"
+    x_axis_col: str = "rt"
+    y_axis_col: str = "int"
+    x_axis_location: str = "below"
+    y_axis_location: str = "left"
+    min_border: int = 0
+    show_plot: bool = True
+    lineWidth: float = 1
+    lineStyle: str = 'solid'
+    plot_type: str = "lineplot"
+    legend: LegendConfig = field(default_factory=default_legend_factory)
+    feature_config: FeatureConfig = field(default_factory=FeatureConfig)
+
+
+@dataclass(kw_only=True)
+class FeautureHeatmapPlotterConfig(_BasePlotterConfig):
+    def default_legend_factory():
+        return LegendConfig(title="Transitions")
+    
+    # Plot Aesthetics
+    title: str = "Chromatogram Plot"
+    xlabel: str = "Retention Time"
+    ylabel: str = "Intensity"
+    x_axis_col: str = "rt"
+    y_axis_col: str = "int"
+    x_axis_location: str = "below"
+    y_axis_location: str = "left"
+    min_border: int = 0
+    show_plot: bool = True
+    lineWidth: float = 1
+    lineStyle: str = 'solid'
+    plot_type: str = "lineplot"
+    add_marginals: bool = False
+    legend: LegendConfig = field(default_factory=default_legend_factory)
+    feature_config: FeatureConfig = field(default_factory=FeatureConfig)
+
+    # Data Specific Attributes
+    ion_mobility: bool = False # if True, plot ion mobility as well in a heatmap

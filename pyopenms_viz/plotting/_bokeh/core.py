@@ -31,7 +31,14 @@ from pandas.core.dtypes.common import is_integer
 
 import os
 
-from pyopenms_viz.plotting._config import FeatureConfig
+from pyopenms_viz.plotting._config import (
+    SpectrumPlotterConfig, 
+    ChromatogramPlotterConfig, 
+    FeautureHeatmapPlotterConfig, 
+    FeatureConfig,
+    LegendConfig
+)
+
 from pyopenms_viz.plotting._misc import ColorGenerator
 
 __relativepath__ = os.path.dirname(__file__)
@@ -78,7 +85,8 @@ class BOKEHPlot(ABC):
             None
         """
         for attr, value in config.__dict__.items():
-            if value is not None and hasattr(self, attr):
+            if value is not None and hasattr(self, attr) and self.__dict__[attr] is None:
+                # print(f"Updating {attr} with {value} and initial value {getattr(self, attr)}\n\n")
                 setattr(self, attr, value)
                 
     def _separate_class_kwargs(self, **kwargs):
@@ -102,24 +110,24 @@ class BOKEHPlot(ABC):
         data,
         kind=None,
         by: str | None = None,
-        subplots: bool = False,
-        sharex: bool = False,
-        sharey: bool = False,
-        height: int = 500,
-        width: int = 500,
-        grid: bool = False,
+        subplots: bool| None = None,
+        sharex: bool | None = None,
+        sharey: bool | None = None,
+        height: int | None = None,
+        width: int | None = None,
+        grid: bool | None = None,
         toolbar_location: str | None = None,
-        fig=None,
+        fig: Figure | None = None,
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
-        show_plot: bool = True,
-        legend: bool = True,
+        show_plot: bool | None = None,
+        legend: LegendConfig | None = None,
         feature_config: FeatureConfig | None = None,
         config=None,
-        **kwds,
+        **kwargs
     ) -> None:
 
         try:
@@ -132,6 +140,8 @@ class BOKEHPlot(ABC):
 
         # Set Attributes
         self.data = self._validate_frame(data)
+
+        # print(f"HOME kwargs: {kwargs}\n\n")
 
         # Config
         self.kind = kind
@@ -154,6 +164,8 @@ class BOKEHPlot(ABC):
         self.feature_config = feature_config
         self.config = config
 
+        # self.setup_config(**kwargs)
+
         if config is not None:
             self._update_from_config(config)
 
@@ -167,6 +179,10 @@ class BOKEHPlot(ABC):
                 width=self.width,
                 height=self.height,
             )
+            
+        if self.by is not None:
+            # Ensure by column data is string
+            self.data[self.by] = self.data[self.by].astype(str)
 
     def _make_plot(self, fig: Figure) -> None:
         raise AbstractMethodError(self)
@@ -271,21 +287,6 @@ class BOKEHPlot(ABC):
 
         show(app)
 
-# class plot:
-#     """
-#     Factory class for creating Bokeh plots
-#     """
-
-#     def __init__(self, data, x, y, kind, **kwargs) -> None:
-#         self._kind = kind
-#         if kind == "line":
-#             return LinePlot(data, x, y, **kwargs)
-#         elif kind == "chromatogram":
-#             return ChromatogramPlot(data, x, y, **kwargs)
-#         # Add more cases for other plot kinds
-#         else:
-#             raise ValueError(f"Invalid plot kind: {kind}")
-    
 
 class PlanePlot(BOKEHPlot, ABC):
     """
@@ -293,6 +294,7 @@ class PlanePlot(BOKEHPlot, ABC):
     """
 
     def __init__(self, data, x, y, **kwargs) -> None:
+        # print(f"PLANEPLOT kwargs: {kwargs}\n\n")
         BOKEHPlot.__init__(self, data, **kwargs)
         if x is None or y is None:
             raise ValueError(
@@ -317,6 +319,7 @@ class LinePlot(PlanePlot):
         return "line"
 
     def __init__(self, data, x, y, **kwargs) -> None:
+        # print(f"LINEPLOT kwargs: {kwargs}\n\n")
         super().__init__(data, x, y, **kwargs)
 
     def _make_plot(self, fig: Figure, **kwargs) -> None:
@@ -328,7 +331,8 @@ class LinePlot(PlanePlot):
 
         newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
 
-        self._add_legend(newlines, legend)
+        if legend is not None:
+            self._add_legend(newlines, legend)
 
         self._update_plot_aes(newlines, **kwargs)
 
@@ -336,15 +340,29 @@ class LinePlot(PlanePlot):
             self._add_tooltips(newlines, tooltips)
 
     @classmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def _plot( # type: ignore[override]
+        cls, 
+        fig, 
+        data, 
+        x, 
+        y, 
+        by: str | None = None, 
+        **kwargs
+        ):
         """
         Plot a line plot
         """
+        color_gen = kwargs.pop("line_color", None)
+        
         if by is None:
             source = ColumnDataSource(data)
+            if color_gen is not None:
+                kwargs["line_color"] = next(color_gen)
             line = fig.line(x=x, y=y, source=source, **kwargs)
+            
+            return fig, None
         else:
-            color_gen = kwargs.pop("line_color", None)
+            
             legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
@@ -464,17 +482,22 @@ class ChromatogramPlot(LinePlot):
         return "chromatogram"
 
     def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = ChromatogramPlotterConfig()
+        
         super().__init__(data, x, y, **kwargs)
         
         self.feature_data = feature_data
         
-        self._plot(x, y)
+        self.plot()
         if self.show_plot:
             self.show()
 
-    def _plot(self, x, y, **kwargs) -> None:
-
-        plot_obj = LinePlot(self.data, x, y, by=self.by, config=self.config)
+    # @classmethod
+    def plot( # type: ignore[override]
+        self,
+        **kwargs
+        ) -> None:
 
         color_gen = ColorGenerator()
 
@@ -490,7 +513,7 @@ class ChromatogramPlot(LinePlot):
         if "product_mz" in self.data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
 
-        self.fig = plot_obj.generate(line_color=color_gen, tooltips=TOOLTIPS)
+        self.fig = super().generate(line_color=color_gen, tooltips=TOOLTIPS)
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
@@ -568,8 +591,8 @@ class MobilogramPlot(ChromatogramPlot):
     def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
         super().__init__(data, x, y, feature_data=feature_data, **kwargs)
 
-    def _plot(self, x, y, **kwargs) -> None:
-        super()._plot(x, y, **kwargs)
+    def plot(self, **kwargs) -> None:
+        super().plot()
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
@@ -592,20 +615,22 @@ class SpectrumPlot(VLinePlot):
         return "spectrum"
     
     def __init__(self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = SpectrumPlotterConfig()
+            
         super().__init__(data, x, y, **kwargs)
         
         self.reference_spectrum = reference_spectrum
         
-        self._plot(x, y)
+        self.plot(x, y)
         if self.show_plot:
             self.show()
             
-    def _plot(self, x, y, **kwargs):
+    def plot(self, x, y, **kwargs):
         
         spectrum, reference_spectrum = self._prepare_data(self.data, y, self.reference_spectrum)
         
         for spec in spectrum:
-            plot_obj = VLinePlot(spec, x, y, by=self.by, config=self.config)
         
             color_gen = ColorGenerator()
             
@@ -622,13 +647,13 @@ class SpectrumPlot(VLinePlot):
             if "product_mz" in self.data.columns:
                 TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
             
-            self.fig = plot_obj.generate(line_color=color_gen, tooltips=TOOLTIPS)
+            self.fig = super().generate(line_color=color_gen, tooltips=TOOLTIPS)
             
             if self.config.mirror_spectrum:
                 color_gen = ColorGenerator()
                 for ref_spec in reference_spectrum:
                     ref_spec[y] = ref_spec[y] * -1  
-                    self.add_mirror_spectrum(plot_obj, self.fig, new_data=ref_spec, line_color=color_gen)
+                    self.add_mirror_spectrum(super(), self.fig, new_data=ref_spec, line_color=color_gen)
                     
         
     def _prepare_data(
@@ -674,15 +699,18 @@ class FeatureHeatmapPlot(ScatterPlot):
         return "feature_heatmap"
     
     def __init__(self, data, x, y, z, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = FeautureHeatmapPlotterConfig()
+        
         super().__init__(data, x, y, **kwargs)
         
-        self._plot(x, y, z, **kwargs)
+        self.plot(x, y, z, **kwargs)
         if self.show_plot:
             self.show()
             
-    def _plot(self, x, y, z, **kwargs):
+    def plot(self, x, y, z, **kwargs):
         
-        plot_obj = ScatterPlot(self.data, x, y, by=self.by, config=self.config)
+        # plot_obj = ScatterPlot(self.data, x, y, by=self.by, config=self.config)
         
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
         
@@ -693,4 +721,4 @@ class FeatureHeatmapPlot(ScatterPlot):
                 high=self.data[z].max(),
             )
         
-        self.fig = plot_obj.generate(marker="square", color=mapper, **other_kwargs)
+        self.fig = super().generate(marker="square", color=mapper, **other_kwargs)

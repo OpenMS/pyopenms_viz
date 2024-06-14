@@ -35,8 +35,10 @@ class PlotAccessor:
                 f"{kind} is not a valid plot kind "
                 f"Valid plot kinds: {self._all_kinds}"
             )
-    
+        # print(f"PLOTACESSOR kwargs: {kwargs}\n\n")
         # Call the plot method of the selected backend
+        if 'backend' in kwargs:
+            kwargs.pop('backend')
         return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
     
     @staticmethod
@@ -66,12 +68,12 @@ class PlotAccessor:
                 ('y', None),
                 ('kind', 'line'),
                 ('by', None),
-                ('subplots', False),
-                ('sharex', False),
-                ('sharey', False),
+                ('subplots', None),
+                ('sharex', None),
+                ('sharey', None),
                 ('height', None),
                 ('width', None),
-                ('grid', False),
+                ('grid', None),
                 ('toolbar_location', None),
                 ('fig', None),
                 ('title', None),
@@ -79,7 +81,7 @@ class PlotAccessor:
                 ('ylabel', None),
                 ('x_axis_location', None),
                 ('y_axis_location', None),
-                ('show_plot', True),
+                ('show_plot', None),
                 ('legend', None),
                 ('feature_config', None),
                 ('config', None),
