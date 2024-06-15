@@ -58,6 +58,7 @@ class _BasePlotterConfig(ABC):
     ylabel: str = "Y-axis"
     x_axis_location: str = "below"
     y_axis_location: str = "left"
+    min_border: str = 0
     engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY"
     height: int = 500
     width: int = 500

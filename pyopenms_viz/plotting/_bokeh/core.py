@@ -5,7 +5,7 @@ from abc import (
     abstractmethod,
 )
 
-from typing import TYPE_CHECKING, Literal, Tuple, Union
+from typing import TYPE_CHECKING, Literal, List, Tuple, Union
 
 from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
@@ -121,6 +121,7 @@ class BOKEHPlot(ABC):
         ylabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
+        min_border: int | None = None,
         show_plot: bool | None = None,
         legend: LegendConfig | None = None,
         feature_config: FeatureConfig | None = None,
@@ -157,6 +158,7 @@ class BOKEHPlot(ABC):
         self.ylabel = ylabel
         self.x_axis_location = x_axis_location
         self.y_axis_location = y_axis_location
+        self.min_border = min_border
         self.show_plot = show_plot
         self.legend = legend
         self.feature_config = feature_config
@@ -176,6 +178,7 @@ class BOKEHPlot(ABC):
                 y_axis_location=self.y_axis_location,
                 width=self.width,
                 height=self.height,
+                min_border=self.min_border
             )
 
         if self.by is not None:
@@ -744,19 +747,30 @@ class FeatureHeatmapPlot(ScatterPlot):
     def _kind(self) -> Literal["feature_heatmap"]:
         return "feature_heatmap"
 
-    def __init__(self, data, x, y, z, **kwargs) -> None:
+    def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = FeautureHeatmapPlotterConfig()
 
+        if add_marginals:
+            kwargs["config"].title = None
+            # kwargs["config"].legend.show = False
+
         super().__init__(data, x, y, **kwargs)
+        self.zlabel = zlabel
+        self.add_marginals = add_marginals
 
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
             self.show()
+            
+    @staticmethod
+    def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
+        # First fill NaNs with 0s for numerical columns and '.' for categorical columns
+        grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
+        return grouped
 
     def plot(self, x, y, z, **kwargs):
 
-        # plot_obj = ScatterPlot(self.data, x, y, by=self.by, config=self.config)
 
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
@@ -770,6 +784,83 @@ class FeatureHeatmapPlot(ScatterPlot):
         self.fig = super().generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+        
+        if self.add_marginals:
+            #############
+            ##  X-Axis Plot
+            
+            # get cols to integrate over and exclude y and z
+            group_cols = [x]
+            if 'Annotation' in self.data.columns:
+                group_cols.append('Annotation')
+                
+            x_data = self._integrate_data_along_dim(self.data, group_cols, z)
+            
+            x_config = self.config.copy()
+            x_config.ylabel = self.zlabel
+            x_config.y_axis_location = 'right'
+            x_config.legend.show = True
+            
+            color_gen = ColorGenerator()
+            
+            # remove 'config' from class_kwargs
+            x_plot_kwargs = class_kwargs.copy()
+            x_plot_kwargs.pop('config', None)
+            
+            x_plot_obj = LinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
+            x_fig = x_plot_obj.generate(line_color=color_gen)
+            zero_line = Span(
+            location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
+            )
+            x_fig.add_layout(zero_line)
+            
+            # Modify plot
+            x_fig.x_range = self.fig.x_range
+            x_fig.width = self.fig.width
+            x_fig.xaxis.visible = False
+            x_fig.min_border = 0
+            
+            #############
+            ##  Y-Axis Plot
+            
+            group_cols = [y]
+            if 'Annotation' in self.data.columns:
+                group_cols.append('Annotation')
+                
+            y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+            
+            y_config = self.config.copy()
+            y_config.xlabel = self.zlabel
+            y_config.y_axis_location = 'left'
+            y_config.legend.show = True
+            y_config.legend.loc = 'below'
+            
+            color_gen = ColorGenerator()
+            
+            y_plot_obj = LinePlot(y_data, z, y, config=y_config, **x_plot_kwargs)
+            y_fig = y_plot_obj.generate(line_color=color_gen)
+            zero_line = Span(
+            location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
+            )
+            y_fig.add_layout(zero_line)
+            
+            # Modify plot
+            y_fig.y_range = self.fig.y_range
+            y_fig.height = self.fig.height
+            y_fig.legend.orientation = 'horizontal'
+            y_fig.x_range.flipped = True
+            y_fig.min_border = 0
+            
+            #############
+            ##  Combine Plots
+            
+            # Modify the main plot 
+            self.fig.yaxis.visible = False
+            
+            from bokeh.layouts import gridplot
+            
+            self.fig = gridplot([[None, x_fig], [y_fig, self.fig]])  
+            
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source
