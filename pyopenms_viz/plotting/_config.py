@@ -78,6 +78,13 @@ class _BasePlotterConfig(ABC):
 class SpectrumPlotterConfig(_BasePlotterConfig):
     def default_legend_factory():
         return LegendConfig(title="Transitions")
+    
+    # Plot Aesthetics
+    title: str = "Spectrum Plot"
+    xlabel: str = "mass-to-charge"
+    ylabel: str = "Intensity"
+    x_axis_col: str = "mz"
+    y_axis_col: str = "int"
     ion_mobility: bool = False
     annotate_mz: bool = False
     annotate_ions: bool = False
@@ -117,11 +124,11 @@ class FeautureHeatmapPlotterConfig(_BasePlotterConfig):
         return LegendConfig(title="Transitions")
     
     # Plot Aesthetics
-    title: str = "Chromatogram Plot"
+    title: str = "Feature Heatmap Plot"
     xlabel: str = "Retention Time"
-    ylabel: str = "Intensity"
+    ylabel: str = "mass-to-charge"
     x_axis_col: str = "rt"
-    y_axis_col: str = "int"
+    y_axis_col: str = "mz"
     x_axis_location: str = "below"
     y_axis_location: str = "left"
     min_border: int = 0
