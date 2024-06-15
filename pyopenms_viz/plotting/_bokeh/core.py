@@ -5,7 +5,7 @@ from abc import (
     abstractmethod,
 )
 
-from typing import TYPE_CHECKING, Literal, Tuple, Optional, Union
+from typing import TYPE_CHECKING, Literal, Tuple, Union
 
 from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
@@ -433,19 +433,25 @@ class VLinePlot(LinePlot):
 
         newlines, legend = self._plot(fig, use_data, self.x, self.y, self.by, **kwargs)
 
-        self._add_legend(newlines, legend)
+        if legend is not None:
+            self._add_legend(newlines, legend)
         self._update_plot_aes(newlines, **kwargs)
         if tooltips is not None:
             self._add_tooltips(newlines, tooltips)
 
-    def _plot(self, fig, data, x, y, by: str | None = None, **kwargs):
+    @classmethod
+    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a vertical line
         """
-
+        
         if by is None:
+            color_gen = kwargs.pop("line_color", None)
             source = ColumnDataSource(data)
+            if color_gen is not None:
+                kwargs["line_color"] = next(color_gen)
             line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
+            return fig, None
         else:
             color_gen = kwargs.pop("line_color", None)
             legend_items = []
@@ -458,7 +464,7 @@ class VLinePlot(LinePlot):
 
             legend = Legend(items=legend_items)
 
-        return fig, legend
+            return fig, legend
 
     def _add_annotation(self, fig, data, x, y, **kwargs):
         pass
