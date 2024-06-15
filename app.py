@@ -179,7 +179,7 @@ if demo == "Test DataFrame Input":
         main_input_args = get_input_col_kind(common_params, plot_type)
         
         if common_params['by'] == 'None':
-            common_params.pop('by')
+            common_params['by'] = None
         
         common_params.pop('x')
         common_params.pop('y')
@@ -191,18 +191,22 @@ if demo == "Test DataFrame Input":
     elif plot_type=='feature_heatmap':
         load_demo_diapasef_featuremap()    
         common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
-        engine = common_params.pop("engine")
+        
+        figure_kwargs = common_params.copy()
+        
+        engine = figure_kwargs.pop("engine")
         main_input_args = get_input_col_kind(common_params, plot_type)
         
-        if common_params['by'] == 'None':
-            common_params.pop('by')
+        if figure_kwargs['by'] == 'None':
+            figure_kwargs['by'] = None
         
-        common_params.pop('x')
-        common_params.pop('y')
-        common_params.pop('z')
-        common_params.pop('show_legend')
-        common_params.pop('relative_intensity')
-        fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
+        figure_kwargs.pop('x')
+        figure_kwargs.pop('y')
+        figure_kwargs.pop('z')
+        figure_kwargs.pop('show_legend')
+        figure_kwargs.pop('relative_intensity')
+        figure_kwargs.pop('extract_manual_features')
+        fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **figure_kwargs)
     
     
     
