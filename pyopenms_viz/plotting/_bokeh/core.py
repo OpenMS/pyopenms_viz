@@ -498,18 +498,17 @@ class ScatterPlot(PlanePlot):
         Plot a scatter plot
         """
 
-        scatter_kwargs = filter_kwargs(fig.scatter, kwargs)
+        # scatter_kwargs = filter_kwargs(fig.scatter, kwargs)
         
         if by is None:
             source = ColumnDataSource(data)
-            line = fig.scatter(x=x, y=y, source=source, **scatter_kwargs)
+            line = fig.scatter(x=x, y=y, source=source, **kwargs)
             return fig, None
         else:
-            color_gen = kwargs.pop("line_color", None)
             legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
-                line = fig.scatter(x=x, y=y, source=source, **scatter_kwargs)
+                line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
@@ -539,8 +538,7 @@ class ChromatogramPlot(LinePlot):
         if self.show_plot:
             self.show()
 
-    # @classmethod
-    def plot(self, **kwargs) -> None:  # type: ignore[override]
+    def plot(self, **kwargs) -> None:  
 
         color_gen = ColorGenerator()
 
@@ -769,7 +767,7 @@ class FeatureHeatmapPlot(ScatterPlot):
             high=self.data[z].max(),
         )
 
-        self.fig = super().generate(marker="square", color=mapper, **other_kwargs)
+        self.fig = super().generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
 
