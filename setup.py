@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "pandas",
-        "bokeh",
+        "bokeh>=3.4.1",
         # Add other dependencies here
     ],
     entry_points={
