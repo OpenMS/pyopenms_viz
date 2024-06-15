@@ -32,7 +32,7 @@ from pyopenms_viz.plotting._config import (
     FeatureConfig,
     LegendConfig,
 )
-from pyopenms_viz.util.util import filter_kwargs
+
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
@@ -500,8 +500,6 @@ class ScatterPlot(PlanePlot):
         """
         Plot a scatter plot
         """
-
-        # scatter_kwargs = filter_kwargs(fig.scatter, kwargs)
         
         if by is None:
             source = ColumnDataSource(data)
