@@ -32,7 +32,7 @@ from pyopenms_viz.plotting._config import (
     FeatureConfig,
     LegendConfig,
 )
-
+from pyopenms_viz.util.util import filter_kwargs
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
@@ -488,7 +488,8 @@ class ScatterPlot(PlanePlot):
         """
         newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
 
-        self._add_legend(newlines, legend)
+        if legend is not None:
+            self._add_legend(newlines, legend)
         self._update_plot_aes(newlines, **kwargs)
 
     @classmethod
@@ -497,19 +498,22 @@ class ScatterPlot(PlanePlot):
         Plot a scatter plot
         """
 
+        scatter_kwargs = filter_kwargs(fig.scatter, kwargs)
+        
         if by is None:
             source = ColumnDataSource(data)
-            line = fig.scatter(x=x, y=y, source=source, **kwargs)
+            line = fig.scatter(x=x, y=y, source=source, **scatter_kwargs)
+            return fig, None
         else:
             color_gen = kwargs.pop("line_color", None)
             legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
-                line = fig.scatter(x=x, y=y, source=source, **kwargs)
+                line = fig.scatter(x=x, y=y, source=source, **scatter_kwargs)
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
-        return fig, legend
+            return fig, legend
 
 
 class ChromatogramPlot(LinePlot):
