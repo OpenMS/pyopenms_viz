@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Literal, Tuple
 from enum import Enum
+from copy import deepcopy
 
 
 class Engine(Enum):
@@ -72,6 +73,9 @@ class _BasePlotterConfig(ABC):
     @property
     def engine_enum(self):
         return Engine[self.engine]
+    
+    def copy(self):
+        return deepcopy(self)
 
 
 @dataclass(kw_only=True)
