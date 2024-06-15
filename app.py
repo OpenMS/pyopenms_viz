@@ -4,8 +4,34 @@ import numpy as np
 from pyopenms_viz.MSExperimentPlotter import plotMSExperiment
 from pyopenms_viz.SpectrumPlotter import plotSpectrum
 from pyopenms_viz.ChromatogramPlotter import plotChromatogram
+
+from pyopenms_viz.plotting._bokeh import (
+    ChromatogramPlot,
+    SpectrumPlot,
+    FeatureHeatmapPlot
+)
+
 import pyopenms as oms
 from urllib.request import urlretrieve
+
+import streamlit as st
+import pandas as pd
+import streamlit.components.v1 as components
+
+from bokeh.plotting import figure, save
+from bokeh.io import output_file
+
+
+# Current streamlit version only supports bokeh 2.4.3
+# See work around: https://github.com/streamlit/streamlit/issues/5858#issuecomment-1482042533
+def use_file_for_bokeh(chart: figure, chart_height=500):
+    output_file('bokeh_graph.html')
+    save(chart)
+    with open("bokeh_graph.html", 'r', encoding='utf-8') as f:
+        html = f.read()
+    components.html(html, height=chart_height)
+# Update the bokeh_chart method to use the file workaround
+st.bokeh_chart = use_file_for_bokeh
 
 with st.sidebar:
     st.title("pyopenms-viz demo")
@@ -47,23 +73,35 @@ def display_fig(fig, engine):
         st.pyplot(fig)
     elif engine == "BOKEH":
         st.bokeh_chart(fig)
+        
     else:
         st.plotly_chart(fig)
 
-
-def get_common_parameters():
+def get_common_parameters(plot_type="spectrum", cols=None):
     params = {}
     with st.sidebar:
         params["engine"] = st.selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
+        if plot_type =="feature_heatmap":
+            st_cols = st.sidebar.columns(3)
+            params["x"] = st_cols[0].selectbox("x", cols)
+            params["y"] = st_cols[1].selectbox("y", cols)
+            params["z"] = st_cols[2].selectbox("z", cols)
+        else:
+            st_cols = st.sidebar.columns(2)
+            params["x"] = st_cols[0].selectbox("x", cols)
+            params["y"] = st_cols[1].selectbox("y", cols)
+        if cols is not None:
+            cols = ['None'] + cols
+            params['by'] = st.selectbox("by", cols)
         params["relative_intensity"] = st.checkbox("relative_intensity", False, help="If true, plot relative intensity values. Defaults to False.")
         params["width"] = st.number_input("width", 50, 1000, 500, 50)
         params["height"] = st.number_input("height", 50, 1000, 500, 50)
         params["title"] = st.text_input("title", "Title")
         params["xlabel"] = st.text_input("xlabel", "x-label")
-        params["ylabel"] = st.text_input("xlabel", "y-label")
+        params["ylabel"] = st.text_input("ylabel", "y-label")
         params["show_legend"] = st.checkbox("show_legend", False)
+        params["extract_manual_features"] = st.checkbox("extract_manual_features", False, help="If true, extract manual features from figure. Defaults to False.")
     return params
-
 
 def get_MSExperiment_params():
     params = {}
@@ -97,14 +135,88 @@ def get_Chromatogram_params():
         params["add_marginals"] = st.checkbox("add_marginal_plots", help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
     return params
 
+def filter_params_for_plotting(params):
+    return {k: v for k, v in params.items() if v is not None}
+
+def get_input_col_kind(params, plot_type):
+    if plot_type == "feature_heatmap":
+        return {"x":params['x'], "y":params['y'], "z":params['z'], "kind":plot_type}
+    else:
+        return {"x":params['x'], "y":params['y'], "kind":plot_type}
+    
+
+backend_map = {"MATPLOTLIB": "matplotlib", "BOKEH": "pomsvib", "PLOTLY": "plotly"}
+
 if "exp_df" not in st.session_state:
     load_demo_mzML()
 
 with st.sidebar:
-    demo = st.selectbox("select demo", ["MSExperiment", "MSSpectrum", "MSChromatogram"])
+    demo = st.selectbox("select demo", ["Test DataFrame Input", "MSExperiment", "MSSpectrum", "MSChromatogram"])
 
 tabs = st.tabs(["📊 **Figure**", "📂 **Data**", "📑 **API docs**"])
-if demo == "MSExperiment":
+if demo == "Test DataFrame Input":
+    with st.sidebar:
+        st.markdown("**Common Parameters**")
+        plot_type = st.sidebar.selectbox("plot_type", ["spectrum", "chromatogram", "mobilogram", "feature_heatmap"])
+    
+    if "chrom_df" not in st.session_state or plot_type in ['chromatogram', 'spectrum']:
+        load_demo_chromatogram_xic()
+        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        engine = common_params.pop("engine")
+        main_input_args = get_input_col_kind(common_params, plot_type)
+        
+        if common_params['by'] == 'None':
+            common_params['by'] = None
+        
+        common_params.pop('x')
+        common_params.pop('y')
+        fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
+        
+    elif plot_type=="mobilogram":
+        load_demo_diapasef_featuremap()    
+        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        engine = common_params.pop("engine")
+        main_input_args = get_input_col_kind(common_params, plot_type)
+        
+        if common_params['by'] == 'None':
+            common_params.pop('by')
+        
+        common_params.pop('x')
+        common_params.pop('y')
+        common_params.pop('show_legend')
+        common_params.pop('relative_intensity')
+        
+        fig = st.session_state.chrom_df.fillna({'native_id': 'NA'}).groupby(['native_id', 'ms_level', 'precursor_mz', 'Annotation', 'product_mz', 'im'])['int'].sum().reset_index().plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
+        
+    elif plot_type=='feature_heatmap':
+        load_demo_diapasef_featuremap()    
+        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        engine = common_params.pop("engine")
+        main_input_args = get_input_col_kind(common_params, plot_type)
+        
+        if common_params['by'] == 'None':
+            common_params.pop('by')
+        
+        common_params.pop('x')
+        common_params.pop('y')
+        common_params.pop('z')
+        common_params.pop('show_legend')
+        common_params.pop('relative_intensity')
+        fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
+    
+    
+    
+    with tabs[0]:
+        display_fig(fig.fig, engine)
+        if common_params["extract_manual_features"]:
+            st.dataframe(fig.get_manual_bounding_box_coords())
+        # pass
+    with tabs[1]:
+        st.dataframe(st.session_state.chrom_df)
+    with tabs[2]:
+        st.write(fig)
+
+elif demo == "MSExperiment":
     with st.sidebar:
         st.markdown("**MSExperiment Parameters**")
         params = get_MSExperiment_params()
