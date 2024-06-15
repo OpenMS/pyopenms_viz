@@ -635,7 +635,7 @@ class MobilogramPlot(ChromatogramPlot):
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
-        self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+        # self.manual_bbox_renderer = self._add_bounding_vertical_drawer(self.fig)
 
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
