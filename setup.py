@@ -23,6 +23,8 @@ setup(
     entry_points={
         "pandas_plotting_backends": [
             "pomsvib = pyopenms_viz.plotting._bokeh",
+            "pomsvip = pyopenms_viz.plotting._plotly",
+            "pomsvim = pyopenms_viz.plotting._matplotlib"
         ],
     },
     classifiers=[
