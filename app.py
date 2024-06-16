@@ -94,6 +94,9 @@ def get_common_parameters(plot_type="spectrum", cols=None):
             cols = ['None'] + cols
             params['by'] = st.selectbox("by", cols)
         params["relative_intensity"] = st.checkbox("relative_intensity", False, help="If true, plot relative intensity values. Defaults to False.")
+        if plot_type == "feature_heatmap":
+            params["add_marginals"] = st.checkbox("add_marginals", False, help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
+        
         params["width"] = st.number_input("width", 50, 1000, 500, 50)
         params["height"] = st.number_input("height", 50, 1000, 500, 50)
         params["title"] = st.text_input("title", "Title")
