@@ -200,7 +200,6 @@ class PLOTLYPlot(ABC):
             ticks='outside',  # Add x-axis ticks outside the plot area
             tickwidth=1,  # Set the width of x-axis ticks
             tickcolor='black',  # Set the color of x-axis ticks
-            # ticklen=5,  # Set the length of x-axis ticks
         )
 
         # Add y-axis grid lines and ticks
@@ -209,10 +208,8 @@ class PLOTLYPlot(ABC):
             showline=True, 
             linewidth=1, 
             linecolor='black',
-            # ticks='outside',  # Add y-axis ticks outside the plot area
             tickwidth=1,  # Set the width of y-axis ticks
-            tickcolor='black',  # Set the color of y-axis ticks
-            # ticklen=5,  # Set the length of y-axis ticks
+            tickcolor='black'  # Set the color of y-axis ticks
         )
             
     def _add_legend(self, fig, legend):
@@ -225,10 +222,16 @@ class PLOTLYPlot(ABC):
         )
     
     def _add_bounding_box_drawer(self, fig, **kwargs):
-        pass
+        fig.update_layout(dragmode='drawrect')
+        return {'modeBarButtonsToAdd':['drawrect',
+                                        'eraseshape'
+                                       ]}
     
-    def _add_boundingvertical_drawer(self, fig, **kwargs):
-        pass
+    def _add_bounding_vertical_drawer(self, fig, **kwargs):
+        fig.update_layout(dragmode='drawline')
+        return {'modeBarButtonsToAdd':['drawline',
+                                        'eraseshape'
+                                       ]}
     
     def _modify_x_range(self, x_range: Tuple[float, float] | None = None, padding: Tuple[float, float] | None = None):
         start, end = x_range
@@ -249,7 +252,7 @@ class PLOTLYPlot(ABC):
         return self.fig
     
     def show(self, **kwargs):
-        self.fig.show()
+        self.fig.show(**kwargs)
 
 
 class PlanePlot(PLOTLYPlot, ABC):
@@ -358,9 +361,9 @@ class ChromatogramPlot(LinePlot):
         
         self.feature_data = feature_data
         
-        self.plot()
+        toolbar_add_config = self.plot()
         if self.show_plot:
-            self.show()
+            self.show(config=toolbar_add_config)
             
     def plot(self, **kwargs):
         
@@ -392,6 +395,10 @@ class ChromatogramPlot(LinePlot):
         self.fig = super().generate(line_color=color_gen, tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data))
         
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        
+        toolbar_add_config = self._add_bounding_vertical_drawer(self.fig)
+        
+        return toolbar_add_config
         
         
 
