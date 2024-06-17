@@ -226,11 +226,27 @@ class PLOTLYPlot(ABC):
                                         'eraseshape'
                                        ])
     
-    def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        fig.update_layout(modebar_add=['drawline',
+    def _add_bounding_vertical_drawer(self, fig, label_suffix, **kwargs):
+        
+        fig.add_trace(go.Scatter(x=[], y=[], mode="lines")
+        )
+        fig.update_layout(modebar_add=['drawrect',
                                         'eraseshape'
-                                       ])
-
+                                       ],
+                          newshape=dict(
+                                showlegend=True,
+                                label=dict(
+                                           texttemplate=label_suffix + "_0: %{x0:.2f} | " + label_suffix + "_1: %{x1:.2f}",
+                                           textposition="top left",),
+                                line_color="#F02D1A",
+                                fillcolor=None,
+                                line=dict(
+                                    dash="dash",
+                                ),
+                                drawdirection="vertical",
+                                opacity=0.5
+                            )
+                          )
     
     def _modify_x_range(self, x_range: Tuple[float, float] | None = None, padding: Tuple[float, float] | None = None):
         start, end = x_range
@@ -395,13 +411,17 @@ class ChromatogramPlot(LinePlot):
         
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
         
-        self._add_bounding_vertical_drawer(self.fig)
+        self._add_bounding_vertical_drawer(self.fig, self.x)
         # self.fig.observe(self.update_info, names=["_js2py_layoutDelta"], type="change")
+        
         
     
     def update_info(self, arg):
         print("Relayout event detected")
         print(arg)
+        
+    
+    
         
         
         
