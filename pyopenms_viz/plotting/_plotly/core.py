@@ -439,21 +439,29 @@ class ChromatogramPlot(LinePlot):
                 name=legend_label
             )
             )
-
-        
     
     def update_info(self, arg):
         print("Relayout event detected")
         print(arg)
         
     
-    
-        
-        
-        
 
 class MobilogramPlot(ChromatogramPlot):
-    pass
+    
+    @property
+    def _kind(self) -> Literal["mobilogram"]:
+        return "mobilogram"
+    
+    def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
+        
+    def plot(self, **kwargs):
+        super().plot()
+        
+        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        
+        if self.feature_data is not None:
+            self._add_peak_boundaries(self.fig, self.feature_data)
 
 
 class SpectrumPlot(VLinePlot):
