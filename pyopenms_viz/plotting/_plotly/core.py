@@ -222,16 +222,15 @@ class PLOTLYPlot(ABC):
         )
     
     def _add_bounding_box_drawer(self, fig, **kwargs):
-        fig.update_layout(dragmode='drawrect')
-        return {'modeBarButtonsToAdd':['drawrect',
+        fig.update_layout(modebar_add=['drawrect',
                                         'eraseshape'
-                                       ]}
+                                       ])
     
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        fig.update_layout(dragmode='drawline')
-        return {'modeBarButtonsToAdd':['drawline',
+        fig.update_layout(modebar_add=['drawline',
                                         'eraseshape'
-                                       ]}
+                                       ])
+
     
     def _modify_x_range(self, x_range: Tuple[float, float] | None = None, padding: Tuple[float, float] | None = None):
         start, end = x_range
@@ -361,9 +360,9 @@ class ChromatogramPlot(LinePlot):
         
         self.feature_data = feature_data
         
-        toolbar_add_config = self.plot()
+        self.plot()
         if self.show_plot:
-            self.show(config=toolbar_add_config)
+            self.show()
             
     def plot(self, **kwargs):
         
@@ -396,9 +395,14 @@ class ChromatogramPlot(LinePlot):
         
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
         
-        toolbar_add_config = self._add_bounding_vertical_drawer(self.fig)
+        self._add_bounding_vertical_drawer(self.fig)
+        # self.fig.observe(self.update_info, names=["_js2py_layoutDelta"], type="change")
         
-        return toolbar_add_config
+    
+    def update_info(self, arg):
+        print("Relayout event detected")
+        print(arg)
+        
         
         
 
