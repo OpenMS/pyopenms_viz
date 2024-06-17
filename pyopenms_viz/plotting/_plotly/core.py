@@ -414,6 +414,32 @@ class ChromatogramPlot(LinePlot):
         self._add_bounding_vertical_drawer(self.fig, self.x)
         # self.fig.observe(self.update_info, names=["_js2py_layoutDelta"], type="change")
         
+        if self.feature_data is not None:
+            self._add_peak_boundaries(self.fig, self.feature_data)
+    
+    def _add_peak_boundaries(self, fig, feature_data, **kwargs):
+        color_gen = ColorGenerator(
+            colormap=self.config.feature_config.colormap, n=feature_data.shape[0]
+        )
+        for idx, (_, feature) in enumerate(feature_data.iterrows()):
+            if "q_value" in feature_data.columns:
+                legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_label = f"Feature {idx}"
+            fig.add_trace(go.Scatter(
+                mode="lines",
+                x=[feature["leftWidth"], feature["leftWidth"], feature["rightWidth"], feature["rightWidth"]],
+                y=[0, feature["apexIntensity"], 0, feature["apexIntensity"]],
+                fillcolor=next(color_gen),
+                opacity=0.5,
+                line=dict(
+                    dash="dash",
+                    width=2.5
+                ),
+                name=legend_label
+            )
+            )
+
         
     
     def update_info(self, arg):
