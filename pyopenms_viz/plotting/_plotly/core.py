@@ -715,13 +715,41 @@ class FeatureHeatmapPlot(ScatterPlot):
 
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
-
+        available_columns = self.data.columns.tolist()
+        # Get index (not a column in dataframe) data first for customer hover data
+        custom_hover_data = [self.data.index]
+        # Get the rest of the columns
+        custom_hover_data  += [self.data[col] for col in ["mz", "Annotation", "product_mz"] if col in available_columns]
+        
+        
+        TOOLTIPS = [
+            "Index: %{customdata[0]}",
+            "Retention Time: %{x:.2f}",
+            "Intensity: %{y:.2f}",
+        ]
+        
+        custom_hover_data_index = 1
+        if "mz" in self.data.columns:
+            TOOLTIPS.append("m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
+            custom_hover_data_index += 1
+        if "Annotation" in self.data.columns:
+            TOOLTIPS.append("Annotation: %{customdata[" + str(custom_hover_data_index) + "]}")
+            custom_hover_data_index += 1
+        if "product_mz" in self.data.columns:
+            TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
+        
         self.fig = super().generate(
-            marker=dict(color=self.data[z].unique(), colorscale="Plasma", showscale=False, symbol='square', size=10, opacity=0.4),
+            marker=dict(
+                color=self.data[z].unique(), 
+                cmin= self.data[z].min(),
+                cmax= self.data[z].max(),
+                colorscale="Plasma_r", showscale=False, symbol='square', size=10, opacity=0.4),
+            tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data),
             **other_kwargs,
         )
 
         # self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        
 
         self._add_bounding_box_drawer(self.fig)
 
