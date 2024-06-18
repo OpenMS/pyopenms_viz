@@ -891,3 +891,5 @@ class FeatureHeatmapPlot(ScatterPlot):
             
             # Overwrite the figure with the new grid figure
             self.fig = fig_m
+            
+            self._update_plot_aes(self.fig)
