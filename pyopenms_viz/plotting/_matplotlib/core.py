@@ -27,7 +27,7 @@ from pyopenms_viz.plotting._misc import ColorGenerator
 
 if TYPE_CHECKING:
     from pandas.core.frame import DataFrame
-    from bokeh.plotting import figure
+    from matplotlib.pyplot import figure
 
 
 def holds_integer(column: Index) -> bool:
@@ -115,7 +115,7 @@ class MATPLOTLIBPlot(ABC):
                 legend: LegendConfig | None = None,
                 feature_config: FeatureConfig | None = None,
                 config=None,
-                **kwargs, 
+                **kwargs
                 ) -> None:
         
         try:
@@ -168,11 +168,17 @@ class MATPLOTLIBPlot(ABC):
     def _make_plot(self, fig: figure) -> None:
         raise AbstractMethodError(self)
     
-    def _update_plot_aes(self, fig, **kwargs):
-        pass
+    def _update_plot_aes(self, ax, **kwargs):
+        ax.grid(self.grid)
     
-    def _add_legend(self, fig, legend):
-        pass
+    def _add_legend(self, ax, legend):
+        matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.legend.loc)
+        legend = ax.legend(*legend,
+                           loc=matplotlibLegendLoc,
+                           title=self.legend.title,
+                           prop={'size': self.legend.fontsize},
+                           bbox_to_anchor=self.legend.bbox_to_anchor)
+        legend.get_title().set_fontsize(str(self.legend.fontsize))
     
     def _modify_x_range(
         self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
@@ -188,8 +194,8 @@ class MATPLOTLIBPlot(ABC):
         """
         Generate the plot
         """
-        self._make_plot(self.fig, **kwargs)
-        return self.fig
+        self._make_plot(self.ax, **kwargs)
+        return self.ax
     
     def show(self):
         pass
@@ -239,14 +245,30 @@ class LinePlot(PlanePlot):
 
     @classmethod
     def _plot(  # type: ignore[override]
-        cls, fig, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, **kwargs
     ):
         """
         Plot a line plot
         """
         color_gen = kwargs.pop("line_color", None)
+        
+        legend_lines = []
+        legend_labels = []
+        
+        if by is None:
+            line, = ax.plot(data[x], data[y], color=next(color_gen))
+            
+            return ax, (None, None)
+        else:
+            for group, df in data.groupby(by):
+                line, = ax.plot(df[x], 
+                                df[y], 
+                                color=next(color_gen))
+                legend_lines.append(line)
+                legend_labels.append(group)
+            return ax, (legend_lines, legend_labels)
 
-        pass
+        
 
 
 class VLinePlot(LinePlot):
@@ -349,7 +371,8 @@ class ChromatogramPlot(LinePlot):
 
 
         if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
+            pass
+            # self._add_peak_boundaries(self.feature_data)
 
     def _add_peak_boundaries(self, feature_data):
         """
@@ -484,7 +507,7 @@ class SpectrumPlot(VLinePlot):
     def add_mirror_spectrum(self, plot_obj, fig: figure, new_data: DataFrame, **kwargs):
         kwargs["new_data"] = new_data
         plot_obj._make_plot(fig, **kwargs)
-        pass
+        
 
 
 class FeatureHeatmapPlot(ScatterPlot):
@@ -522,8 +545,6 @@ class FeatureHeatmapPlot(ScatterPlot):
 
 
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
-
-        pass
         
         if self.add_marginals:
             #############
