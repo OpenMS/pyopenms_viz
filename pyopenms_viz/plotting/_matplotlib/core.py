@@ -365,14 +365,13 @@ class ChromatogramPlot(LinePlot):
 
         color_gen = ColorGenerator()
 
-        self.fig = super().generate(line_color=color_gen)
+        self.ax = super().generate(line_color=color_gen)
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
 
         if self.feature_data is not None:
-            pass
-            # self._add_peak_boundaries(self.feature_data)
+            self._add_peak_boundaries(self.feature_data)
 
     def _add_peak_boundaries(self, feature_data):
         """
@@ -384,28 +383,45 @@ class ChromatogramPlot(LinePlot):
         Returns:
             None
         """
+        
+        legend = self.ax.get_legend()
+        self.ax.add_artist(legend)
+        
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=feature_data.shape[0]
         )
+        
         legend_items = []
         for idx, (_, feature) in enumerate(feature_data.iterrows()):
-            peak_boundary_lines = self.fig.segment(
-                x0=[feature["leftWidth"], feature["rightWidth"]],
-                y0=[0, 0],
-                x1=[feature["leftWidth"], feature["rightWidth"]],
-                y1=[feature["apexIntensity"], feature["apexIntensity"]],
-                color=next(color_gen),
-                line_dash=self.feature_config.lineStyle,
-                line_width=self.feature_config.lineWidth,
-            )
-            if "q_value" in feature_data.columns:
-                legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
-            else:
-                legend_label = f"Feature {idx}"
-            legend_items.append((legend_label, [peak_boundary_lines]))
-
+            use_color = next(color_gen)
+            self.ax.vlines(
+                x=feature['leftWidth'],
+                ymin=0,
+                ymax=self.data[self.y].max(),
+                lw=self.feature_config.lineWidth,
+                color=use_color,
+                ls=self.feature_config.lineStyle)
+            self.ax.vlines(
+                x=feature['rightWidth'],
+                ymin=0,
+                ymax=self.data[self.y].max(),
+                lw=self.feature_config.lineWidth,
+                color=use_color,
+                ls=self.feature_config.lineStyle)
+        
+        color_gen = ColorGenerator(
+            colormap=self.feature_config.colormap, n=feature_data.shape[0]
+        )
+        
         if self.feature_config.legend.show:
-            pass
+            custom_lines = [Line2D([0], [0], color=next(color_gen), lw=self.feature_config.lineWidth) for i in range(len(feature_data))]
+            if "q_value" in feature_data.columns:
+                legend_labels = [f"Feature {idx} (q-value: {feature['q_value']:.4f})"]
+            else:
+                legend_labels = [f"Feature {idx}"]
+
+            matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(self.feature_config.legend.loc)
+            self.ax.legend(custom_lines, legend_labels, loc=matplotlibLegendLoc, title=self.feature_config.legend.title, prop={'size': self.feature_config.legend.fontsize}, bbox_to_anchor=self.feature_config.legend.bbox_to_anchor)
 
 
 
