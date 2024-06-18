@@ -183,12 +183,20 @@ class MATPLOTLIBPlot(ABC):
     def _modify_x_range(
         self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
     ):
-        pass
+        start, end = x_range
+        if padding is not None:
+            start = start - (start * padding[0])
+            end = end + (end * padding[1])
+        self.ax.set_xlim(start, end)
     
     def _modify_y_range(
         self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
     ):
-        pass
+        start, end = y_range
+        if padding is not None:
+            start = start - (start * padding[0])
+            end = end + (end * padding[1])
+        self.ax.set_ylim(start, end)
     
     def generate(self, **kwargs):
         """
@@ -198,7 +206,7 @@ class MATPLOTLIBPlot(ABC):
         return self.ax
     
     def show(self):
-        pass
+        plt.show()
     
 class PlanePlot(MATPLOTLIBPlot, ABC):
     """
@@ -296,12 +304,29 @@ class VLinePlot(LinePlot):
         self._update_plot_aes(newlines, **kwargs)
 
     @classmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def _plot(cls, ax, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a vertical line
         """
+        color_gen = kwargs.pop("line_color", None)
         
-        pass
+        legend_lines = []
+        legend_labels = []
+        
+        if by is None:
+            for _, row in data.iterrows():
+                line, = ax.plot([data[x], data[x]], [0, data[y]], color=next(color_gen))
+            
+            return ax, (None, None)
+        else:
+            for group, df in data.groupby(by):
+                line, = ax.plot(df[x], 
+                                df[y], 
+                                color=next(color_gen))
+                legend_lines.append(line)
+                legend_labels.append(group)
+            return ax, (legend_lines, legend_labels)
+        
 
     def _add_annotation(self, fig, data, x, y, **kwargs):
         pass
@@ -409,17 +434,14 @@ class ChromatogramPlot(LinePlot):
                 color=use_color,
                 ls=self.feature_config.lineStyle)
         
-        color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=feature_data.shape[0]
-        )
-        
-        if self.feature_config.legend.show:
-            custom_lines = [Line2D([0], [0], color=next(color_gen), lw=self.feature_config.lineWidth) for i in range(len(feature_data))]
-            if "q_value" in feature_data.columns:
-                legend_labels = [f"Feature {idx} (q-value: {feature['q_value']:.4f})"]
-            else:
-                legend_labels = [f"Feature {idx}"]
+            if self.feature_config.legend.show:
+                custom_lines = [Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth) for i in range(len(feature_data))]
+                if "q_value" in feature_data.columns:
+                    legend_labels = [f"Feature {idx} (q-value: {feature['q_value']:.4f})"]
+                else:
+                    legend_labels = [f"Feature {idx}"]
 
+        if self.feature_config.legend.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(self.feature_config.legend.loc)
             self.ax.legend(custom_lines, legend_labels, loc=matplotlibLegendLoc, title=self.feature_config.legend.title, prop={'size': self.feature_config.legend.fontsize}, bbox_to_anchor=self.feature_config.legend.bbox_to_anchor)
 
@@ -491,7 +513,7 @@ class SpectrumPlot(VLinePlot):
                 for ref_spec in reference_spectrum:
                     ref_spec[y] = ref_spec[y] * -1
                     self.add_mirror_spectrum(
-                        super(), self.fig, new_data=ref_spec, line_color=color_gen
+                        super(), self.ax, new_data=ref_spec, line_color=color_gen
                     )
 
     def _prepare_data(
@@ -520,10 +542,10 @@ class SpectrumPlot(VLinePlot):
 
         return spectrum, reference_spectrum
 
-    def add_mirror_spectrum(self, plot_obj, fig: figure, new_data: DataFrame, **kwargs):
+    def add_mirror_spectrum(self, plot_obj, ax, new_data: DataFrame, **kwargs):
         kwargs["new_data"] = new_data
-        plot_obj._make_plot(fig, **kwargs)
-        
+        plot_obj._make_plot(ax, **kwargs)
+        ax.plot(ax.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
 
 
 class FeatureHeatmapPlot(ScatterPlot):
