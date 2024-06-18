@@ -172,13 +172,14 @@ class MATPLOTLIBPlot(ABC):
         ax.grid(self.grid)
     
     def _add_legend(self, ax, legend):
-        matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.legend.loc)
-        legend = ax.legend(*legend,
-                           loc=matplotlibLegendLoc,
-                           title=self.legend.title,
-                           prop={'size': self.legend.fontsize},
-                           bbox_to_anchor=self.legend.bbox_to_anchor)
-        legend.get_title().set_fontsize(str(self.legend.fontsize))
+        if legend is not None:
+            matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.legend.loc)
+            legend = ax.legend(*legend,
+                            loc=matplotlibLegendLoc,
+                            title=self.legend.title,
+                            prop={'size': self.legend.fontsize},
+                            bbox_to_anchor=self.legend.bbox_to_anchor)
+            legend.get_title().set_fontsize(str(self.legend.fontsize))
     
     def _modify_x_range(
         self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
@@ -355,12 +356,36 @@ class ScatterPlot(PlanePlot):
         self._update_plot_aes(newlines, **kwargs)
 
     @classmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def _plot(cls, ax, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a scatter plot
         """
-        
-        pass
+        color_gen = kwargs.pop("line_color", None)
+        z = kwargs.pop("z", None)
+
+        legend_lines = []
+        legend_labels = []
+        if by is None:
+            if z is not None:
+                use_color = data[z]
+            else:
+                use_color =  next(color_gen)
+            scatter = ax.scatter([data[x], data[x]], [0, data[y]], c=use_color, **kwargs)
+            
+            return ax, None
+        else:
+            for group, df in data.groupby(by):
+                if z is not None:
+                    use_color = df[z]
+                else:
+                    use_color =  next(color_gen)
+                scatter = ax.scatter(df[x],
+                                df[y],
+                                c=use_color,
+                                **kwargs)
+                legend_lines.append(scatter)
+                legend_labels.append(group)
+            return ax, (legend_lines, legend_labels)
 
 
 class ChromatogramPlot(LinePlot):
@@ -583,6 +608,15 @@ class FeatureHeatmapPlot(ScatterPlot):
 
 
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+        
+        self.ax = super().generate(
+             z=z,
+             marker="s",
+             s=20,
+             edgecolors="none",
+             cmap="afmhot_r",
+             **other_kwargs
+        )
         
         if self.add_marginals:
             #############
