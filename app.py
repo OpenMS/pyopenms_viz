@@ -148,7 +148,7 @@ def get_input_col_kind(params, plot_type):
         return {"x":params['x'], "y":params['y'], "kind":plot_type}
     
 
-backend_map = {"MATPLOTLIB": "matplotlib", "BOKEH": "pomsvib", "PLOTLY": "plotly"}
+backend_map = {"MATPLOTLIB": "pomsvim", "BOKEH": "pomsvib", "PLOTLY": "pomsvip"}
 
 if "exp_df" not in st.session_state:
     load_demo_mzML()
