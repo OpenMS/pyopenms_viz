@@ -288,8 +288,8 @@ class PlanePlot(PLOTLYPlot, ABC):
             
         self.x = x
         self.y = y
-      
-  
+
+
 class LinePlot(PlanePlot):
     """
     Class for assembling a Plotly line plot
@@ -430,7 +430,63 @@ class VLinePlot(LinePlot):
 
 
 class ScatterPlot(PlanePlot):
-    pass
+    
+    @property
+    def _kind(self) -> Literal["scatter"]:
+        return "scatter"
+    
+    def __init__(self, data, x, y, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
+        
+    def _make_plot(self, fig: Figure, **kwargs) -> Figure:
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        custom_hover_data = kwargs.pop("custom_hover_data", None)
+        
+        traces = self._plot(self.data, self.x, self.y, self.by, **kwargs)
+        fig.add_traces(data=traces)
+        
+        self._update_plot_aes(fig)
+        
+        if tooltips is not None:
+            self._add_tooltips(fig, tooltips, custom_hover_data)
+            
+    @classmethod
+    def _plot(cls, data, x, y, by=None, **kwargs) -> Figure:
+        color_gen = kwargs.pop("line_color", None)
+        marker_dict = kwargs.pop("marker", None)
+        
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        traces = []
+        if by is None:
+            if marker_dict is None:
+                marker_dict = dict(color=next(color_gen))
+            trace = go.Scattergl(
+                x=data[x],
+                y=data[y],
+                mode="markers",
+                marker=dict(
+                    color=next(color_gen)
+                )
+            )
+            traces.append(trace)
+        else:
+            for group, df in data.groupby(by):
+                if marker_dict is None:
+                    marker_dict = dict(color=next(color_gen))
+                    
+                trace = go.Scatter(
+                    x=df[x],
+                    y=df[y],
+                    mode="markers",
+                    name=group,
+                    marker=marker_dict, 
+                    **kwargs
+                )
+                traces.append(trace)
+                
+        return traces
 
 
 class ChromatogramPlot(LinePlot):
@@ -514,8 +570,8 @@ class ChromatogramPlot(LinePlot):
     def update_info(self, arg):
         print("Relayout event detected")
         print(arg)
-        
-    
+
+
 class MobilogramPlot(ChromatogramPlot):
     
     @property
@@ -629,5 +685,45 @@ class SpectrumPlot(VLinePlot):
 
 
 class FeatureHeatmapPlot(ScatterPlot):
-    pass
 
+    @property
+    def _kind(self) -> Literal["feature_heatmap"]:
+        return "feature_heatmap"
+
+    def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = FeautureHeatmapPlotterConfig()
+
+        if add_marginals:
+            kwargs["config"].title = None
+
+        super().__init__(data, x, y, **kwargs)
+        self.zlabel = zlabel
+        self.add_marginals = add_marginals
+
+        self.plot(x, y, z, **kwargs)
+        if self.show_plot:
+            self.show()
+
+    @staticmethod
+    def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
+        # First fill NaNs with 0s for numerical columns and '.' for categorical columns
+        grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
+        return grouped
+
+    def plot(self, x, y, z, **kwargs):
+
+        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+
+
+        self.fig = super().generate(
+            marker=dict(color=self.data[z].unique(), colorscale="Plasma", showscale=False, symbol='square', size=10, opacity=0.4),
+            **other_kwargs,
+        )
+
+        # self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+
+        self._add_bounding_box_drawer(self.fig)
+
+        if self.add_marginals:
+            pass
