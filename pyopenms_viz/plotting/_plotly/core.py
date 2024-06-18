@@ -886,7 +886,7 @@ class FeatureHeatmapPlot(ScatterPlot):
             fig_m.update_layout(
                 height=self.height,
                 width=self.width,
-                title=self.config.title
+                title=self.title
             )
             
             # Overwrite the figure with the new grid figure
