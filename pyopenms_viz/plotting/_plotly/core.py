@@ -193,7 +193,7 @@ class PLOTLYPlot(ABC):
         
         # Add x-axis grid lines and ticks
         fig.update_xaxes(
-            showgrid=self.config.grid,  # Add x-axis grid lines
+            showgrid=self.grid,  # Add x-axis grid lines
             showline=True, 
             linewidth=1, 
             linecolor='black',
@@ -204,7 +204,7 @@ class PLOTLYPlot(ABC):
 
         # Add y-axis grid lines and ticks
         fig.update_yaxes(
-            showgrid=self.config.grid,  # Add y-axis grid lines
+            showgrid=self.grid,  # Add y-axis grid lines
             showline=True, 
             linewidth=1, 
             linecolor='black',
@@ -310,7 +310,7 @@ class LinePlot(PlanePlot):
         traces = self._plot(self.data, self.x, self.y, self.by, **kwargs)
         fig.add_traces(data=traces)
         
-        self._update_plot_aes(self.fig)
+        self._update_plot_aes(fig)
         
         if tooltips is not None:
             self._add_tooltips(fig, tooltips, custom_hover_data)
@@ -355,7 +355,78 @@ class LinePlot(PlanePlot):
 
 
 class VLinePlot(LinePlot):
-    pass
+    
+    @property
+    def _kind(self) -> Literal["vline"]:
+        return "vline"
+    
+    def __init__(self, data, x, y, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
+        
+    def _make_plot(self, fig: Figure, **kwargs) -> Figure:
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        use_data = kwargs.pop("new_data", self.data)
+        custom_hover_data = kwargs.pop("custom_hover_data", None)
+        
+        traces = self._plot(use_data, self.x, self.y, self.by, **kwargs)
+        fig.add_traces(data=traces)
+        
+        self._update_plot_aes(fig)
+        
+        if tooltips is not None:
+            self._add_tooltips(fig, tooltips, custom_hover_data)
+        
+    @classmethod
+    def _plot(cls, data, x, y, by=None, **kwargs) -> Figure:
+        color_gen = kwargs.pop("line_color", None)
+        
+        traces = []
+        if by is None:
+            line_color = next(color_gen)
+            if "showlegend" in kwargs:
+                showlegend = kwargs["showlegend"]
+                first_group_trace_showlenged = showlegend
+            else:
+                first_group_trace_showlenged = True
+            for _, row in data.iterrows():
+                trace = go.Scattergl(
+                    x=[row[x]] * 2,
+                    y=[0, row[y]],
+                    mode="lines",
+                    name="Trace",
+                    legendgroup="Trace",
+                    showlegend=first_group_trace_showlenged,
+                    line=dict(
+                        color=line_color
+                        )
+                )
+                first_group_trace_showlenged = False
+                traces.append(trace)
+        else:
+            for group, df in data.groupby(by):
+                line_color = next(color_gen)
+                if "showlegend" in kwargs:
+                    showlegend = kwargs["showlegend"]
+                    first_group_trace_showlenged = showlegend
+                else:
+                    first_group_trace_showlenged = True
+                for _, row in df.iterrows():
+                    trace = go.Scattergl(
+                        x=[row[x]] * 2,
+                        y=[0, row[y]],
+                        mode="lines",
+                        name=group,
+                        legendgroup=group,
+                        showlegend=first_group_trace_showlenged,
+                        line=dict(
+                            color=line_color
+                        )
+                    )
+                    first_group_trace_showlenged = False
+                    traces.append(trace)
+                
+        return traces
 
 
 class ScatterPlot(PlanePlot):
@@ -445,7 +516,6 @@ class ChromatogramPlot(LinePlot):
         print(arg)
         
     
-
 class MobilogramPlot(ChromatogramPlot):
     
     @property
@@ -465,7 +535,97 @@ class MobilogramPlot(ChromatogramPlot):
 
 
 class SpectrumPlot(VLinePlot):
-    pass
+    
+    @property
+    def _kind(self) -> Literal["spectrum"]:
+        return "spectrum"
+    
+    def __init__(self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = SpectrumPlotterConfig()
+        
+        super().__init__(data, x, y, **kwargs)
+        
+        self.reference_spectrum = reference_spectrum
+        
+        self.plot(x, y)
+        if self.show_plot:
+            self.show()
+            
+    def plot(self, x, y, **kwargs):
+        spectrum, reference_spectrum = self._prepare_data(
+            self.data, y, self.reference_spectrum
+        )
+        
+        for spec in spectrum:
+
+            color_gen = ColorGenerator()
+            
+            available_columns = self.data.columns.tolist()
+            # Get index (not a column in dataframe) data first for customer hover data
+            custom_hover_data = [self.data.index]
+            # Get the rest of the columns
+            custom_hover_data  += [self.data[col] for col in ["mz", "Annotation", "product_mz"] if col in available_columns]
+            
+            
+            TOOLTIPS = [
+                "Index: %{customdata[0]}",
+                "Retention Time: %{x:.2f}",
+                "Intensity: %{y:.2f}",
+            ]
+            
+            custom_hover_data_index = 1
+            if "mz" in self.data.columns:
+                TOOLTIPS.append("m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
+                custom_hover_data_index += 1
+            if "Annotation" in self.data.columns:
+                TOOLTIPS.append("Annotation: %{customdata[" + str(custom_hover_data_index) + "]}")
+                custom_hover_data_index += 1
+            if "product_mz" in self.data.columns:
+                TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
+            
+            self.fig = super().generate(line_color=color_gen, tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data))
+        
+            if self.config.mirror_spectrum:
+                color_gen = ColorGenerator()
+                for ref_spec in reference_spectrum:
+                    ref_spec[y] = ref_spec[y] * -1
+                    self.add_mirror_spectrum(super(), self.fig, new_data=ref_spec, line_color=color_gen, showlegend=False)
+                    self.fig.add_hline(y=0, line_color="black", line=dict(width=1))
+        
+        # self._modify_y_range((0, self.data[y].max()), (0, 0.1))
+        self._modify_x_range((self.data[x].min(), self.data[x].max()), (0.1, 0.1))
+            
+        
+    def _prepare_data(
+        self,
+        spectrum: Union[DataFrame, list[DataFrame]],
+        y: str,
+        reference_spectrum: Union[DataFrame, list[DataFrame]] | None = None,
+    ) -> Tuple[list, list]:
+        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
+
+        # Ensure input spectra dataframes are in lists
+        if not isinstance(spectrum, list):
+            spectrum = [spectrum]
+
+        if reference_spectrum is None:
+            reference_spectrum = []
+        elif not isinstance(reference_spectrum, list):
+            reference_spectrum = [reference_spectrum]
+        # Convert to relative intensity if required
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            combined_spectra = spectrum + (
+                reference_spectrum if reference_spectrum else []
+            )
+            for df in combined_spectra:
+                df[y] = df[y] / df[y].max() * 100
+
+        return spectrum, reference_spectrum
+    
+    def add_mirror_spectrum(self, plot_obj, fig: Figure, new_data: DataFrame, **kwargs):
+        kwargs["new_data"] = new_data
+        plot_obj._make_plot(fig, **kwargs)
 
 
 class FeatureHeatmapPlot(ScatterPlot):
