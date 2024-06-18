@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Literal, List, Tuple, Union
 
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
+from plotly.subplots import make_subplots
 
 from pandas.core.frame import DataFrame
 from pandas.errors import AbstractMethodError
@@ -224,7 +225,19 @@ class PLOTLYPlot(ABC):
     def _add_bounding_box_drawer(self, fig, **kwargs):
         fig.update_layout(modebar_add=['drawrect',
                                         'eraseshape'
-                                       ])
+                                       ],
+                          newshape=dict(
+                                showlegend=True,
+                                label=dict(
+                                           texttemplate="x0: %{x0:.2f} | x1: %{x1:.2f}<br>y0: %{y0:.2f} | y1: %{y1:.2f}",
+                                           textposition="top left",),
+                                line_color="#F02D1A",
+                                fillcolor=None,
+                                line=dict(
+                                    dash="dash",
+                                ),
+                                opacity=0.5
+                            ))
     
     def _add_bounding_vertical_drawer(self, fig, label_suffix, **kwargs):
         
@@ -754,4 +767,127 @@ class FeatureHeatmapPlot(ScatterPlot):
         self._add_bounding_box_drawer(self.fig)
 
         if self.add_marginals:
-            pass
+            #############
+            ##  X-Axis Plot
+            
+            # get cols to integrate over and exclude y and z
+            group_cols = [x]
+            if 'Annotation' in self.data.columns:
+                group_cols.append('Annotation')
+                
+            x_data = self._integrate_data_along_dim(self.data, group_cols, z)
+            
+            x_config = self.config.copy()
+            x_config.ylabel = self.zlabel
+            x_config.y_axis_location = 'right'
+            x_config.legend.show = True
+            
+            color_gen = ColorGenerator()
+            
+            # remove 'config' from class_kwargs
+            x_plot_kwargs = class_kwargs.copy()
+            x_plot_kwargs.pop('config', None)
+            
+            x_plot_obj = LinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
+            x_fig = x_plot_obj.generate(line_color=color_gen)
+            # x_fig.add_hline(y=0, line_color="black", line=dict(width=1))
+            x_fig.update_xaxes(visible=False)
+            
+            #############
+            ##  Y-Axis Plot
+            
+            group_cols = [y]
+            if 'Annotation' in self.data.columns:
+                group_cols.append('Annotation')
+                
+            y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+            
+            y_config = self.config.copy()
+            y_config.xlabel = self.zlabel
+            y_config.y_axis_location = 'left'
+            y_config.legend.show = True
+            y_config.legend.loc = 'below'
+            
+            color_gen = ColorGenerator()
+            
+            # remove 'config' from class_kwargs
+            y_plot_kwargs = class_kwargs.copy()
+            y_plot_kwargs.pop('config', None)
+            
+            y_plot_obj = LinePlot(y_data, z, y, config=y_config, **y_plot_kwargs)
+            y_fig = y_plot_obj.generate(line_color=color_gen)
+            # y_fig.add_vline(x=0, line_color="black", line=dict(width=1))
+            y_fig.update_xaxes(range=[0, y_data[z].max()])
+            y_fig.update_yaxes(range=[y_data[y].min(), y_data[y].max()])
+            y_fig.update_layout(xaxis_title = self.ylabel, yaxis_title = self.zlabel)
+            
+            #############
+            ##  Combine Plots
+            
+             # Create a figure with subplots
+            fig_m = make_subplots(
+                rows=2, cols=2,
+                shared_xaxes=True, shared_yaxes=True,
+                vertical_spacing=0, horizontal_spacing=0,
+                subplot_titles=(None, f"Integrated {self.xlabel}", f"Integrated {self.ylabel}", None),
+                specs=[[{}, {"type": "xy", "rowspan": 1, "secondary_y":True}],
+                    [{"type": "xy", "rowspan": 1, "secondary_y":False},     {"type": "xy", "rowspan": 1, "secondary_y":False}]]
+            )
+            
+            # Add the heatmap to the first row
+            for trace in self.fig.data:
+                trace.showlegend = False
+                trace.legendgroup = trace.name
+                fig_m.add_trace(trace, row=2, col=2, secondary_y=False)
+                
+            # Update the heatmao layout
+            fig_m.update_layout(self.fig.layout)
+            fig_m.update_yaxes(row=2, col=2, secondary_y=False) 
+            
+            # Add the x-axis plot to the second row
+            for trace in x_fig.data:
+    
+                trace.legendgroup = trace.name
+                fig_m.add_trace(trace, row=1, col=2, secondary_y=True)
+            
+            # Update the XIC layout
+            fig_m.update_layout(x_fig.layout)
+
+            # Make the y-axis of fig_xic independent
+            fig_m.update_yaxes(overwrite=True, row=1, col=2, secondary_y=True)
+            
+            # Manually adjust the domain of secondary y-axis to only span the first row of the subplot
+            fig_m['layout']['yaxis3']['domain'] = [0.5, 1.0]
+            
+            # Add the XIM plot to the second row
+            for trace in y_fig.data:
+                trace.showlegend = False
+                trace.legendgroup = trace.name
+                fig_m.add_trace(trace, row=2, col=1)
+
+            # Update the XIM layout
+            fig_m.update_layout(y_fig.layout)
+
+            # Make the x-axis of fig_xim independent
+            fig_m.update_xaxes(overwrite=True, row=2, col=1)
+
+            # Reverse the x-axis range for the XIM subplot
+            fig_m.update_xaxes(autorange="reversed", row=2, col=1)
+
+            # Update xaxis properties
+            fig_m.update_xaxes(title_text=self.xlabel, row=2, col=2)
+            fig_m.update_xaxes(title_text=self.zlabel,  row=2, col=1)
+
+            # Update yaxis properties
+            fig_m.update_yaxes(title_text=self.zlabel, row=1, col=2)
+            fig_m.update_yaxes(title_text=self.ylabel, row=2, col=1)
+
+            # Update the layout
+            fig_m.update_layout(
+                height=self.height,
+                width=self.width,
+                title=self.config.title
+            )
+            
+            # Overwrite the figure with the new grid figure
+            self.fig = fig_m
