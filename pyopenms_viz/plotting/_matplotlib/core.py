@@ -341,7 +341,6 @@ class LinePlot(PlanePlot):
         return "line"
 
     def __init__(self, data, x, y, **kwargs) -> None:
-        # print(f"LINEPLOT kwargs: {kwargs}\n\n")
         super().__init__(data, x, y, **kwargs)
 
     def _make_plot(self, ax: Axes, **kwargs) -> None:

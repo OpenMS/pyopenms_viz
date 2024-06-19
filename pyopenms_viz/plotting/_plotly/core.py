@@ -71,7 +71,6 @@ class PLOTLYPlot(ABC):
                 and hasattr(self, attr)
                 and self.__dict__[attr] is None
             ):
-                # print(f"Updating {attr} with {value} and initial value {getattr(self, attr)}\n\n")
                 setattr(self, attr, value)
 
     def _separate_class_kwargs(self, **kwargs):
@@ -552,7 +551,6 @@ class ChromatogramPlot(LinePlot):
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
         
         self._add_bounding_vertical_drawer(self.fig, self.x)
-        # self.fig.observe(self.update_info, names=["_js2py_layoutDelta"], type="change")
         
         if self.feature_data is not None:
             self._add_peak_boundaries(self.fig, self.feature_data)
@@ -580,9 +578,9 @@ class ChromatogramPlot(LinePlot):
             )
             )
     
-    def update_info(self, arg):
-        print("Relayout event detected")
-        print(arg)
+    def get_manual_bounding_box_coords(self, arg):
+        # TODO: Implement this method, plotly doesn't have a direct easy way of extracting the relayout events. Would need to implement / add a dash dependency to add a callback to extract the relayout events
+        pass
 
 
 class MobilogramPlot(ChromatogramPlot):
@@ -751,6 +749,7 @@ class FeatureHeatmapPlot(ScatterPlot):
         if "product_mz" in self.data.columns:
             TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
         
+        # TODO: The current marker colorscale is not working as expected. Need to fix this. It doesn't plot the right intensity values, as compared to bokeh and matplotlib
         self.fig = super().generate(
             marker=dict(
                 color=self.data[z].unique(), 
@@ -760,9 +759,6 @@ class FeatureHeatmapPlot(ScatterPlot):
             tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data),
             **other_kwargs,
         )
-
-        # self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
-        
 
         self._add_bounding_box_drawer(self.fig)
 
@@ -790,7 +786,6 @@ class FeatureHeatmapPlot(ScatterPlot):
             
             x_plot_obj = LinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
             x_fig = x_plot_obj.generate(line_color=color_gen)
-            # x_fig.add_hline(y=0, line_color="black", line=dict(width=1))
             x_fig.update_xaxes(visible=False)
             
             #############
@@ -816,7 +811,6 @@ class FeatureHeatmapPlot(ScatterPlot):
             
             y_plot_obj = LinePlot(y_data, z, y, config=y_config, **y_plot_kwargs)
             y_fig = y_plot_obj.generate(line_color=color_gen)
-            # y_fig.add_vline(x=0, line_color="black", line=dict(width=1))
             y_fig.update_xaxes(range=[0, y_data[z].max()])
             y_fig.update_yaxes(range=[y_data[y].min(), y_data[y].max()])
             y_fig.update_layout(xaxis_title = self.ylabel, yaxis_title = self.zlabel)

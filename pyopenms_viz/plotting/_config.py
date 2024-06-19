@@ -5,6 +5,7 @@ from enum import Enum
 from copy import deepcopy
 
 
+# TODO: This class could be removed, or changed to backend and then the config can be interpolated into the dataframe plot call
 class Engine(Enum):
     PLOTLY = 1
     BOKEH = 2
@@ -43,11 +44,11 @@ class LegendConfig:
 @dataclass(kw_only=True)
 class FeatureConfig:
     def default_legend_factory():
-        return LegendConfig(title="Features", loc='right', bbox_to_anchor=(1.5, 0.5))
+        return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
 
     colormap: str = "viridis"
     lineWidth: float = 1
-    lineStyle: str = 'solid'
+    lineStyle: str = "solid"
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
 
@@ -74,7 +75,7 @@ class _BasePlotterConfig(ABC):
     @property
     def engine_enum(self):
         return Engine[self.engine]
-    
+
     def copy(self):
         return deepcopy(self)
 
@@ -83,7 +84,7 @@ class _BasePlotterConfig(ABC):
 class SpectrumPlotterConfig(_BasePlotterConfig):
     def default_legend_factory():
         return LegendConfig(title="Transitions")
-    
+
     # Plot Aesthetics
     title: str = "Spectrum Plot"
     xlabel: str = "mass-to-charge"
@@ -99,13 +100,13 @@ class SpectrumPlotterConfig(_BasePlotterConfig):
     custom_annotation_color: bool = (False,)
     custom_annotation_text: bool = False
     legend: LegendConfig = field(default_factory=default_legend_factory)
-    
+
 
 @dataclass(kw_only=True)
 class ChromatogramPlotterConfig(_BasePlotterConfig):
     def default_legend_factory():
         return LegendConfig(title="Transitions")
-    
+
     # Plot Aesthetics
     title: str = "Chromatogram Plot"
     xlabel: str = "Retention Time"
@@ -117,7 +118,7 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     min_border: int = 0
     show_plot: bool = True
     lineWidth: float = 1
-    lineStyle: str = 'solid'
+    lineStyle: str = "solid"
     plot_type: str = "lineplot"
     legend: LegendConfig = field(default_factory=default_legend_factory)
     feature_config: FeatureConfig = field(default_factory=FeatureConfig)
@@ -127,7 +128,7 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
 class FeautureHeatmapPlotterConfig(_BasePlotterConfig):
     def default_legend_factory():
         return LegendConfig(title="Transitions")
-    
+
     # Plot Aesthetics
     title: str = "Feature Heatmap Plot"
     xlabel: str = "Retention Time"
@@ -139,11 +140,11 @@ class FeautureHeatmapPlotterConfig(_BasePlotterConfig):
     min_border: int = 0
     show_plot: bool = True
     lineWidth: float = 1
-    lineStyle: str = 'solid'
+    lineStyle: str = "solid"
     plot_type: str = "lineplot"
     add_marginals: bool = False
     legend: LegendConfig = field(default_factory=default_legend_factory)
     feature_config: FeatureConfig = field(default_factory=FeatureConfig)
 
     # Data Specific Attributes
-    ion_mobility: bool = False # if True, plot ion mobility as well in a heatmap
+    ion_mobility: bool = False  # if True, plot ion mobility as well in a heatmap

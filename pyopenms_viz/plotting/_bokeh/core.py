@@ -60,6 +60,7 @@ class BOKEHPlot(ABC):
 
     data: DataFrame
 
+    # TODO: This method and the two below it are shared across the backends and could be abstracted out to a higher level
     def _validate_frame(self, data):
         """
         Validate the input data frame.
@@ -84,7 +85,6 @@ class BOKEHPlot(ABC):
                 and hasattr(self, attr)
                 and self.__dict__[attr] is None
             ):
-                # print(f"Updating {attr} with {value} and initial value {getattr(self, attr)}\n\n")
                 setattr(self, attr, value)
 
     def _separate_class_kwargs(self, **kwargs):
@@ -139,8 +139,6 @@ class BOKEHPlot(ABC):
 
         # Set Attributes
         self.data = self._validate_frame(data)
-
-        # print(f"HOME kwargs: {kwargs}\n\n")
 
         # Config
         self.kind = kind
@@ -332,13 +330,13 @@ class BOKEHPlot(ABC):
         show(app)
 
 
+# TODO: This class is shared across the backends and could be abstracted out to a higher level
 class PlanePlot(BOKEHPlot, ABC):
     """
     Abstract class for assembling a Bokeh plot on a plane
     """
 
     def __init__(self, data, x, y, **kwargs) -> None:
-        # print(f"PLANEPLOT kwargs: {kwargs}\n\n")
         BOKEHPlot.__init__(self, data, **kwargs)
         if x is None or y is None:
             raise ValueError(
@@ -363,7 +361,6 @@ class LinePlot(PlanePlot):
         return "line"
 
     def __init__(self, data, x, y, **kwargs) -> None:
-        # print(f"LINEPLOT kwargs: {kwargs}\n\n")
         super().__init__(data, x, y, **kwargs)
 
     def _make_plot(self, fig: figure, **kwargs) -> None:
@@ -470,6 +467,7 @@ class VLinePlot(LinePlot):
             return fig, legend
 
     def _add_annotation(self, fig, data, x, y, **kwargs):
+        #TODO: Implement text label annotations
         pass
 
 
