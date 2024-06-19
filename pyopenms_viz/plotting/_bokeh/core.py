@@ -52,71 +52,8 @@ class BOKEHPlot(BasePlot):
     Base class for assembling a Bokeh plot
     """
 
-    def __init__(
-        self,
-        data,
-        kind=None,
-        by: str | None = None,
-        subplots: bool | None = None,
-        sharex: bool | None = None,
-        sharey: bool | None = None,
-        height: int | None = None,
-        width: int | None = None,
-        grid: bool | None = None,
-        toolbar_location: str | None = None,
-        fig: figure | None = None,
-        title: str | None = None,
-        xlabel: str | None = None,
-        ylabel: str | None = None,
-        x_axis_location: str | None = None,
-        y_axis_location: str | None = None,
-        min_border: int | None = None,
-        show_plot: bool | None = None,
-        legend: LegendConfig | None = None,
-        feature_config: FeatureConfig | None = None,
-        config=None,
-        **kwargs,
-    ) -> None:
-
-        try:
-            from bokeh.plotting import figure, show
-            from bokeh.models import ColumnDataSource, Legend
-        except ImportError:
-            raise ImportError(
-                "Bokeh is not installed. Please install Bokeh to use this plotting library in pyopenms-viz."
-            )
-
-        # Set Attributes
-        self.data = self._validate_frame(data)
-
-        # Config
-        self.kind = kind
-        self.by = by
-        self.subplots = subplots
-        self.sharex = sharex
-        self.sharey = sharey
-        self.height = height
-        self.width = width
-        self.grid = grid
-        self.toolbar_location = toolbar_location
-        self.fig = fig
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.x_axis_location = x_axis_location
-        self.y_axis_location = y_axis_location
-        self.min_border = min_border
-        self.show_plot = show_plot
-        self.legend = legend
-        self.feature_config = feature_config
-        self.config = config
-
-        # self.setup_config(**kwargs)
-
-        if config is not None:
-            self._update_from_config(config)
-
-        if fig is None:
+    def _create_figure(self) -> None:
+        if self.fig is None:
             self.fig = figure(
                 title=self.title,
                 x_axis_label=self.xlabel,
@@ -128,9 +65,14 @@ class BOKEHPlot(BasePlot):
                 min_border=self.min_border
             )
 
-        if self.by is not None:
-            # Ensure by column data is string
-            self.data[self.by] = self.data[self.by].astype(str)
+    def _load_extension(self) -> None:
+        try:
+            from bokeh.plotting import figure, show
+            from bokeh.models import ColumnDataSource, Legend
+        except ImportError:
+            raise ImportError(
+                f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
+            )
 
     def _make_plot(self, fig: figure) -> None:
         raise AbstractMethodError(self)

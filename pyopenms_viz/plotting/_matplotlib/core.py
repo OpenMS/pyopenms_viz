@@ -44,110 +44,28 @@ class MATPLOTLIBPlot(BasePlot):
         data (DataFrame): The input data frame.
     """
 
-    def __init__(
-        self,
-        data,
-        kind=None,
-        by: str | None = None,
-        subplots: bool | None = None,
-        sharex: bool | None = None,
-        sharey: bool | None = None,
-        height: int | None = None,
-        width: int | None = None,
-        grid: bool | None = None,
-        toolbar_location: str | None = None,
-        fig: figure | None = None,
-        ax: Axes | None = None,
-        title: str | None = None,
-        xlabel: str | None = None,
-        ylabel: str | None = None,
-        x_axis_location: str | None = None,
-        y_axis_location: str | None = None,
-        min_border: int | None = None,
-        show_plot: bool | None = None,
-        legend: LegendConfig | None = None,
-        feature_config: FeatureConfig | None = None,
-        config=None,
-        **kwargs,
-    ) -> None:
-        """
-        Initialize the MATPLOTLIBPlot object.
-
-        Args:
-            data (DataFrame): The input data frame.
-            kind (str, optional): The kind of plot to assemble. Defaults to None.
-            by (str, optional): The column to group the data by. Defaults to None.
-            subplots (bool, optional): Whether to create subplots. Defaults to None.
-            sharex (bool, optional): Whether to share the x-axis. Defaults to None.
-            sharey (bool, optional): Whether to share the y-axis. Defaults to None.
-            height (int, optional): The height of the plot. Defaults to None.
-            width (int, optional): The width of the plot. Defaults to None.
-            grid (bool, optional): Whether to show grid lines. Defaults to None.
-            toolbar_location (str, optional): The location of the toolbar. Defaults to None.
-            fig (figure, optional): The figure object. Defaults to None.
-            ax (None, optional): The axes object. Defaults to None.
-            title (str, optional): The title of the plot. Defaults to None.
-            xlabel (str, optional): The label for the x-axis. Defaults to None.
-            ylabel (str, optional): The label for the y-axis. Defaults to None.
-            x_axis_location (str, optional): The location of the x-axis. Defaults to None.
-            y_axis_location (str, optional): The location of the y-axis. Defaults to None.
-            min_border (int, optional): The minimum border size. Defaults to None.
-            show_plot (bool, optional): Whether to show the plot. Defaults to None.
-            legend (LegendConfig, optional): The legend configuration. Defaults to None.
-            feature_config (FeatureConfig, optional): The feature configuration. Defaults to None.
-            config (None, optional): The plot configuration. Defaults to None.
-            **kwargs: Additional keyword arguments.
-
-        Raises:
-            ImportError: If matplotlib is not installed.
-        """
+    def _load_extension(self):
+        '''
+        Load the matplotlib extension.
+        '''
         try:
-            from matplotlib import pyplot as plt
+            from matplotlib import pyplot
         except ImportError:
             raise ImportError(
-                "matplotlib is not installed. Please install matplotlib to use this plotting library in pyopenms-viz"
+                f"matplotlib is not installed. Please install using `pip install matplotlib` to use this plotting library in pyopenms-viz"
             )
 
-        # Set Attributes
-        self.data = self._validate_frame(data)
-
-        # Config
-        self.kind = kind
-        self.by = by
-        self.subplots = subplots
-        self.sharex = sharex
-        self.sharey = sharey
-        self.height = height
-        self.width = width
-        self.grid = grid
-        self.toolbar_location = toolbar_location
-        self.fig = fig
-        self.ax = ax
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.x_axis_location = x_axis_location
-        self.y_axis_location = y_axis_location
-        self.min_border = min_border
-        self.show_plot = show_plot
-        self.legend = legend
-        self.feature_config = feature_config
-        self.config = config
-
-        if config is not None:
-            self._update_from_config(config)
-
-        if fig is None:
+    def _create_figure(self):
+        '''
+        Create a figure and axes objects.
+        '''
+        if self.fig is None:
             self.fig, self.ax = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
             self.ax.set_title(self.title)
             self.ax.set_xlabel(self.xlabel)
             self.ax.set_ylabel(self.ylabel)
-
-        if self.by is not None:
-            # Ensure by column data is string
-            self.data[self.by] = self.data[self.by].astype(str)
 
     def _make_plot(self, ax: Axes) -> None:
         """

@@ -39,63 +39,22 @@ class PLOTLYPlot(BasePlot):
     Base class for assembling a Ploty plot
     """
 
-    def __init__(self, 
-                 data,
-                 kind=None,
-                by: str | None = None,
-                subplots: bool | None = None,
-                sharex: bool | None = None,
-                sharey: bool | None = None,
-                height: int | None = None,
-                width: int | None = None,
-                grid: bool | None = None,
-                toolbar_location: str | None = None,
-                fig: Figure | None = None,
-                title: str | None = None,
-                xlabel: str | None = None,
-                ylabel: str | None = None,
-                x_axis_location: str | None = None,
-                y_axis_location: str | None = None,
-                min_border: int | None = None,
-                show_plot: bool | None = None,
-                legend: LegendConfig | None = None,
-                feature_config: FeatureConfig | None = None,
-                config=None,
-                **kwargs
-        ) -> None:
-        
+    def _load_extension(self):
+        '''
+        Tries to load the plotly extensions, if not throw an import error
+        '''
         try:
-            import plotly.graph_objects as go
+            import plotly.graph_objects
         except ImportError:
-            raise ImportError("Plotly is not installed. Please install it using `pip install plotly`.")
+            raise ImportError(
+                f"plotly is not installed. Please install using `pip install plotly` to use this plotting library in pyopenms-viz"
+            )
         
-        self.data = self._validate_frame(data)
-        
-        self.kind = kind
-        self.by = by
-        self.subplots = subplots
-        self.sharex = sharex
-        self.sharey = sharey
-        self.height = height
-        self.width = width
-        self.grid = grid
-        self.toolbar_location = toolbar_location
-        self.fig = fig
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.x_axis_location = x_axis_location
-        self.y_axis_location = y_axis_location
-        self.min_border = min_border
-        self.show_plot = show_plot
-        self.legend = legend
-        self.feature_config = feature_config
-        self.config = config
-        
-        if config is not None:
-            self._update_from_config(config)
-            
-        if fig is None:
+    def _create_figure(self):
+        '''
+        Create a new figure, if a figure is not supplied
+        '''
+        if self.fig is None:
             self.fig = go.Figure()
             self.fig.update_layout(
                 title=self.title,
@@ -104,11 +63,9 @@ class PLOTLYPlot(BasePlot):
                 width=self.width,
                 height=self.height
             )
-        
-        if self.by is not None:
-            # Ensure by column data is string
-            self.data[self.by] = self.data[self.by].astype(str)
     
+ 
+
     def _make_plot(self, fig: Figure, **kwargs) -> Figure:
         raise AbstractMethodError(self)
     

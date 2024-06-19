@@ -8,11 +8,71 @@ import types
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 
+from ._config import LegendConfig, FeatureConfig
+
 
 class BasePlot(ABC):
     """
     Base Class For Assembling a PyViz Plot
     """
+    def __init__(
+        self,
+        data,
+        kind=None,
+        by: str | None = None,
+        subplots: bool | None = None,
+        sharex: bool | None = None,
+        sharey: bool | None = None,
+        height: int | None = None,
+        width: int | None = None,
+        grid: bool | None = None,
+        toolbar_location: str | None = None,
+        fig: "figure" | None = None,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        x_axis_location: str | None = None,
+        y_axis_location: str | None = None,
+        min_border: int | None = None,
+        show_plot: bool | None = None,
+        legend: LegendConfig | None = None,
+        feature_config: FeatureConfig | None = None,
+        config=None,
+        **kwargs,
+    ) -> None:
+
+        # Config
+        self.data = data 
+        self.kind = kind
+        self.by = by
+        self.subplots = subplots
+        self.sharex = sharex
+        self.sharey = sharey
+        self.height = height
+        self.width = width
+        self.grid = grid
+        self.toolbar_location = toolbar_location
+        self.fig = fig
+        self.title = title
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.x_axis_location = x_axis_location
+        self.y_axis_location = y_axis_location
+        self.min_border = min_border
+        self.show_plot = show_plot
+        self.legend = legend
+        self.feature_config = feature_config
+        self.config = config
+
+        if config is not None:
+            self._update_from_config(config)
+
+        if self.by is not None:
+            # Ensure by column data is string
+            self.data[self.by] = self.data[self.by].astype(str)
+
+        self._load_extension()
+        self._create_figure()
 
     @property
     @abstractmethod
@@ -21,8 +81,14 @@ class BasePlot(ABC):
         The kind of plot to assemble. Must be overridden by subclasses.
         """
         raise NotImplementedError
-
-    data: DataFrame
+    
+    @abstractmethod
+    def _create_figure(self) -> None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def _load_extension(self) -> None:
+        raise NotImplementedError
 
     def _update_from_config(self, config) -> None:
         """
@@ -57,7 +123,6 @@ class BasePlot(ABC):
         class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
         other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
         return class_kwargs, other_kwargs
-
 
 class PlotAccessor:
     """
