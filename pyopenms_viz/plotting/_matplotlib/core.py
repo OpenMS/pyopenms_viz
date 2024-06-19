@@ -36,22 +36,37 @@ def holds_integer(column: Index) -> bool:
 
 class MATPLOTLIBPlot(ABC):
     """
-    Base class for assembling a Matplotlib plot
+    Base class for assembling a Matplotlib plot.
+
+    Attributes:
+        data (DataFrame): The input data frame.
     """
-    
+
     @property
     @abstractmethod
     def _kind(self) -> str:
         """
         The kind of plot to assemble. Must be overridden by subclasses.
+
+        Returns:
+            str: The kind of plot.
         """
         raise NotImplementedError
-    
+
     data: DataFrame
-    
+
     def _validate_frame(self, data):
         """
         Validate the input data frame.
+
+        Args:
+            data (DataFrame): The input data frame.
+
+        Raises:
+            TypeError: If the input data is not a pandas DataFrame.
+
+        Returns:
+            DataFrame: The validated input data frame.
         """
         if not isinstance(data, DataFrame):
             raise TypeError(f"Input data must be a pandas DataFrame, not {type(data)}")
@@ -73,14 +88,13 @@ class MATPLOTLIBPlot(ABC):
                 and hasattr(self, attr)
                 and self.__dict__[attr] is None
             ):
-                # print(f"Updating {attr} with {value} and initial value {getattr(self, attr)}\n\n")
                 setattr(self, attr, value)
 
     def _separate_class_kwargs(self, **kwargs):
         """
         Separates the keyword arguments into class-specific arguments and other arguments.
 
-        Parameters:
+        Args:
             **kwargs: Keyword arguments passed to the method.
 
         Returns:
@@ -93,36 +107,69 @@ class MATPLOTLIBPlot(ABC):
         return class_kwargs, other_kwargs
 
     def __init__(
-                self,
-                data,
-                kind=None,
-                by: str | None = None,
-                subplots: bool | None = None,
-                sharex: bool | None = None,
-                sharey: bool | None = None,
-                height: int | None = None,
-                width: int | None = None,
-                grid: bool | None = None,
-                toolbar_location: str | None = None,
-                fig: figure | None = None,
-                title: str | None = None,
-                xlabel: str | None = None,
-                ylabel: str | None = None,
-                x_axis_location: str | None = None,
-                y_axis_location: str | None = None,
-                min_border: int | None = None,
-                show_plot: bool | None = None,
-                legend: LegendConfig | None = None,
-                feature_config: FeatureConfig | None = None,
-                config=None,
-                **kwargs
-                ) -> None:
-        
+        self,
+        data,
+        kind=None,
+        by: str | None = None,
+        subplots: bool | None = None,
+        sharex: bool | None = None,
+        sharey: bool | None = None,
+        height: int | None = None,
+        width: int | None = None,
+        grid: bool | None = None,
+        toolbar_location: str | None = None,
+        fig: figure | None = None,
+        ax: None = None,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        x_axis_location: str | None = None,
+        y_axis_location: str | None = None,
+        min_border: int | None = None,
+        show_plot: bool | None = None,
+        legend: LegendConfig | None = None,
+        feature_config: FeatureConfig | None = None,
+        config=None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialize the MATPLOTLIBPlot object.
+
+        Args:
+            data (DataFrame): The input data frame.
+            kind (str, optional): The kind of plot to assemble. Defaults to None.
+            by (str, optional): The column to group the data by. Defaults to None.
+            subplots (bool, optional): Whether to create subplots. Defaults to None.
+            sharex (bool, optional): Whether to share the x-axis. Defaults to None.
+            sharey (bool, optional): Whether to share the y-axis. Defaults to None.
+            height (int, optional): The height of the plot. Defaults to None.
+            width (int, optional): The width of the plot. Defaults to None.
+            grid (bool, optional): Whether to show grid lines. Defaults to None.
+            toolbar_location (str, optional): The location of the toolbar. Defaults to None.
+            fig (figure, optional): The figure object. Defaults to None.
+            ax (None, optional): The axes object. Defaults to None.
+            title (str, optional): The title of the plot. Defaults to None.
+            xlabel (str, optional): The label for the x-axis. Defaults to None.
+            ylabel (str, optional): The label for the y-axis. Defaults to None.
+            x_axis_location (str, optional): The location of the x-axis. Defaults to None.
+            y_axis_location (str, optional): The location of the y-axis. Defaults to None.
+            min_border (int, optional): The minimum border size. Defaults to None.
+            show_plot (bool, optional): Whether to show the plot. Defaults to None.
+            legend (LegendConfig, optional): The legend configuration. Defaults to None.
+            feature_config (FeatureConfig, optional): The feature configuration. Defaults to None.
+            config (None, optional): The plot configuration. Defaults to None.
+            **kwargs: Additional keyword arguments.
+
+        Raises:
+            ImportError: If matplotlib is not installed.
+        """
         try:
             from matplotlib import pyplot as plt
         except ImportError:
-            raise ImportError("matplotlib is not installed. Please install matplotlib to use this plotting library in pyopenms-viz")
-        
+            raise ImportError(
+                "matplotlib is not installed. Please install matplotlib to use this plotting library in pyopenms-viz"
+            )
+
         # Set Attributes
         self.data = self._validate_frame(data)
 
@@ -137,6 +184,7 @@ class MATPLOTLIBPlot(ABC):
         self.grid = grid
         self.toolbar_location = toolbar_location
         self.fig = fig
+        self.ax = ax
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -148,15 +196,13 @@ class MATPLOTLIBPlot(ABC):
         self.feature_config = feature_config
         self.config = config
 
-        # self.setup_config(**kwargs)
-
         if config is not None:
             self._update_from_config(config)
 
         if fig is None:
             self.fig, self.ax = plt.subplots(
-                figsize=(self.width/100, self.height/100),
-                dpi=100)
+                figsize=(self.width / 100, self.height / 100), dpi=100
+            )
             self.ax.set_title(self.title)
             self.ax.set_xlabel(self.xlabel)
             self.ax.set_ylabel(self.ylabel)
@@ -164,51 +210,106 @@ class MATPLOTLIBPlot(ABC):
         if self.by is not None:
             # Ensure by column data is string
             self.data[self.by] = self.data[self.by].astype(str)
-            
+
     def _make_plot(self, fig: figure) -> None:
+        """
+        Abstract method to make the plot.
+
+        Args:
+            fig (figure): The figure object.
+
+        Raises:
+            AbstractMethodError: If the method is not implemented in the subclass.
+        """
         raise AbstractMethodError(self)
-    
+
     def _update_plot_aes(self, ax, **kwargs):
+        """
+        Update the plot aesthetics.
+
+        Args:
+            ax: The axes object.
+            **kwargs: Additional keyword arguments.
+        """
         ax.grid(self.grid)
-    
+
     def _add_legend(self, ax, legend):
+        """
+        Add a legend to the plot.
+
+        Args:
+            ax: The axes object.
+            legend: The legend configuration.
+        """
         if legend is not None:
-            matplotlibLegendLoc= LegendConfig._matplotlibLegendLocationMapper(self.legend.loc)
-            legend = ax.legend(*legend,
-                            loc=matplotlibLegendLoc,
-                            title=self.legend.title,
-                            prop={'size': self.legend.fontsize},
-                            bbox_to_anchor=self.legend.bbox_to_anchor)
+            matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
+                self.legend.loc
+            )
+            if self.legend.orientation == "horizontal":
+                ncol = len(legend[0])
+            else:
+                ncol = 1
+            
+            legend = ax.legend(
+                *legend,
+                loc=matplotlibLegendLoc,
+                title=self.legend.title,
+                prop={"size": self.legend.fontsize},
+                bbox_to_anchor=self.legend.bbox_to_anchor,
+                ncol=ncol,
+            )
+
             legend.get_title().set_fontsize(str(self.legend.fontsize))
-    
+
     def _modify_x_range(
         self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
     ):
+        """
+        Modify the x-axis range.
+
+        Args:
+            x_range (Tuple[float, float]): The x-axis range.
+            padding (Tuple[float, float] | None, optional): The padding for the range. Defaults to None.
+        """
         start, end = x_range
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
         self.ax.set_xlim(start, end)
-    
+
     def _modify_y_range(
         self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
     ):
+        """
+        Modify the y-axis range.
+
+        Args:
+            y_range (Tuple[float, float]): The y-axis range.
+            padding (Tuple[float, float] | None, optional): The padding for the range. Defaults to None.
+        """
         start, end = y_range
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
         self.ax.set_ylim(start, end)
-    
+
     def generate(self, **kwargs):
         """
-        Generate the plot
+        Generate the plot.
+
+        Returns:
+            axes: The axes object.
         """
         self._make_plot(self.ax, **kwargs)
         return self.ax
-    
+
     def show(self):
+        """
+        Show the plot.
+        """
         plt.show()
-    
+
+
 class PlanePlot(MATPLOTLIBPlot, ABC):
     """
     Abstract class for assembling a matplotlib plot on a plane
@@ -227,6 +328,7 @@ class PlanePlot(MATPLOTLIBPlot, ABC):
 
         self.x = x
         self.y = y
+
 
 class LinePlot(PlanePlot):
     """
@@ -260,24 +362,20 @@ class LinePlot(PlanePlot):
         Plot a line plot
         """
         color_gen = kwargs.pop("line_color", None)
-        
+
         legend_lines = []
         legend_labels = []
-        
+
         if by is None:
-            line, = ax.plot(data[x], data[y], color=next(color_gen))
-            
+            (line,) = ax.plot(data[x], data[y], color=next(color_gen))
+
             return ax, (None, None)
         else:
             for group, df in data.groupby(by):
-                line, = ax.plot(df[x], 
-                                df[y], 
-                                color=next(color_gen))
+                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
-
-        
 
 
 class VLinePlot(LinePlot):
@@ -310,24 +408,23 @@ class VLinePlot(LinePlot):
         Plot a vertical line
         """
         color_gen = kwargs.pop("line_color", None)
-        
+
         legend_lines = []
         legend_labels = []
-        
+
         if by is None:
             for _, row in data.iterrows():
-                line, = ax.plot([data[x], data[x]], [0, data[y]], color=next(color_gen))
-            
+                (line,) = ax.plot(
+                    [data[x], data[x]], [0, data[y]], color=next(color_gen)
+                )
+
             return ax, (None, None)
         else:
             for group, df in data.groupby(by):
-                line, = ax.plot(df[x], 
-                                df[y], 
-                                color=next(color_gen))
+                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
-        
 
     def _add_annotation(self, fig, data, x, y, **kwargs):
         pass
@@ -369,20 +466,19 @@ class ScatterPlot(PlanePlot):
             if z is not None:
                 use_color = data[z]
             else:
-                use_color =  next(color_gen)
-            scatter = ax.scatter([data[x], data[x]], [0, data[y]], c=use_color, **kwargs)
-            
+                use_color = next(color_gen)
+            scatter = ax.scatter(
+                [data[x], data[x]], [0, data[y]], c=use_color, **kwargs
+            )
+
             return ax, None
         else:
             for group, df in data.groupby(by):
                 if z is not None:
                     use_color = df[z]
                 else:
-                    use_color =  next(color_gen)
-                scatter = ax.scatter(df[x],
-                                df[y],
-                                c=use_color,
-                                **kwargs)
+                    use_color = next(color_gen)
+                scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -411,14 +507,13 @@ class ChromatogramPlot(LinePlot):
         if self.show_plot:
             self.show()
 
-    def plot(self, **kwargs) -> None:  
+    def plot(self, **kwargs) -> None:
 
         color_gen = ColorGenerator()
 
         self.ax = super().generate(line_color=color_gen)
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
-
 
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
@@ -433,43 +528,58 @@ class ChromatogramPlot(LinePlot):
         Returns:
             None
         """
-        
+
         legend = self.ax.get_legend()
         self.ax.add_artist(legend)
-        
+
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=feature_data.shape[0]
         )
-        
+
         legend_items = []
         for idx, (_, feature) in enumerate(feature_data.iterrows()):
             use_color = next(color_gen)
             self.ax.vlines(
-                x=feature['leftWidth'],
+                x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
                 lw=self.feature_config.lineWidth,
                 color=use_color,
-                ls=self.feature_config.lineStyle)
+                ls=self.feature_config.lineStyle,
+            )
             self.ax.vlines(
-                x=feature['rightWidth'],
+                x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
                 lw=self.feature_config.lineWidth,
                 color=use_color,
-                ls=self.feature_config.lineStyle)
-        
+                ls=self.feature_config.lineStyle,
+            )
+
             if self.feature_config.legend.show:
-                custom_lines = [Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth) for i in range(len(feature_data))]
+                custom_lines = [
+                    Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth)
+                    for i in range(len(feature_data))
+                ]
                 if "q_value" in feature_data.columns:
-                    legend_labels = [f"Feature {idx} (q-value: {feature['q_value']:.4f})"]
+                    legend_labels = [
+                        f"Feature {idx} (q-value: {feature['q_value']:.4f})"
+                    ]
                 else:
                     legend_labels = [f"Feature {idx}"]
 
         if self.feature_config.legend.show:
-            matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(self.feature_config.legend.loc)
-            self.ax.legend(custom_lines, legend_labels, loc=matplotlibLegendLoc, title=self.feature_config.legend.title, prop={'size': self.feature_config.legend.fontsize}, bbox_to_anchor=self.feature_config.legend.bbox_to_anchor)
-
+            matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
+                self.feature_config.legend.loc
+            )
+            self.ax.legend(
+                custom_lines,
+                legend_labels,
+                loc=matplotlibLegendLoc,
+                title=self.feature_config.legend.title,
+                prop={"size": self.feature_config.legend.fontsize},
+                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
+            )
 
 
 class MobilogramPlot(ChromatogramPlot):
@@ -491,10 +601,8 @@ class MobilogramPlot(ChromatogramPlot):
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
-
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
-
 
 
 class SpectrumPlot(VLinePlot):
@@ -582,45 +690,168 @@ class FeatureHeatmapPlot(ScatterPlot):
     def _kind(self) -> Literal["feature_heatmap"]:
         return "feature_heatmap"
 
-    def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
+    def __init__(
+        self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs
+    ) -> None:
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = FeautureHeatmapPlotterConfig()
 
         if add_marginals:
             kwargs["config"].title = None
-            # kwargs["config"].legend.show = False
+
+            # Create a 2 by 2 figure and axis for marginal plots
+            fig, ax = plt.subplots(
+                2, 2, figsize=(kwargs["width"] / 100, kwargs["height"] / 100), dpi=200
+            )
+            kwargs["fig"] = fig
+            kwargs["ax"] = ax[1, 1]
+            self.ax_grid = ax
 
         super().__init__(data, x, y, **kwargs)
+
         self.zlabel = zlabel
         self.add_marginals = add_marginals
 
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
             self.show()
-            
+
     @staticmethod
-    def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
+    def _integrate_data_along_dim(
+        data: DataFrame, group_cols: List[str] | str, integrate_col: str
+    ) -> DataFrame:
         # First fill NaNs with 0s for numerical columns and '.' for categorical columns
-        grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
+        grouped = (
+            data.apply(
+                lambda x: x.fillna(0) if x.dtype.kind in "biufc" else x.fillna(".")
+            )
+            .groupby(group_cols)[integrate_col]
+            .sum()
+            .reset_index()
+        )
         return grouped
 
     def plot(self, x, y, z, **kwargs):
 
-
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
-        
-        self.ax = super().generate(
-             z=z,
-             marker="s",
-             s=20,
-             edgecolors="none",
-             cmap="afmhot_r",
-             **other_kwargs
-        )
-        
-        if self.add_marginals:
+
+        if not self.add_marginals:
+            self.ax = super().generate(
+                z=z,
+                marker="s",
+                s=20,
+                edgecolors="none",
+                cmap="afmhot_r",
+                **other_kwargs,
+            )
+
+        else:
+
+            self.ax = super().generate(
+                z=z,
+                marker="s",
+                s=20,
+                edgecolors="none",
+                cmap="afmhot_r",
+                **other_kwargs,
+            )
+            self.ax.set_title(None)
+            self.ax.set_xlabel(self.xlabel)
+            self.ax.set_ylabel(None)
+            self.ax.set_yticklabels([])
+            self.ax.set_yticks([])
+            self.ax.legend_ = None
+
             #############
             ##  X-Axis Plot
-            
-            pass 
-            
+
+            class_kwargs.pop("fig", None)
+            class_kwargs.pop("ax", None)
+
+            # get cols to integrate over and exclude y and z
+            group_cols = [x]
+            if "Annotation" in self.data.columns:
+                group_cols.append("Annotation")
+
+            x_data = self._integrate_data_along_dim(self.data, group_cols, z)
+
+            x_config = self.config.copy()
+            x_config.ylabel = self.zlabel
+            x_config.y_axis_location = "right"
+            x_config.legend.show = True
+
+            color_gen = ColorGenerator()
+
+            # remove 'config' from class_kwargs
+            x_plot_kwargs = class_kwargs.copy()
+            x_plot_kwargs.pop("config", None)
+
+            x_plot_obj = LinePlot(
+                x_data,
+                x,
+                z,
+                fig=self.fig,
+                ax=self.ax_grid[0, 1],
+                config=x_config,
+                **x_plot_kwargs,
+            )
+            x_fig = x_plot_obj.generate(line_color=color_gen)
+
+            self.ax_grid[0, 1].set_title(None)
+            self.ax_grid[0, 1].set_xlabel(None)
+            self.ax_grid[0, 1].set_xticklabels([])
+            self.ax_grid[0, 1].set_xticks([])
+            self.ax_grid[0, 1].set_ylabel(self.zlabel)
+            self.ax_grid[0, 1].yaxis.set_ticks_position("right")
+            self.ax_grid[0, 1].yaxis.set_label_position("right")
+            self.ax_grid[0, 1].yaxis.tick_right()
+            self.ax_grid[0, 1].legend_ = None
+
+            #############
+            ##  Y-Axis Plot
+
+            # get cols to integrate over and exclude y and z
+            group_cols = [y]
+            if "Annotation" in self.data.columns:
+                group_cols.append("Annotation")
+
+            y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+
+            y_config = self.config.copy()
+            y_config.xlabel = self.zlabel
+            y_config.y_axis_location = "left"
+            y_config.legend.show = True
+            y_config.legend.loc = "below"
+            y_config.legend.orientation = "horizontal"
+            y_config.legend.bbox_to_anchor = (1, -0.4)
+
+            color_gen = ColorGenerator()
+
+            # remove 'config' from class_kwargs
+            y_plot_kwargs = class_kwargs.copy()
+            y_plot_kwargs.pop("config", None)
+
+            y_plot_obj = LinePlot(
+                y_data,
+                z,
+                y,
+                fig=self.fig,
+                ax=self.ax_grid[1, 0],
+                config=y_config,
+                **y_plot_kwargs,
+            )
+            y_fig = y_plot_obj.generate(line_color=color_gen)
+            self.ax_grid[1, 0].invert_xaxis()
+            self.ax_grid[1, 0].set_title(None)
+            self.ax_grid[1, 0].set_xlabel(self.ylabel)
+            self.ax_grid[1, 0].set_ylabel(self.zlabel)
+            # self.ax_grid[1, 0].legend_ = None
+
+            self.ax_grid[0, 0].remove()
+            self.ax_grid[0, 0].axis("off")
+
+            # Update the figure size
+            self.fig.set_size_inches(self.width / 100, self.height / 100)
+
+            # Adjust the layout
+            plt.subplots_adjust(wspace=0, hspace=0)
