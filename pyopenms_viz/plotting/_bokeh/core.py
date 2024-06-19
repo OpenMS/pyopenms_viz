@@ -33,6 +33,8 @@ from pyopenms_viz.plotting._config import (
     LegendConfig,
 )
 
+from .._core import BasePlot
+
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
@@ -45,63 +47,10 @@ def holds_integer(column: Index) -> bool:
     return column.inferred_type in {"integer", "mixed-integer"}
 
 
-class BOKEHPlot(ABC):
+class BOKEHPlot(BasePlot):
     """
     Base class for assembling a Bokeh plot
     """
-
-    @property
-    @abstractmethod
-    def _kind(self) -> str:
-        """
-        The kind of plot to assemble. Must be overridden by subclasses.
-        """
-        raise NotImplementedError
-
-    data: DataFrame
-
-    # TODO: This method and the two below it are shared across the backends and could be abstracted out to a higher level
-    def _validate_frame(self, data):
-        """
-        Validate the input data frame.
-        """
-        if not isinstance(data, DataFrame):
-            raise TypeError(f"Input data must be a pandas DataFrame, not {type(data)}")
-        return data
-
-    def _update_from_config(self, config) -> None:
-        """
-        Updates the plot configuration based on the provided `config` object.
-
-        Args:
-            config (Config): The configuration object containing the plot settings.
-
-        Returns:
-            None
-        """
-        for attr, value in config.__dict__.items():
-            if (
-                value is not None
-                and hasattr(self, attr)
-                and self.__dict__[attr] is None
-            ):
-                setattr(self, attr, value)
-
-    def _separate_class_kwargs(self, **kwargs):
-        """
-        Separates the keyword arguments into class-specific arguments and other arguments.
-
-        Parameters:
-            **kwargs: Keyword arguments passed to the method.
-
-        Returns:
-            class_kwargs: A dictionary containing the class-specific keyword arguments.
-            other_kwargs: A dictionary containing the remaining keyword arguments.
-
-        """
-        class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
-        other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
-        return class_kwargs, other_kwargs
 
     def __init__(
         self,
@@ -409,7 +358,6 @@ class LinePlot(PlanePlot):
             legend = Legend(items=legend_items)
 
             return fig, legend
-
 
 class VLinePlot(LinePlot):
     """

@@ -1,11 +1,62 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import Any
 import importlib
 import types
 
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
+
+
+class BasePlot(ABC):
+    """
+    Base Class For Assembling a PyViz Plot
+    """
+
+    @property
+    @abstractmethod
+    def _kind(self) -> str:
+        """
+        The kind of plot to assemble. Must be overridden by subclasses.
+        """
+        raise NotImplementedError
+
+    data: DataFrame
+
+    def _update_from_config(self, config) -> None:
+        """
+        Updates the plot configuration based on the provided `config` object.
+
+        Args:
+            config (Config): The configuration object containing the plot settings.
+
+        Returns:
+            None
+        """
+        for attr, value in config.__dict__.items():
+            if (
+                value is not None
+                and hasattr(self, attr)
+                and self.__dict__[attr] is None
+            ):
+                setattr(self, attr, value)
+
+    def _separate_class_kwargs(self, **kwargs):
+        """
+        Separates the keyword arguments into class-specific arguments and other arguments.
+
+        Parameters:
+            **kwargs: Keyword arguments passed to the method.
+
+        Returns:
+            class_kwargs: A dictionary containing the class-specific keyword arguments.
+            other_kwargs: A dictionary containing the remaining keyword arguments.
+
+        """
+        class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
+        other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
+        return class_kwargs, other_kwargs
 
 
 class PlotAccessor:
