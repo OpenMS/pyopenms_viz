@@ -77,7 +77,7 @@ def display_fig(fig, engine):
     else:
         st.plotly_chart(fig)
 
-def get_common_parameters(plot_type="spectrum", cols=None):
+def get_common_parameters(plot_type="spectrum", cols=None, all_cols=None):
     params = {}
     with st.sidebar:
         params["engine"] = st.selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
@@ -91,8 +91,8 @@ def get_common_parameters(plot_type="spectrum", cols=None):
             params["x"] = st_cols[0].selectbox("x", cols)
             params["y"] = st_cols[1].selectbox("y", cols)
         if cols is not None:
-            cols = ['None'] + cols
-            params['by'] = st.selectbox("by", cols)
+            all_cols = ['None'] + all_cols
+            params['by'] = st.selectbox("by", all_cols)
         params["relative_intensity"] = st.checkbox("relative_intensity", False, help="If true, plot relative intensity values. Defaults to False.")
         if plot_type == "feature_heatmap":
             params["add_marginals"] = st.checkbox("add_marginals", False, help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
@@ -161,10 +161,11 @@ if demo == "Test DataFrame Input":
     with st.sidebar:
         st.markdown("**Common Parameters**")
         plot_type = st.sidebar.selectbox("plot_type", ["spectrum", "chromatogram", "mobilogram", "feature_heatmap"])
-    
+    data_dimension_cols = ["mz", "rt", "int"]
     if "chrom_df" not in st.session_state or plot_type in ['chromatogram', 'spectrum']:
         load_demo_chromatogram_xic()
-        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        all_cols = list(st.session_state.chrom_df.columns)
+        common_params = get_common_parameters(plot_type=plot_type, cols=data_dimension_cols, all_cols=all_cols)
         engine = common_params.pop("engine")
         main_input_args = get_input_col_kind(common_params, plot_type)
         
@@ -176,8 +177,10 @@ if demo == "Test DataFrame Input":
         fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
         
     elif plot_type=="mobilogram":
-        load_demo_diapasef_featuremap()    
-        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        load_demo_diapasef_featuremap()  
+        all_cols = list(st.session_state.chrom_df.columns)
+        
+        common_params = get_common_parameters(plot_type=plot_type, cols=data_dimension_cols + ['im'], all_cols=all_cols)
         engine = common_params.pop("engine")
         main_input_args = get_input_col_kind(common_params, plot_type)
         
@@ -193,7 +196,8 @@ if demo == "Test DataFrame Input":
         
     elif plot_type=='feature_heatmap':
         load_demo_diapasef_featuremap()    
-        common_params = get_common_parameters(plot_type=plot_type, cols=list(st.session_state.chrom_df.columns))
+        all_cols = list(st.session_state.chrom_df.columns)
+        common_params = get_common_parameters(plot_type=plot_type, cols=data_dimension_cols + ['im'], all_cols=all_cols)
         
         figure_kwargs = common_params.copy()
         
