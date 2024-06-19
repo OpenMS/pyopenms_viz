@@ -36,7 +36,7 @@ def holds_integer(column: Index) -> bool:
     return column.inferred_type in {"integer", "mixed-integer"}
 
 
-class MATPLOTLIBPlot(BasePlot):
+class MATPLOTLIBPlot(BasePlot, ABC):
     """
     Base class for assembling a Matplotlib plot.
 

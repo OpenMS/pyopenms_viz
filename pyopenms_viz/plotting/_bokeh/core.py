@@ -47,7 +47,7 @@ def holds_integer(column: Index) -> bool:
     return column.inferred_type in {"integer", "mixed-integer"}
 
 
-class BOKEHPlot(BasePlot):
+class BOKEHPlot(BasePlot, ABC):
     """
     Base class for assembling a Bokeh plot
     """

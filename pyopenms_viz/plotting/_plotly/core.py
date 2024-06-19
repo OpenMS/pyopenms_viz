@@ -34,7 +34,7 @@ from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 def holds_integer(data: DataFrame, column: str) -> bool:
     return column.inferred_type in {"integer", "mixed-integer"}
 
-class PLOTLYPlot(BasePlot):
+class PLOTLYPlot(BasePlot, ABC):
     """
     Base class for assembling a Ploty plot
     """
