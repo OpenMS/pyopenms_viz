@@ -28,6 +28,7 @@ from pyopenms_viz.plotting._misc import ColorGenerator
 if TYPE_CHECKING:
     from pandas.core.frame import DataFrame
     from matplotlib.pyplot import figure
+    from matplotlib.axes import Axes
 
 
 def holds_integer(column: Index) -> bool:
@@ -119,7 +120,7 @@ class MATPLOTLIBPlot(ABC):
         grid: bool | None = None,
         toolbar_location: str | None = None,
         fig: figure | None = None,
-        ax: None = None,
+        ax: Axes | None = None,
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str | None = None,
@@ -211,12 +212,12 @@ class MATPLOTLIBPlot(ABC):
             # Ensure by column data is string
             self.data[self.by] = self.data[self.by].astype(str)
 
-    def _make_plot(self, fig: figure) -> None:
+    def _make_plot(self, ax: Axes) -> None:
         """
         Abstract method to make the plot.
 
         Args:
-            fig (figure): The figure object.
+            ax (Axes): The Axes object.
 
         Raises:
             AbstractMethodError: If the method is not implemented in the subclass.
@@ -343,11 +344,11 @@ class LinePlot(PlanePlot):
         # print(f"LINEPLOT kwargs: {kwargs}\n\n")
         super().__init__(data, x, y, **kwargs)
 
-    def _make_plot(self, fig: figure, **kwargs) -> None:
+    def _make_plot(self, ax: Axes, **kwargs) -> None:
         """
         Make a line plot
         """
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self._plot(ax, self.data, self.x, self.y, self.by, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -369,7 +370,7 @@ class LinePlot(PlanePlot):
         if by is None:
             (line,) = ax.plot(data[x], data[y], color=next(color_gen))
 
-            return ax, (None, None)
+            return ax, None
         else:
             for group, df in data.groupby(by):
                 (line,) = ax.plot(df[x], df[y], color=next(color_gen))
@@ -390,13 +391,13 @@ class VLinePlot(LinePlot):
     def __init__(self, data, x, y, **kwargs) -> None:
         super().__init__(data, x, y, **kwargs)
 
-    def _make_plot(self, fig: figure, **kwargs) -> None:
+    def _make_plot(self, ax: Axes, **kwargs) -> None:
         """
         Make a vertical line plot
         """
         use_data = kwargs.pop("new_data", self.data)
 
-        newlines, legend = self._plot(fig, use_data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self._plot(ax, use_data, self.x, self.y, self.by, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -413,12 +414,13 @@ class VLinePlot(LinePlot):
         legend_labels = []
 
         if by is None:
+            use_color = next(color_gen)
             for _, row in data.iterrows():
                 (line,) = ax.plot(
-                    [data[x], data[x]], [0, data[y]], color=next(color_gen)
+                    [row[x], row[x]], [0, row[y]], color=use_color
                 )
 
-            return ax, (None, None)
+            return ax, None
         else:
             for group, df in data.groupby(by):
                 (line,) = ax.plot(df[x], df[y], color=next(color_gen))
@@ -426,7 +428,7 @@ class VLinePlot(LinePlot):
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
-    def _add_annotation(self, fig, data, x, y, **kwargs):
+    def _add_annotation(self, ax, data, x, y, **kwargs):
         pass
 
 
@@ -442,11 +444,11 @@ class ScatterPlot(PlanePlot):
     def __init__(self, data, x, y, **kwargs) -> None:
         super().__init__(data, x, y, **kwargs)
 
-    def _make_plot(self, fig: figure, **kwargs) -> None:
+    def _make_plot(self, ax: Axes, **kwargs) -> None:
         """
         Make a scatter plot
         """
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self._plot(ax, self.data, self.x, self.y, self.by, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -528,9 +530,9 @@ class ChromatogramPlot(LinePlot):
         Returns:
             None
         """
-
-        legend = self.ax.get_legend()
-        self.ax.add_artist(legend)
+        if self.by is not None:
+            legend = self.ax.get_legend()
+            self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=feature_data.shape[0]
@@ -638,8 +640,7 @@ class SpectrumPlot(VLinePlot):
 
             color_gen = ColorGenerator()
 
-            pass
-            self.fig = super().generate(line_color=color_gen)
+            self.ax = super().generate(line_color=color_gen)
 
             if self.config.mirror_spectrum:
                 color_gen = ColorGenerator()
