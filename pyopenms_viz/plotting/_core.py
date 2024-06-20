@@ -105,6 +105,7 @@ class BasePlot(ABC):
             raise ValueError(f"For {self.kind} plot, {name} must be set") 
         elif colname not in self.data.columns:
             raise KeyError(f"Column {colname} not in data")
+        #TODO fix these error checks
         #elif not is_integer(self.data[colname]):
         #    raise ValueError(f"Column {colname} must be numeric 11")
         #elif not (is_integer(self.data[colname]) and self.data[colname].inferred_type not in {"integer", "mixed-integer"}):
@@ -163,13 +164,18 @@ class BasePlot(ABC):
         return class_kwargs, other_kwargs
 
     def _make_plot(self, fig, **kwargs) -> None:
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+
         newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
         self._update_plot_aes(newlines, **kwargs)
 
-    
+        if tooltips is not None:
+            self._add_tooltips(newlines, tooltips)
+
     @abstractmethod
     def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """

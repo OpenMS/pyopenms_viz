@@ -70,9 +70,6 @@ class BOKEHPlot(BasePlot, ABC):
                 f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
             )
 
-    def _make_plot(self, fig: figure) -> None:
-        raise AbstractMethodError(self)
-
     def _update_plot_aes(self, fig, **kwargs):
         """
         Update the aesthetics of the plot
@@ -230,26 +227,6 @@ class BOKEHLinePlot(BOKEHPlot):
     def _kind(self) -> Literal["line", "vline", "chromatogram"]:
         return "line"
 
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-
-    def _make_plot(self, fig: figure, **kwargs) -> None:
-        """
-        Make a line plot
-        """
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
-
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-
-        self._update_plot_aes(newlines, **kwargs)
-
-        if tooltips is not None:
-            self._add_tooltips(newlines, tooltips)
-
     @classmethod
     def _plot(  # type: ignore[override]
         cls, fig, data, x, y, by: str | None = None, **kwargs
@@ -298,6 +275,7 @@ class BOKEHVLinePlot(BOKEHPlot):
         """
         # Check for tooltips in kwargs and pop
         tooltips = kwargs.pop("tooltips", None)
+        ##TODO find more elegant way to create mirror spectrum
         use_data = kwargs.pop("new_data", self.data)
 
         newlines, legend = self._plot(fig, use_data, self.x, self.y, self.by, **kwargs)
@@ -351,16 +329,6 @@ class BOKEHScatterPlot(BOKEHPlot):
 
     def __init__(self, data, x, y, z=None, **kwargs) -> None:
         super().__init__(data, x, y, z=z, **kwargs)
-
-    def _make_plot(self, fig: figure, **kwargs) -> None:
-        """
-        Make a scatter plot
-        """
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
 
     @classmethod
     def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -508,9 +476,6 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot):
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
 
-    def get_manual_bounding_box_coords(self):
-        return super().get_manual_bounding_box_coords()
-
 
 class BOKEHSpectrumPlot(BOKEHVLinePlot):
     """
@@ -613,8 +578,6 @@ class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
         return "feature_heatmap"
 
     def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
-        print("Feature Heatmap Plotter")
-        print(z)
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = FeautureHeatmapPlotterConfig()
 
