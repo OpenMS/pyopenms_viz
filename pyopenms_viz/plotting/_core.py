@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Literal, Tuple
 import importlib
 import types
 
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
+from pandas.core.dtypes.common import is_integer
+import pandas as pd
 
 from ._config import LegendConfig, FeatureConfig
 
@@ -18,6 +20,9 @@ class BasePlot(ABC):
     def __init__(
         self,
         data,
+        x: str | None = None,
+        y: str | None = None,
+        z: str | None = None,
         kind=None,
         by: str | None = None,
         subplots: bool | None = None,
@@ -67,12 +72,45 @@ class BasePlot(ABC):
         if config is not None:
             self._update_from_config(config)
 
+        ### get x and y data
+        if self._kind in {"line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "feature_heatmap"}:
+            self.x = self._verify_column(x, 'x')
+            self.y = self._verify_column(y, 'y')
+        
+        if self._kind in {"scatter", "feature_heatmap"}:
+            self.z = self._verify_column(z, 'z')
+
         if self.by is not None:
             # Ensure by column data is string
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
         self._create_figure()
+
+    def _verify_column(self, colname: str, name: str) -> str:
+        """fetch data from column name
+
+        Args:
+            colname (str): column name of data to fetch
+
+        Returns:
+            pd.Series: pandas series or None
+        
+        Raises:
+            ValueError: if colname is None
+            KeyError: if colname is not in data
+            ValueError: if colname is not numeric
+        """
+        if colname is None:
+            raise ValueError(f"For {self.kind} plot, {name} must be set") 
+        elif colname not in self.data.columns:
+            raise KeyError(f"Column {colname} not in data")
+        #elif not is_integer(self.data[colname]):
+        #    raise ValueError(f"Column {colname} must be numeric 11")
+        #elif not (is_integer(self.data[colname]) and self.data[colname].inferred_type not in {"integer", "mixed-integer"}):
+        #    raise ValueError(f"Column {colname} must be numeric")
+        else:
+            return colname
 
     @property
     @abstractmethod
@@ -123,6 +161,105 @@ class BasePlot(ABC):
         class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
         other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
         return class_kwargs, other_kwargs
+
+    @abstractmethod
+    def _make_plot(self, figure) -> None:
+        pass
+
+    @abstractmethod
+    def _update_plot_aes(self, fig, **kwargs):
+        pass
+
+    @abstractmethod
+    def _add_legend(self, fig, legend):
+        pass
+    
+    @abstractmethod
+    def _modify_x_range(
+        self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+    ):
+        """
+        Modify the x-axis range.
+
+        Args:
+            x_range (Tuple[float, float]): The desired x-axis range.
+            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
+        """
+        pass
+
+    @abstractmethod
+    def _modify_y_range(
+        self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+    ):
+        """
+        Modify the y-axis range.
+
+        Args:
+            y_range (Tuple[float, float]): The desired y-axis range.
+            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
+        """
+        pass
+    
+    @abstractmethod
+    def generate(self, **kwargs):
+        """
+        Generate the plot
+        """
+        pass
+
+    @abstractmethod
+    def show(self):
+        pass
+    
+    # methods only for interactive plotting
+    @abstractmethod
+    def _add_tooltips(self, fig, tooltips):
+        pass
+
+    @abstractmethod
+    def _add_bounding_box_drawer(self, fig, **kwargs):
+        pass
+        
+    def _add_bounding_vertical_drawer(self, fig, **kwargs):
+        pass
+
+
+'''
+class LinePlot:
+    @property
+    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
+        return "line"
+
+    def __init__(self, data, x, y, **kwargs) -> None:
+        super().__init__(data, x, y, **kwargs)
+
+    def _make_plot(self, fig, **kwargs) -> None:
+        """
+        Make a line plot
+        """
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+
+        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+
+        if legend is not None:
+            self._add_legend(newlines, legend)
+
+        self._update_plot_aes(newlines, **kwargs)
+
+        if tooltips is not None:
+            self._add_tooltips(newlines, tooltips)
+    
+    @abstractmethod
+    @classmethod
+    def _plot(  # type: ignore[override]
+        cls, fig, data, x, y, by: str | None = None, **kwargs
+    ):
+        """
+        Plot a line plot
+        """
+        pass
+'''
 
 class PlotAccessor:
     """

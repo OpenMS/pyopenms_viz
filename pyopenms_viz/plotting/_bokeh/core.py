@@ -43,10 +43,6 @@ if TYPE_CHECKING:
     from bokeh.plotting import figure
 
 
-def holds_integer(column: Index) -> bool:
-    return column.inferred_type in {"integer", "mixed-integer"}
-
-
 class BOKEHPlot(BasePlot, ABC):
     """
     Base class for assembling a Bokeh plot
@@ -81,7 +77,6 @@ class BOKEHPlot(BasePlot, ABC):
         """
         Update the aesthetics of the plot
         """
-
         fig.grid.visible = self.grid
         fig.toolbar_location = self.toolbar_location
 
@@ -221,31 +216,15 @@ class BOKEHPlot(BasePlot, ABC):
         show(app)
 
 
-# TODO: This class is shared across the backends and could be abstracted out to a higher level
-class PlanePlot(BOKEHPlot, ABC):
+class BOKEHLinePlot(BOKEHPlot):
     """
-    Abstract class for assembling a Bokeh plot on a plane
+    Class for assembling a Bokeh line plot
+
+    Line Plot 
     """
 
     def __init__(self, data, x, y, **kwargs) -> None:
-        BOKEHPlot.__init__(self, data, **kwargs)
-        if x is None or y is None:
-            raise ValueError(
-                self._kind + " requires an x and y column to be specified."
-            )
-        if is_integer(x) and not holds_integer(self.data.columns):
-            x = self.data.columns[x]
-        if is_integer(y) and not holds_integer(self.data.columns):
-            y = self.data.columns[y]
-
-        self.x = x
-        self.y = y
-
-
-class LinePlot(PlanePlot):
-    """
-    Class for assembling a Bokeh line plot
-    """
+        super().__init__(data, x, y, **kwargs)
 
     @property
     def _kind(self) -> Literal["line", "vline", "chromatogram"]:
@@ -301,7 +280,7 @@ class LinePlot(PlanePlot):
 
             return fig, legend
 
-class VLinePlot(LinePlot):
+class BOKEHVLinePlot(BOKEHPlot):
     """
     Class for assembling a Bokeh vertical line plot
     """
@@ -361,7 +340,7 @@ class VLinePlot(LinePlot):
         pass
 
 
-class ScatterPlot(PlanePlot):
+class BOKEHScatterPlot(BOKEHPlot):
     """
     Class for assembling a Bokeh scatter plot
     """
@@ -404,7 +383,7 @@ class ScatterPlot(PlanePlot):
             return fig, legend
 
 
-class ChromatogramPlot(LinePlot):
+class BOKEHChromatogramPlot(BOKEHLinePlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
@@ -505,7 +484,7 @@ class ChromatogramPlot(LinePlot):
         )
 
 
-class MobilogramPlot(ChromatogramPlot):
+class BOKEHMobilogramPlot(BOKEHChromatogramPlot):
     """
     Class for assembling a Bokeh mobilogram plot
     """
@@ -533,7 +512,7 @@ class MobilogramPlot(ChromatogramPlot):
         return super().get_manual_bounding_box_coords()
 
 
-class SpectrumPlot(VLinePlot):
+class BOKEHSpectrumPlot(BOKEHVLinePlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
@@ -624,7 +603,7 @@ class SpectrumPlot(VLinePlot):
         fig.add_layout(zero_line)
 
 
-class FeatureHeatmapPlot(ScatterPlot):
+class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
@@ -693,7 +672,7 @@ class FeatureHeatmapPlot(ScatterPlot):
             x_plot_kwargs = class_kwargs.copy()
             x_plot_kwargs.pop('config', None)
             
-            x_plot_obj = LinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
+            x_plot_obj = BOKEHLinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
             x_fig = x_plot_obj.generate(line_color=color_gen)
             zero_line = Span(
             location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
@@ -723,7 +702,7 @@ class FeatureHeatmapPlot(ScatterPlot):
             
             color_gen = ColorGenerator()
             
-            y_plot_obj = LinePlot(y_data, z, y, config=y_config, **x_plot_kwargs)
+            y_plot_obj = BOKEHLinePlot(y_data, z, y, config=y_config, **x_plot_kwargs)
             y_fig = y_plot_obj.generate(line_color=color_gen)
             zero_line = Span(
             location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
