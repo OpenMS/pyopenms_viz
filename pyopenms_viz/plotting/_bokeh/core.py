@@ -26,14 +26,23 @@ from .._config import (
 )
 
 # pyopenms_viz imports
-from .._core import BasePlot
+from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot
 from .._misc import ColorGenerator
 from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
-class BOKEHPlot(BasePlot, ABC):
+class BOKEHPlot(BasePlotter, ABC):
     """
     Base class for assembling a Bokeh plot
     """
+
+    def _load_extension(self) -> None:
+        try:
+            from bokeh.plotting import figure, show
+            from bokeh.models import ColumnDataSource, Legend
+        except ImportError:
+            raise ImportError(
+                f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
+            )
 
     def _create_figure(self) -> None:
         if self.fig is None:
@@ -46,15 +55,6 @@ class BOKEHPlot(BasePlot, ABC):
                 width=self.width,
                 height=self.height,
                 min_border=self.min_border
-            )
-
-    def _load_extension(self) -> None:
-        try:
-            from bokeh.plotting import figure, show
-            from bokeh.models import ColumnDataSource, Legend
-        except ImportError:
-            raise ImportError(
-                f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
             )
 
     def _update_plot_aes(self, fig, **kwargs):
@@ -75,7 +75,7 @@ class BOKEHPlot(BasePlot, ABC):
             fig.legend.title = self.legend.title
             fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
 
-    def _add_tooltips(self, fig, tooltips):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
         """
         Add tooltips to the plot
         """
@@ -193,17 +193,10 @@ class BOKEHPlot(BasePlot, ABC):
         show(app)
 
 
-class BOKEHLinePlot(BOKEHPlot):
+class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
     Class for assembling a collection of Bokeh line plots
     """
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-
-    @property
-    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
-        return "line"
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -233,7 +226,7 @@ class BOKEHLinePlot(BOKEHPlot):
 
             return fig, legend
 
-class BOKEHVLinePlot(BOKEHPlot):
+class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
     Class for assembling a series of vertical line plots in Bokeh
     """
@@ -276,17 +269,10 @@ class BOKEHVLinePlot(BOKEHPlot):
         #TODO: Implement text label annotations
         pass
 
-class BOKEHScatterPlot(BOKEHPlot):
+class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
     Class for assembling a Bokeh scatter plot
     """
-
-    @property
-    def _kind(self) -> Literal["scatter"]:
-        return "scatter"
-
-    def __init__(self, data, x, y, z=None, **kwargs) -> None:
-        super().__init__(data, x, y, z=z, **kwargs)
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -309,28 +295,10 @@ class BOKEHScatterPlot(BOKEHPlot):
             return fig, legend
 
 
-class BOKEHChromatogramPlot(BOKEHPlot):
+class BOKEHChromatogramPlot(BOKEHPlot, ChromatogramPlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
-
-    @property
-    def _kind(self) -> Literal["chromatogram"]:
-        return "chromatogram"
-
-    def __init__(
-        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
-    ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = ChromatogramPlotterConfig()
-
-        super().__init__(data, x, y, **kwargs)
-
-        self.feature_data = feature_data
-
-        self.plot(self.data, self.x, self.y, **kwargs)
-        if self.show_plot:
-            self.show()
 
     def plot(self, data, x, y, **kwargs) -> None:  
 
@@ -411,7 +379,7 @@ class BOKEHChromatogramPlot(BOKEHPlot):
         )
 
 
-class BOKEHMobilogramPlot(BOKEHChromatogramPlot):
+class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a Bokeh mobilogram plot
     """
@@ -420,38 +388,14 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot):
     def _kind(self) -> Literal["mobilogram"]:
         return "mobilogram"
 
-    def __init__(
-        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
-    ) -> None:
-        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
-
     def plot(self, data, x, y,  **kwargs) -> None:
         super().plot(data, x, y, **kwargs)
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
-
-class BOKEHSpectrumPlot(BOKEHPlot):
+class BOKEHSpectrumPlot(BOKEHPlot, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
-
-    @property
-    def _kind(self) -> Literal["spectrum"]:
-        return "spectrum"
-
-    def __init__(
-        self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs
-    ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = SpectrumPlotterConfig()
-
-        super().__init__(data, x, y, **kwargs)
-
-        self.reference_spectrum = reference_spectrum
-
-        self.plot(x, y, **kwargs)
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, **kwargs):
 
@@ -490,52 +434,10 @@ class BOKEHSpectrumPlot(BOKEHPlot):
             )
             self.fig.add_layout(zero_line)
 
-    def _prepare_data(
-        self,
-        spectrum: Union[DataFrame, list[DataFrame]],
-        y: str,
-        reference_spectrum: Union[DataFrame, list[DataFrame], None],
-    ) -> tuple[list, list]:
-        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
-
-        # Convert to relative intensity if required
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            spectrum[y] = spectrum[y] / spectrum[y].max() * 100
-            if reference_spectrum is not None:
-                reference_spectrum[y] = reference_spectrum[y] / reference_spectrum[y].max() * 100
-
-        return spectrum, reference_spectrum
-
-class BOKEHFeatureHeatmapPlot(BOKEHPlot):
+class BOKEHFeatureHeatmapPlot(BOKEHPlot, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
-
-    @property
-    def _kind(self) -> Literal["feature_heatmap"]:
-        return "feature_heatmap"
-
-    def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = FeautureHeatmapPlotterConfig()
-
-        if add_marginals:
-            kwargs["config"].title = None
-            # kwargs["config"].legend.show = False
-
-        super().__init__(data, x, y, z=z, **kwargs)
-        self.zlabel = zlabel
-        self.add_marginals = add_marginals
-
-        self.plot(x, y, z, **kwargs)
-        if self.show_plot:
-            self.show()
-            
-    @staticmethod
-    def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
-        # First fill NaNs with 0s for numerical columns and '.' for categorical columns
-        grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
-        return grouped
 
     def plot(self, x, y, z, **kwargs):
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)

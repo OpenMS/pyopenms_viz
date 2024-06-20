@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Tuple
+from typing import Any, Tuple, Literal, Union, List
 import importlib
 import types
 
@@ -9,9 +9,100 @@ from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 
-from ._config import LegendConfig, FeatureConfig
+from ._config import LegendConfig, FeatureConfig, ChromatogramPlotterConfig, SpectrumPlotterConfig, FeautureHeatmapPlotterConfig
 
-class BasePlot(ABC):
+class BasePlotter(ABC):
+    """
+    This class shows functions which must be implemented by all backends
+    """
+
+    @abstractmethod
+    def _load_extension(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _create_figure(self) -> None:
+        raise NotImplementedError
+    
+    def _make_plot(self, fig, **kwargs) -> None:
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        custom_hover_data = kwargs.pop("custom_hover_data", None)
+
+        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+
+        if legend is not None:
+            self._add_legend(newlines, legend)
+        self._update_plot_aes(newlines, **kwargs)
+
+        if tooltips is not None:
+            self._add_tooltips(newlines, tooltips, custom_hover_data)
+
+    @abstractmethod
+    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+        """
+        Create the plot 
+        """
+        pass
+
+    @abstractmethod
+    def _update_plot_aes(self, fig, **kwargs):
+        pass
+
+    @abstractmethod
+    def _add_legend(self, fig, legend):
+        pass
+    
+    @abstractmethod
+    def _modify_x_range(
+        self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+    ):
+        """
+        Modify the x-axis range.
+
+        Args:
+            x_range (Tuple[float, float]): The desired x-axis range.
+            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
+        """
+        pass
+
+    @abstractmethod
+    def _modify_y_range(
+        self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+    ):
+        """
+        Modify the y-axis range.
+
+        Args:
+            y_range (Tuple[float, float]): The desired y-axis range.
+            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
+        """
+        pass
+    
+    def generate(self, **kwargs):
+        """
+        Generate the plot
+        """
+        self._make_plot(self.fig, **kwargs)
+        return self.fig
+
+    @abstractmethod
+    def show(self):
+        pass
+    
+    # methods only for interactive plotting
+    @abstractmethod
+    def _add_tooltips(self, fig, tooltips):
+        pass
+
+    @abstractmethod
+    def _add_bounding_box_drawer(self, fig, **kwargs):
+        pass
+        
+    def _add_bounding_vertical_drawer(self, fig, **kwargs):
+        pass
+  
+class PyVizBase(ABC):
     """
     Base Class For Assembling a PyViz Plot
     """
@@ -119,14 +210,6 @@ class BasePlot(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def _create_figure(self) -> None:
-        raise NotImplementedError
-    
-    @abstractmethod
-    def _load_extension(self) -> None:
-        raise NotImplementedError
-
     def _update_from_config(self, config) -> None:
         """
         Updates the plot configuration based on the provided `config` object.
@@ -161,121 +244,123 @@ class BasePlot(ABC):
         other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
         return class_kwargs, other_kwargs
 
-    def _make_plot(self, fig, **kwargs) -> None:
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
-
-        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
-
-        if tooltips is not None:
-            self._add_tooltips(newlines, tooltips)
-
-    @abstractmethod
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
-        """
-        Create the plot 
-        """
-        pass
-
-    @abstractmethod
-    def _update_plot_aes(self, fig, **kwargs):
-        pass
-
-    @abstractmethod
-    def _add_legend(self, fig, legend):
-        pass
-    
-    @abstractmethod
-    def _modify_x_range(
-        self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
-    ):
-        """
-        Modify the x-axis range.
-
-        Args:
-            x_range (Tuple[float, float]): The desired x-axis range.
-            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
-        """
-        pass
-
-    @abstractmethod
-    def _modify_y_range(
-        self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
-    ):
-        """
-        Modify the y-axis range.
-
-        Args:
-            y_range (Tuple[float, float]): The desired y-axis range.
-            padding (Tuple[float, float] | None, optional): The padding to be applied to the x-axis range, in decimal percent. Defaults to None.
-        """
-        pass
-    
-    def generate(self, **kwargs):
-        """
-        Generate the plot
-        """
-        self._make_plot(self.fig, **kwargs)
-        return self.fig
-
-    @abstractmethod
-    def show(self):
-        pass
-    
-    # methods only for interactive plotting
-    @abstractmethod
-    def _add_tooltips(self, fig, tooltips):
-        pass
-
-    @abstractmethod
-    def _add_bounding_box_drawer(self, fig, **kwargs):
-        pass
-        
-    def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        pass
-
-
-'''
-class LinePlot:
+class LinePlot(PyVizBase, ABC):
     @property
     def _kind(self) -> Literal["line", "vline", "chromatogram"]:
         return "line"
 
-    def __init__(self, data, x, y, **kwargs) -> None:
+class VLinePlot(PyVizBase, ABC):
+    @property
+    def _kind(self) -> Literal["vline"]:
+        return "vline"
+    
+class ScatterPlot(PyVizBase, ABC):
+    @property
+    def _kind(self) -> Literal["scatter"]:
+        return "scatter"
+
+class ChromatogramPlot(PyVizBase, ABC):
+    @property
+    def _kind(self) -> Literal["chromatogram"]:
+        return "chromatogram"
+
+    def __init__(
+        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
+    ) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = ChromatogramPlotterConfig()
+
         super().__init__(data, x, y, **kwargs)
 
-    def _make_plot(self, fig, **kwargs) -> None:
-        """
-        Make a line plot
-        """
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
+        self.feature_data = feature_data
 
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        self.plot(self.data, self.x, self.y, **kwargs)
+        if self.show_plot:
+            self.show()
 
-        if legend is not None:
-            self._add_legend(newlines, legend)
-
-        self._update_plot_aes(newlines, **kwargs)
-
-        if tooltips is not None:
-            self._add_tooltips(newlines, tooltips)
-    
     @abstractmethod
-    @classmethod
-    def _plot(  # type: ignore[override]
-        cls, fig, data, x, y, by: str | None = None, **kwargs
-    ):
+    def _add_peak_boundaries(self, feature_data):
         """
-        Plot a line plot
+        Prepare data for adding peak boundaries to the plot.
+
+        Args:
+            feature_data (DataFrame): The feature data containing the peak boundaries.
+
+        Returns:
+            None
         """
         pass
-'''
 
+class MobilogramPlot(ChromatogramPlot, ABC):
+
+    @property
+    def _kind(self) -> Literal["mobilogram"]:
+        return "mobilogram"
+
+    def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
+
+class SpectrumPlot(PyVizBase, ABC):
+    @property
+    def _kind(self) -> Literal["spectrum"]:
+        return "spectrum"
+
+    def __init__(self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = SpectrumPlotterConfig()
+        
+        super().__init__(data, x, y, **kwargs)
+        
+        self.reference_spectrum = reference_spectrum
+        
+        self.plot(x, y, **kwargs)
+        if self.show_plot:
+            self.show()
+
+
+    def _prepare_data(
+        self,
+        spectrum: DataFrame,
+        y: str,
+        reference_spectrum: Union[DataFrame, None],
+    ) -> tuple[list, list]:
+        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
+
+        # Convert to relative intensity if required
+        if self.config.relative_intensity or self.config.mirror_spectrum:
+            spectrum[y] = spectrum[y] / spectrum[y].max() * 100
+            if reference_spectrum is not None:
+                reference_spectrum[y] = reference_spectrum[y] / reference_spectrum[y].max() * 100
+
+        return spectrum, reference_spectrum
+
+class FeatureHeatmapPlot(PyVizBase, ABC):
+    @property
+    def _kind(self) -> Literal["feature_heatmap"]:
+        return "feature_heatmap"
+    
+    def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
+        if "config" not in kwargs or kwargs["config"] is None:
+            kwargs["config"] = FeautureHeatmapPlotterConfig()
+
+        if add_marginals:
+            kwargs["config"].title = None
+
+        super().__init__(data, x, y, z=z, **kwargs)
+        self.zlabel = zlabel
+        self.add_marginals = add_marginals
+
+        self.plot(x, y, z, **kwargs)
+        if self.show_plot:
+            self.show()
+
+    @staticmethod
+    def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
+        # First fill NaNs with 0s for numerical columns and '.' for categorical columns
+        grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
+        return grouped
+    
+        
 class PlotAccessor:
     """
     Make plots of MassSpec data using dataframes
