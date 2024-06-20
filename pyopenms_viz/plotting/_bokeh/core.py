@@ -197,13 +197,6 @@ class BOKEHPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         self.fig.y_range = Range1d(start=start, end=end)
 
-    def generate(self, **kwargs):
-        """
-        Generate the plot
-        """
-        self._make_plot(self.fig, **kwargs)
-        return self.fig
-
     def show(self):
         from bokeh.io import show
 
@@ -215,9 +208,7 @@ class BOKEHPlot(BasePlot, ABC):
 
 class BOKEHLinePlot(BOKEHPlot):
     """
-    Class for assembling a Bokeh line plot
-
-    Line Plot 
+    Class for assembling a collection of Bokeh line plots
     """
 
     def __init__(self, data, x, y, **kwargs) -> None:
@@ -228,9 +219,7 @@ class BOKEHLinePlot(BOKEHPlot):
         return "line"
 
     @classmethod
-    def _plot(  # type: ignore[override]
-        cls, fig, data, x, y, by: str | None = None, **kwargs
-    ):
+    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a line plot
         """
@@ -259,7 +248,7 @@ class BOKEHLinePlot(BOKEHPlot):
 
 class BOKEHVLinePlot(BOKEHPlot):
     """
-    Class for assembling a Bokeh vertical line plot
+    Class for assembling a series of vertical line plots in Bokeh
     """
 
     @property
@@ -269,27 +258,10 @@ class BOKEHVLinePlot(BOKEHPlot):
     def __init__(self, data, x, y, **kwargs) -> None:
         super().__init__(data, x, y, **kwargs)
 
-    def _make_plot(self, fig: figure, **kwargs) -> None:
-        """
-        Make a vertical line plot
-        """
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
-        ##TODO find more elegant way to create mirror spectrum
-        use_data = kwargs.pop("new_data", self.data)
-
-        newlines, legend = self._plot(fig, use_data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
-        if tooltips is not None:
-            self._add_tooltips(newlines, tooltips)
-
     @classmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
-        Plot a vertical line
+        Plot a set of vertical lines 
         """
         
         if by is None:
@@ -317,7 +289,6 @@ class BOKEHVLinePlot(BOKEHPlot):
         #TODO: Implement text label annotations
         pass
 
-
 class BOKEHScatterPlot(BOKEHPlot):
     """
     Class for assembling a Bokeh scatter plot
@@ -331,7 +302,7 @@ class BOKEHScatterPlot(BOKEHPlot):
         super().__init__(data, x, y, z=z, **kwargs)
 
     @classmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a scatter plot
         """
@@ -351,7 +322,7 @@ class BOKEHScatterPlot(BOKEHPlot):
             return fig, legend
 
 
-class BOKEHChromatogramPlot(BOKEHLinePlot):
+class BOKEHChromatogramPlot(BOKEHPlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
@@ -370,11 +341,11 @@ class BOKEHChromatogramPlot(BOKEHLinePlot):
 
         self.feature_data = feature_data
 
-        self.plot()
+        self.plot(self.data, self.x, self.y, **kwargs)
         if self.show_plot:
             self.show()
 
-    def plot(self, **kwargs) -> None:  
+    def plot(self, data, x, y, **kwargs) -> None:  
 
         color_gen = ColorGenerator()
 
@@ -390,7 +361,8 @@ class BOKEHChromatogramPlot(BOKEHLinePlot):
         if "product_mz" in self.data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
 
-        self.fig = super().generate(line_color=color_gen, tooltips=TOOLTIPS)
+        linePlot = BOKEHLinePlot(data, x, y, **kwargs)
+        self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
@@ -466,18 +438,12 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot):
     ) -> None:
         super().__init__(data, x, y, feature_data=feature_data, **kwargs)
 
-    def plot(self, **kwargs) -> None:
-        super().plot()
-
+    def plot(self, data, x, y,  **kwargs) -> None:
+        super().plot(data, x, y, **kwargs)
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
-        # self.manual_bbox_renderer = self._add_bounding_vertical_drawer(self.fig)
 
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
-
-
-class BOKEHSpectrumPlot(BOKEHVLinePlot):
+class BOKEHSpectrumPlot(BOKEHPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
@@ -496,7 +462,7 @@ class BOKEHSpectrumPlot(BOKEHVLinePlot):
 
         self.reference_spectrum = reference_spectrum
 
-        self.plot(x, y)
+        self.plot(x, y, **kwargs)
         if self.show_plot:
             self.show()
 
@@ -506,32 +472,36 @@ class BOKEHSpectrumPlot(BOKEHVLinePlot):
             self.data, y, self.reference_spectrum
         )
 
-        for spec in spectrum:
+        color_gen = ColorGenerator()
 
-            color_gen = ColorGenerator()
+        # Tooltips for interactive information
+        TOOLTIPS = [
+            ("index", "$index"),
+            ("Retention Time", "@rt{0.2f}"),
+            ("Intensity", "@int{0.2f}"),
+            ("m/z", "@mz{0.4f}"),
+        ]
 
-            # Tooltips for interactive information
-            TOOLTIPS = [
-                ("index", "$index"),
-                ("Retention Time", "@rt{0.2f}"),
-                ("Intensity", "@int{0.2f}"),
-                ("m/z", "@mz{0.4f}"),
-            ]
+        ## TODO customizable or fixed
+        if "Annotation" in self.data.columns:
+            TOOLTIPS.append(("Annotation", "@Annotation"))
+        if "product_mz" in self.data.columns:
+            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
 
-            if "Annotation" in self.data.columns:
-                TOOLTIPS.append(("Annotation", "@Annotation"))
-            if "product_mz" in self.data.columns:
-                TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
+        spectrumPlot = BOKEHVLinePlot(spectrum, x, y, **kwargs)
+        self.fig = spectrumPlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
 
-            self.fig = super().generate(line_color=color_gen, tooltips=TOOLTIPS)
-
-            if self.config.mirror_spectrum:
-                color_gen = ColorGenerator()
-                for ref_spec in reference_spectrum:
-                    ref_spec[y] = ref_spec[y] * -1
-                    self.add_mirror_spectrum(
-                        super(), self.fig, new_data=ref_spec, line_color=color_gen
-                    )
+        if self.config.mirror_spectrum and reference_spectrum is not None:
+            ## create a mirror spectrum
+            color_gen_mirror = ColorGenerator()
+            reference_spectrum[y] = reference_spectrum[y] * -1
+            kwargs.pop("fig") # remove figure object from kwargs, use the same figure as above
+            mirror_spectrum = BOKEHVLinePlot(reference_spectrum, x, y, fig=self.fig, **kwargs)
+            mirror_spectrum.generate(line_color=color_gen_mirror)
+            zero_line = Span(
+                location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
+            )
+            self.fig.add_layout(zero_line)
 
     def _prepare_data(
         self,
@@ -541,34 +511,15 @@ class BOKEHSpectrumPlot(BOKEHVLinePlot):
     ) -> tuple[list, list]:
         """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
 
-        # Ensure input spectra dataframes are in lists
-        if not isinstance(spectrum, list):
-            spectrum = [spectrum]
-
-        if reference_spectrum is None:
-            reference_spectrum = []
-        elif not isinstance(reference_spectrum, list):
-            reference_spectrum = [reference_spectrum]
         # Convert to relative intensity if required
         if self.config.relative_intensity or self.config.mirror_spectrum:
-            combined_spectra = spectrum + (
-                reference_spectrum if reference_spectrum else []
-            )
-            for df in combined_spectra:
-                df[y] = df[y] / df[y].max() * 100
+            spectrum[y] = spectrum[y] / spectrum[y].max() * 100
+            if reference_spectrum is not None:
+                reference_spectrum[y] = reference_spectrum[y] / reference_spectrum[y].max() * 100
 
         return spectrum, reference_spectrum
 
-    def add_mirror_spectrum(self, plot_obj, fig: figure, new_data: DataFrame, **kwargs):
-        kwargs["new_data"] = new_data
-        plot_obj._make_plot(fig, **kwargs)
-        zero_line = Span(
-            location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
-        )
-        fig.add_layout(zero_line)
-
-
-class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
+class BOKEHFeatureHeatmapPlot(BOKEHPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
@@ -600,8 +551,6 @@ class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
         return grouped
 
     def plot(self, x, y, z, **kwargs):
-
-
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
         mapper = linear_cmap(
@@ -611,7 +560,8 @@ class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
             high=self.data[z].max(),
         )
 
-        self.fig = super().generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
+        scatterPlot = BOKEHScatterPlot(self.data, x, y, z=z, **kwargs)
+        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
         

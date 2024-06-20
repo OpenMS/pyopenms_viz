@@ -167,7 +167,7 @@ class BasePlot(ABC):
         # Check for tooltips in kwargs and pop
         tooltips = kwargs.pop("tooltips", None)
 
-        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -177,9 +177,9 @@ class BasePlot(ABC):
             self._add_tooltips(newlines, tooltips)
 
     @abstractmethod
-    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
-        Create the base plot
+        Create the plot 
         """
         pass
 
@@ -217,12 +217,12 @@ class BasePlot(ABC):
         """
         pass
     
-    @abstractmethod
     def generate(self, **kwargs):
         """
         Generate the plot
         """
         self._make_plot(self.fig, **kwargs)
+        return self.fig
 
     @abstractmethod
     def show(self):
