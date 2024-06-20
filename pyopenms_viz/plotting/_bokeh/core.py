@@ -349,8 +349,8 @@ class BOKEHScatterPlot(BOKEHPlot):
     def _kind(self) -> Literal["scatter"]:
         return "scatter"
 
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
+    def __init__(self, data, x, y, z=None, **kwargs) -> None:
+        super().__init__(data, x, y, z=z, **kwargs)
 
     def _make_plot(self, fig: figure, **kwargs) -> None:
         """
@@ -613,6 +613,8 @@ class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
         return "feature_heatmap"
 
     def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
+        print("Feature Heatmap Plotter")
+        print(z)
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = FeautureHeatmapPlotterConfig()
 
@@ -620,7 +622,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHScatterPlot):
             kwargs["config"].title = None
             # kwargs["config"].legend.show = False
 
-        super().__init__(data, x, y, **kwargs)
+        super().__init__(data, x, y, z=z, **kwargs)
         self.zlabel = zlabel
         self.add_marginals = add_marginals
 

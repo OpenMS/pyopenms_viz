@@ -77,7 +77,7 @@ class BasePlot(ABC):
             self.x = self._verify_column(x, 'x')
             self.y = self._verify_column(y, 'y')
         
-        if self._kind in {"scatter", "feature_heatmap"}:
+        if self._kind in {"feature_heatmap"}:
             self.z = self._verify_column(z, 'z')
 
         if self.by is not None:
@@ -162,8 +162,19 @@ class BasePlot(ABC):
         other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
         return class_kwargs, other_kwargs
 
+    def _make_plot(self, fig, **kwargs) -> None:
+        newlines, legend = self._plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+
+        if legend is not None:
+            self._add_legend(newlines, legend)
+        self._update_plot_aes(newlines, **kwargs)
+
+    
     @abstractmethod
-    def _make_plot(self, figure) -> None:
+    def _plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+        """
+        Create the base plot
+        """
         pass
 
     @abstractmethod
@@ -205,7 +216,7 @@ class BasePlot(ABC):
         """
         Generate the plot
         """
-        pass
+        self._make_plot(self.fig, **kwargs)
 
     @abstractmethod
     def show(self):
