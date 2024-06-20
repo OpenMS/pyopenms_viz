@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from abc import (
-    ABC,
-    abstractmethod,
-)
+from abc import ABC
 
-from typing import TYPE_CHECKING, Literal, List, Tuple, Union
+from typing import Literal, List, Tuple, Union
 
 from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
@@ -21,27 +18,17 @@ from bokeh.models import (
 )
 
 from pandas.core.frame import DataFrame
-from pandas.errors import AbstractMethodError
-from pandas import Index
-from pandas.core.dtypes.common import is_integer
 
-from pyopenms_viz.plotting._config import (
+from .._config import (
     SpectrumPlotterConfig,
     ChromatogramPlotterConfig,
     FeautureHeatmapPlotterConfig,
-    FeatureConfig,
-    LegendConfig,
 )
 
+# pyopenms_viz imports
 from .._core import BasePlot
-
-from pyopenms_viz.plotting._misc import ColorGenerator
-from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
-
-if TYPE_CHECKING:
-    from pandas.core.frame import DataFrame
-    from bokeh.plotting import figure
-
+from .._misc import ColorGenerator
+from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 class BOKEHPlot(BasePlot, ABC):
     """

@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Literal, Tuple
+from typing import Any, Tuple
 import importlib
 import types
 
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
-import pandas as pd
 
 from ._config import LegendConfig, FeatureConfig
-
 
 class BasePlot(ABC):
     """
