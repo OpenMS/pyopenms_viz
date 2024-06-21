@@ -19,12 +19,6 @@ from bokeh.models import (
 
 from pandas.core.frame import DataFrame
 
-from .._config import (
-    SpectrumPlotterConfig,
-    ChromatogramPlotterConfig,
-    FeautureHeatmapPlotterConfig,
-)
-
 # pyopenms_viz imports
 from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot
 from .._misc import ColorGenerator
