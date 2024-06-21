@@ -1,42 +1,17 @@
 from __future__ import annotations
 
-from abc import (
-    ABC,
-    abstractmethod,
-)
-from typing import TYPE_CHECKING, Literal, List, Tuple, Union
+from abc import ABC
+from typing import Literal, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from pandas.core.frame import DataFrame
-from pandas.errors import AbstractMethodError
-from pandas import Index
-from pandas.core.dtypes.common import is_integer
+from .._config import LegendConfig
 
-from pyopenms_viz.plotting._config import (
-    SpectrumPlotterConfig,
-    ChromatogramPlotterConfig,
-    FeautureHeatmapPlotterConfig,
-    FeatureConfig,
-    LegendConfig,
-)
+from .._misc import ColorGenerator
+from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
 
-from pyopenms_viz.plotting._misc import ColorGenerator
-from .._core import BasePlot
-
-
-if TYPE_CHECKING:
-    from pandas.core.frame import DataFrame
-    from matplotlib.pyplot import figure
-    from matplotlib.axes import Axes
-
-
-def holds_integer(column: Index) -> bool:
-    return column.inferred_type in {"integer", "mixed-integer"}
-
-
-class MATPLOTLIBPlot(BasePlot, ABC):
+class MATPLOTLIBPlot(BasePlotter, ABC):
     """
     Base class for assembling a Matplotlib plot.
 
@@ -57,27 +32,15 @@ class MATPLOTLIBPlot(BasePlot, ABC):
 
     def _create_figure(self):
         '''
-        Create a figure and axes objects.
-        '''
+        Create a figure and axes objects,
+        for consistency with other backends, the self.fig object stores the matplotlib axes object '''
         if self.fig is None:
-            self.fig, self.ax = plt.subplots(
+            self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
-            self.ax.set_title(self.title)
-            self.ax.set_xlabel(self.xlabel)
-            self.ax.set_ylabel(self.ylabel)
-
-    def _make_plot(self, ax: Axes) -> None:
-        """
-        Abstract method to make the plot.
-
-        Args:
-            ax (Axes): The Axes object.
-
-        Raises:
-            AbstractMethodError: If the method is not implemented in the subclass.
-        """
-        raise AbstractMethodError(self)
+            self.fig.set_title(self.title)
+            self.fig.set_xlabel(self.xlabel)
+            self.fig.set_ylabel(self.ylabel)
 
     def _update_plot_aes(self, ax, **kwargs):
         """
@@ -131,7 +94,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        self.ax.set_xlim(start, end)
+        self.fig.set_xlim(start, end)
 
     def _modify_y_range(
         self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
@@ -147,17 +110,18 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        self.ax.set_ylim(start, end)
+        self.fig.set_ylim(start, end)
 
-    def generate(self, **kwargs):
-        """
-        Generate the plot.
 
-        Returns:
-            axes: The axes object.
-        """
-        self._make_plot(self.ax, **kwargs)
-        return self.ax
+    # since matplotlib creates static plots, we don't need to implement the following methods
+    def _add_tooltips(self, fig, tooltips):
+        pass
+
+    def _add_bounding_box_drawer(self, fig, **kwargs):
+        pass
+
+    def _add_bounding_vertical_drawer(self, fig, **kwargs):
+        pass 
 
     def show(self):
         """
@@ -165,57 +129,19 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         """
         plt.show()
 
-
-class PlanePlot(MATPLOTLIBPlot, ABC):
-    """
-    Abstract class for assembling a matplotlib plot on a plane
-    """
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        MATPLOTLIBPlot.__init__(self, data, **kwargs)
-        if x is None or y is None:
-            raise ValueError(
-                self._kind + " requires an x and y column to be specified."
-            )
-        if is_integer(x) and not holds_integer(self.data.columns):
-            x = self.data.columns[x]
-        if is_integer(y) and not holds_integer(self.data.columns):
-            y = self.data.columns[y]
-
-        self.x = x
-        self.y = y
-
-
-class LinePlot(PlanePlot):
+class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
     Class for assembling a matplotlib line plot
     """
 
-    @property
-    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
-        return "line"
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-
-    def _make_plot(self, ax: Axes, **kwargs) -> None:
-        """
-        Make a line plot
-        """
-        newlines, legend = self._plot(ax, self.data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-
-        self._update_plot_aes(newlines, **kwargs)
-
     @classmethod
-    def _plot(  # type: ignore[override]
+    def plot(  # type: ignore[override]
         cls, ax, data, x, y, by: str | None = None, **kwargs
-    ):
+    ) -> Tuple[Axes, "Legend"]:
         """
         Plot a line plot
         """
+
         color_gen = kwargs.pop("line_color", None)
 
         legend_lines = []
@@ -232,33 +158,13 @@ class LinePlot(PlanePlot):
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
-
-class VLinePlot(LinePlot):
+class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     """
     Class for assembling a matplotlib vertical line plot
     """
 
-    @property
-    def _kind(self) -> Literal["vline"]:
-        return "vline"
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-
-    def _make_plot(self, ax: Axes, **kwargs) -> None:
-        """
-        Make a vertical line plot
-        """
-        use_data = kwargs.pop("new_data", self.data)
-
-        newlines, legend = self._plot(ax, use_data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
-
     @classmethod
-    def _plot(cls, ax, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, ax, data, x, y, by: str | None = None, **kwargs) -> Tuple[Axes, "Legend"]:
         """
         Plot a vertical line
         """
@@ -286,30 +192,13 @@ class VLinePlot(LinePlot):
         pass
 
 
-class ScatterPlot(PlanePlot):
+class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
     Class for assembling a matplotlib scatter plot
     """
 
-    @property
-    def _kind(self) -> Literal["scatter"]:
-        return "scatter"
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-
-    def _make_plot(self, ax: Axes, **kwargs) -> None:
-        """
-        Make a scatter plot
-        """
-        newlines, legend = self._plot(ax, self.data, self.x, self.y, self.by, **kwargs)
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
-
     @classmethod
-    def _plot(cls, ax, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, ax, data, x, y, by: str | None = None, **kwargs) -> Tuple[Axes, "Legend"]:
         """
         Plot a scatter plot
         """
@@ -340,34 +229,18 @@ class ScatterPlot(PlanePlot):
             return ax, (legend_lines, legend_labels)
 
 
-class ChromatogramPlot(LinePlot):
+class MATPLOTLIBChromatogramPlot(MATPLOTLIBPlot, ChromatogramPlot):
     """
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
 
-    @property
-    def _kind(self) -> Literal["chromatogram"]:
-        return "chromatogram"
-
-    def __init__(
-        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
-    ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = ChromatogramPlotterConfig()
-
-        super().__init__(data, x, y, **kwargs)
-
-        self.feature_data = feature_data
-
-        self.plot()
-        if self.show_plot:
-            self.show()
-
-    def plot(self, **kwargs) -> None:
+    def plot(self, data, x, y, **kwargs) -> None:
 
         color_gen = ColorGenerator()
 
-        self.ax = super().generate(line_color=color_gen)
+        kwargs['fig'] = self.fig
+        linePlot = MATPLOTLIBLinePlot(data, x, y, **kwargs)
+        self.fig = linePlot.generate(line_color=color_gen)
 
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
@@ -385,8 +258,8 @@ class ChromatogramPlot(LinePlot):
             None
         """
         if self.by is not None:
-            legend = self.ax.get_legend()
-            self.ax.add_artist(legend)
+            legend = self.fig.get_legend()
+            self.fig.add_artist(legend)
 
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=feature_data.shape[0]
@@ -395,7 +268,7 @@ class ChromatogramPlot(LinePlot):
         legend_items = []
         for idx, (_, feature) in enumerate(feature_data.iterrows()):
             use_color = next(color_gen)
-            self.ax.vlines(
+            self.fig.vlines(
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
@@ -403,7 +276,7 @@ class ChromatogramPlot(LinePlot):
                 color=use_color,
                 ls=self.feature_config.lineStyle,
             )
-            self.ax.vlines(
+            self.fig.vlines(
                 x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
@@ -428,7 +301,7 @@ class ChromatogramPlot(LinePlot):
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.feature_config.legend.loc
             )
-            self.ax.legend(
+            self.fig.legend(
                 custom_lines,
                 legend_labels,
                 loc=matplotlibLegendLoc,
@@ -437,8 +310,12 @@ class ChromatogramPlot(LinePlot):
                 bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
             )
 
+        # since matplotlib is not interactive cannot implement the following methods
+        def get_manual_bounding_box_coords(self):
+            pass
 
-class MobilogramPlot(ChromatogramPlot):
+
+class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a matplotlib mobilogram plot
     """
@@ -447,42 +324,17 @@ class MobilogramPlot(ChromatogramPlot):
     def _kind(self) -> Literal["mobilogram"]:
         return "mobilogram"
 
-    def __init__(
-        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
-    ) -> None:
-        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
-
-    def plot(self, **kwargs) -> None:
+    def plot(self, data, x, y, **kwargs) -> None:
         super().plot()
-
         self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
 
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
 
-
-class SpectrumPlot(VLinePlot):
+class MATPLOTLIBSpectrumPlot(MATPLOTLIBPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
     """
-
-    @property
-    def _kind(self) -> Literal["spectrum"]:
-        return "spectrum"
-
-    def __init__(
-        self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs
-    ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = SpectrumPlotterConfig()
-
-        super().__init__(data, x, y, **kwargs)
-
-        self.reference_spectrum = reference_spectrum
-
-        self.plot(x, y)
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, **kwargs):
 
@@ -490,119 +342,49 @@ class SpectrumPlot(VLinePlot):
             self.data, y, self.reference_spectrum
         )
 
-        for spec in spectrum:
+        color_gen = ColorGenerator()
 
-            color_gen = ColorGenerator()
+        kwargs['fig'] = self.fig
+        spectrumPlot = MATPLOTLIBVLinePlot(spectrum, x, y, **kwargs)
+        self.ax = spectrumPlot.generate(line_color=color_gen)
 
-            self.ax = super().generate(line_color=color_gen)
+        if self.config.mirror_spectrum and reference_spectrum is not None:
+            color_gen_mirror = ColorGenerator()
+            reference_spectrum[y] = reference_spectrum[y] * -1
+            kwargs.pop("fig", None)
+            mirror_spectrum = MATPLOTLIBVLinePlot(reference_spectrum, x, y, fig=self.fig,  **kwargs)
+            mirror_spectrum.generate(line_color=color_gen_mirror)
+            plt.axhline(y=0, color="black", linestyle="-", linewidth=1)
 
-            if self.config.mirror_spectrum:
-                color_gen = ColorGenerator()
-                for ref_spec in reference_spectrum:
-                    ref_spec[y] = ref_spec[y] * -1
-                    self.add_mirror_spectrum(
-                        super(), self.ax, new_data=ref_spec, line_color=color_gen
-                    )
-
-    def _prepare_data(
-        self,
-        spectrum: Union[DataFrame, list[DataFrame]],
-        y: str,
-        reference_spectrum: Union[DataFrame, list[DataFrame], None],
-    ) -> tuple[list, list]:
-        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
-
-        # Ensure input spectra dataframes are in lists
-        if not isinstance(spectrum, list):
-            spectrum = [spectrum]
-
-        if reference_spectrum is None:
-            reference_spectrum = []
-        elif not isinstance(reference_spectrum, list):
-            reference_spectrum = [reference_spectrum]
-        # Convert to relative intensity if required
-        if self.config.relative_intensity or self.config.mirror_spectrum:
-            combined_spectra = spectrum + (
-                reference_spectrum if reference_spectrum else []
-            )
-            for df in combined_spectra:
-                df[y] = df[y] / df[y].max() * 100
-
-        return spectrum, reference_spectrum
-
-    def add_mirror_spectrum(self, plot_obj, ax, new_data: DataFrame, **kwargs):
-        kwargs["new_data"] = new_data
-        plot_obj._make_plot(ax, **kwargs)
-        ax.plot(ax.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
-
-
-class FeatureHeatmapPlot(ScatterPlot):
+class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBPlot, FeatureHeatmapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """
 
-    @property
-    def _kind(self) -> Literal["feature_heatmap"]:
-        return "feature_heatmap"
-
-    def __init__(
-        self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs
-    ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = FeautureHeatmapPlotterConfig()
-
-        if add_marginals:
-            kwargs["config"].title = None
-
-            # Create a 2 by 2 figure and axis for marginal plots
-            fig, ax = plt.subplots(
-                2, 2, figsize=(kwargs["width"] / 100, kwargs["height"] / 100), dpi=200
-            )
-            kwargs["fig"] = fig
-            kwargs["ax"] = ax[1, 1]
-            self.ax_grid = ax
-
-        super().__init__(data, x, y, **kwargs)
-
-        self.zlabel = zlabel
-        self.add_marginals = add_marginals
-
-        self.plot(x, y, z, **kwargs)
-        if self.show_plot:
-            self.show()
-
-    @staticmethod
-    def _integrate_data_along_dim(
-        data: DataFrame, group_cols: List[str] | str, integrate_col: str
-    ) -> DataFrame:
-        # First fill NaNs with 0s for numerical columns and '.' for categorical columns
-        grouped = (
-            data.apply(
-                lambda x: x.fillna(0) if x.dtype.kind in "biufc" else x.fillna(".")
-            )
-            .groupby(group_cols)[integrate_col]
-            .sum()
-            .reset_index()
-        )
-        return grouped
-
     def plot(self, x, y, z, **kwargs):
 
+        # Create a 2 by 2 figure and axis for marginal plots
+        fig, ax = plt.subplots(
+            2, 2, figsize=(kwargs["width"] / 100, kwargs["height"] / 100), dpi=200
+        )
+        self.ax_grid = ax
+
+        kwargs['fig'] = ax[1,1]
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
-        if not self.add_marginals:
-            self.ax = super().generate(
-                z=z,
-                marker="s",
-                s=20,
-                edgecolors="none",
-                cmap="afmhot_r",
-                **other_kwargs,
-            )
+        scatterPlot = MATPLOTLIBScatterPlot(self.data, x, y, z=z, **class_kwargs)
+        self.ax = scatterPlot.generate(
+            z=z,
+            marker="s",
+            s=20,
+            edgecolors="none",
+            cmap="afmhot_r",
+            **other_kwargs,
+        )
 
-        else:
+        if self.add_marginals:
 
-            self.ax = super().generate(
+            self.ax = scatterPlot.generate(
                 z=z,
                 marker="s",
                 s=20,
@@ -621,7 +403,6 @@ class FeatureHeatmapPlot(ScatterPlot):
             ##  X-Axis Plot
 
             class_kwargs.pop("fig", None)
-            class_kwargs.pop("ax", None)
 
             # get cols to integrate over and exclude y and z
             group_cols = [x]
@@ -641,12 +422,11 @@ class FeatureHeatmapPlot(ScatterPlot):
             x_plot_kwargs = class_kwargs.copy()
             x_plot_kwargs.pop("config", None)
 
-            x_plot_obj = LinePlot(
+            x_plot_obj = MATPLOTLIBLinePlot(
                 x_data,
                 x,
                 z,
-                fig=self.fig,
-                ax=self.ax_grid[0, 1],
+                fig=self.ax_grid[0, 1],
                 config=x_config,
                 **x_plot_kwargs,
             )
@@ -686,12 +466,11 @@ class FeatureHeatmapPlot(ScatterPlot):
             y_plot_kwargs = class_kwargs.copy()
             y_plot_kwargs.pop("config", None)
 
-            y_plot_obj = LinePlot(
+            y_plot_obj = MATPLOTLIBLinePlot(
                 y_data,
                 z,
                 y,
-                fig=self.fig,
-                ax=self.ax_grid[1, 0],
+                fig=self.ax_grid[1, 0],
                 config=y_config,
                 **y_plot_kwargs,
             )
@@ -706,7 +485,11 @@ class FeatureHeatmapPlot(ScatterPlot):
             self.ax_grid[0, 0].axis("off")
 
             # Update the figure size
-            self.fig.set_size_inches(self.width / 100, self.height / 100)
+            fig.set_size_inches(self.width / 100, self.height / 100)
 
             # Adjust the layout
             plt.subplots_adjust(wspace=0, hspace=0)
+    
+    # since matplotlib is not interactive cannot implement the following methods
+    def get_manual_bounding_box_coords(self):
+        pass

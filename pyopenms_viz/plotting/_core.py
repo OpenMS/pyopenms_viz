@@ -10,6 +10,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 
 from ._config import LegendConfig, FeatureConfig, ChromatogramPlotterConfig, SpectrumPlotterConfig, FeautureHeatmapPlotterConfig
+from ._matplotlib.core import MATPLOTLIBPlot
 
 class BasePlotter(ABC):
     """
@@ -174,7 +175,10 @@ class PyVizBase(ABC):
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
-        self._create_figure()
+        
+        # feature heatmap matplotlib extension does not need a figure to be created since it is created in the class itself
+        if self._kind not in {"feature_heatmap"} and isinstance(self, MATPLOTLIBPlot):
+            self._create_figure()
 
     def _verify_column(self, colname: str, name: str) -> str:
         """fetch data from column name
