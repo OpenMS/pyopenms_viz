@@ -17,9 +17,6 @@ from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramP
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
-def holds_integer(data: DataFrame, column: str) -> bool:
-    return column.inferred_type in {"integer", "mixed-integer"}
-
 class PLOTLYPlot(BasePlotter, ABC):
     """
     Base class for assembling a Ploty plot
