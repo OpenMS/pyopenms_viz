@@ -191,6 +191,9 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
     Class for assembling a collection of Bokeh line plots
     """
+    @property
+    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
+        return "line"
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -267,6 +270,9 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
     Class for assembling a Bokeh scatter plot
     """
+    @property
+    def _kind(self) -> Literal["scatter"]:
+        return "scatter"
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -294,10 +300,10 @@ class BOKEHChromatogramPlot(BOKEHPlot, ChromatogramPlot):
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
 
-    def plot(self, data, x, y, **kwargs) -> None:  
+    def plot_lines(self, data, x, y, **kwargs) -> None:  
+        return BOKEHLinePlot(data, x, y, **kwargs)
 
-        color_gen = ColorGenerator()
-
+    def _create_tooltips(self, data):
         # Tooltips for interactive information
         TOOLTIPS = [
             ("index", "$index"),
@@ -305,21 +311,12 @@ class BOKEHChromatogramPlot(BOKEHPlot, ChromatogramPlot):
             ("Intensity", "@int{0.2f}"),
             ("m/z", "@mz{0.4f}"),
         ]
-        if "Annotation" in self.data.columns:
+        if "Annotation" in data.columns:
             TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in self.data.columns:
+        if "product_mz" in data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
-
-        linePlot = BOKEHLinePlot(data, x, y, **kwargs)
-        self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
-
-        self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
-
-        self.manual_boundary_renderer = self._add_bounding_vertical_drawer(self.fig)
-
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
-
+        return TOOLTIPS
+    
     def _add_peak_boundaries(self, feature_data):
         """
         Add peak boundaries to the plot.

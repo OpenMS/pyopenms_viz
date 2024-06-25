@@ -10,7 +10,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 
 from ._config import LegendConfig, FeatureConfig, ChromatogramPlotterConfig, SpectrumPlotterConfig, FeautureHeatmapPlotterConfig
-from ._matplotlib.core import MATPLOTLIBPlot
+from ._misc import ColorGenerator
 
 class BasePlotter(ABC):
     """
@@ -102,8 +102,7 @@ class BasePlotter(ABC):
         
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
         pass
-  
-class PyVizBase(ABC):
+
     """
     Base Class For Assembling a PyViz Plot
     """
@@ -175,10 +174,7 @@ class PyVizBase(ABC):
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
-        
-        # feature heatmap matplotlib extension does not need a figure to be created since it is created in the class itself
-        if self._kind not in {"feature_heatmap"} and isinstance(self, MATPLOTLIBPlot):
-            self._create_figure()
+        self._create_figure()
 
     def _verify_column(self, colname: str, name: str) -> str:
         """fetch data from column name
@@ -248,22 +244,22 @@ class PyVizBase(ABC):
         other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
         return class_kwargs, other_kwargs
 
-class LinePlot(PyVizBase, ABC):
+class LinePlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["line", "vline", "chromatogram"]:
         return "line"
 
-class VLinePlot(PyVizBase, ABC):
+class VLinePlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["vline"]:
         return "vline"
     
-class ScatterPlot(PyVizBase, ABC):
+class ScatterPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["scatter"]:
         return "scatter"
 
-class ChromatogramPlot(PyVizBase, ABC):
+class ChromatogramPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["chromatogram"]:
         return "chromatogram"
@@ -281,6 +277,39 @@ class ChromatogramPlot(PyVizBase, ABC):
         self.plot(self.data, self.x, self.y, **kwargs)
         if self.show_plot:
             self.show()
+    
+    def plot(self, data, x, y, **kwargs):
+        """
+        Create the plot
+        """
+        color_gen = ColorGenerator()
+        TOOLTIPS = self._create_tooltips(data)
+        linePlot = self.plot_lines(data, x, y, **kwargs)
+        self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
+
+        self._modify_y_range((0, self.data[y].max()), (0, 0.1))
+
+        self.manual_boundary_renderer = self._add_bounding_vertical_drawer(self.fig)
+
+        if self.feature_data is not None:
+            self._add_peak_boundaries(self.feature_data)
+
+    @abstractmethod
+    def plot_lines(self, data, x, y, **kwargs):
+        pass
+
+    @abstractmethod
+    def _create_tooltips(self, data):
+        """
+        Create the tooltips for the plot.
+
+        Args:
+            data (DataFrame): The data to be plotted.
+
+        Returns:
+            TOOLTIPS: The tooltips for the plot.
+        """
+        pass
 
     @abstractmethod
     def _add_peak_boundaries(self, feature_data):
@@ -304,7 +333,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
     def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
         super().__init__(data, x, y, feature_data=feature_data, **kwargs)
 
-class SpectrumPlot(PyVizBase, ABC):
+class SpectrumPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["spectrum"]:
         return "spectrum"
@@ -338,7 +367,7 @@ class SpectrumPlot(PyVizBase, ABC):
 
         return spectrum, reference_spectrum
 
-class FeatureHeatmapPlot(PyVizBase, ABC):
+class FeatureHeatmapPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["feature_heatmap"]:
         return "feature_heatmap"
