@@ -438,11 +438,9 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
             kwargs["config"].title = None
         
         super().__init__(data, x, y, z=z, **kwargs)
-        print("finished init")
         self.zlabel = zlabel
         self.add_marginals = add_marginals
 
-        print("starting plot")
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
             self.show()
@@ -457,18 +455,14 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
  
-        # remove 'config' from class_kwargs
-        class_kwarg_copy = class_kwargs.copy()
-        class_kwarg_copy.pop('config', None)
-        
         if self.add_marginals:
             # remove 'config' from class_kwargs
-            class_kwarg_copy = class_kwargs.copy()
-            class_kwarg_copy.pop('config', None)
+            class_kwargs_copy = class_kwargs.copy()
+            class_kwargs_copy.pop('config', None)
  
-            x_fig = self.create_x_axis_plot(x, z, class_kwarg_copy)
+            x_fig = self.create_x_axis_plot(x, z, class_kwargs_copy)
 
-            y_fig = self.create_y_axis_plot(y, z, class_kwarg_copy)
+            y_fig = self.create_y_axis_plot(y, z, class_kwargs_copy)
 
             self.combine_plots(x_fig, y_fig)
 
@@ -509,7 +503,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         return x_fig
         
     @abstractmethod
-    def create_y_axis_plot(self, z, y, class_kwargs) -> "figure":
+    def create_y_axis_plot(self, y, z, class_kwargs) -> "figure":
         group_cols = [y]
         if 'Annotation' in self.data.columns:
             group_cols.append('Annotation')
@@ -524,7 +518,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         
         color_gen = ColorGenerator()
         
-        y_plot_obj = self.get_vline_renderer(y_data, z, y, config=y_config, **class_kwargs)
+        y_plot_obj = self.get_line_renderer(y_data, z, y, config=y_config, **class_kwargs)
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
 

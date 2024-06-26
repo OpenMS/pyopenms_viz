@@ -417,7 +417,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
     def get_color_map(self, z):
         return linear_cmap(
             field_name=z,
-            palette=Plasma256,
+            palette=Plasma256[::-1],
             low=min(self.data[z]),
             high=max(self.data[z]),
         )
