@@ -162,7 +162,7 @@ class BasePlotter(ABC):
             self._update_from_config(config)
 
         ### get x and y data
-        if self._kind in {"line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "feature_heatmap"}:
+        if self._kind in {"line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "feature_heatmap", "complex"}:
             self.x = self._verify_column(x, 'x')
             self.y = self._verify_column(y, 'y')
         
@@ -259,6 +259,37 @@ class ScatterPlot(BasePlotter, ABC):
     def _kind(self) -> Literal["scatter"]:
         return "scatter"
 
+class ComplexPlot(BasePlotter, ABC):
+    """
+    Abstract class for complex plots, such as chromatograms and mobilograms which are made up of simple plots such as ScatterPlots, VLines and LinePlots.
+
+    Args:
+        BasePlotter (_type_): _description_
+        ABC (_type_): _description_
+    """
+    @property
+    def _kind(self) -> Literal["complex"]:
+        return "complex"
+    
+    @abstractmethod
+    def get_line_renderer(self, data, x, y, **kwargs):
+        pass
+
+    @abstractmethod
+    def get_vline_renderer(self, data, x, y, **kwargs):
+        pass
+
+    @abstractmethod
+    def get_scatter_renderer(self, data, x, y, **kwargs):
+        pass
+
+    @abstractmethod
+    def plot_x_axis_line(self, fig):
+        """
+        plot line across x axis
+        """
+        pass
+
 class ChromatogramPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["chromatogram"]:
@@ -284,7 +315,7 @@ class ChromatogramPlot(BasePlotter, ABC):
         """
         color_gen = ColorGenerator()
         TOOLTIPS = self._create_tooltips(data)
-        linePlot = self.plot_lines(data, x, y, **kwargs)
+        linePlot = self.get_line_renderer(data, x, y, **kwargs)
         self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
 
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
@@ -293,10 +324,6 @@ class ChromatogramPlot(BasePlotter, ABC):
 
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
-
-    @abstractmethod
-    def plot_lines(self, data, x, y, **kwargs):
-        pass
 
     @abstractmethod
     def _create_tooltips(self, data):
@@ -332,8 +359,13 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
     def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
         super().__init__(data, x, y, feature_data=feature_data, **kwargs)
+    
+    def plot(self, data, x, y, **kwargs):
+        super(ChromatogramPlot).plot(data, x, y, **kwargs)
+        self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
-class SpectrumPlot(BasePlotter, ABC):
+
+class SpectrumPlot(ComplexPlot, ABC):
     @property
     def _kind(self) -> Literal["spectrum"]:
         return "spectrum"
@@ -350,6 +382,31 @@ class SpectrumPlot(BasePlotter, ABC):
         if self.show_plot:
             self.show()
 
+    def plot(self, x, y, **kwargs):
+
+        spectrum, reference_spectrum = self._prepare_data(
+            self.data, y, self.reference_spectrum
+        )
+
+        color_gen = ColorGenerator()
+
+        TOOLTIPS = self._create_tooltips(self.data)
+
+        spectrumPlot = self.get_vline_renderer(spectrum, x, y, **kwargs)
+        self.fig = spectrumPlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
+
+        if self.config.mirror_spectrum and reference_spectrum is not None:
+            ## create a mirror spectrum
+            color_gen_mirror = ColorGenerator()
+            reference_spectrum[y] = reference_spectrum[y] * -1
+            kwargs.pop("fig") # remove figure object from kwargs, use the same figure as above
+            mirror_spectrum = self.get_vline_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
+            mirror_spectrum.generate(line_color=color_gen_mirror)
+            self.plot_x_axis_line(self.fig)
+
+    @abstractmethod
+    def _create_tooltips(self, data):
+        pass
 
     def _prepare_data(
         self,
@@ -367,7 +424,8 @@ class SpectrumPlot(BasePlotter, ABC):
 
         return spectrum, reference_spectrum
 
-class FeatureHeatmapPlot(BasePlotter, ABC):
+class FeatureHeatmapPlot(ComplexPlot, ABC):
+    # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
     def _kind(self) -> Literal["feature_heatmap"]:
         return "feature_heatmap"
@@ -378,14 +436,41 @@ class FeatureHeatmapPlot(BasePlotter, ABC):
 
         if add_marginals:
             kwargs["config"].title = None
-
+        
         super().__init__(data, x, y, z=z, **kwargs)
+        print("finished init")
         self.zlabel = zlabel
         self.add_marginals = add_marginals
 
+        print("starting plot")
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
             self.show()
+
+    def plot(self, x, y, z, **kwargs):
+        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+
+        mapper = self.get_color_map(z)
+
+        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
+        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
+
+        self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+ 
+        # remove 'config' from class_kwargs
+        class_kwarg_copy = class_kwargs.copy()
+        class_kwarg_copy.pop('config', None)
+        
+        if self.add_marginals:
+            # remove 'config' from class_kwargs
+            class_kwarg_copy = class_kwargs.copy()
+            class_kwarg_copy.pop('config', None)
+ 
+            x_fig = self.create_x_axis_plot(x, z, class_kwarg_copy)
+
+            y_fig = self.create_y_axis_plot(y, z, class_kwarg_copy)
+
+            self.combine_plots(x_fig, y_fig)
 
     @staticmethod
     def _integrate_data_along_dim(data: DataFrame, group_cols: List[str] | str, integrate_col: str) -> DataFrame:
@@ -393,7 +478,62 @@ class FeatureHeatmapPlot(BasePlotter, ABC):
         grouped = data.apply(lambda x: x.fillna(0) if x.dtype.kind in 'biufc' else x.fillna('.')).groupby(group_cols)[integrate_col].sum().reset_index()
         return grouped
     
+
+    @abstractmethod
+    def get_color_map(self, z):
+        '''
+        Get color iterator for the plot
+        '''
+        pass
+
+    @abstractmethod
+    def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
+        # get cols to integrate over and exclude y and z
+        group_cols = [x]
+        if 'Annotation' in self.data.columns:
+            group_cols.append('Annotation')
+            
+        x_data = self._integrate_data_along_dim(self.data, group_cols, z)
         
+        x_config = self.config.copy()
+        x_config.ylabel = self.zlabel
+        x_config.y_axis_location = 'right'
+        x_config.legend.show = True
+        
+        color_gen = ColorGenerator()
+       
+        x_plot_obj = self.get_line_renderer(x_data, x, z, config=x_config, **class_kwargs)
+        x_fig = x_plot_obj.generate(line_color=color_gen)
+        self.plot_x_axis_line(x_fig)
+
+        return x_fig
+        
+    @abstractmethod
+    def create_y_axis_plot(self, z, y, class_kwargs) -> "figure":
+        group_cols = [y]
+        if 'Annotation' in self.data.columns:
+            group_cols.append('Annotation')
+            
+        y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+        
+        y_config = self.config.copy()
+        y_config.xlabel = self.zlabel
+        y_config.y_axis_location = 'left'
+        y_config.legend.show = True
+        y_config.legend.loc = 'below'
+        
+        color_gen = ColorGenerator()
+        
+        y_plot_obj = self.get_vline_renderer(y_data, z, y, config=y_config, **class_kwargs)
+        y_fig = y_plot_obj.generate(line_color=color_gen)
+        self.plot_x_axis_line(y_fig)
+
+        return y_fig
+
+    @abstractmethod
+    def combine_plots(self, x_fig, y_fig):
+        pass
+
 class PlotAccessor:
     """
     Make plots of MassSpec data using dataframes
