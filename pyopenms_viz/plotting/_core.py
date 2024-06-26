@@ -437,8 +437,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     def plot(self, x, y, z, **kwargs):
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
-        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        self._generate_scatterplot(scatterPlot, z, **other_kwargs)
+        self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
  
@@ -461,7 +460,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     
 
     @abstractmethod
-    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
+    def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         pass
 
     @abstractmethod

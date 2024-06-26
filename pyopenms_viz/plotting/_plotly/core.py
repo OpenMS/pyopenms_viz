@@ -390,12 +390,13 @@ class PLOTLYSpectrumPlot(PLOTLYComplexPlot, SpectrumPlot):
     
 class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
 
-    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
+    def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
+        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
         self.fig = scatterPlot.generate(marker=dict(
                 color=self.data[z].unique(), 
                 cmin= self.data[z].min(),
                 cmax= self.data[z].max(),
-                colorscale="Plasma_r", showscale=False, symbol='square', size=10, opacity=0.4) , **kwargs)
+                colorscale="Plasma_r", showscale=False, symbol='square', size=10, opacity=0.4) , **other_kwargs)
 
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)

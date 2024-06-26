@@ -401,7 +401,8 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
     Class for assembling a Bokeh feature heatmap plot
     """
 
-    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
+    def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
+        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
         mapper =  linear_cmap(
             field_name=z,
             palette=Plasma256[::-1],
@@ -409,7 +410,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
             high=max(self.data[z]),
         )
     
-        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **kwargs)
+        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
