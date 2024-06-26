@@ -12,7 +12,7 @@ from pandas.core.frame import DataFrame
 
 from numpy import column_stack
 
-from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
+from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ComplexPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
 
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
@@ -123,7 +123,8 @@ class PLOTLYPlot(BasePlotter, ABC):
                                 opacity=0.5
                             ))
     
-    def _add_bounding_vertical_drawer(self, fig, label_suffix, **kwargs):
+    def _add_bounding_vertical_drawer(self, fig, **kwargs):
+        # Note: self.label_suffix must be defined
         
         fig.add_trace(go.Scatter(x=[], y=[], mode="lines")
         )
@@ -133,7 +134,7 @@ class PLOTLYPlot(BasePlotter, ABC):
                           newshape=dict(
                                 showlegend=True,
                                 label=dict(
-                                           texttemplate=label_suffix + "_0: %{x0:.2f} | " + label_suffix + "_1: %{x1:.2f}",
+                                           texttemplate=self.label_suffix + "_0: %{x0:.2f} | " + self.label_suffix + "_1: %{x1:.2f}",
                                            textposition="top left",),
                                 line_color="#F02D1A",
                                 fillcolor=None,
@@ -173,20 +174,6 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     
     def __init__(self, data, x, y, **kwargs) -> None:
         super().__init__(data, x, y, **kwargs)
-        
-    '''
-    def _make_plot(self, fig: Figure, **kwargs) -> Figure:
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
-        custom_hover_data = kwargs.pop("custom_hover_data", None)
-        
-        traces, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
-        
-        self._update_plot_aes(fig)
-        
-        if tooltips is not None:
-            self._add_tooltips(fig, tooltips, custom_hover_data)
-    '''
         
     @classmethod
     def plot( # type: ignore[override]
@@ -324,12 +311,22 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         fig.add_traces(data=traces)
         return fig, None
 
-class PLOTLYChromatogramPlot(PLOTLYPlot, ChromatogramPlot):
+class PLOTLYComplexPlot(ComplexPlot, PLOTLYPlot, ABC):
+
+    def get_line_renderer(self, data, x, y, **kwargs) -> None:
+        return PLOTLYLinePlot(data, x, y, **kwargs)
     
-    def plot(self, data, x, y, by=None, **kwargs):
-        
-        color_gen = ColorGenerator()
-        
+    def get_vline_renderer(self, data, x, y, **kwargs) -> None:
+        return PLOTLYVLinePlot(data, x, y, **kwargs)
+    
+    def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
+        print("getting scatter renderer")
+        return PLOTLYScatterPlot(data, x, y, **kwargs)
+    
+    def plot_x_axis_line(self, fig):
+        fig.add_hline(y=0, line_color="black", line=dict(width=1))
+    
+    def _create_tooltips(self):
         available_columns = self.data.columns.tolist()
         # Get index (not a column in dataframe) data first for customer hover data
         custom_hover_data = [self.data.index]
@@ -352,17 +349,11 @@ class PLOTLYChromatogramPlot(PLOTLYPlot, ChromatogramPlot):
         if "product_mz" in self.data.columns:
             TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
         
-        linePlot = PLOTLYLinePlot(data, x, y, **kwargs)
-        self.fig = linePlot.generate(line_color=color_gen, tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data), **kwargs)
-        
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
-        
-        self._add_bounding_vertical_drawer(self.fig, self.x)
-        
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.fig, self.feature_data)
-    
-    def _add_peak_boundaries(self, fig, feature_data, **kwargs):
+        return "<br>".join(TOOLTIPS), column_stack(custom_hover_data)
+
+class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
+
+    def _add_peak_boundaries(self, feature_data, **kwargs):
         color_gen = ColorGenerator(
             colormap=self.config.feature_config.colormap, n=feature_data.shape[0]
         )
@@ -371,7 +362,7 @@ class PLOTLYChromatogramPlot(PLOTLYPlot, ChromatogramPlot):
                 legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"Feature {idx}"
-            fig.add_trace(go.Scatter(
+            self.fig.add_trace(go.Scatter(
                 mode="lines",
                 x=[feature["leftWidth"], feature["leftWidth"], feature["rightWidth"], feature["rightWidth"]],
                 y=[0, feature["apexIntensity"], 0, feature["apexIntensity"]],
@@ -391,231 +382,105 @@ class PLOTLYChromatogramPlot(PLOTLYPlot, ChromatogramPlot):
 
 
 class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
-    
-    @property
-    def _kind(self) -> Literal["mobilogram"]:
-        return "mobilogram"
-    
-    def plot(self, **kwargs):
-        super().plot(**kwargs)
-        
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
-        
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.fig, self.feature_data)
+    pass
 
 
-class PLOTLYSpectrumPlot(PLOTLYPlot, SpectrumPlot):
+class PLOTLYSpectrumPlot(PLOTLYComplexPlot, SpectrumPlot):
+    pass
     
-    def plot(self, x, y, **kwargs):
-        spectrum, reference_spectrum = self._prepare_data(
-            self.data, y, self.reference_spectrum
-        )
-        
-        color_gen = ColorGenerator()
-        
-        available_columns = self.data.columns.tolist()
-        # Get index (not a column in dataframe) data first for customer hover data
-        custom_hover_data = [self.data.index]
-        # Get the rest of the columns
-        custom_hover_data  += [self.data[col] for col in ["mz", "Annotation", "product_mz"] if col in available_columns]
-        
-        
-        TOOLTIPS = [
-            "Index: %{customdata[0]}",
-            "Retention Time: %{x:.2f}",
-            "Intensity: %{y:.2f}",
-        ]
-        
-        custom_hover_data_index = 1
-        if "mz" in self.data.columns:
-            TOOLTIPS.append("m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
-            custom_hover_data_index += 1
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append("Annotation: %{customdata[" + str(custom_hover_data_index) + "]}")
-            custom_hover_data_index += 1
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
-        
-        spectrumPlot = PLOTLYVLinePlot(spectrum, x, y, **kwargs)
-        self.fig = spectrumPlot.generate(line_color=color_gen, tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data))
-    
-        if self.config.mirror_spectrum and reference_spectrum is not None:
-            color_gen_mirror = ColorGenerator()
-            reference_spectrum[y] = reference_spectrum[y] * -1
-            kwargs.pop("fig", None)
-            mirrorSpectrumPlot = PLOTLYVLinePlot(reference_spectrum, x, y, fig=self.fig, **kwargs)
-            ref_spec = mirrorSpectrumPlot.generate(line_color=color_gen_mirror, showlegend=False)
-            self.fig.add_hline(y=0, line_color="black", line=dict(width=1))
-    
-        # self._modify_y_range((0, self.data[y].max()), (0, 0.1))
-        self._modify_x_range((self.data[x].min(), self.data[x].max()), (0.1, 0.1))
-            
-class PLOTLYFeatureHeatmapPlot(PLOTLYPlot, FeatureHeatmapPlot):
+class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
 
-    def plot(self, x, y, z, **kwargs):
-
-        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
-
-        available_columns = self.data.columns.tolist()
-        # Get index (not a column in dataframe) data first for customer hover data
-        custom_hover_data = [self.data.index]
-        # Get the rest of the columns
-        custom_hover_data  += [self.data[col] for col in ["mz", "Annotation", "product_mz"] if col in available_columns]
-        
-        
-        TOOLTIPS = [
-            "Index: %{customdata[0]}",
-            "Retention Time: %{x:.2f}",
-            "Intensity: %{y:.2f}",
-        ]
-        
-        custom_hover_data_index = 1
-        if "mz" in self.data.columns:
-            TOOLTIPS.append("m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
-            custom_hover_data_index += 1
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append("Annotation: %{customdata[" + str(custom_hover_data_index) + "]}")
-            custom_hover_data_index += 1
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append("Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}")
-        
-        # TODO: The current marker colorscale is not working as expected. Need to fix this. It doesn't plot the right intensity values, as compared to bokeh and matplotlib
-        scatterPlot = PLOTLYScatterPlot(self.data, x, y, **kwargs)
-        self.fig = scatterPlot.generate(
-            marker=dict(
+    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
+        self.fig = scatterPlot.generate(marker=dict(
                 color=self.data[z].unique(), 
                 cmin= self.data[z].min(),
                 cmax= self.data[z].max(),
-                colorscale="Plasma_r", showscale=False, symbol='square', size=10, opacity=0.4),
-            tooltips="<br>".join(TOOLTIPS), custom_hover_data=column_stack(custom_hover_data),
-            **other_kwargs,
-        )
+                colorscale="Plasma_r", showscale=False, symbol='square', size=10, opacity=0.4) , **kwargs)
 
-        self._add_bounding_box_drawer(self.fig)
-
-        if self.add_marginals:
-            #############
-            ##  X-Axis Plot
-            
-            # get cols to integrate over and exclude y and z
-            group_cols = [x]
-            if 'Annotation' in self.data.columns:
-                group_cols.append('Annotation')
-                
-            x_data = self._integrate_data_along_dim(self.data, group_cols, z)
-            
-            x_config = self.config.copy()
-            x_config.ylabel = self.zlabel
-            x_config.y_axis_location = 'right'
-            x_config.legend.show = True
-            
-            color_gen = ColorGenerator()
-            
-            # remove 'config' from class_kwargs
-            x_plot_kwargs = class_kwargs.copy()
-            x_plot_kwargs.pop('config', None)
-            
-            x_plot_obj = PLOTLYLinePlot(x_data, x, z, config=x_config, **x_plot_kwargs)
-            x_fig = x_plot_obj.generate(line_color=color_gen)
-            x_fig.update_xaxes(visible=False)
-            
-            #############
-            ##  Y-Axis Plot
-            
-            group_cols = [y]
-            if 'Annotation' in self.data.columns:
-                group_cols.append('Annotation')
-                
-            y_data = self._integrate_data_along_dim(self.data, group_cols, z)
-            
-            y_config = self.config.copy()
-            y_config.xlabel = self.zlabel
-            y_config.y_axis_location = 'left'
-            y_config.legend.show = True
-            y_config.legend.loc = 'below'
-            
-            color_gen = ColorGenerator()
-            
-            # remove 'config' from class_kwargs
-            y_plot_kwargs = class_kwargs.copy()
-            y_plot_kwargs.pop('config', None)
-            
-            y_plot_obj = PLOTLYLinePlot(y_data, z, y, config=y_config, **y_plot_kwargs)
-            y_fig = y_plot_obj.generate(line_color=color_gen)
-            y_fig.update_xaxes(range=[0, y_data[z].max()])
-            y_fig.update_yaxes(range=[y_data[y].min(), y_data[y].max()])
-            y_fig.update_layout(xaxis_title = self.ylabel, yaxis_title = self.zlabel)
-            
-            #############
-            ##  Combine Plots
-            
-             # Create a figure with subplots
-            fig_m = make_subplots(
-                rows=2, cols=2,
-                shared_xaxes=True, shared_yaxes=True,
-                vertical_spacing=0, horizontal_spacing=0,
-                subplot_titles=(None, f"Integrated {self.xlabel}", f"Integrated {self.ylabel}", None),
-                specs=[[{}, {"type": "xy", "rowspan": 1, "secondary_y":True}],
-                    [{"type": "xy", "rowspan": 1, "secondary_y":False},     {"type": "xy", "rowspan": 1, "secondary_y":False}]]
-            )
-            
-            # Add the heatmap to the first row
-            for trace in self.fig.data:
-                trace.showlegend = False
-                trace.legendgroup = trace.name
-                fig_m.add_trace(trace, row=2, col=2, secondary_y=False)
-                
-            # Update the heatmao layout
-            fig_m.update_layout(self.fig.layout)
-            fig_m.update_yaxes(row=2, col=2, secondary_y=False) 
-            
-            # Add the x-axis plot to the second row
-            for trace in x_fig.data:
+    def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
+        x_fig = super().create_x_axis_plot(x, z, class_kwargs)
+        x_fig.update_xaxes(visible=False)
+        
+        return x_fig
     
-                trace.legendgroup = trace.name
-                fig_m.add_trace(trace, row=1, col=2, secondary_y=True)
+    def create_y_axis_plot(self, y, z, class_kwargs) -> "figure":
+        y_fig =  super().create_y_axis_plot(y, z, class_kwargs)
+        y_fig.update_xaxes(range=[0, self.data[z].max()])
+        y_fig.update_yaxes(range=[self.data[y].min(), self.data[y].max()])
+        y_fig.update_layout(xaxis_title = self.ylabel, yaxis_title = self.zlabel)
+
+        return y_fig
+
+    def combine_plots(self, x_fig, y_fig):
+        #############
+        ##  Combine Plots
+        
+            # Create a figure with subplots
+        fig_m = make_subplots(
+            rows=2, cols=2,
+            shared_xaxes=True, shared_yaxes=True,
+            vertical_spacing=0, horizontal_spacing=0,
+            subplot_titles=(None, f"Integrated {self.xlabel}", f"Integrated {self.ylabel}", None),
+            specs=[[{}, {"type": "xy", "rowspan": 1, "secondary_y":True}],
+                [{"type": "xy", "rowspan": 1, "secondary_y":False},     {"type": "xy", "rowspan": 1, "secondary_y":False}]]
+        )
+        
+        # Add the heatmap to the first row
+        for trace in self.fig.data:
+            trace.showlegend = False
+            trace.legendgroup = trace.name
+            fig_m.add_trace(trace, row=2, col=2, secondary_y=False)
             
-            # Update the XIC layout
-            fig_m.update_layout(x_fig.layout)
+        # Update the heatmao layout
+        fig_m.update_layout(self.fig.layout)
+        fig_m.update_yaxes(row=2, col=2, secondary_y=False) 
+        
+        # Add the x-axis plot to the second row
+        for trace in x_fig.data:
 
-            # Make the y-axis of fig_xic independent
-            fig_m.update_yaxes(overwrite=True, row=1, col=2, secondary_y=True)
-            
-            # Manually adjust the domain of secondary y-axis to only span the first row of the subplot
-            fig_m['layout']['yaxis3']['domain'] = [0.5, 1.0]
-            
-            # Add the XIM plot to the second row
-            for trace in y_fig.data:
-                trace.showlegend = False
-                trace.legendgroup = trace.name
-                fig_m.add_trace(trace, row=2, col=1)
+            trace.legendgroup = trace.name
+            fig_m.add_trace(trace, row=1, col=2, secondary_y=True)
+        
+        # Update the XIC layout
+        fig_m.update_layout(x_fig.layout)
 
-            # Update the XIM layout
-            fig_m.update_layout(y_fig.layout)
+        # Make the y-axis of fig_xic independent
+        fig_m.update_yaxes(overwrite=True, row=1, col=2, secondary_y=True)
+        
+        # Manually adjust the domain of secondary y-axis to only span the first row of the subplot
+        fig_m['layout']['yaxis3']['domain'] = [0.5, 1.0]
+        
+        # Add the XIM plot to the second row
+        for trace in y_fig.data:
+            trace.showlegend = False
+            trace.legendgroup = trace.name
+            fig_m.add_trace(trace, row=2, col=1)
 
-            # Make the x-axis of fig_xim independent
-            fig_m.update_xaxes(overwrite=True, row=2, col=1)
+        # Update the XIM layout
+        fig_m.update_layout(y_fig.layout)
 
-            # Reverse the x-axis range for the XIM subplot
-            fig_m.update_xaxes(autorange="reversed", row=2, col=1)
+        # Make the x-axis of fig_xim independent
+        fig_m.update_xaxes(overwrite=True, row=2, col=1)
 
-            # Update xaxis properties
-            fig_m.update_xaxes(title_text=self.xlabel, row=2, col=2)
-            fig_m.update_xaxes(title_text=self.zlabel,  row=2, col=1)
+        # Reverse the x-axis range for the XIM subplot
+        fig_m.update_xaxes(autorange="reversed", row=2, col=1)
 
-            # Update yaxis properties
-            fig_m.update_yaxes(title_text=self.zlabel, row=1, col=2)
-            fig_m.update_yaxes(title_text=self.ylabel, row=2, col=1)
+        # Update xaxis properties
+        fig_m.update_xaxes(title_text=self.xlabel, row=2, col=2)
+        fig_m.update_xaxes(title_text=self.zlabel,  row=2, col=1)
 
-            # Update the layout
-            fig_m.update_layout(
-                height=self.height,
-                width=self.width,
-                title=self.title
-            )
-            
-            # Overwrite the figure with the new grid figure
-            self.fig = fig_m
-            
-            self._update_plot_aes(self.fig)
+        # Update yaxis properties
+        fig_m.update_yaxes(title_text=self.zlabel, row=1, col=2)
+        fig_m.update_yaxes(title_text=self.ylabel, row=2, col=1)
+
+        # Update the layout
+        fig_m.update_layout(
+            height=self.height,
+            width=self.width,
+            title=self.title
+        )
+        
+        # Overwrite the figure with the new grid figure
+        self.fig = fig_m
+        
+        self._update_plot_aes(self.fig)

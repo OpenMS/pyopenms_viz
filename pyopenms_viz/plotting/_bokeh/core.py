@@ -312,12 +312,7 @@ class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
         )
         fig.add_layout(zero_line)
 
-class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
-    """
-    Class for assembling a Bokeh extracted ion chromatogram plot
-    """
-
-    def _create_tooltips(self, data):
+    def _create_tooltips(self):
         # Tooltips for interactive information
         TOOLTIPS = [
             ("index", "$index"),
@@ -325,12 +320,18 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
             ("Intensity", "@int{0.2f}"),
             ("m/z", "@mz{0.4f}"),
         ]
-        if "Annotation" in data.columns:
+        if "Annotation" in self.data.columns:
             TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in data.columns:
+        if "product_mz" in self.data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
-        return TOOLTIPS
+        return TOOLTIPS, None
     
+
+class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
+    """
+    Class for assembling a Bokeh extracted ion chromatogram plot
+    """
+
     def _add_peak_boundaries(self, feature_data):
         """
         Add peak boundaries to the plot.
@@ -387,40 +388,28 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a Bokeh mobilogram plot
     """
+    pass
 
 class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
-
-    def _create_tooltips(self, data):
-        # Tooltips for interactive information
-        TOOLTIPS = [
-            ("index", "$index"),
-            ("Retention Time", "@rt{0.2f}"),
-            ("Intensity", "@int{0.2f}"),
-            ("m/z", "@mz{0.4f}"),
-        ]
-
-        ## TODO customizable or fixed
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
-        return TOOLTIPS
+    pass
     
 class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
 
-    def get_color_map(self, z):
-        return linear_cmap(
+    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
+        mapper =  linear_cmap(
             field_name=z,
             palette=Plasma256[::-1],
             low=min(self.data[z]),
             high=max(self.data[z]),
         )
+    
+        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **kwargs)
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)

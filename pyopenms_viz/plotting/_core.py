@@ -290,6 +290,10 @@ class ComplexPlot(BasePlotter, ABC):
         """
         pass
 
+    @abstractmethod
+    def _create_tooltips(self):
+        pass
+
 class ChromatogramPlot(BasePlotter, ABC):
     @property
     def _kind(self) -> Literal["chromatogram"]:
@@ -304,6 +308,7 @@ class ChromatogramPlot(BasePlotter, ABC):
         super().__init__(data, x, y, **kwargs)
 
         self.feature_data = feature_data
+        self.label_suffix = self.x # set label suffix for bounding box
 
         self.plot(self.data, self.x, self.y, **kwargs)
         if self.show_plot:
@@ -314,9 +319,9 @@ class ChromatogramPlot(BasePlotter, ABC):
         Create the plot
         """
         color_gen = ColorGenerator()
-        TOOLTIPS = self._create_tooltips(data)
+        TOOLTIPS, custom_hover_data = self._create_tooltips()
         linePlot = self.get_line_renderer(data, x, y, **kwargs)
-        self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
+        self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
@@ -324,19 +329,6 @@ class ChromatogramPlot(BasePlotter, ABC):
 
         if self.feature_data is not None:
             self._add_peak_boundaries(self.feature_data)
-
-    @abstractmethod
-    def _create_tooltips(self, data):
-        """
-        Create the tooltips for the plot.
-
-        Args:
-            data (DataFrame): The data to be plotted.
-
-        Returns:
-            TOOLTIPS: The tooltips for the plot.
-        """
-        pass
 
     @abstractmethod
     def _add_peak_boundaries(self, feature_data):
@@ -390,23 +382,20 @@ class SpectrumPlot(ComplexPlot, ABC):
 
         color_gen = ColorGenerator()
 
-        TOOLTIPS = self._create_tooltips(self.data)
+        TOOLTIPS, custom_hover_data = self._create_tooltips()
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, **kwargs)
-        self.fig = spectrumPlot.generate(line_color=color_gen, tooltips=TOOLTIPS)
+        self.fig = spectrumPlot.generate(line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
         if self.config.mirror_spectrum and reference_spectrum is not None:
             ## create a mirror spectrum
             color_gen_mirror = ColorGenerator()
             reference_spectrum[y] = reference_spectrum[y] * -1
-            kwargs.pop("fig") # remove figure object from kwargs, use the same figure as above
+            if "fig" in kwargs.keys():
+                kwargs.pop("fig") # remove figure object from kwargs, use the same figure as above
             mirror_spectrum = self.get_vline_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
             mirror_spectrum.generate(line_color=color_gen_mirror)
             self.plot_x_axis_line(self.fig)
-
-    @abstractmethod
-    def _create_tooltips(self, data):
-        pass
 
     def _prepare_data(
         self,
@@ -448,10 +437,8 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     def plot(self, x, y, z, **kwargs):
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
-        mapper = self.get_color_map(z)
-
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
+        self._generate_scatterplot(scatterPlot, z, **other_kwargs)
 
         self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
  
@@ -474,10 +461,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     
 
     @abstractmethod
-    def get_color_map(self, z):
-        '''
-        Get color iterator for the plot
-        '''
+    def _generate_scatterplot(self, scatterPlot, z, **kwargs):
         pass
 
     @abstractmethod
