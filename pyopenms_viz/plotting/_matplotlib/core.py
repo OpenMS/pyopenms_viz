@@ -5,11 +5,12 @@ from typing import Literal, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.gridspec import GridSpec
 
 from .._config import LegendConfig
 
 from .._misc import ColorGenerator
-from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
+from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ComplexPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
 
 class MATPLOTLIBPlot(BasePlotter, ABC):
     """
@@ -228,24 +229,28 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
+class MATPLOTLIBComplexPlot(ComplexPlot, MATPLOTLIBPlot, ABC):
 
-class MATPLOTLIBChromatogramPlot(MATPLOTLIBPlot, ChromatogramPlot):
+    def get_line_renderer(self, data, x, y, **kwargs) -> None:
+        return MATPLOTLIBLinePlot(data, x, y, **kwargs)
+    
+    def get_vline_renderer(self, data, x, y, **kwargs) -> None:
+        return MATPLOTLIBVLinePlot(data, x, y, **kwargs)
+    
+    def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
+        return MATPLOTLIBScatterPlot(data, x, y, **kwargs)
+    
+    def plot_x_axis_line(self, fig):
+        fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
+
+    def _create_tooltips(self):
+        # No tooltips for MATPLOTLIB because it is not interactive
+        return None, None
+
+class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
     """
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
-
-    def plot(self, data, x, y, **kwargs) -> None:
-
-        color_gen = ColorGenerator()
-
-        kwargs['fig'] = self.fig
-        linePlot = MATPLOTLIBLinePlot(data, x, y, **kwargs)
-        self.fig = linePlot.generate(line_color=color_gen)
-
-        self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
-
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
 
     def _add_peak_boundaries(self, feature_data):
         """
@@ -319,44 +324,16 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a matplotlib mobilogram plot
     """
+    pass
 
-    @property
-    def _kind(self) -> Literal["mobilogram"]:
-        return "mobilogram"
 
-    def plot(self, data, x, y, **kwargs) -> None:
-        super().plot()
-        self._modify_y_range((0, self.data["int"].max()), (0, 0.1))
-
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
-
-class MATPLOTLIBSpectrumPlot(MATPLOTLIBPlot, SpectrumPlot):
+class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
     """
+    pass
 
-    def plot(self, x, y, **kwargs):
-
-        spectrum, reference_spectrum = self._prepare_data(
-            self.data, y, self.reference_spectrum
-        )
-
-        color_gen = ColorGenerator()
-
-        kwargs['fig'] = self.fig
-        spectrumPlot = MATPLOTLIBVLinePlot(spectrum, x, y, **kwargs)
-        self.ax = spectrumPlot.generate(line_color=color_gen)
-
-        if self.config.mirror_spectrum and reference_spectrum is not None:
-            color_gen_mirror = ColorGenerator()
-            reference_spectrum[y] = reference_spectrum[y] * -1
-            kwargs.pop("fig", None)
-            mirror_spectrum = MATPLOTLIBVLinePlot(reference_spectrum, x, y, fig=self.fig,  **kwargs)
-            mirror_spectrum.generate(line_color=color_gen_mirror)
-            plt.axhline(y=0, color="black", linestyle="-", linewidth=1)
-
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBPlot, FeatureHeatmapPlot):
+class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """
@@ -364,16 +341,67 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBPlot, FeatureHeatmapPlot):
     def plot(self, x, y, z, **kwargs):
 
         # Create a 2 by 2 figure and axis for marginal plots
-        fig, ax = plt.subplots(
+        fig, self.ax_grid = plt.subplots(
             2, 2, figsize=(kwargs["width"] / 100, kwargs["height"] / 100), dpi=200
         )
-        self.ax_grid = ax
 
-        kwargs['fig'] = ax[1,1]
-        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+        super().plot(x, y, z, **kwargs)
+        self.ax_grid[0, 0].remove()
+        self.ax_grid[0, 0].axis("off")
 
-        scatterPlot = MATPLOTLIBScatterPlot(self.data, x, y, z=z, **class_kwargs)
-        self.ax = scatterPlot.generate(
+        # Update the figure size
+        fig.set_size_inches(self.width / 100, self.height / 100)
+        plt.subplots_adjust(wspace=0, hspace=0)
+
+    def combine_plots(self, x_fig, y_fig): # plots all plotted on same figure do not need to combine
+        pass
+
+    def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
+        class_kwargs['fig'] = self.ax_grid[0, 1]
+        super().create_x_axis_plot(x, z, class_kwargs)
+
+        self.ax_grid[0, 1].set_title(None)
+        self.ax_grid[0, 1].set_xlabel(None)
+        self.ax_grid[0, 1].set_xticklabels([])
+        self.ax_grid[0, 1].set_xticks([])
+        self.ax_grid[0, 1].set_ylabel(self.zlabel)
+        self.ax_grid[0, 1].yaxis.set_ticks_position("right")
+        self.ax_grid[0, 1].yaxis.set_label_position("right")
+        self.ax_grid[0, 1].yaxis.tick_right()
+        self.ax_grid[0, 1].legend_ = None
+
+    def create_y_axis_plot(self, y, z, class_kwargs) -> "figure":
+        #Note y_config is different so we cannot use the base class methods
+        class_kwargs['fig'] = self.ax_grid[1, 0]
+        group_cols = [y]
+        if 'Annotation' in self.data.columns:
+            group_cols.append('Annotation')
+            
+        y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+        y_config = self.config.copy()
+        y_config.xlabel = self.zlabel
+        y_config.y_axis_location = "left"
+        y_config.legend.show = True
+        y_config.legend.loc = "below"
+        y_config.legend.orientation = "horizontal"
+        y_config.legend.bbox_to_anchor = (1, -0.4)
+       
+        color_gen = ColorGenerator()
+        
+        y_plot_obj = self.get_line_renderer(y_data, z, y, config=y_config, **class_kwargs)
+        y_fig = y_plot_obj.generate(line_color=color_gen)
+        self.plot_x_axis_line(y_fig)
+        self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))
+        self.ax_grid[1, 0].invert_xaxis()
+        self.ax_grid[1, 0].set_title(None)
+        self.ax_grid[1, 0].set_xlabel(self.ylabel)
+        self.ax_grid[1, 0].set_ylabel(self.zlabel)
+        self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
+
+    def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
+        class_kwargs['fig'] = self.ax_grid[1, 1]
+        scatterPlot = self.get_scatter_renderer(self.data, x, y, z=z, **class_kwargs)
+        scatterPlot.generate(
             z=z,
             marker="s",
             s=20,
@@ -381,115 +409,14 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBPlot, FeatureHeatmapPlot):
             cmap="afmhot_r",
             **other_kwargs,
         )
+        self.ax_grid[1,1].set_title(None)
+        self.ax_grid[1,1].set_xlabel(self.xlabel)
+        self.ax_grid[1,1].set_ylabel(None)
+        self.ax_grid[1,1].set_yticklabels([])
+        self.ax_grid[1,1].set_yticks([])
+        self.ax_grid[1,1].legend_ = None
 
-        if self.add_marginals:
 
-            self.ax = scatterPlot.generate(
-                z=z,
-                marker="s",
-                s=20,
-                edgecolors="none",
-                cmap="afmhot_r",
-                **other_kwargs,
-            )
-            self.ax.set_title(None)
-            self.ax.set_xlabel(self.xlabel)
-            self.ax.set_ylabel(None)
-            self.ax.set_yticklabels([])
-            self.ax.set_yticks([])
-            self.ax.legend_ = None
-
-            #############
-            ##  X-Axis Plot
-
-            class_kwargs.pop("fig", None)
-
-            # get cols to integrate over and exclude y and z
-            group_cols = [x]
-            if "Annotation" in self.data.columns:
-                group_cols.append("Annotation")
-
-            x_data = self._integrate_data_along_dim(self.data, group_cols, z)
-
-            x_config = self.config.copy()
-            x_config.ylabel = self.zlabel
-            x_config.y_axis_location = "right"
-            x_config.legend.show = True
-
-            color_gen = ColorGenerator()
-
-            # remove 'config' from class_kwargs
-            x_plot_kwargs = class_kwargs.copy()
-            x_plot_kwargs.pop("config", None)
-
-            x_plot_obj = MATPLOTLIBLinePlot(
-                x_data,
-                x,
-                z,
-                fig=self.ax_grid[0, 1],
-                config=x_config,
-                **x_plot_kwargs,
-            )
-            x_fig = x_plot_obj.generate(line_color=color_gen)
-
-            self.ax_grid[0, 1].set_title(None)
-            self.ax_grid[0, 1].set_xlabel(None)
-            self.ax_grid[0, 1].set_xticklabels([])
-            self.ax_grid[0, 1].set_xticks([])
-            self.ax_grid[0, 1].set_ylabel(self.zlabel)
-            self.ax_grid[0, 1].yaxis.set_ticks_position("right")
-            self.ax_grid[0, 1].yaxis.set_label_position("right")
-            self.ax_grid[0, 1].yaxis.tick_right()
-            self.ax_grid[0, 1].legend_ = None
-
-            #############
-            ##  Y-Axis Plot
-
-            # get cols to integrate over and exclude y and z
-            group_cols = [y]
-            if "Annotation" in self.data.columns:
-                group_cols.append("Annotation")
-
-            y_data = self._integrate_data_along_dim(self.data, group_cols, z)
-
-            y_config = self.config.copy()
-            y_config.xlabel = self.zlabel
-            y_config.y_axis_location = "left"
-            y_config.legend.show = True
-            y_config.legend.loc = "below"
-            y_config.legend.orientation = "horizontal"
-            y_config.legend.bbox_to_anchor = (1, -0.4)
-
-            color_gen = ColorGenerator()
-
-            # remove 'config' from class_kwargs
-            y_plot_kwargs = class_kwargs.copy()
-            y_plot_kwargs.pop("config", None)
-
-            y_plot_obj = MATPLOTLIBLinePlot(
-                y_data,
-                z,
-                y,
-                fig=self.ax_grid[1, 0],
-                config=y_config,
-                **y_plot_kwargs,
-            )
-            y_fig = y_plot_obj.generate(line_color=color_gen)
-            self.ax_grid[1, 0].invert_xaxis()
-            self.ax_grid[1, 0].set_title(None)
-            self.ax_grid[1, 0].set_xlabel(self.ylabel)
-            self.ax_grid[1, 0].set_ylabel(self.zlabel)
-            # self.ax_grid[1, 0].legend_ = None
-
-            self.ax_grid[0, 0].remove()
-            self.ax_grid[0, 0].axis("off")
-
-            # Update the figure size
-            fig.set_size_inches(self.width / 100, self.height / 100)
-
-            # Adjust the layout
-            plt.subplots_adjust(wspace=0, hspace=0)
-    
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):
         pass

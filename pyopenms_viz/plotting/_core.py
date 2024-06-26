@@ -174,6 +174,9 @@ class BasePlotter(ABC):
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
+        
+        #from ._matplotlib.core import MATPLOTLIBPlot
+        #if not isinstance(self, MATPLOTLIBPlot):
         self._create_figure()
 
     def _verify_column(self, colname: str, name: str) -> str:
