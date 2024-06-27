@@ -320,7 +320,6 @@ class PLOTLYComplexPlot(ComplexPlot, PLOTLYPlot, ABC):
         return PLOTLYVLinePlot(data, x, y, **kwargs)
     
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
-        print("getting scatter renderer")
         return PLOTLYScatterPlot(data, x, y, **kwargs)
     
     def plot_x_axis_line(self, fig):
