@@ -174,9 +174,6 @@ class BasePlotter(ABC):
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
-        
-        #from ._matplotlib.core import MATPLOTLIBPlot
-        #if not isinstance(self, MATPLOTLIBPlot):
         self._create_figure()
 
     def _verify_column(self, colname: str, name: str) -> str:
@@ -323,7 +320,8 @@ class ChromatogramPlot(BasePlotter, ABC):
         """
         color_gen = ColorGenerator()
         TOOLTIPS, custom_hover_data = self._create_tooltips()
-        linePlot = self.get_line_renderer(data, x, y, **kwargs)
+        kwargs.pop("fig", None) # remove figure from **kwargs if exists, use the ChromatogramPlot figure object instead of creating a new figure
+        linePlot = self.get_line_renderer(data, x, y, fig=self.fig, **kwargs)
         self.fig = linePlot.generate(line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
@@ -387,7 +385,8 @@ class SpectrumPlot(ComplexPlot, ABC):
 
         TOOLTIPS, custom_hover_data = self._create_tooltips()
 
-        spectrumPlot = self.get_vline_renderer(spectrum, x, y, **kwargs)
+        kwargs.pop("fig", None) # remove figure from **kwargs if exists, use the ChromatogramPlot figure object instead of creating a new figure
+        spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
         self.fig = spectrumPlot.generate(line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
         if self.config.mirror_spectrum and reference_spectrum is not None:
