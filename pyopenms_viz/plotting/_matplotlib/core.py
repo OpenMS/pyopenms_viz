@@ -375,8 +375,8 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         #Note y_config is different so we cannot use the base class methods
         class_kwargs['fig'] = self.ax_grid[1, 0]
         group_cols = [y]
-        if 'Annotation' in self.data.columns:
-            group_cols.append('Annotation')
+        if self.by is not None:
+            group_cols.append(self.by)
             
         y_data = self._integrate_data_along_dim(self.data, group_cols, z)
         y_config = self.config.copy()
@@ -389,7 +389,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
        
         color_gen = ColorGenerator()
         
-        y_plot_obj = self.get_line_renderer(y_data, z, y, config=y_config, **class_kwargs)
+        y_plot_obj = self.get_line_renderer(y_data, z, y, by=self.by, config=y_config, **class_kwargs)
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
         self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))

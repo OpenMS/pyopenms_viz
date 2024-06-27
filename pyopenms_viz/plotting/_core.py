@@ -47,7 +47,7 @@ class BasePlotter(ABC):
     ) -> None:
 
         # Config
-        self.data = data 
+        self.data = data.copy()
         self.kind = kind
         self.by = by
         self.subplots = subplots
@@ -82,6 +82,7 @@ class BasePlotter(ABC):
 
         if self.by is not None:
             # Ensure by column data is string
+            self.by = self._verify_column(by, 'by')
             self.data[self.by] = self.data[self.by].astype(str)
 
         self._load_extension()
@@ -92,6 +93,7 @@ class BasePlotter(ABC):
 
         Args:
             colname (str | int): column name of data to fetch or the index of the column to fetch
+            name (str): name of the column e.g. x, y, z for error message
 
         Returns:
             pd.Series: pandas series or None
@@ -105,17 +107,18 @@ class BasePlotter(ABC):
             return column.inferred_type in {"integer", "mixed-integer"}
 
         if colname is None:
-            raise ValueError(f"For {self.kind} plot, {name} must be set") 
+            raise ValueError(f"For `{self.kind}` plot, `{name}` must be set") 
 
         # if integer is supplied get the corresponding column associated with that index
         if is_integer(colname) and not holds_integer(self.data.columns):
             if colname >= len(self.data.columns):
-                raise ValueError(f"Column index {colname} out of range")
+                print(self.data.columns)
+                raise ValueError(f"Column index `{colname}` out of range, `{name}` could not be set")
             else:
                 colname = self.data.columns[colname]
         else: # assume column name is supplied
             if colname not in self.data.columns:
-                raise KeyError(f"Column {colname} not in data")
+                raise KeyError(f"Column `{colname}` not in data, `{name}` could not be set")
         
         # checks passed return column name 
         return colname
@@ -453,6 +456,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
             # remove 'config' from class_kwargs
             class_kwargs_copy = class_kwargs.copy()
             class_kwargs_copy.pop('config', None)
+            class_kwargs_copy.pop("by", None)
  
             x_fig = self.create_x_axis_plot(x, z, class_kwargs_copy)
 
@@ -475,9 +479,9 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
         # get cols to integrate over and exclude y and z
         group_cols = [x]
-        if 'Annotation' in self.data.columns:
-            group_cols.append('Annotation')
-            
+        if self.by is not None:
+            group_cols.append(self.by)
+
         x_data = self._integrate_data_along_dim(self.data, group_cols, z)
         
         x_config = self.config.copy()
@@ -487,7 +491,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         
         color_gen = ColorGenerator()
        
-        x_plot_obj = self.get_line_renderer(x_data, x, z, config=x_config, **class_kwargs)
+        x_plot_obj = self.get_line_renderer(x_data, x, z, by=self.by, config=x_config, **class_kwargs)
         x_fig = x_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(x_fig)
 
@@ -496,8 +500,8 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     @abstractmethod
     def create_y_axis_plot(self, y, z, class_kwargs) -> "figure":
         group_cols = [y]
-        if 'Annotation' in self.data.columns:
-            group_cols.append('Annotation')
+        if self.by is not None:
+            group_cols.append(self.by)
             
         y_data = self._integrate_data_along_dim(self.data, group_cols, z)
         
@@ -509,7 +513,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         
         color_gen = ColorGenerator()
         
-        y_plot_obj = self.get_line_renderer(y_data, z, y, config=y_config, **class_kwargs)
+        y_plot_obj = self.get_line_renderer(y_data, z, y, by=self.by, config=y_config, **class_kwargs)
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
 
