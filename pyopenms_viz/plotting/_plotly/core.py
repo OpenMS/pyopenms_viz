@@ -168,13 +168,6 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     Class for assembling a set of line plots in plotly
     """
     
-    @property
-    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
-        return "line"
-    
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
-        
     @classmethod
     def plot( # type: ignore[override]
         cls,

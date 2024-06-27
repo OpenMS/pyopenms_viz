@@ -192,9 +192,6 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
     Class for assembling a collection of Bokeh line plots
     """
-    @property
-    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
-        return "line"
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -228,13 +225,6 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
     Class for assembling a series of vertical line plots in Bokeh
     """
-
-    @property
-    def _kind(self) -> Literal["vline"]:
-        return "vline"
-
-    def __init__(self, data, x, y, **kwargs) -> None:
-        super().__init__(data, x, y, **kwargs)
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
@@ -271,9 +261,6 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
     Class for assembling a Bokeh scatter plot
     """
-    @property
-    def _kind(self) -> Literal["scatter"]:
-        return "scatter"
 
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):

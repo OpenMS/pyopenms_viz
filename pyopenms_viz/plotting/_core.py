@@ -251,21 +251,19 @@ class BasePlotter(ABC):
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
         pass
 
-
-
 class LinePlot(BasePlotter, ABC):
     @property
-    def _kind(self) -> Literal["line", "vline", "chromatogram"]:
+    def _kind(self):
         return "line"
 
 class VLinePlot(BasePlotter, ABC):
     @property
-    def _kind(self) -> Literal["vline"]:
+    def _kind(self):
         return "vline"
     
 class ScatterPlot(BasePlotter, ABC):
     @property
-    def _kind(self) -> Literal["scatter"]:
+    def _kind(self):
         return "scatter"
 
 class ComplexPlot(BasePlotter, ABC):
@@ -276,10 +274,7 @@ class ComplexPlot(BasePlotter, ABC):
         BasePlotter (_type_): _description_
         ABC (_type_): _description_
     """
-    @property
-    def _kind(self) -> Literal["complex"]:
-        return "complex"
-    
+
     @abstractmethod
     def get_line_renderer(self, data, x, y, **kwargs):
         pass
@@ -305,7 +300,7 @@ class ComplexPlot(BasePlotter, ABC):
 
 class ChromatogramPlot(BasePlotter, ABC):
     @property
-    def _kind(self) -> Literal["chromatogram"]:
+    def _kind(self):
         return "chromatogram"
 
     def __init__(
@@ -356,7 +351,7 @@ class ChromatogramPlot(BasePlotter, ABC):
 class MobilogramPlot(ChromatogramPlot, ABC):
 
     @property
-    def _kind(self) -> Literal["mobilogram"]:
+    def _kind(self):
         return "mobilogram"
 
     def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
@@ -369,7 +364,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
 class SpectrumPlot(ComplexPlot, ABC):
     @property
-    def _kind(self) -> Literal["spectrum"]:
+    def _kind(self):
         return "spectrum"
 
     def __init__(self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs) -> None:
@@ -427,7 +422,7 @@ class SpectrumPlot(ComplexPlot, ABC):
 class FeatureHeatmapPlot(ComplexPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
-    def _kind(self) -> Literal["feature_heatmap"]:
+    def _kind(self):
         return "feature_heatmap"
     
     def __init__(self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs) -> None:
