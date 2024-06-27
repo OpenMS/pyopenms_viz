@@ -9,26 +9,26 @@ from pyopenms_viz.plotting._matplotlib.core import (
     MATPLOTLIBChromatogramPlot,
     MATPLOTLIBMobilogramPlot,
     MATPLOTLIBSpectrumPlot,
-    MATPLOTLIBFeatureHeatmapPlot
+    MATPLOTLIBFeatureHeatmapPlot,
 )
 
 if TYPE_CHECKING:
     from pyopenms_viz.plotting._matplotlib.core import MATPLOTLIBPlot
-    
+
 PLOT_CLASSES: dict[str, type[MATPLOTLIBPlot]] = {
-        "line": MATPLOTLIBLinePlot,
-        "vline": MATPLOTLIBVLinePlot,
-        "scatter": MATPLOTLIBScatterPlot,
-        "chromatogram": MATPLOTLIBChromatogramPlot,
-        "mobilogram": MATPLOTLIBMobilogramPlot,
-        "spectrum": MATPLOTLIBSpectrumPlot,
-        "feature_heatmap": MATPLOTLIBFeatureHeatmapPlot
-    }
+    "line": MATPLOTLIBLinePlot,
+    "vline": MATPLOTLIBVLinePlot,
+    "scatter": MATPLOTLIBScatterPlot,
+    "chromatogram": MATPLOTLIBChromatogramPlot,
+    "mobilogram": MATPLOTLIBMobilogramPlot,
+    "spectrum": MATPLOTLIBSpectrumPlot,
+    "feature_heatmap": MATPLOTLIBFeatureHeatmapPlot,
+}
+
 
 def plot(data, kind, **kwargs):
     plot_obj = PLOT_CLASSES[kind](data, **kwargs)
     return plot_obj
 
-__all__ = [
-    "plot"
-]
+
+__all__ = ["plot"]

@@ -20,9 +20,20 @@ from bokeh.models import (
 from pandas.core.frame import DataFrame
 
 # pyopenms_viz imports
-from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ComplexPlot, ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot
+from .._core import (
+    BasePlotter,
+    LinePlot,
+    VLinePlot,
+    ScatterPlot,
+    ComplexPlot,
+    ChromatogramPlot,
+    MobilogramPlot,
+    FeatureHeatmapPlot,
+    SpectrumPlot,
+)
 from .._misc import ColorGenerator
 from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
+
 
 class BOKEHPlot(BasePlotter, ABC):
     """
@@ -51,7 +62,7 @@ class BOKEHPlot(BasePlotter, ABC):
                 y_axis_location=self.y_axis_location,
                 width=self.width,
                 height=self.height,
-                min_border=self.min_border
+                min_border=self.min_border,
             )
 
     def _update_plot_aes(self, fig, **kwargs):
@@ -223,6 +234,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
 
             return fig, legend
 
+
 class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
     Class for assembling a series of vertical line plots in Bokeh
@@ -231,9 +243,9 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     @classmethod
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
-        Plot a set of vertical lines 
+        Plot a set of vertical lines
         """
-        
+
         if by is None:
             color_gen = kwargs.pop("line_color", None)
             source = ColumnDataSource(data)
@@ -256,8 +268,9 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
             return fig, legend
 
     def _add_annotation(self, fig, data, x, y, **kwargs):
-        #TODO: Implement text label annotations
+        # TODO: Implement text label annotations
         pass
+
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
@@ -269,7 +282,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
-        
+
         if by is None:
             source = ColumnDataSource(data)
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
@@ -283,18 +296,19 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             legend = Legend(items=legend_items)
 
             return fig, legend
-        
+
+
 class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHLinePlot(data, x, y, **kwargs)
-    
+
     def get_vline_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHVLinePlot(data, x, y, **kwargs)
-    
+
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHScatterPlot(data, x, y, **kwargs)
-    
+
     def plot_x_axis_line(self, fig):
         zero_line = Span(
             location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
@@ -314,7 +328,7 @@ class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
         if "product_mz" in self.data.columns:
             TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
         return TOOLTIPS, None
-    
+
 
 class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
     """
@@ -373,18 +387,23 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
             columns={"x0": "leftWidth", "x1": "rightWidth"}
         )
 
+
 class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a Bokeh mobilogram plot
     """
+
     pass
+
 
 class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
+
     pass
-    
+
+
 class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
@@ -392,43 +411,45 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        mapper =  linear_cmap(
+        mapper = linear_cmap(
             field_name=z,
             palette=Plasma256[::-1],
             low=min(self.data[z]),
             high=max(self.data[z]),
         )
-    
-        self.fig = scatterPlot.generate(marker="square", line_color=mapper, fill_color=mapper, **other_kwargs)
+
+        self.fig = scatterPlot.generate(
+            marker="square", line_color=mapper, fill_color=mapper, **other_kwargs
+        )
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
- 
+
         # Modify plot
         x_fig.x_range = self.fig.x_range
         x_fig.width = self.fig.width
         x_fig.xaxis.visible = False
         x_fig.min_border = 0
         return x_fig
-    
+
     def create_y_axis_plot(self, y, z, class_kwargs):
-        y_fig =  super().create_y_axis_plot(y, z, class_kwargs)
-        
+        y_fig = super().create_y_axis_plot(y, z, class_kwargs)
+
         # Modify plot
         y_fig.y_range = self.fig.y_range
         y_fig.height = self.fig.height
-        y_fig.legend.orientation = 'horizontal'
+        y_fig.legend.orientation = "horizontal"
         y_fig.x_range.flipped = True
         y_fig.min_border = 0
         return y_fig
 
     def combine_plots(self, x_fig, y_fig):
-        # Modify the main plot 
+        # Modify the main plot
         self.fig.yaxis.visible = False
-        
+
         from bokeh.layouts import gridplot
-        
-        self.fig = gridplot([[None, x_fig], [y_fig, self.fig]])  
+
+        self.fig = gridplot([[None, x_fig], [y_fig, self.fig]])
 
     def get_scatter_renderer(self, data, x, y, **kwargs):
         return BOKEHScatterPlot(data, x, y, **kwargs)

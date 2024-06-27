@@ -9,7 +9,18 @@ from matplotlib.lines import Line2D
 from .._config import LegendConfig
 
 from .._misc import ColorGenerator
-from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ComplexPlot, ChromatogramPlot, MobilogramPlot, SpectrumPlot, FeatureHeatmapPlot
+from .._core import (
+    BasePlotter,
+    LinePlot,
+    VLinePlot,
+    ScatterPlot,
+    ComplexPlot,
+    ChromatogramPlot,
+    MobilogramPlot,
+    SpectrumPlot,
+    FeatureHeatmapPlot,
+)
+
 
 class MATPLOTLIBPlot(BasePlotter, ABC):
     """
@@ -24,9 +35,9 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
         return False
 
     def _load_extension(self):
-        '''
+        """
         Load the matplotlib extension.
-        '''
+        """
         try:
             from matplotlib import pyplot
         except ImportError:
@@ -35,9 +46,10 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
             )
 
     def _create_figure(self):
-        '''
+        """
         Create a figure and axes objects,
-        for consistency with other backends, the self.fig object stores the matplotlib axes object '''
+        for consistency with other backends, the self.fig object stores the matplotlib axes object
+        """
         if self.fig is None:
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
@@ -72,7 +84,7 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
                 ncol = len(legend[0])
             else:
                 ncol = 1
-            
+
             legend = ax.legend(
                 *legend,
                 loc=matplotlibLegendLoc,
@@ -116,22 +128,28 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
             end = end + (end * padding[1])
         self.fig.set_ylim(start, end)
 
-
     # since matplotlib creates static plots, we don't need to implement the following methods
     def _add_tooltips(self, fig, tooltips):
-        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_tooltips'")
+        raise NotImplementedError(
+            "Matplotlib does not support interactive plots and cannot use method '_add_tooltips'"
+        )
 
     def _add_bounding_box_drawer(self, fig, **kwargs):
-        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_bounding_box_drawer'")
+        raise NotImplementedError(
+            "Matplotlib does not support interactive plots and cannot use method '_add_bounding_box_drawer'"
+        )
 
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'")
+        raise NotImplementedError(
+            "Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'"
+        )
 
     def show(self):
         """
         Show the plot.
         """
         plt.show()
+
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
@@ -162,13 +180,16 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
+
 class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     """
     Class for assembling a matplotlib vertical line plot
     """
 
     @classmethod
-    def plot(cls, ax, data, x, y, by: str | None = None, **kwargs) -> Tuple[Axes, "Legend"]:
+    def plot(
+        cls, ax, data, x, y, by: str | None = None, **kwargs
+    ) -> Tuple[Axes, "Legend"]:
         """
         Plot a vertical line
         """
@@ -180,9 +201,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         if by is None:
             use_color = next(color_gen)
             for _, row in data.iterrows():
-                (line,) = ax.plot(
-                    [row[x], row[x]], [0, row[y]], color=use_color
-                )
+                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=use_color)
 
             return ax, None
         else:
@@ -202,7 +221,9 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
 
     @classmethod
-    def plot(cls, ax, data, x, y, by: str | None = None, **kwargs) -> Tuple[Axes, "Legend"]:
+    def plot(
+        cls, ax, data, x, y, by: str | None = None, **kwargs
+    ) -> Tuple[Axes, "Legend"]:
         """
         Plot a scatter plot
         """
@@ -232,23 +253,25 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
+
 class MATPLOTLIBComplexPlot(ComplexPlot, MATPLOTLIBPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBLinePlot(data, x, y, **kwargs)
-    
+
     def get_vline_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBVLinePlot(data, x, y, **kwargs)
-    
+
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBScatterPlot(data, x, y, **kwargs)
-    
+
     def plot_x_axis_line(self, fig):
         fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
 
     def _create_tooltips(self):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
+
 
 class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
     """
@@ -327,6 +350,7 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
     """
     Class for assembling a matplotlib mobilogram plot
     """
+
     pass
 
 
@@ -334,7 +358,9 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
     """
+
     pass
+
 
 class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
     """
@@ -357,11 +383,13 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.superFig.set_size_inches(self.width / 100, self.height / 100)
         self.superFig.subplots_adjust(wspace=0, hspace=0)
 
-    def combine_plots(self, x_fig, y_fig): # plots all plotted on same figure do not need to combine
+    def combine_plots(
+        self, x_fig, y_fig
+    ):  # plots all plotted on same figure do not need to combine
         pass
 
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
-        class_kwargs['fig'] = self.ax_grid[0, 1]
+        class_kwargs["fig"] = self.ax_grid[0, 1]
         super().create_x_axis_plot(x, z, class_kwargs)
 
         self.ax_grid[0, 1].set_title(None)
@@ -375,12 +403,12 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.ax_grid[0, 1].legend_ = None
 
     def create_y_axis_plot(self, y, z, class_kwargs) -> "figure":
-        #Note y_config is different so we cannot use the base class methods
-        class_kwargs['fig'] = self.ax_grid[1, 0]
+        # Note y_config is different so we cannot use the base class methods
+        class_kwargs["fig"] = self.ax_grid[1, 0]
         group_cols = [y]
         if self.by is not None:
             group_cols.append(self.by)
-            
+
         y_data = self._integrate_data_along_dim(self.data, group_cols, z)
         y_config = self.config.copy()
         y_config.xlabel = self.zlabel
@@ -389,10 +417,12 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         y_config.legend.loc = "below"
         y_config.legend.orientation = "horizontal"
         y_config.legend.bbox_to_anchor = (1, -0.4)
-       
+
         color_gen = ColorGenerator()
-        
-        y_plot_obj = self.get_line_renderer(y_data, z, y, by=self.by, config=y_config, **class_kwargs)
+
+        y_plot_obj = self.get_line_renderer(
+            y_data, z, y, by=self.by, config=y_config, **class_kwargs
+        )
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
         self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))
@@ -403,7 +433,9 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        scatterPlot = self.get_scatter_renderer(self.data, x, y, z=z, fig=self.ax_grid[1,1], **class_kwargs)
+        scatterPlot = self.get_scatter_renderer(
+            self.data, x, y, z=z, fig=self.ax_grid[1, 1], **class_kwargs
+        )
         scatterPlot.generate(
             z=z,
             marker="s",
@@ -412,13 +444,12 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             cmap="afmhot_r",
             **other_kwargs,
         )
-        self.ax_grid[1,1].set_title(None)
-        self.ax_grid[1,1].set_xlabel(self.xlabel)
-        self.ax_grid[1,1].set_ylabel(None)
-        self.ax_grid[1,1].set_yticklabels([])
-        self.ax_grid[1,1].set_yticks([])
-        self.ax_grid[1,1].legend_ = None
-
+        self.ax_grid[1, 1].set_title(None)
+        self.ax_grid[1, 1].set_xlabel(self.xlabel)
+        self.ax_grid[1, 1].set_ylabel(None)
+        self.ax_grid[1, 1].set_yticklabels([])
+        self.ax_grid[1, 1].set_yticks([])
+        self.ax_grid[1, 1].legend_ = None
 
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):

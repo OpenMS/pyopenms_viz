@@ -9,12 +9,12 @@ from pyopenms_viz.plotting._plotly.core import (
     PLOTLYChromatogramPlot,
     PLOTLYMobilogramPlot,
     PLOTLYSpectrumPlot,
-    PLOTLYFeatureHeatmapPlot
+    PLOTLYFeatureHeatmapPlot,
 )
 
 if TYPE_CHECKING:
     from pyopenms_viz.plotting._plotly.core import PLOTLYPlot
-    
+
 PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
     "line": PLOTLYLinePlot,
     "vline": PLOTLYVLinePlot,
@@ -22,13 +22,13 @@ PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
     "chromatogram": PLOTLYChromatogramPlot,
     "mobilogram": PLOTLYMobilogramPlot,
     "spectrum": PLOTLYSpectrumPlot,
-    "feature_heatmap": PLOTLYFeatureHeatmapPlot
+    "feature_heatmap": PLOTLYFeatureHeatmapPlot,
 }
+
 
 def plot(data, kind, **kwargs):
     plot_obj = PLOT_CLASSES[kind](data, **kwargs)
     return plot_obj
 
-__all__ = [
-    "plot"
-]
+
+__all__ = ["plot"]

@@ -10,12 +10,12 @@ from pyopenms_viz.plotting._bokeh.core import (
     BOKEHChromatogramPlot,
     BOKEHMobilogramPlot,
     BOKEHSpectrumPlot,
-    BOKEHFeatureHeatmapPlot
+    BOKEHFeatureHeatmapPlot,
 )
 
 if TYPE_CHECKING:
     from pyopenms_viz.plotting._bokeh.core import BOKEHPlot
-    
+
 PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "line": BOKEHLinePlot,
     "vline": BOKEHVLinePlot,
@@ -23,14 +23,13 @@ PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "chromatogram": BOKEHChromatogramPlot,
     "mobilogram": BOKEHMobilogramPlot,
     "spectrum": BOKEHSpectrumPlot,
-    "feature_heatmap": BOKEHFeatureHeatmapPlot
+    "feature_heatmap": BOKEHFeatureHeatmapPlot,
 }
 
 
 def plot(data, kind, **kwargs):
     plot_obj = PLOT_CLASSES[kind](data, **kwargs)
-    return plot_obj 
+    return plot_obj
 
-__all__ = [
-    "plot"
-]
+
+__all__ = ["plot"]
