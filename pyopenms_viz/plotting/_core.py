@@ -131,6 +131,13 @@ class BasePlotter(ABC):
         """
         raise NotImplementedError
     
+    @property
+    def _interactive(self) -> bool:
+        """
+        Whether the plot is interactive. Must be overridden by subclasses
+        """
+        return NotImplementedError
+    
     def _update_from_config(self, config) -> None:
         """
         Updates the plot configuration based on the provided `config` object.
@@ -184,7 +191,7 @@ class BasePlotter(ABC):
             self._add_legend(newlines, legend)
         self._update_plot_aes(newlines, **kwargs)
 
-        if tooltips is not None:
+        if tooltips is not None and self._interactive:
             self._add_tooltips(newlines, tooltips, custom_hover_data)
 
     @abstractmethod
@@ -304,14 +311,17 @@ class ChromatogramPlot(BasePlotter, ABC):
         return "chromatogram"
 
     def __init__(
-        self, data, x, y, feature_data: DataFrame | None = None, **kwargs
+        self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = ChromatogramPlotterConfig()
 
         super().__init__(data, x, y, **kwargs)
 
-        self.feature_data = feature_data
+        if annotation_data is not None:
+            self.annotation_data = annotation_data.copy()
+        else:
+            self.annotation_data = None
         self.label_suffix = self.x # set label suffix for bounding box
 
         self.plot(self.data, self.x, self.y, **kwargs)
@@ -330,18 +340,18 @@ class ChromatogramPlot(BasePlotter, ABC):
 
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
-        self.manual_boundary_renderer = self._add_bounding_vertical_drawer(self.fig)
+        self.manual_boundary_renderer = self._add_bounding_vertical_drawer(self.fig) if self._interactive else None
 
-        if self.feature_data is not None:
-            self._add_peak_boundaries(self.feature_data)
+        if self.annotation_data is not None:
+            self._add_peak_boundaries(self.annotation_data)
 
     @abstractmethod
-    def _add_peak_boundaries(self, feature_data):
+    def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
 
         Args:
-            feature_data (DataFrame): The feature data containing the peak boundaries.
+            annotation_data (DataFrame): The feature data containing the peak boundaries.
 
         Returns:
             None
@@ -354,8 +364,8 @@ class MobilogramPlot(ChromatogramPlot, ABC):
     def _kind(self):
         return "mobilogram"
 
-    def __init__(self, data, x, y, feature_data: DataFrame | None = None, **kwargs) -> None:
-        super().__init__(data, x, y, feature_data=feature_data, **kwargs)
+    def __init__(self, data, x, y, annotation_data: DataFrame | None = None, **kwargs) -> None:
+        super().__init__(data, x, y, annotation_data=annotation_data, **kwargs)
     
     def plot(self, data, x, y, **kwargs):
         super(ChromatogramPlot).plot(data, x, y, **kwargs)
@@ -445,7 +455,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
         self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
 
-        self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig)
+        self.manual_bbox_renderer = self._add_bounding_box_drawer(self.fig) if self._interactive else None
  
         if self.add_marginals:
             # remove 'config' from class_kwargs

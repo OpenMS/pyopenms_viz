@@ -22,6 +22,10 @@ class PLOTLYPlot(BasePlotter, ABC):
     Base class for assembling a Ploty plot
     """
 
+    @property
+    def _interactive(self) -> bool:
+        return True
+
     def _load_extension(self):
         '''
         Tries to load the plotly extensions, if not throw an import error

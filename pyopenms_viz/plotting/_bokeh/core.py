@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 
-from typing import Literal, List, Tuple, Union
+from typing import Tuple
 
 from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
@@ -18,7 +18,6 @@ from bokeh.models import (
 )
 
 from pandas.core.frame import DataFrame
-from plotting._config import FeatureConfig, LegendConfig
 
 # pyopenms_viz imports
 from .._core import BasePlotter, LinePlot, VLinePlot, ScatterPlot, ComplexPlot, ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot
@@ -29,6 +28,9 @@ class BOKEHPlot(BasePlotter, ABC):
     """
     Base class for assembling a Bokeh plot
     """
+
+    def _interactive(self):
+        return False
 
     def _load_extension(self) -> None:
         try:

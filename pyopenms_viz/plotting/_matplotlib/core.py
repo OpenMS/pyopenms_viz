@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Literal, Tuple
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.gridspec import GridSpec
 
 from .._config import LegendConfig
 
@@ -19,6 +18,10 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
     Attributes:
         data (DataFrame): The input data frame.
     """
+
+    @property
+    def _interactive(self):
+        return False
 
     def _load_extension(self):
         '''
@@ -116,13 +119,13 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
 
     # since matplotlib creates static plots, we don't need to implement the following methods
     def _add_tooltips(self, fig, tooltips):
-        pass
+        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_tooltips'")
 
     def _add_bounding_box_drawer(self, fig, **kwargs):
-        pass
+        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_bounding_box_drawer'")
 
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        pass 
+        raise NotImplementedError("Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'")
 
     def show(self):
         """
