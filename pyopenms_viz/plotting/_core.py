@@ -17,6 +17,151 @@ class BasePlotter(ABC):
     This class shows functions which must be implemented by all backends
     """
 
+    def __init__(
+        self,
+        data,
+        x: str | None = None,
+        y: str | None = None,
+        z: str | None = None,
+        kind=None,
+        by: str | None = None,
+        subplots: bool | None = None,
+        sharex: bool | None = None,
+        sharey: bool | None = None,
+        height: int | None = None,
+        width: int | None = None,
+        grid: bool | None = None,
+        toolbar_location: str | None = None,
+        fig: "figure" | None = None,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        x_axis_location: str | None = None,
+        y_axis_location: str | None = None,
+        min_border: int | None = None,
+        show_plot: bool | None = None,
+        legend: LegendConfig | None = None,
+        feature_config: FeatureConfig | None = None,
+        config=None,
+        **kwargs,
+    ) -> None:
+
+        # Config
+        self.data = data 
+        self.kind = kind
+        self.by = by
+        self.subplots = subplots
+        self.sharex = sharex
+        self.sharey = sharey
+        self.height = height
+        self.width = width
+        self.grid = grid
+        self.toolbar_location = toolbar_location
+        self.fig = fig
+        self.title = title
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.x_axis_location = x_axis_location
+        self.y_axis_location = y_axis_location
+        self.min_border = min_border
+        self.show_plot = show_plot
+        self.legend = legend
+        self.feature_config = feature_config
+        self.config = config
+
+        if config is not None:
+            self._update_from_config(config)
+
+        ### get x and y data
+        if self._kind in {"line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "feature_heatmap", "complex"}:
+            self.x = self._verify_column(x, 'x')
+            self.y = self._verify_column(y, 'y')
+        
+        if self._kind in {"feature_heatmap"}:
+            self.z = self._verify_column(z, 'z')
+
+        if self.by is not None:
+            # Ensure by column data is string
+            self.data[self.by] = self.data[self.by].astype(str)
+
+        self._load_extension()
+        self._create_figure()
+
+    def _verify_column(self, colname: str | int , name: str) -> str:
+        """fetch data from column name
+
+        Args:
+            colname (str | int): column name of data to fetch or the index of the column to fetch
+
+        Returns:
+            pd.Series: pandas series or None
+        
+        Raises:
+            ValueError: if colname is None
+            KeyError: if colname is not in data
+            ValueError: if colname is not numeric
+        """
+        def holds_integer(column) -> bool:
+            return column.inferred_type in {"integer", "mixed-integer"}
+
+        if colname is None:
+            raise ValueError(f"For {self.kind} plot, {name} must be set") 
+
+        # if integer is supplied get the corresponding column associated with that index
+        if is_integer(colname) and not holds_integer(self.data.columns):
+            if colname >= len(self.data.columns):
+                raise ValueError(f"Column index {colname} out of range")
+            else:
+                colname = self.data.columns[colname]
+        else: # assume column name is supplied
+            if colname not in self.data.columns:
+                raise KeyError(f"Column {colname} not in data")
+        
+        # checks passed return column name 
+        return colname
+
+    @property
+    @abstractmethod
+    def _kind(self) -> str:
+        """
+        The kind of plot to assemble. Must be overridden by subclasses.
+        """
+        raise NotImplementedError
+    
+    def _update_from_config(self, config) -> None:
+        """
+        Updates the plot configuration based on the provided `config` object.
+
+        Args:
+            config (Config): The configuration object containing the plot settings.
+
+        Returns:
+            None
+        """
+        for attr, value in config.__dict__.items():
+            if (
+                value is not None
+                and hasattr(self, attr)
+                and self.__dict__[attr] is None
+            ):
+                setattr(self, attr, value)
+
+    def _separate_class_kwargs(self, **kwargs):
+        """
+        Separates the keyword arguments into class-specific arguments and other arguments.
+
+        Parameters:
+            **kwargs: Keyword arguments passed to the method.
+
+        Returns:
+            class_kwargs: A dictionary containing the class-specific keyword arguments.
+            other_kwargs: A dictionary containing the remaining keyword arguments.
+
+        """
+        class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
+        other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
+        return class_kwargs, other_kwargs
+
     @abstractmethod
     def _load_extension(self) -> None:
         raise NotImplementedError
@@ -103,146 +248,7 @@ class BasePlotter(ABC):
     def _add_bounding_vertical_drawer(self, fig, **kwargs):
         pass
 
-    """
-    Base Class For Assembling a PyViz Plot
-    """
-    def __init__(
-        self,
-        data,
-        x: str | None = None,
-        y: str | None = None,
-        z: str | None = None,
-        kind=None,
-        by: str | None = None,
-        subplots: bool | None = None,
-        sharex: bool | None = None,
-        sharey: bool | None = None,
-        height: int | None = None,
-        width: int | None = None,
-        grid: bool | None = None,
-        toolbar_location: str | None = None,
-        fig: "figure" | None = None,
-        title: str | None = None,
-        xlabel: str | None = None,
-        ylabel: str | None = None,
-        x_axis_location: str | None = None,
-        y_axis_location: str | None = None,
-        min_border: int | None = None,
-        show_plot: bool | None = None,
-        legend: LegendConfig | None = None,
-        feature_config: FeatureConfig | None = None,
-        config=None,
-        **kwargs,
-    ) -> None:
 
-        # Config
-        self.data = data 
-        self.kind = kind
-        self.by = by
-        self.subplots = subplots
-        self.sharex = sharex
-        self.sharey = sharey
-        self.height = height
-        self.width = width
-        self.grid = grid
-        self.toolbar_location = toolbar_location
-        self.fig = fig
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.x_axis_location = x_axis_location
-        self.y_axis_location = y_axis_location
-        self.min_border = min_border
-        self.show_plot = show_plot
-        self.legend = legend
-        self.feature_config = feature_config
-        self.config = config
-
-        if config is not None:
-            self._update_from_config(config)
-
-        ### get x and y data
-        if self._kind in {"line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "feature_heatmap", "complex"}:
-            self.x = self._verify_column(x, 'x')
-            self.y = self._verify_column(y, 'y')
-        
-        if self._kind in {"feature_heatmap"}:
-            self.z = self._verify_column(z, 'z')
-
-        if self.by is not None:
-            # Ensure by column data is string
-            self.data[self.by] = self.data[self.by].astype(str)
-
-        self._load_extension()
-        self._create_figure()
-
-    def _verify_column(self, colname: str, name: str) -> str:
-        """fetch data from column name
-
-        Args:
-            colname (str): column name of data to fetch
-
-        Returns:
-            pd.Series: pandas series or None
-        
-        Raises:
-            ValueError: if colname is None
-            KeyError: if colname is not in data
-            ValueError: if colname is not numeric
-        """
-        if colname is None:
-            raise ValueError(f"For {self.kind} plot, {name} must be set") 
-        elif colname not in self.data.columns:
-            raise KeyError(f"Column {colname} not in data")
-        #TODO fix these error checks
-        #elif not is_integer(self.data[colname]):
-        #    raise ValueError(f"Column {colname} must be numeric 11")
-        #elif not (is_integer(self.data[colname]) and self.data[colname].inferred_type not in {"integer", "mixed-integer"}):
-        #    raise ValueError(f"Column {colname} must be numeric")
-        else:
-            return colname
-
-    @property
-    @abstractmethod
-    def _kind(self) -> str:
-        """
-        The kind of plot to assemble. Must be overridden by subclasses.
-        """
-        raise NotImplementedError
-    
-    def _update_from_config(self, config) -> None:
-        """
-        Updates the plot configuration based on the provided `config` object.
-
-        Args:
-            config (Config): The configuration object containing the plot settings.
-
-        Returns:
-            None
-        """
-        for attr, value in config.__dict__.items():
-            if (
-                value is not None
-                and hasattr(self, attr)
-                and self.__dict__[attr] is None
-            ):
-                setattr(self, attr, value)
-
-    def _separate_class_kwargs(self, **kwargs):
-        """
-        Separates the keyword arguments into class-specific arguments and other arguments.
-
-        Parameters:
-            **kwargs: Keyword arguments passed to the method.
-
-        Returns:
-            class_kwargs: A dictionary containing the class-specific keyword arguments.
-            other_kwargs: A dictionary containing the remaining keyword arguments.
-
-        """
-        class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
-        other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
-        return class_kwargs, other_kwargs
 
 class LinePlot(BasePlotter, ABC):
     @property
