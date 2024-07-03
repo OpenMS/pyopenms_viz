@@ -382,7 +382,7 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
                         feature["rightWidth"],
                         feature["rightWidth"],
                     ],
-                    y=[0, feature["apexIntensity"], 0, feature["apexIntensity"]],
+                    y=[feature["apexIntensity"], 0, 0, feature["apexIntensity"]],
                     fillcolor=next(color_gen),
                     opacity=0.5,
                     line=dict(dash="dash", width=2.5),
