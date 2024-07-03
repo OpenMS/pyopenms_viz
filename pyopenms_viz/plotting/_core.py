@@ -466,6 +466,12 @@ class SpectrumPlot(ComplexPlot, ABC):
     ) -> tuple[list, list]:
         """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
 
+        # copy spectrum data to not modify the original
+        spectrum = spectrum.copy()
+        reference_spectrum = (
+            self.reference_spectrum.copy() if reference_spectrum is not None else None
+        )
+
         # Convert to relative intensity if required
         if self.config.relative_intensity or self.config.mirror_spectrum:
             spectrum[y] = spectrum[y] / spectrum[y].max() * 100
