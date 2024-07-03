@@ -400,7 +400,19 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
 
 
 class PLOTLYSpectrumPlot(PLOTLYComplexPlot, SpectrumPlot):
-    pass
+    def _prepare_data(
+        self, spectrum: DataFrame, y: str, reference_spectrum: DataFrame | None
+    ) -> Tuple[List]:
+        spectrum, reference_spectrum = super()._prepare_data(
+            spectrum, y, reference_spectrum
+        )
+
+        if reference_spectrum is not None:
+            # add a "ref" label to legend elements, useful when for plotly because reference elements and base elements are in the same legend
+            if self.by is not None:
+                reference_spectrum[self.by] = reference_spectrum[self.by] + " (ref)"
+
+        return spectrum, reference_spectrum
 
 
 class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
