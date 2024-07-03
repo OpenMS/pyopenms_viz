@@ -2,15 +2,26 @@ This repository holds the interactive visualization library for PyOpenMS.
 
 
 Organization
+_core.py:
+1. BasePlotter: Abstract BaseClass which all PyOpenMSViz objects are derived from
+    - Defines methods that must be implemented by the backends 
+    - Initiates objects and does common error checking - checking was previously done in `PlannarPlot()` class has been moved here
+3. LinePlot, ScatterPlot etc. Simple Plots, plot method is defined in the specific modules 
+4.  ComplexPlot: Abstract class which contains one or more simple plots 
+     - ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot all inherit from this
+     - Contains methods that generate a simple plot object
+     - For the most part, complex plots should allow plotting independent from each backend, should be able to construct the plots with commonly defined pyopenmsViz methods defined in the BasePlotter
+5. ChromatogramPlot, SpectrumPlot, FeatureHeatMapPlot: Complex plots. Must have a plot() function defined in general their plot methods should only consist of common functions defined in BasePlotter
 
-- pyopenms_viz holds the main code
-- `_BasePlotter` is the base class for all plotters. Contains a plot() method which will output and cache the figure object to the self.fig attribute
-- `_BasePlotterConfig` is the main configuration class for plotters which all plotters should inherit from. This is a `dataclass` holding configurations. 
+core.py
+All backends follow the same structure, as an example look at _bokeh/core.py
+1. BOKEHPlot: Inherits from BasePlotter, implements abstract methods using bokeh
+2. BOKEHLinePlot, BOKEHVLinePlot, BOKEHScattePlot - simple plots, plotting methods rely heavily on BOKEH specifics. Inherit from BOKEHPlot and the base simple plot classes (e.g. LinePlot, VLinePlot etc.)
+3. BOKEHComplexPlot: Inherits from ComplexPlot and BOKEHPlot, provides framework for complex plots using bokeh
 
-- for launch might not need both plotly and bokeh extension for everything but option is there for future use.
-- There is a class based API for developers and a functional API (catch all function of plot_spectrum and plot_chromatogram ) for users who do not want to deal with classes. Using classes is advantageous for plotting several spectra/chromatograms with the same configuration.
-- testing
-    - with massdash code repository tests for plots are done using custom syrupy snapshottests. This testing framework has been added to this repository
+4. BOKEHChromatogramPlot: Inherits  from BOKEHComplexPlot and ChromatogramPlot. Defines bokeh specific methods for chromatogram. The plot() method from the parent ChromatogramPlot class does not have to be redefined 
+    - Some plots and some backends have to supplement the plot() method but in most cases it does not have to be changed dramatically from the base _core.py
+    - MobilogramPlot, SpectrumPlot etc all follow a similar format.
 
 See jupyter notebooks for examples of how to use the different plotters.
 
