@@ -370,18 +370,22 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
     # override creating figure because create a 2 by 2 figure
     def _create_figure(self):
         # Create a 2 by 2 figure and axis for marginal plots
-        self.superFig, self.ax_grid = plt.subplots(
-            2, 2, figsize=(self.width / 100, self.height / 100), dpi=200
-        )
+        if self.add_marginals:
+            self.superFig, self.ax_grid = plt.subplots(
+                2, 2, figsize=(self.width / 100, self.height / 100), dpi=200
+            )
+        else:
+            super()._create_figure()
 
     def plot(self, x, y, z, **kwargs):
         super().plot(x, y, z, **kwargs)
-        self.ax_grid[0, 0].remove()
-        self.ax_grid[0, 0].axis("off")
 
-        # Update the figure size
-        self.superFig.set_size_inches(self.width / 100, self.height / 100)
-        self.superFig.subplots_adjust(wspace=0, hspace=0)
+        if self.add_marginals:
+            self.ax_grid[0, 0].remove()
+            self.ax_grid[0, 0].axis("off")
+            # Update the figure size
+            self.superFig.set_size_inches(self.width / 100, self.height / 100)
+            self.superFig.subplots_adjust(wspace=0, hspace=0)
 
     def combine_plots(
         self, x_fig, y_fig
@@ -433,6 +437,19 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
+        scatterPlot = self.get_scatter_renderer(
+            self.data, x, y, z=z, fig=self.fig, **class_kwargs
+        )
+        scatterPlot.generate(
+            z=z,
+            marker="s",
+            s=20,
+            edgecolors="none",
+            cmap="afmhot_r",
+            **other_kwargs,
+        )
+
+    def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
             self.data, x, y, z=z, fig=self.ax_grid[1, 1], **class_kwargs
         )
