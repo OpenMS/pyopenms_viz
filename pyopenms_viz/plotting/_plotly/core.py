@@ -421,7 +421,7 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
         self.fig = scatterPlot.generate(
             marker=dict(
-                color=self.data[z].unique(),
+                color=self.data[z],
                 cmin=self.data[z].min(),
                 cmax=self.data[z].max(),
                 colorscale="Plasma_r",
