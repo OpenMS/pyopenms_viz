@@ -403,7 +403,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         super().__init__(data, x, y, annotation_data=annotation_data, **kwargs)
 
     def plot(self, data, x, y, **kwargs):
-        super(ChromatogramPlot).plot(data, x, y, **kwargs)
+        super().plot(data, x, y, **kwargs)
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
 
@@ -498,9 +498,9 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         if add_marginals:
             kwargs["config"].title = None
 
-        super().__init__(data, x, y, z=z, **kwargs)
         self.zlabel = zlabel
         self.add_marginals = add_marginals
+        super().__init__(data, x, y, z=z, **kwargs)
 
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
@@ -509,7 +509,10 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     def plot(self, x, y, z, **kwargs):
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
-        self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
+        if self.add_marginals:
+            self.create_main_plot_marginals(x, y, z, class_kwargs, other_kwargs)
+        else:
+            self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
 
         self.manual_bbox_renderer = (
             self._add_bounding_box_drawer(self.fig) if self._interactive else None
@@ -545,6 +548,10 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     @abstractmethod
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         pass
+
+    # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
+    def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
+        self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
 
     @abstractmethod
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
