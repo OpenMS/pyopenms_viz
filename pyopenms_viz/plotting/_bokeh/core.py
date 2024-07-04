@@ -421,6 +421,9 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
         self.fig = scatterPlot.generate(
             marker="square", line_color=mapper, fill_color=mapper, **other_kwargs
         )
+        
+        if self.annotation_data is not None:
+            self._add_box_boundaries(self.annotation_data)
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
@@ -478,3 +481,51 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 "y1": f"{self.y}_1",
             }
         )
+        
+    def _add_box_boundaries(self, annotation_data):
+        color_gen = ColorGenerator(
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+        )
+        legend_items = []
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
+            x0 = feature["leftWidth"]
+            x1 = feature["rightWidth"]
+            y0 = feature["IM_leftWidth"]
+            y1 = feature["IM_rightWidth"]
+
+            # Calculate center points and dimensions
+            center_x = (x0 + x1) / 2
+            center_y = (y0 + y1) / 2
+            width = abs(x1 - x0)
+            height = abs(y1 - y0)
+
+            box_boundary_lines = self.fig.rect(
+                x=center_x,
+                y=center_y,
+                width=width,
+                height=height,
+                color=next(color_gen),
+                line_dash=self.feature_config.lineStyle,
+                line_width=self.feature_config.lineWidth,
+                fill_alpha=0
+            )
+            if 'name' in annotation_data.columns:
+                use_name = feature['name']
+            else:
+                use_name = f"Feature {idx}"
+            if "q_value" in annotation_data.columns:
+                legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_label = f"{use_name}"
+            legend_items.append((legend_label, [box_boundary_lines]))
+
+        if self.feature_config.legend.show:
+            legend = Legend(items=legend_items)
+            legend.click_policy = self.feature_config.legend.onClick
+            legend.title = self.feature_config.legend.title
+            legend.orientation = self.feature_config.legend.orientation
+            legend.label_text_font_size = (
+                str(self.feature_config.legend.fontsize) + "pt"
+            )
+            self.fig.add_layout(legend, self.feature_config.legend.loc)
+        

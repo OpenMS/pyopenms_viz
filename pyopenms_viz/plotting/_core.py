@@ -490,7 +490,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         return "feature_heatmap"
 
     def __init__(
-        self, data, x, y, z, zlabel=None, add_marginals=False, **kwargs
+        self, data, x, y, z, zlabel=None, add_marginals=False, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
         if "config" not in kwargs or kwargs["config"] is None:
             kwargs["config"] = FeautureHeatmapPlotterConfig()
@@ -501,6 +501,11 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         super().__init__(data, x, y, z=z, **kwargs)
         self.zlabel = zlabel
         self.add_marginals = add_marginals
+        
+        if annotation_data is not None:
+            self.annotation_data = annotation_data.copy()
+        else:
+            self.annotation_data = None 
 
         self.plot(x, y, z, **kwargs)
         if self.show_plot:
@@ -596,6 +601,19 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
     @abstractmethod
     def combine_plots(self, x_fig, y_fig):
+        pass
+    
+    @abstractmethod
+    def _add_box_boundaries(self, annotation_data):
+        """
+        Prepare data for adding box boundaries to the plot.
+
+        Args:
+            annotation_data (DataFrame): The feature data containing the box boundaries.
+
+        Returns:
+            None
+        """
         pass
 
 
