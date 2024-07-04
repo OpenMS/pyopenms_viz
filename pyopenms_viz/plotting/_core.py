@@ -403,7 +403,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         super().__init__(data, x, y, annotation_data=annotation_data, **kwargs)
 
     def plot(self, data, x, y, **kwargs):
-        super(ChromatogramPlot).plot(data, x, y, **kwargs)
+        super().plot(data, x, y, **kwargs)
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
 
