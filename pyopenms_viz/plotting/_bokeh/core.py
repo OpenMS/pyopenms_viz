@@ -359,10 +359,14 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
                 line_dash=self.feature_config.lineStyle,
                 line_width=self.feature_config.lineWidth,
             )
-            if "q_value" in feature_data.columns:
-                legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
+            if 'name' in feature_data.columns:
+                use_name = feature['name']
             else:
-                legend_label = f"Feature {idx}"
+                use_name = f"Feature {idx}"
+            if "q_value" in feature_data.columns:
+                legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_label = f"{use_name}"
             legend_items.append((legend_label, [peak_boundary_lines]))
 
         if self.feature_config.legend.show:
