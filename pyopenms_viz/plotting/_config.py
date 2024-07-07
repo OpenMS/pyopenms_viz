@@ -12,6 +12,56 @@ class Engine(Enum):
     MATPLOTLIB = 3
 
 
+def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
+    """
+    Maps Bokeh line dash types to their Plotly or Matplotlib equivalents.
+    
+    Args:
+    bokeh_dash (str or list): Bokeh line dash type or custom dash pattern.
+    target_library (str): 'plotly' or 'matplotlib' (default: 'plotly')
+    
+    Returns:
+    str or list or tuple: Equivalent line dash type for the target library.
+    """
+    plotly_mapper = {
+        "solid": "solid",
+        "dashed": "dash",
+        "dotted": "dot",
+        "dotdash": "dashdot",
+        "dashdot": "dashdot",
+    }
+    
+    matplotlib_mapper = {
+        "solid": "-",
+        "dashed": "--",
+        "dotted": ":",
+        "dotdash": "-.",
+        "dashdot": "-.",
+    }
+    
+    if target_library.lower() == 'plotly':
+        if isinstance(bokeh_dash, str):
+            # If it's already a valid Plotly dash type, return it as is
+            if bokeh_dash in plotly_mapper.values():
+                return bokeh_dash
+            # Otherwise, map from Bokeh to Plotly
+            return plotly_mapper.get(bokeh_dash, "solid")
+        elif isinstance(bokeh_dash, list):
+            return ' '.join(f"{num}px" for num in bokeh_dash)
+    elif target_library.lower() == 'matplotlib':
+        if isinstance(bokeh_dash, str):
+            # If it's already a valid Matplotlib dash type, return it as is
+            if bokeh_dash in matplotlib_mapper.values():
+                return bokeh_dash
+            # Otherwise, map from Bokeh to Matplotlib
+            return matplotlib_mapper.get(bokeh_dash, "-")
+        elif isinstance(bokeh_dash, list):
+            return (None, tuple(bokeh_dash))
+    
+    # Default return if target_library is not recognized or bokeh_dash is neither string nor list
+    return "solid" if target_library.lower() == 'plotly' else "-"
+
+
 @dataclass(kw_only=True)
 class LegendConfig:
     loc: str = "right"
