@@ -97,8 +97,8 @@ class FeatureConfig:
         return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
 
     colormap: str = "viridis"
-    lineWidth: float = 1
-    lineStyle: str = "solid"
+    line_width: float = 1
+    line_type: str = "solid"
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
 
@@ -118,8 +118,8 @@ class _BasePlotterConfig(ABC):
     show_plot: bool = True
     colormap: str = "viridis"
     grid: bool = True
-    lineStyle: str = "solid"
-    lineWidth: float = 1
+    line_type: str = "solid"
+    line_width: float = 1
     toolbar_location: str = "above"
 
     @property
@@ -167,8 +167,8 @@ class ChromatogramPlotterConfig(_BasePlotterConfig):
     y_axis_location: str = "left"
     min_border: int = 0
     show_plot: bool = True
-    lineWidth: float = 1
-    lineStyle: str = "solid"
+    line_width: float = 1
+    line_type: str = "solid"
     plot_type: str = "lineplot"
     legend: LegendConfig = field(default_factory=default_legend_factory)
     feature_config: FeatureConfig = field(default_factory=FeatureConfig)
@@ -189,8 +189,8 @@ class FeautureHeatmapPlotterConfig(_BasePlotterConfig):
     y_axis_location: str = "left"
     min_border: int = 0
     show_plot: bool = True
-    lineWidth: float = 1
-    lineStyle: str = "solid"
+    line_width: float = 1
+    line_type: str = "solid"
     plot_type: str = "lineplot"
     add_marginals: bool = False
     legend: LegendConfig = field(default_factory=default_legend_factory)
