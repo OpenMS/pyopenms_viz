@@ -5,6 +5,7 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 
 from .._config import LegendConfig
 
@@ -448,6 +449,9 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             cmap="afmhot_r",
             **other_kwargs,
         )
+        
+        if self.annotation_data is not None:
+            self._add_box_boundaries(self.annotation_data)
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
@@ -467,6 +471,57 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.ax_grid[1, 1].set_yticklabels([])
         self.ax_grid[1, 1].set_yticks([])
         self.ax_grid[1, 1].legend_ = None
+        
+    def _add_box_boundaries(self, annotation_data):
+        if self.by is not None:
+            legend = self.fig.get_legend()
+            self.fig.add_artist(legend)
+            
+        color_gen = ColorGenerator(
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+        )
+        legend_items = []
+
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
+            x0 = feature["leftWidth"]
+            x1 = feature["rightWidth"]
+            y0 = feature["IM_leftWidth"]
+            y1 = feature["IM_rightWidth"]
+
+            # Calculate center points and dimensions
+            width = abs(x1 - x0)
+            height = abs(y1 - y0)
+
+            color = next(color_gen)
+            custom_lines = Rectangle((x0, y0), width, height, 
+                            fill=False, 
+                            edgecolor=color,
+                            linestyle=self.feature_config.lineStyle,
+                            linewidth=self.feature_config.lineWidth)
+            self.fig.add_patch(custom_lines)
+
+            if 'name' in annotation_data.columns:
+                use_name = feature['name']
+            else:
+                use_name = f"Feature {idx}"
+            if "q_value" in annotation_data.columns:
+                legend_labels = f"{use_name} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_labels = f"{use_name}"
+
+        # Add legend
+        if self.feature_config.legend.show:
+            matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
+                self.feature_config.legend.loc
+            )
+            self.fig.legend(
+                [custom_lines],
+                [legend_labels],
+                loc=matplotlibLegendLoc,
+                title=self.feature_config.legend.title,
+                prop={"size": self.feature_config.legend.fontsize},
+                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
+            )
 
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):
