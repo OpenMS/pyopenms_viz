@@ -304,22 +304,22 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.lineWidth,
+                lw=self.feature_config.line_width,
                 color=use_color,
-                ls=self.feature_config.lineStyle,
+                ls=self.feature_config.line_style,
             )
             self.fig.vlines(
                 x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.lineWidth,
+                lw=self.feature_config.line_width,
                 color=use_color,
-                ls=self.feature_config.lineStyle,
+                ls=self.feature_config.line_style,
             )
 
             if self.feature_config.legend.show:
                 custom_lines = [
-                    Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth)
+                    Line2D([0], [0], color=use_color, lw=self.feature_config.line_width)
                     for i in range(len(annotation_data))
                 ]
                 if "q_value" in annotation_data.columns:
@@ -496,8 +496,8 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             custom_lines = Rectangle((x0, y0), width, height, 
                             fill=False, 
                             edgecolor=color,
-                            linestyle=self.feature_config.lineStyle,
-                            linewidth=self.feature_config.lineWidth)
+                            linestyle=self.feature_config.line_style,
+                            linewidth=self.feature_config.line_width)
             self.fig.add_patch(custom_lines)
 
             if 'name' in annotation_data.columns:

@@ -387,8 +387,8 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
                     opacity=0.5,
                     line=dict(
                         color = next(color_gen),
-                        dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly'), 
-                        width=self.feature_config.lineWidth
+                        dash=bokeh_line_dash_mapper(self.feature_config.line_style, 'plotly'), 
+                        width=self.feature_config.line_width
                         ),
                     name=legend_label,
                 )
@@ -566,8 +566,8 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
                         opacity=0.5,
                         line=dict(
                             color = color,
-                            width=self.feature_config.lineWidth,
-                            dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly')
+                            width=self.feature_config.line_width,
+                            dash=bokeh_line_dash_mapper(self.feature_config.line_style, 'plotly')
                         ),
                         name=legend_label
                     )
