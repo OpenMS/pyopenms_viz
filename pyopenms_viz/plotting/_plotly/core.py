@@ -24,6 +24,7 @@ from .._core import (
     FeatureHeatmapPlot,
 )
 
+from .._config import bokeh_line_dash_mapper
 from pyopenms_viz.plotting._misc import ColorGenerator
 from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
@@ -432,6 +433,9 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
             ),
             **other_kwargs,
         )
+        
+        if self.annotation_data is not None:
+            self._add_box_boundaries(self.annotation_data)
 
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
@@ -529,3 +533,39 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
         self.fig = fig_m
 
         self._update_plot_aes(self.fig)
+
+    def _add_box_boundaries(self, annotation_data, **kwargs):
+        color_gen = ColorGenerator(
+            colormap=self.config.feature_config.colormap, n=annotation_data.shape[0]
+        )
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
+            x0 = feature["leftWidth"]
+            x1 = feature["rightWidth"]
+            y0 = feature["IM_leftWidth"]
+            y1 = feature["IM_rightWidth"]
+            
+            color = next(color_gen)
+    
+            if 'name' in annotation_data.columns:
+                use_name = feature['name']
+            else:
+                use_name = f"Feature {idx}"
+            if "q_value" in annotation_data.columns:
+                legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
+            else:
+                legend_label = f"{use_name}"
+            self.fig.add_trace(
+                    go.Scatter(
+                        x=[x0, x1, x1, x0, x0],  # Start and end at the same point to close the shape
+                        y=[y0, y0, y1, y1, y0],
+                        mode='lines',
+                        fill='none',
+                        opacity=0.5,
+                        line=dict(
+                            color = color,
+                            width=self.feature_config.lineWidth,
+                            dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly')
+                        ),
+                        name=legend_label
+                    )
+                )
