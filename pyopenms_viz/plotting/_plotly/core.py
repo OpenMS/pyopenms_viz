@@ -384,9 +384,12 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
                         feature["rightWidth"],
                     ],
                     y=[feature["apexIntensity"], 0, 0, feature["apexIntensity"]],
-                    fillcolor=next(color_gen),
                     opacity=0.5,
-                    line=dict(dash="dash", width=2.5),
+                    line=dict(
+                        color = next(color_gen),
+                        dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly'), 
+                        width=self.feature_config.lineWidth
+                        ),
                     name=legend_label,
                 )
             )
