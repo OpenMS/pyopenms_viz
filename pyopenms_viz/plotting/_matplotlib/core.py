@@ -279,12 +279,12 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
 
-    def _add_peak_boundaries(self, feature_data):
+    def _add_peak_boundaries(self, annotation_data):
         """
         Add peak boundaries to the plot.
 
         Args:
-            feature_data (DataFrame): The feature data containing the peak boundaries.
+            annotation_data (DataFrame): The feature data containing the peak boundaries.
 
         Returns:
             None
@@ -294,11 +294,11 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
             self.fig.add_artist(legend)
 
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=feature_data.shape[0]
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
 
         legend_items = []
-        for idx, (_, feature) in enumerate(feature_data.iterrows()):
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             use_color = next(color_gen)
             self.fig.vlines(
                 x=feature["leftWidth"],
@@ -320,9 +320,9 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
             if self.feature_config.legend.show:
                 custom_lines = [
                     Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth)
-                    for i in range(len(feature_data))
+                    for i in range(len(annotation_data))
                 ]
-                if "q_value" in feature_data.columns:
+                if "q_value" in annotation_data.columns:
                     legend_labels = [
                         f"Feature {idx} (q-value: {feature['q_value']:.4f})"
                     ]

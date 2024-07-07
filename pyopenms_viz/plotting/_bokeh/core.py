@@ -335,21 +335,21 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
 
-    def _add_peak_boundaries(self, feature_data):
+    def _add_peak_boundaries(self, annotation_data):
         """
         Add peak boundaries to the plot.
 
         Args:
-            feature_data (DataFrame): The feature data containing the peak boundaries.
+            annotation_data (DataFrame): The feature data containing the peak boundaries.
 
         Returns:
             None
         """
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=feature_data.shape[0]
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
         legend_items = []
-        for idx, (_, feature) in enumerate(feature_data.iterrows()):
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             peak_boundary_lines = self.fig.segment(
                 x0=[feature["leftWidth"], feature["rightWidth"]],
                 y0=[0, 0],
@@ -359,11 +359,11 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
                 line_dash=self.feature_config.lineStyle,
                 line_width=self.feature_config.lineWidth,
             )
-            if 'name' in feature_data.columns:
+            if 'name' in annotation_data.columns:
                 use_name = feature['name']
             else:
                 use_name = f"Feature {idx}"
-            if "q_value" in feature_data.columns:
+            if "q_value" in annotation_data.columns:
                 legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"{use_name}"

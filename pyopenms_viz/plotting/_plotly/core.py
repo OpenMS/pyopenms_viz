@@ -365,12 +365,12 @@ class PLOTLYComplexPlot(ComplexPlot, PLOTLYPlot, ABC):
 
 class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
 
-    def _add_peak_boundaries(self, feature_data, **kwargs):
+    def _add_peak_boundaries(self, annotation_data, **kwargs):
         color_gen = ColorGenerator(
-            colormap=self.config.feature_config.colormap, n=feature_data.shape[0]
+            colormap=self.config.feature_config.colormap, n=annotation_data.shape[0]
         )
-        for idx, (_, feature) in enumerate(feature_data.iterrows()):
-            if "q_value" in feature_data.columns:
+        for idx, (_, feature) in enumerate(annotation_data.iterrows()):
+            if "q_value" in annotation_data.columns:
                 legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"Feature {idx}"
