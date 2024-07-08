@@ -20,6 +20,7 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
+    APPEND_PLOT_DOC
 )
 
 
@@ -51,7 +52,7 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the self.fig object stores the matplotlib axes object
         """
-        if self.fig is None:
+        if self.fig is None and self.width is not None and self.height is not None:
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
@@ -158,6 +159,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -188,6 +190,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -222,6 +225,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -304,22 +308,22 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.lineWidth,
+                lw=self.feature_config.line_width,
                 color=use_color,
-                ls=self.feature_config.lineStyle,
+                ls=self.feature_config.line_type,
             )
             self.fig.vlines(
                 x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.lineWidth,
+                lw=self.feature_config.line_width,
                 color=use_color,
-                ls=self.feature_config.lineStyle,
+                ls=self.feature_config.line_type,
             )
 
             if self.feature_config.legend.show:
                 custom_lines = [
-                    Line2D([0], [0], color=use_color, lw=self.feature_config.lineWidth)
+                    Line2D([0], [0], color=use_color, lw=self.feature_config.line_width)
                     for i in range(len(annotation_data))
                 ]
                 if "q_value" in annotation_data.columns:
@@ -355,6 +359,7 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
     pass
 
 
+@APPEND_PLOT_DOC
 class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
@@ -415,26 +420,32 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             group_cols.append(self.by)
 
         y_data = self._integrate_data_along_dim(self.data, group_cols, z)
-        y_config = self.config.copy()
+        y_config = self._config.copy()
         y_config.xlabel = self.zlabel
+        y_config.ylabel = self.ylabel
         y_config.y_axis_location = "left"
         y_config.legend.show = True
         y_config.legend.loc = "below"
         y_config.legend.orientation = "horizontal"
         y_config.legend.bbox_to_anchor = (1, -0.4)
+        
+        # remove legend from class_kwargs to update legend args for y axis plot
+        class_kwargs.pop("legend", None)
+        class_kwargs.pop("xlabel", None)
+        class_kwargs.pop("ylabel", None)
 
         color_gen = ColorGenerator()
 
         y_plot_obj = self.get_line_renderer(
-            y_data, z, y, by=self.by, config=y_config, **class_kwargs
+            y_data, z, y, by=self.by, _config=y_config, **class_kwargs
         )
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
         self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))
         self.ax_grid[1, 0].invert_xaxis()
         self.ax_grid[1, 0].set_title(None)
-        self.ax_grid[1, 0].set_xlabel(self.ylabel)
-        self.ax_grid[1, 0].set_ylabel(self.zlabel)
+        self.ax_grid[1, 0].set_xlabel(self.zlabel)
+        self.ax_grid[1, 0].set_ylabel(self.ylabel)
         self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
@@ -496,8 +507,8 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             custom_lines = Rectangle((x0, y0), width, height, 
                             fill=False, 
                             edgecolor=color,
-                            linestyle=self.feature_config.lineStyle,
-                            linewidth=self.feature_config.lineWidth)
+                            linestyle=self.feature_config.line_type,
+                            linewidth=self.feature_config.line_width)
             self.fig.add_patch(custom_lines)
 
             if 'name' in annotation_data.columns:

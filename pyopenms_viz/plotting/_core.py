@@ -1,22 +1,98 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Tuple, Literal, Union, List
+from typing import Any, Tuple, Literal, Union, List, Dict
 import importlib
 import types
 
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
+from pandas.util._decorators import Appender
 
 from ._config import (
     LegendConfig,
     FeatureConfig,
-    ChromatogramPlotterConfig,
-    SpectrumPlotterConfig,
-    FeautureHeatmapPlotterConfig,
+    _BasePlotterConfig
 )
 from ._misc import ColorGenerator
+
+
+_common_kinds = ("line", "vline", "scatter")
+_msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+_all_kinds = _common_kinds + _msdata_kinds
+_entrypoint_backends = ("pomsvim", "pomsvib", "pomsvip")
+
+_baseplot_doc = f"""
+    Plot method for creating plots from a Pandas DataFrame.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame or numpy.ndarray
+        The data to be plotted.
+    x : str or None, optional
+        The column name for the x-axis data.
+    y : str or None, optional
+        The column name for the y-axis data.
+    z : str or None, optional
+        The column name for the z-axis data (for 3D plots).
+    kind : str, optional
+        The kind of plot to create. One of: {_all_kinds}
+    by : str or None, optional
+        Column in the DataFrame to group by.
+    relative_intensity : bool, default False
+        Whether to use relative intensity for the y-axis.
+    subplots : bool or None, optional
+        Whether to create separate subplots for each column.
+    sharex, sharey : bool or None, optional
+        Whether to share x or y axes among subplots.
+    height, width : int or None, optional
+        The height and width of the figure in pixels.
+    grid : bool or None, optional
+        Whether to show the grid on the plot.
+    toolbar_location : str or None, optional
+        The location of the toolbar (e.g., 'above', 'below', 'left', 'right').
+    fig : figure or None, optional
+        An existing figure object to plot on.
+    title : str or None, optional
+        The title of the plot.
+    xlabel, ylabel : str or None, optional
+        Labels for the x and y axes.
+    x_axis_location, y_axis_location : str or None, optional
+        The location of the x and y axes (e.g., 'bottom', 'top', 'left', 'right').
+    line_type : str or None, optional
+        The type of line to use (e.g., 'solid', 'dashed', 'dotted').
+    line_width : float or None, optional
+        The width of the lines in the plot.
+    min_border : int or None, optional
+        The minimum border size around the plot.
+    show_plot : bool or None, optional
+        Whether to display the plot immediately after creation.
+    legend : LegendConfig or dict or None, optional
+        Configuration for the plot legend.
+    feature_config : FeatureConfig or dict or None, optional
+        Configuration for additional plot features.
+    backend : str, default None
+        Backend to use instead of the backend specified in the option
+        ``plotting.backend``. For pyopenms_viz, options are one of {_entrypoint_backends} Alternatively, to
+        specify the ``plotting.backend`` for the whole session, set
+        ``pd.options.plotting.backend``.
+    **kwargs
+        Additional keyword arguments to be passed to the plotting function.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> 
+    >>> data = pd.DataFrame(dict'x': [1, 2, 3], 'y': [4, 5, 6]))
+    >>> data.plot(x='x', y='y', kind='spectrum', backend='pomsvim')
+    """
+
+APPEND_PLOT_DOC = Appender(_baseplot_doc)
 
 
 class BasePlotter(ABC):
@@ -32,6 +108,7 @@ class BasePlotter(ABC):
         z: str | None = None,
         kind=None,
         by: str | None = None,
+        relative_intensity: bool = False,
         subplots: bool | None = None,
         sharex: bool | None = None,
         sharey: bool | None = None,
@@ -45,18 +122,23 @@ class BasePlotter(ABC):
         ylabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
+        line_type: str | None = None,
+        line_width: float | None = None,
         min_border: int | None = None,
         show_plot: bool | None = None,
-        legend: LegendConfig | None = None,
-        feature_config: FeatureConfig | None = None,
-        config=None,
+        legend: LegendConfig | Dict | None = None,
+        feature_config: FeatureConfig | Dict | None = None,
+        _config: _BasePlotterConfig | None = None,
         **kwargs,
     ) -> None:
 
-        # Config
+        # Data attributes
         self.data = data.copy()
         self.kind = kind
         self.by = by
+        self.relative_intensity = relative_intensity
+        
+        # Plotting attributes
         self.subplots = subplots
         self.sharex = sharex
         self.sharey = sharey
@@ -70,15 +152,25 @@ class BasePlotter(ABC):
         self.ylabel = ylabel
         self.x_axis_location = x_axis_location
         self.y_axis_location = y_axis_location
+        self.line_type = line_type
+        self.line_width = line_width
         self.min_border = min_border
         self.show_plot = show_plot
+        
         self.legend = legend
         self.feature_config = feature_config
-        self.config = config
-
-        if config is not None:
-            self._update_from_config(config)
-
+        
+        self._config = _config
+        
+        if _config is not None:
+            self._update_from_config(_config)
+        
+        if self.legend is not None and isinstance(self.legend, dict):
+            self.legend = LegendConfig.from_dict(self.legend)
+            
+        if self.feature_config is not None and isinstance(self.feature_config, dict):
+            self.feature_config = FeatureConfig.from_dict(self.feature_config)
+        
         ### get x and y data
         if self._kind in {
             "line",
@@ -339,9 +431,10 @@ class ChromatogramPlot(BasePlotter, ABC):
     def __init__(
         self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = ChromatogramPlotterConfig()
-
+        
+        # Set default config attributes if not passed as keyword arguments
+        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
+        
         super().__init__(data, x, y, **kwargs)
 
         if annotation_data is not None:
@@ -413,14 +506,16 @@ class SpectrumPlot(ComplexPlot, ABC):
         return "spectrum"
 
     def __init__(
-        self, data, x, y, reference_spectrum: DataFrame | None = None, **kwargs
+        self, data, x, y, reference_spectrum: DataFrame | None = None, mirror_spectrum: bool = False, **kwargs
     ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = SpectrumPlotterConfig()
+
+        # Set default config attributes if not passed as keyword arguments
+        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
 
         super().__init__(data, x, y, **kwargs)
 
         self.reference_spectrum = reference_spectrum
+        self.mirror_spectrum = mirror_spectrum
 
         self.plot(x, y, **kwargs)
         if self.show_plot:
@@ -444,7 +539,7 @@ class SpectrumPlot(ComplexPlot, ABC):
             line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
         )
 
-        if self.config.mirror_spectrum and reference_spectrum is not None:
+        if self.mirror_spectrum and reference_spectrum is not None:
             ## create a mirror spectrum
             color_gen_mirror = ColorGenerator()
             reference_spectrum[y] = reference_spectrum[y] * -1
@@ -473,7 +568,7 @@ class SpectrumPlot(ComplexPlot, ABC):
         )
 
         # Convert to relative intensity if required
-        if self.config.relative_intensity or self.config.mirror_spectrum:
+        if self.relative_intensity or self.mirror_spectrum:
             spectrum[y] = spectrum[y] / spectrum[y].max() * 100
             if reference_spectrum is not None:
                 reference_spectrum[y] = (
@@ -492,11 +587,12 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     def __init__(
         self, data, x, y, z, zlabel=None, add_marginals=False, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
-        if "config" not in kwargs or kwargs["config"] is None:
-            kwargs["config"] = FeautureHeatmapPlotterConfig()
+        
+        # Set default config attributes if not passed as keyword arguments
+        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
 
         if add_marginals:
-            kwargs["config"].title = None
+            kwargs["_config"].title = None
 
         self.zlabel = zlabel
         self.add_marginals = add_marginals
@@ -526,7 +622,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         if self.add_marginals:
             # remove 'config' from class_kwargs
             class_kwargs_copy = class_kwargs.copy()
-            class_kwargs_copy.pop("config", None)
+            class_kwargs_copy.pop("_config", None)
             class_kwargs_copy.pop("by", None)
 
             x_fig = self.create_x_axis_plot(x, z, class_kwargs_copy)
@@ -567,15 +663,20 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
         x_data = self._integrate_data_along_dim(self.data, group_cols, z)
 
-        x_config = self.config.copy()
+        x_config = self._config.copy()
         x_config.ylabel = self.zlabel
         x_config.y_axis_location = "right"
-        x_config.legend.show = True
+        x_config.legend.show = True        
+        x_config.legend.loc = "right"
 
         color_gen = ColorGenerator()
+        
+        # remove legend from class_kwargs to update legend args for x axis plot
+        class_kwargs.pop("legend", None)
+        class_kwargs.pop("ylabel", None)
 
         x_plot_obj = self.get_line_renderer(
-            x_data, x, z, by=self.by, config=x_config, **class_kwargs
+            x_data, x, z, by=self.by, _config=x_config, **class_kwargs
         )
         x_fig = x_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(x_fig)
@@ -590,16 +691,21 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
         y_data = self._integrate_data_along_dim(self.data, group_cols, z)
 
-        y_config = self.config.copy()
+        y_config = self._config.copy()
         y_config.xlabel = self.zlabel
+        y_config.ylabel = self.ylabel
         y_config.y_axis_location = "left"
         y_config.legend.show = True
         y_config.legend.loc = "below"
+        
+        # remove legend from class_kwargs to update legend args for y axis plot
+        class_kwargs.pop("legend", None)
+        class_kwargs.pop("xlabel", None)
 
         color_gen = ColorGenerator()
 
         y_plot_obj = self.get_line_renderer(
-            y_data, z, y, by=self.by, config=y_config, **class_kwargs
+            y_data, z, y, by=self.by, _config=y_config, **class_kwargs
         )
         y_fig = y_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(y_fig)
@@ -699,10 +805,13 @@ class PlotAccessor:
                 ("ylabel", None),
                 ("x_axis_location", None),
                 ("y_axis_location", None),
+                ("line_type", None),
+                ("line_width", None),
+                ("min_border", None),
                 ("show_plot", None),
                 ("legend", None),
                 ("feature_config", None),
-                ("config", None),
+                ("_config", None),
                 ("backend", backend_name),
             ]
         else:

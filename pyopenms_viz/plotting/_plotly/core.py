@@ -22,6 +22,7 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
+    APPEND_PLOT_DOC
 )
 
 from .._config import bokeh_line_dash_mapper
@@ -68,9 +69,9 @@ class PLOTLYPlot(BasePlotter, ABC):
         Update the plot aesthetics.
         """
         fig.update_layout(
-            legend_title=self.config.legend.title,
-            legend_font_size=self.config.legend.fontsize,
-            showlegend=self.config.legend.show,
+            legend_title=self.legend.title,
+            legend_font_size=self.legend.fontsize,
+            showlegend=self.legend.show,
         )
 
         # Update to look similar to Bokeh theme
@@ -194,6 +195,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
         cls,
         fig,
@@ -229,6 +231,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
 
@@ -280,6 +283,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
         marker_dict = kwargs.pop("marker", None)
@@ -367,7 +371,7 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
 
     def _add_peak_boundaries(self, annotation_data, **kwargs):
         color_gen = ColorGenerator(
-            colormap=self.config.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             if "q_value" in annotation_data.columns:
@@ -387,8 +391,8 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
                     opacity=0.5,
                     line=dict(
                         color = next(color_gen),
-                        dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly'), 
-                        width=self.feature_config.lineWidth
+                        dash=bokeh_line_dash_mapper(self.feature_config.line_type, 'plotly'), 
+                        width=self.feature_config.line_width
                         ),
                     name=legend_label,
                 )
@@ -528,6 +532,10 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
         # Update yaxis properties
         fig_m.update_yaxes(title_text=self.zlabel, row=1, col=2)
         fig_m.update_yaxes(title_text=self.ylabel, row=2, col=1)
+        
+        # Remove axes for first quadrant
+        fig_m.update_xaxes(visible=False, row=1, col=1)
+        fig_m.update_yaxes(visible=False, row=1, col=1)
 
         # Update the layout
         fig_m.update_layout(height=self.height, width=self.width, title=self.title)
@@ -539,7 +547,7 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
 
     def _add_box_boundaries(self, annotation_data, **kwargs):
         color_gen = ColorGenerator(
-            colormap=self.config.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             x0 = feature["leftWidth"]
@@ -566,8 +574,8 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
                         opacity=0.5,
                         line=dict(
                             color = color,
-                            width=self.feature_config.lineWidth,
-                            dash=bokeh_line_dash_mapper(self.feature_config.lineStyle, 'plotly')
+                            width=self.feature_config.line_width,
+                            dash=bokeh_line_dash_mapper(self.feature_config.line_type, 'plotly')
                         ),
                         name=legend_label
                     )

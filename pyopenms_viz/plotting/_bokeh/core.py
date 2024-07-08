@@ -30,6 +30,7 @@ from .._core import (
     MobilogramPlot,
     FeatureHeatmapPlot,
     SpectrumPlot,
+    APPEND_PLOT_DOC
 )
 from .._misc import ColorGenerator
 from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
@@ -207,6 +208,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a line plot
@@ -241,6 +243,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a set of vertical lines
@@ -278,6 +281,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a scatter plot
@@ -356,8 +360,8 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
                 x1=[feature["leftWidth"], feature["rightWidth"]],
                 y1=[feature["apexIntensity"], feature["apexIntensity"]],
                 color=next(color_gen),
-                line_dash=self.feature_config.lineStyle,
-                line_width=self.feature_config.lineWidth,
+                line_dash=self.feature_config.line_type,
+                line_width=self.feature_config.line_width,
             )
             if 'name' in annotation_data.columns:
                 use_name = feature['name']
@@ -509,8 +513,8 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 width=width,
                 height=height,
                 color=next(color_gen),
-                line_dash=self.feature_config.lineStyle,
-                line_width=self.feature_config.lineWidth,
+                line_dash=self.feature_config.line_type,
+                line_width=self.feature_config.line_width,
                 fill_alpha=0
             )
             if 'name' in annotation_data.columns:
