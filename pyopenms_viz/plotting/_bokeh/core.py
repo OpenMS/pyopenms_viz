@@ -356,7 +356,7 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
                 x1=[feature["leftWidth"], feature["rightWidth"]],
                 y1=[feature["apexIntensity"], feature["apexIntensity"]],
                 color=next(color_gen),
-                line_dash=self.feature_config.line_style,
+                line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
             )
             if 'name' in annotation_data.columns:
@@ -509,7 +509,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 width=width,
                 height=height,
                 color=next(color_gen),
-                line_dash=self.feature_config.line_style,
+                line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
                 fill_alpha=0
             )
