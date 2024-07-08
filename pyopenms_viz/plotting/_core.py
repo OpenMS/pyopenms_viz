@@ -8,6 +8,7 @@ import types
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
+from pandas.util._decorators import Appender
 
 from ._config import (
     LegendConfig,
@@ -15,6 +16,83 @@ from ._config import (
     _BasePlotterConfig
 )
 from ._misc import ColorGenerator
+
+
+_common_kinds = ("line", "vline", "scatter")
+_msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+_all_kinds = _common_kinds + _msdata_kinds
+_entrypoint_backends = ("pomsvim", "pomsvib", "pomsvip")
+
+_baseplot_doc = f"""
+    Plot method for creating plots from a Pandas DataFrame.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame or numpy.ndarray
+        The data to be plotted.
+    x : str or None, optional
+        The column name for the x-axis data.
+    y : str or None, optional
+        The column name for the y-axis data.
+    z : str or None, optional
+        The column name for the z-axis data (for 3D plots).
+    kind : str, optional
+        The kind of plot to create. One of: {_all_kinds}
+    by : str or None, optional
+        Column in the DataFrame to group by.
+    relative_intensity : bool, default False
+        Whether to use relative intensity for the y-axis.
+    subplots : bool or None, optional
+        Whether to create separate subplots for each column.
+    sharex, sharey : bool or None, optional
+        Whether to share x or y axes among subplots.
+    height, width : int or None, optional
+        The height and width of the figure in pixels.
+    grid : bool or None, optional
+        Whether to show the grid on the plot.
+    toolbar_location : str or None, optional
+        The location of the toolbar (e.g., 'above', 'below', 'left', 'right').
+    fig : figure or None, optional
+        An existing figure object to plot on.
+    title : str or None, optional
+        The title of the plot.
+    xlabel, ylabel : str or None, optional
+        Labels for the x and y axes.
+    x_axis_location, y_axis_location : str or None, optional
+        The location of the x and y axes (e.g., 'bottom', 'top', 'left', 'right').
+    line_type : str or None, optional
+        The type of line to use (e.g., 'solid', 'dashed', 'dotted').
+    line_width : float or None, optional
+        The width of the lines in the plot.
+    min_border : int or None, optional
+        The minimum border size around the plot.
+    show_plot : bool or None, optional
+        Whether to display the plot immediately after creation.
+    legend : LegendConfig or dict or None, optional
+        Configuration for the plot legend.
+    feature_config : FeatureConfig or dict or None, optional
+        Configuration for additional plot features.
+    backend : str, default None
+        Backend to use instead of the backend specified in the option
+        ``plotting.backend``. For pyopenms_viz, options are one of {_entrypoint_backends} Alternatively, to
+        specify the ``plotting.backend`` for the whole session, set
+        ``pd.options.plotting.backend``.
+    **kwargs
+        Additional keyword arguments to be passed to the plotting function.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> 
+    >>> data = pd.DataFrame(dict'x': [1, 2, 3], 'y': [4, 5, 6]))
+    >>> data.plot(x='x', y='y', kind='spectrum', backend='pomsvim')
+    """
+
+APPEND_PLOT_DOC = Appender(_baseplot_doc)
 
 
 class BasePlotter(ABC):
@@ -92,7 +170,7 @@ class BasePlotter(ABC):
             
         if self.feature_config is not None and isinstance(self.feature_config, dict):
             self.feature_config = FeatureConfig.from_dict(self.feature_config)
-
+        
         ### get x and y data
         if self._kind in {
             "line",
@@ -727,6 +805,9 @@ class PlotAccessor:
                 ("ylabel", None),
                 ("x_axis_location", None),
                 ("y_axis_location", None),
+                ("line_type", None),
+                ("line_width", None),
+                ("min_border", None),
                 ("show_plot", None),
                 ("legend", None),
                 ("feature_config", None),

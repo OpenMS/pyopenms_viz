@@ -30,6 +30,7 @@ from .._core import (
     MobilogramPlot,
     FeatureHeatmapPlot,
     SpectrumPlot,
+    APPEND_PLOT_DOC
 )
 from .._misc import ColorGenerator
 from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
@@ -207,6 +208,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a line plot
@@ -241,6 +243,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a set of vertical lines
@@ -278,6 +281,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
         """
         Plot a scatter plot

@@ -20,6 +20,7 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
+    APPEND_PLOT_DOC
 )
 
 
@@ -51,7 +52,7 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the self.fig object stores the matplotlib axes object
         """
-        if self.fig is None:
+        if self.fig is None and self.width is not None and self.height is not None:
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
@@ -158,6 +159,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -188,6 +190,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -222,6 +225,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(
         cls, ax, data, x, y, by: str | None = None, **kwargs
     ) -> Tuple[Axes, "Legend"]:
@@ -355,6 +359,7 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
     pass
 
 
+@APPEND_PLOT_DOC
 class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot

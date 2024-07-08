@@ -22,6 +22,7 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
+    APPEND_PLOT_DOC
 )
 
 from .._config import bokeh_line_dash_mapper
@@ -194,6 +195,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
         cls,
         fig,
@@ -229,6 +231,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
 
@@ -280,6 +283,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
     @classmethod
+    @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
         marker_dict = kwargs.pop("marker", None)
