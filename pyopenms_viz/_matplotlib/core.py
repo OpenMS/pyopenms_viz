@@ -78,7 +78,7 @@ class MATPLOTLIBPlot(BasePlotter, ABC):
             ax: The axes object.
             legend: The legend configuration.
         """
-        if legend is not None:
+        if legend is not None and self.legend.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.legend.loc
             )
@@ -277,7 +277,7 @@ class MATPLOTLIBComplexPlot(ComplexPlot, MATPLOTLIBPlot, ABC):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
 
-
+@APPEND_PLOT_DOC
 class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
     """
     Class for assembling a matplotlib extracted ion chromatogram plot
@@ -293,7 +293,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
         Returns:
             None
         """
-        if self.by is not None:
+        if self.by is not None and self.legend.show:
             legend = self.fig.get_legend()
             self.fig.add_artist(legend)
 
@@ -302,9 +302,10 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
         )
 
         legend_items = []
+        legend_labels = [] 
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             use_color = next(color_gen)
-            self.fig.vlines(
+            left_vlne = self.fig.vlines(
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
@@ -320,25 +321,24 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
                 color=use_color,
                 ls=self.feature_config.line_type,
             )
+            legend_items.append(left_vlne)
 
-            if self.feature_config.legend.show:
-                custom_lines = [
-                    Line2D([0], [0], color=use_color, lw=self.feature_config.line_width)
-                    for i in range(len(annotation_data))
-                ]
-                if "q_value" in annotation_data.columns:
-                    legend_labels = [
-                        f"Feature {idx} (q-value: {feature['q_value']:.4f})"
-                    ]
-                else:
-                    legend_labels = [f"Feature {idx}"]
+            if 'name' in annotation_data.columns:
+                use_name = feature['name']
+            else:
+                use_name = f"Feature {idx}"
+            if "q_value" in annotation_data.columns:
+                cur_legend_labels = f"{use_name} (q-value: {feature['q_value']:.4f})"
+            else:
+                cur_legend_labels = f"{use_name}"
+            legend_labels.append(cur_legend_labels)
 
         if self.feature_config.legend.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.feature_config.legend.loc
             )
             self.fig.legend(
-                custom_lines,
+                legend_items,
                 legend_labels,
                 loc=matplotlibLegendLoc,
                 title=self.feature_config.legend.title,
