@@ -20,7 +20,7 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
-    APPEND_PLOT_DOC
+    APPEND_PLOT_DOC,
 )
 
 
@@ -428,7 +428,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         y_config.legend.loc = "below"
         y_config.legend.orientation = "horizontal"
         y_config.legend.bbox_to_anchor = (1, -0.4)
-        
+
         # remove legend from class_kwargs to update legend args for y axis plot
         class_kwargs.pop("legend", None)
         class_kwargs.pop("xlabel", None)
@@ -460,7 +460,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             cmap="afmhot_r",
             **other_kwargs,
         )
-        
+
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
 
@@ -482,12 +482,12 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
         self.ax_grid[1, 1].set_yticklabels([])
         self.ax_grid[1, 1].set_yticks([])
         self.ax_grid[1, 1].legend_ = None
-        
+
     def _add_box_boundaries(self, annotation_data):
         if self.by is not None:
             legend = self.fig.get_legend()
             self.fig.add_artist(legend)
-            
+
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
@@ -504,15 +504,19 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
             height = abs(y1 - y0)
 
             color = next(color_gen)
-            custom_lines = Rectangle((x0, y0), width, height, 
-                            fill=False, 
-                            edgecolor=color,
-                            linestyle=self.feature_config.line_type,
-                            linewidth=self.feature_config.line_width)
+            custom_lines = Rectangle(
+                (x0, y0),
+                width,
+                height,
+                fill=False,
+                edgecolor=color,
+                linestyle=self.feature_config.line_type,
+                linewidth=self.feature_config.line_width,
+            )
             self.fig.add_patch(custom_lines)
 
-            if 'name' in annotation_data.columns:
-                use_name = feature['name']
+            if "name" in annotation_data.columns:
+                use_name = feature["name"]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:

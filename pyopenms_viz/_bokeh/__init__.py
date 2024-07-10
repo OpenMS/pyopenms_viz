@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyopenms_viz.plotting._bokeh.core import (
+from .core import (
     BOKEHLinePlot,
     BOKEHVLinePlot,
     BOKEHScatterPlot,
@@ -14,7 +14,7 @@ from pyopenms_viz.plotting._bokeh.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._bokeh.core import BOKEHPlot
+    from .core import BOKEHPlot
 
 PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "line": BOKEHLinePlot,

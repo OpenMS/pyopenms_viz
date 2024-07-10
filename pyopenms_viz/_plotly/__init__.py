@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyopenms_viz.plotting._plotly.core import (
+from .core import (
     PLOTLYLinePlot,
     PLOTLYVLinePlot,
     PLOTLYScatterPlot,
@@ -13,7 +13,7 @@ from pyopenms_viz.plotting._plotly.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._plotly.core import PLOTLYPlot
+    from .core import PLOTLYPlot
 
 PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
     "line": PLOTLYLinePlot,

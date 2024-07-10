@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 
-from typing import TYPE_CHECKING, Literal, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
@@ -22,12 +22,12 @@ from .._core import (
     MobilogramPlot,
     SpectrumPlot,
     FeatureHeatmapPlot,
-    APPEND_PLOT_DOC
+    APPEND_PLOT_DOC,
 )
 
 from .._config import bokeh_line_dash_mapper
-from pyopenms_viz.plotting._misc import ColorGenerator
-from pyopenms_viz.constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
+from .._misc import ColorGenerator
+from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
 class PLOTLYPlot(BasePlotter, ABC):
@@ -390,10 +390,12 @@ class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
                     y=[feature["apexIntensity"], 0, 0, feature["apexIntensity"]],
                     opacity=0.5,
                     line=dict(
-                        color = next(color_gen),
-                        dash=bokeh_line_dash_mapper(self.feature_config.line_type, 'plotly'), 
-                        width=self.feature_config.line_width
+                        color=next(color_gen),
+                        dash=bokeh_line_dash_mapper(
+                            self.feature_config.line_type, "plotly"
                         ),
+                        width=self.feature_config.line_width,
+                    ),
                     name=legend_label,
                 )
             )
@@ -440,7 +442,7 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
             ),
             **other_kwargs,
         )
-        
+
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
 
@@ -532,7 +534,7 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
         # Update yaxis properties
         fig_m.update_yaxes(title_text=self.zlabel, row=1, col=2)
         fig_m.update_yaxes(title_text=self.ylabel, row=2, col=1)
-        
+
         # Remove axes for first quadrant
         fig_m.update_xaxes(visible=False, row=1, col=1)
         fig_m.update_yaxes(visible=False, row=1, col=1)
@@ -554,11 +556,11 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
             x1 = feature["rightWidth"]
             y0 = feature["IM_leftWidth"]
             y1 = feature["IM_rightWidth"]
-            
+
             color = next(color_gen)
-    
-            if 'name' in annotation_data.columns:
-                use_name = feature['name']
+
+            if "name" in annotation_data.columns:
+                use_name = feature["name"]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
@@ -566,17 +568,25 @@ class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
             else:
                 legend_label = f"{use_name}"
             self.fig.add_trace(
-                    go.Scatter(
-                        x=[x0, x1, x1, x0, x0],  # Start and end at the same point to close the shape
-                        y=[y0, y0, y1, y1, y0],
-                        mode='lines',
-                        fill='none',
-                        opacity=0.5,
-                        line=dict(
-                            color = color,
-                            width=self.feature_config.line_width,
-                            dash=bokeh_line_dash_mapper(self.feature_config.line_type, 'plotly')
+                go.Scatter(
+                    x=[
+                        x0,
+                        x1,
+                        x1,
+                        x0,
+                        x0,
+                    ],  # Start and end at the same point to close the shape
+                    y=[y0, y0, y1, y1, y0],
+                    mode="lines",
+                    fill="none",
+                    opacity=0.5,
+                    line=dict(
+                        color=color,
+                        width=self.feature_config.line_width,
+                        dash=bokeh_line_dash_mapper(
+                            self.feature_config.line_type, "plotly"
                         ),
-                        name=legend_label
-                    )
+                    ),
+                    name=legend_label,
                 )
+            )

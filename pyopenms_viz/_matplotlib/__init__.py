@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyopenms_viz.plotting._matplotlib.core import (
+from .core import (
     MATPLOTLIBLinePlot,
     MATPLOTLIBVLinePlot,
     MATPLOTLIBScatterPlot,
@@ -13,7 +13,7 @@ from pyopenms_viz.plotting._matplotlib.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._matplotlib.core import MATPLOTLIBPlot
+    from .core import MATPLOTLIBPlot
 
 PLOT_CLASSES: dict[str, type[MATPLOTLIBPlot]] = {
     "line": MATPLOTLIBLinePlot,
