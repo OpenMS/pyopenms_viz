@@ -5,3 +5,4 @@ peakmap.parquet
 ms_data.mzML
 *.d
 *.ipynb_checkpoints
+build
