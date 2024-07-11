@@ -2,8 +2,9 @@ from __future__ import annotations
 
 
 from typing import TYPE_CHECKING
+from ..constants import IS_SPHINX_BUILD
 
-from pyopenms_viz.plotting._bokeh.core import (
+from .core import (
     BOKEHLinePlot,
     BOKEHVLinePlot,
     BOKEHScatterPlot,
@@ -14,7 +15,11 @@ from pyopenms_viz.plotting._bokeh.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._bokeh.core import BOKEHPlot
+    from .core import BOKEHPlot
+
+if IS_SPHINX_BUILD:
+    from .core import BOKEH_MSPlotter, BOKEHPlot
+
 
 PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "line": BOKEHLinePlot,

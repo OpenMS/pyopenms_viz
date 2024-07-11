@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from ..constants import IS_SPHINX_BUILD
 
-from pyopenms_viz.plotting._plotly.core import (
+from .core import (
     PLOTLYLinePlot,
     PLOTLYVLinePlot,
     PLOTLYScatterPlot,
@@ -13,9 +14,12 @@ from pyopenms_viz.plotting._plotly.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._plotly.core import PLOTLYPlot
+    from .core import PLOTLYPlotter
 
-PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
+if IS_SPHINX_BUILD:
+    from .core import PLOTLY_MSPlotter, PLOTLYPlotter
+
+PLOT_CLASSES: dict[str, type[PLOTLYPlotter]] = {
     "line": PLOTLYLinePlot,
     "vline": PLOTLYVLinePlot,
     "scatter": PLOTLYScatterPlot,

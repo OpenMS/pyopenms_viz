@@ -25,15 +25,15 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    ComplexPlot,
+    BaseMSPlotter,
     ChromatogramPlot,
     MobilogramPlot,
     FeatureHeatmapPlot,
     SpectrumPlot,
-    APPEND_PLOT_DOC
+    APPEND_PLOT_DOC,
 )
 from .._misc import ColorGenerator
-from ...constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
+from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
 class BOKEHPlot(BasePlotter, ABC):
@@ -302,7 +302,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             return fig, legend
 
 
-class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
+class BOKEH_MSPlotter(BaseMSPlotter, BOKEHPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHLinePlot(data, x, y, **kwargs)
@@ -334,7 +334,7 @@ class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
         return TOOLTIPS, None
 
 
-class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
+class BOKEHChromatogramPlot(BOKEH_MSPlotter, ChromatogramPlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
@@ -363,8 +363,8 @@ class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
                 line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
             )
-            if 'name' in annotation_data.columns:
-                use_name = feature['name']
+            if "name" in annotation_data.columns:
+                use_name = feature["name"]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
@@ -404,7 +404,7 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     pass
 
 
-class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
+class BOKEHSpectrumPlot(BOKEH_MSPlotter, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
@@ -412,7 +412,7 @@ class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
     pass
 
 
-class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
+class BOKEHFeatureHeatmapPlot(BOKEH_MSPlotter, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
@@ -429,7 +429,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
         self.fig = scatterPlot.generate(
             marker="square", line_color=mapper, fill_color=mapper, **other_kwargs
         )
-        
+
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
 
@@ -489,7 +489,7 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 "y1": f"{self.y}_1",
             }
         )
-        
+
     def _add_box_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
@@ -515,10 +515,10 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 color=next(color_gen),
                 line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
-                fill_alpha=0
+                fill_alpha=0,
             )
-            if 'name' in annotation_data.columns:
-                use_name = feature['name']
+            if "name" in annotation_data.columns:
+                use_name = feature["name"]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
@@ -536,4 +536,3 @@ class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
                 str(self.feature_config.legend.fontsize) + "pt"
             )
             self.fig.add_layout(legend, self.feature_config.legend.loc)
-        

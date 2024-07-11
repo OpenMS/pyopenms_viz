@@ -10,11 +10,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from ._config import (
-    LegendConfig,
-    FeatureConfig,
-    _BasePlotterConfig
-)
+from ._config import LegendConfig, FeatureConfig, _BasePlotterConfig
 from ._misc import ColorGenerator
 
 
@@ -137,7 +133,7 @@ class BasePlotter(ABC):
         self.kind = kind
         self.by = by
         self.relative_intensity = relative_intensity
-        
+
         # Plotting attributes
         self.subplots = subplots
         self.sharex = sharex
@@ -156,21 +152,21 @@ class BasePlotter(ABC):
         self.line_width = line_width
         self.min_border = min_border
         self.show_plot = show_plot
-        
+
         self.legend = legend
         self.feature_config = feature_config
-        
+
         self._config = _config
-        
+
         if _config is not None:
             self._update_from_config(_config)
-        
+
         if self.legend is not None and isinstance(self.legend, dict):
             self.legend = LegendConfig.from_dict(self.legend)
-            
+
         if self.feature_config is not None and isinstance(self.feature_config, dict):
             self.feature_config = FeatureConfig.from_dict(self.feature_config)
-        
+
         ### get x and y data
         if self._kind in {
             "line",
@@ -390,7 +386,7 @@ class ScatterPlot(BasePlotter, ABC):
         return "scatter"
 
 
-class ComplexPlot(BasePlotter, ABC):
+class BaseMSPlotter(BasePlotter, ABC):
     """
     Abstract class for complex plots, such as chromatograms and mobilograms which are made up of simple plots such as ScatterPlots, VLines and LinePlots.
 
@@ -423,7 +419,7 @@ class ComplexPlot(BasePlotter, ABC):
         pass
 
 
-class ChromatogramPlot(BasePlotter, ABC):
+class ChromatogramPlot(BaseMSPlotter, ABC):
     @property
     def _kind(self):
         return "chromatogram"
@@ -431,10 +427,10 @@ class ChromatogramPlot(BasePlotter, ABC):
     def __init__(
         self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
-        
+
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
-        
+
         super().__init__(data, x, y, **kwargs)
 
         if annotation_data is not None:
@@ -500,13 +496,19 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
 
-class SpectrumPlot(ComplexPlot, ABC):
+class SpectrumPlot(BaseMSPlotter, ABC):
     @property
     def _kind(self):
         return "spectrum"
 
     def __init__(
-        self, data, x, y, reference_spectrum: DataFrame | None = None, mirror_spectrum: bool = False, **kwargs
+        self,
+        data,
+        x,
+        y,
+        reference_spectrum: DataFrame | None = None,
+        mirror_spectrum: bool = False,
+        **kwargs,
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
@@ -578,16 +580,24 @@ class SpectrumPlot(ComplexPlot, ABC):
         return spectrum, reference_spectrum
 
 
-class FeatureHeatmapPlot(ComplexPlot, ABC):
+class FeatureHeatmapPlot(BaseMSPlotter, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
     def _kind(self):
         return "feature_heatmap"
 
     def __init__(
-        self, data, x, y, z, zlabel=None, add_marginals=False, annotation_data: DataFrame | None = None, **kwargs
+        self,
+        data,
+        x,
+        y,
+        z,
+        zlabel=None,
+        add_marginals=False,
+        annotation_data: DataFrame | None = None,
+        **kwargs,
     ) -> None:
-        
+
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
 
@@ -596,11 +606,11 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
 
         self.zlabel = zlabel
         self.add_marginals = add_marginals
-        
+
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
         else:
-            self.annotation_data = None 
+            self.annotation_data = None
         super().__init__(data, x, y, z=z, **kwargs)
 
         self.plot(x, y, z, **kwargs)
@@ -666,11 +676,11 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         x_config = self._config.copy()
         x_config.ylabel = self.zlabel
         x_config.y_axis_location = "right"
-        x_config.legend.show = True        
+        x_config.legend.show = True
         x_config.legend.loc = "right"
 
         color_gen = ColorGenerator()
-        
+
         # remove legend from class_kwargs to update legend args for x axis plot
         class_kwargs.pop("legend", None)
         class_kwargs.pop("ylabel", None)
@@ -697,7 +707,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
         y_config.y_axis_location = "left"
         y_config.legend.show = True
         y_config.legend.loc = "below"
-        
+
         # remove legend from class_kwargs to update legend args for y axis plot
         class_kwargs.pop("legend", None)
         class_kwargs.pop("xlabel", None)
@@ -715,7 +725,7 @@ class FeatureHeatmapPlot(ComplexPlot, ABC):
     @abstractmethod
     def combine_plots(self, x_fig, y_fig):
         pass
-    
+
     @abstractmethod
     def _add_box_boundaries(self, annotation_data):
         """

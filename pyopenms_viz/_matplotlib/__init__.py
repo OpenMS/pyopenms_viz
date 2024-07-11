@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from ..constants import IS_SPHINX_BUILD
 
-from pyopenms_viz.plotting._matplotlib.core import (
+from .core import (
     MATPLOTLIBLinePlot,
     MATPLOTLIBVLinePlot,
     MATPLOTLIBScatterPlot,
@@ -13,7 +14,10 @@ from pyopenms_viz.plotting._matplotlib.core import (
 )
 
 if TYPE_CHECKING:
-    from pyopenms_viz.plotting._matplotlib.core import MATPLOTLIBPlot
+    from .core import MATPLOTLIBPlot
+
+if IS_SPHINX_BUILD:
+    from .core import MATPLOTLIB_MSPlotter, MATPLOTLIBPlot
 
 PLOT_CLASSES: dict[str, type[MATPLOTLIBPlot]] = {
     "line": MATPLOTLIBLinePlot,
