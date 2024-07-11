@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from ..constants import IS_SPHINX_BUILD
 
 from .core import (
     MATPLOTLIBLinePlot,
@@ -14,6 +15,9 @@ from .core import (
 
 if TYPE_CHECKING:
     from .core import MATPLOTLIBPlot
+
+if IS_SPHINX_BUILD:
+    from .core import MATPLOTLIB_MSPlotter, MATPLOTLIBPlot
 
 PLOT_CLASSES: dict[str, type[MATPLOTLIBPlot]] = {
     "line": MATPLOTLIBLinePlot,

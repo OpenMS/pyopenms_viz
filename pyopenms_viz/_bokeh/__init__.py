@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 from typing import TYPE_CHECKING
+from ..constants import IS_SPHINX_BUILD
 
 from .core import (
     BOKEHLinePlot,
@@ -15,6 +16,10 @@ from .core import (
 
 if TYPE_CHECKING:
     from .core import BOKEHPlot
+
+if IS_SPHINX_BUILD:
+    from .core import BOKEH_MSPlotter, BOKEHPlot
+
 
 PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
     "line": BOKEHLinePlot,
