@@ -15,7 +15,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    ComplexPlot,
+    BaseMSPlotter,
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
@@ -259,7 +259,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             return ax, (legend_lines, legend_labels)
 
 
-class MATPLOTLIBComplexPlot(ComplexPlot, MATPLOTLIBPlot, ABC):
+class MATPLOTLIB_MSPlotter(BaseMSPlotter, MATPLOTLIBPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBLinePlot(data, x, y, **kwargs)
@@ -277,8 +277,9 @@ class MATPLOTLIBComplexPlot(ComplexPlot, MATPLOTLIBPlot, ABC):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
 
+
 @APPEND_PLOT_DOC
-class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
+class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlotter, ChromatogramPlot):
     """
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
@@ -302,7 +303,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
         )
 
         legend_items = []
-        legend_labels = [] 
+        legend_labels = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             use_color = next(color_gen)
             left_vlne = self.fig.vlines(
@@ -323,8 +324,8 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIBComplexPlot, ChromatogramPlot):
             )
             legend_items.append(left_vlne)
 
-            if 'name' in annotation_data.columns:
-                use_name = feature['name']
+            if "name" in annotation_data.columns:
+                use_name = feature["name"]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
@@ -360,7 +361,7 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
 
 
 @APPEND_PLOT_DOC
-class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
+class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlotter, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
     """
@@ -368,7 +369,7 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIBComplexPlot, SpectrumPlot):
     pass
 
 
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIBComplexPlot, FeatureHeatmapPlot):
+class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlotter, FeatureHeatmapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """

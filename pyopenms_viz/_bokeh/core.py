@@ -25,7 +25,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    ComplexPlot,
+    BaseMSPlotter,
     ChromatogramPlot,
     MobilogramPlot,
     FeatureHeatmapPlot,
@@ -302,7 +302,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             return fig, legend
 
 
-class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
+class BOKEH_MSPlotter(BaseMSPlotter, BOKEHPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHLinePlot(data, x, y, **kwargs)
@@ -334,7 +334,7 @@ class BOKEHComplexPlot(ComplexPlot, BOKEHPlot, ABC):
         return TOOLTIPS, None
 
 
-class BOKEHChromatogramPlot(BOKEHComplexPlot, ChromatogramPlot):
+class BOKEHChromatogramPlot(BOKEH_MSPlotter, ChromatogramPlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
@@ -404,7 +404,7 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     pass
 
 
-class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
+class BOKEHSpectrumPlot(BOKEH_MSPlotter, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
@@ -412,7 +412,7 @@ class BOKEHSpectrumPlot(BOKEHComplexPlot, SpectrumPlot):
     pass
 
 
-class BOKEHFeatureHeatmapPlot(BOKEHComplexPlot, FeatureHeatmapPlot):
+class BOKEHFeatureHeatmapPlot(BOKEH_MSPlotter, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """

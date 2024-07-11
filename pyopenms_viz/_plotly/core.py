@@ -17,7 +17,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    ComplexPlot,
+    BaseMSPlotter,
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
@@ -317,7 +317,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         return fig, None
 
 
-class PLOTLYComplexPlot(ComplexPlot, PLOTLYPlot, ABC):
+class PLOTLY_MSPlot(BaseMSPlotter, PLOTLYPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return PLOTLYLinePlot(data, x, y, **kwargs)
@@ -367,7 +367,7 @@ class PLOTLYComplexPlot(ComplexPlot, PLOTLYPlot, ABC):
         return "<br>".join(TOOLTIPS), column_stack(custom_hover_data)
 
 
-class PLOTLYChromatogramPlot(PLOTLYComplexPlot, ChromatogramPlot):
+class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
 
     def _add_peak_boundaries(self, annotation_data, **kwargs):
         color_gen = ColorGenerator(
@@ -409,7 +409,7 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
     pass
 
 
-class PLOTLYSpectrumPlot(PLOTLYComplexPlot, SpectrumPlot):
+class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
     def _prepare_data(
         self, spectrum: DataFrame, y: str, reference_spectrum: DataFrame | None
     ) -> Tuple[List]:
@@ -425,7 +425,7 @@ class PLOTLYSpectrumPlot(PLOTLYComplexPlot, SpectrumPlot):
         return spectrum, reference_spectrum
 
 
-class PLOTLYFeatureHeatmapPlot(PLOTLYComplexPlot, FeatureHeatmapPlot):
+class PLOTLYFeatureHeatmapPlot(PLOTLY_MSPlot, FeatureHeatmapPlot):
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
