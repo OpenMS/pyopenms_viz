@@ -31,6 +31,36 @@ Key Features Include:
 * **Interactive and Static Plotting** - Multiple backends supported including matplotlib, bokeh and plotly.
 * **Usage Flexibility** - User-friendly web based dashboard for quick visualizations, advanced python package for more complex applications 
 
+Quick Start
+***********
+
+Installation
+------------
+
+.. code-block:: shell
+   pip install pyopenms-viz
+
+Plotting a Spectrum
+-------------------
+
+.. code-block:: python
+
+        import pandas as pd
+        ms_data = pd.read_csv("path/to/ms_data.csv")
+        pd.set_option("plotting.backend", "ms_bokeh") # try changing backend to "ms_plotly" or "ms_matplotlib"
+        ms_data.plot(x="m/z", y="intensity", kind="spectrum") 
+        
+Plotting a Chromatogram
+-----------------------
+
+.. code-block:: python
+
+        import pandas as pd
+        ms_data = pd.read_csv("path/to/ms_data.csv")
+        pd.set_option("plotting.backend", "ms_bokeh") # try changing backend to "ms_plotly" or "ms_matplotlib"
+        ms_data.plot(x="rt", y="intensity", kind="chromatogram")
+
+
 User Guide
 **********
 
@@ -39,7 +69,9 @@ User Guide
    :glob:
 
    Installation
+   User Guide
    Testing
+   PlottingGallery
    API
 
 Contribute
