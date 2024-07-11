@@ -12,14 +12,14 @@ class Engine(Enum):
     MATPLOTLIB = 3
 
 
-def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
+def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):
     """
     Maps Bokeh line dash types to their Plotly or Matplotlib equivalents.
-    
+
     Args:
     bokeh_dash (str or list): Bokeh line dash type or custom dash pattern.
     target_library (str): 'plotly' or 'matplotlib' (default: 'plotly')
-    
+
     Returns:
     str or list or tuple: Equivalent line dash type for the target library.
     """
@@ -30,7 +30,7 @@ def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
         "dotdash": "dashdot",
         "dashdot": "dashdot",
     }
-    
+
     matplotlib_mapper = {
         "solid": "-",
         "dashed": "--",
@@ -38,8 +38,8 @@ def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
         "dotdash": "-.",
         "dashdot": "-.",
     }
-    
-    if target_library.lower() == 'plotly':
+
+    if target_library.lower() == "plotly":
         if isinstance(bokeh_dash, str):
             # If it's already a valid Plotly dash type, return it as is
             if bokeh_dash in plotly_mapper.values():
@@ -47,8 +47,8 @@ def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
             # Otherwise, map from Bokeh to Plotly
             return plotly_mapper.get(bokeh_dash, "solid")
         elif isinstance(bokeh_dash, list):
-            return ' '.join(f"{num}px" for num in bokeh_dash)
-    elif target_library.lower() == 'matplotlib':
+            return " ".join(f"{num}px" for num in bokeh_dash)
+    elif target_library.lower() == "matplotlib":
         if isinstance(bokeh_dash, str):
             # If it's already a valid Matplotlib dash type, return it as is
             if bokeh_dash in matplotlib_mapper.values():
@@ -57,9 +57,9 @@ def bokeh_line_dash_mapper(bokeh_dash, target_library='plotly'):
             return matplotlib_mapper.get(bokeh_dash, "-")
         elif isinstance(bokeh_dash, list):
             return (None, tuple(bokeh_dash))
-    
+
     # Default return if target_library is not recognized or bokeh_dash is neither string nor list
-    return "solid" if target_library.lower() == 'plotly' else "-"
+    return "solid" if target_library.lower() == "plotly" else "-"
 
 
 @dataclass(kw_only=True)
@@ -89,36 +89,36 @@ class LegendConfig:
             "below": "lower center",
         }
         return loc_mapper[loc]
-    
+
     @classmethod
-    def from_dict(cls, legend_dict: Dict[str, Any]) -> 'LegendConfig':
+    def from_dict(cls, legend_dict: Dict[str, Any]) -> "LegendConfig":
         """
         Convert a dictionary to a LegendConfig instance.
-        
+
         Args:
         legend_dict (Dict[str, Any]): Dictionary containing legend configuration.
-        
+
         Returns:
         LegendConfig: An instance of LegendConfig with the specified settings.
         """
         # Create a dictionary with default values
         config = {
-            'loc': "right",
-            'orientation': "vertical",
-            'title': "Legend",
-            'fontsize': 10,
-            'show': True,
-            'onClick': "mute",
-            'bbox_to_anchor': (1.2, 0.5)
+            "loc": "right",
+            "orientation": "vertical",
+            "title": "Legend",
+            "fontsize": 10,
+            "show": True,
+            "onClick": "mute",
+            "bbox_to_anchor": (1.2, 0.5),
         }
-        
+
         # Update with provided values
         config.update(legend_dict)
-        
+
         # Ensure onClick is a valid value
-        if config['onClick'] not in ["hide", "mute"]:
-            config['onClick'] = "mute"
-        
+        if config["onClick"] not in ["hide", "mute"]:
+            config["onClick"] = "mute"
+
         # Create and return the LegendConfig instance
         return cls(**config)
 
@@ -134,45 +134,46 @@ class FeatureConfig:
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
     @classmethod
-    def from_dict(cls, feature_dict: Dict[str, Any]) -> 'FeatureConfig':
+    def from_dict(cls, feature_dict: Dict[str, Any]) -> "FeatureConfig":
         """
         Convert a dictionary to a FeatureConfig instance.
-        
+
         Args:
         feature_dict (Dict[str, Any]): Dictionary containing feature configuration.
-        
+
         Returns:
         FeatureConfig: An instance of FeatureConfig with the specified settings.
         """
         # Extract the legend dictionary if it exists
-        legend_dict = feature_dict.pop('legend', None)
-        
+        legend_dict = feature_dict.pop("legend", None)
+
         # Create the LegendConfig instance if legend_dict is provided
         if legend_dict:
             legend_config = LegendConfig.from_dict(legend_dict)
         else:
             legend_config = cls.default_legend_factory()
-        
+
         # Create a dictionary with default values
         config = {
-            'colormap': "viridis",
-            'line_width': 1,
-            'line_type': "solid",
-            'legend': legend_config
+            "colormap": "viridis",
+            "line_width": 1,
+            "line_type": "solid",
+            "legend": legend_config,
         }
-        
+
         # Update with provided values
         config.update(feature_dict)
-        
+
         # Create and return the FeatureConfig instance
         return cls(**config)
 
+
 @dataclass(kw_only=True)
-class _BasePlotterConfig(ABC):
-       
+class _BasePlotConfig(ABC):
+
     def default_legend_factory():
         return LegendConfig(title="Trace")
-    
+
     kind: str = "default"
     title: str = "1D Plot"
     xlabel: str = "X-axis"
@@ -191,10 +192,10 @@ class _BasePlotterConfig(ABC):
     line_type: str = "solid"
     line_width: float = 1
     toolbar_location: str = "above"
-    
+
     legend: LegendConfig = field(default_factory=default_legend_factory)
     feature_config: FeatureConfig = field(default_factory=FeatureConfig)
-    
+
     def __post_init__(self):
         # Update default plot labels based on the kind of plot
         self.set_plot_labels()
@@ -214,22 +215,22 @@ class _BasePlotterConfig(ABC):
             "chromatogram": {
                 "title": "Chromatogram",
                 "xlabel": "Retention Time",
-                "ylabel": "Intensity"
+                "ylabel": "Intensity",
             },
             "mobilogram": {
                 "title": "Mobilogram",
                 "xlabel": "Ion Mobility",
-                "ylabel": "Intensity"
+                "ylabel": "Intensity",
             },
             "spectrum": {
                 "title": "Mass Spectrum",
                 "xlabel": "mass-to-charge",
-                "ylabel": "Intensity"
+                "ylabel": "Intensity",
             },
             "feature_heatmap": {
                 "title": "PeakMap of mass-to-charge vs. retention time",
                 "xlabel": "Retention Time",
-                "ylabel": "mass-to-charge"
+                "ylabel": "mass-to-charge",
             },
             # Add more plot types as needed
         }
@@ -238,6 +239,6 @@ class _BasePlotterConfig(ABC):
             self.title = plot_configs[self.kind]["title"]
             self.xlabel = plot_configs[self.kind]["xlabel"]
             self.ylabel = plot_configs[self.kind]["ylabel"]
-            
+
             if self.relative_intensity and "Intensity" in self.ylabel:
                 self.ylabel = "Relative " + self.ylabel

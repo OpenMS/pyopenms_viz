@@ -21,11 +21,11 @@ from pandas.core.frame import DataFrame
 
 # pyopenms_viz imports
 from .._core import (
-    BasePlotter,
+    BasePlot,
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    BaseMSPlotter,
+    BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
     FeatureHeatmapPlot,
@@ -36,7 +36,7 @@ from .._misc import ColorGenerator
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
-class BOKEHPlot(BasePlotter, ABC):
+class BOKEHPlot(BasePlot, ABC):
     """
     Base class for assembling a Bokeh plot
     """
@@ -302,7 +302,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             return fig, legend
 
 
-class BOKEH_MSPlotter(BaseMSPlotter, BOKEHPlot, ABC):
+class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHLinePlot(data, x, y, **kwargs)
@@ -334,7 +334,7 @@ class BOKEH_MSPlotter(BaseMSPlotter, BOKEHPlot, ABC):
         return TOOLTIPS, None
 
 
-class BOKEHChromatogramPlot(BOKEH_MSPlotter, ChromatogramPlot):
+class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
     """
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
@@ -404,7 +404,7 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
     pass
 
 
-class BOKEHSpectrumPlot(BOKEH_MSPlotter, SpectrumPlot):
+class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
@@ -412,7 +412,7 @@ class BOKEHSpectrumPlot(BOKEH_MSPlotter, SpectrumPlot):
     pass
 
 
-class BOKEHFeatureHeatmapPlot(BOKEH_MSPlotter, FeatureHeatmapPlot):
+class BOKEHFeatureHeatmapPlot(BOKEH_MSPlot, FeatureHeatmapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """

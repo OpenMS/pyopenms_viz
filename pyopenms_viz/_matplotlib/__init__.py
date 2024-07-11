@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from .core import MATPLOTLIBPlot
 
 if IS_SPHINX_BUILD:
-    from .core import MATPLOTLIB_MSPlotter, MATPLOTLIBPlot
+    from .core import MATPLOTLIB_MSPlot, MATPLOTLIBPlot
 
 PLOT_CLASSES: dict[str, type[MATPLOTLIBPlot]] = {
     "line": MATPLOTLIBLinePlot,

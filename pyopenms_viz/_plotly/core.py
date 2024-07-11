@@ -13,11 +13,11 @@ from pandas.core.frame import DataFrame
 from numpy import column_stack
 
 from .._core import (
-    BasePlotter,
+    BasePlot,
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    BaseMSPlotter,
+    BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
@@ -30,7 +30,7 @@ from .._misc import ColorGenerator
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
-class PLOTLYPlotter(BasePlotter, ABC):
+class PLOTLYPlot(BasePlot, ABC):
     """
     Base class for assembling a Ploty plot
     """
@@ -189,7 +189,7 @@ class PLOTLYPlotter(BasePlotter, ABC):
         self.fig.show(**kwargs)
 
 
-class PLOTLYLinePlot(PLOTLYPlotter, LinePlot):
+class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
     Class for assembling a set of line plots in plotly
     """
@@ -228,7 +228,7 @@ class PLOTLYLinePlot(PLOTLYPlotter, LinePlot):
         return fig, None
 
 
-class PLOTLYVLinePlot(PLOTLYPlotter, VLinePlot):
+class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
     @classmethod
     @APPEND_PLOT_DOC
@@ -280,7 +280,7 @@ class PLOTLYVLinePlot(PLOTLYPlotter, VLinePlot):
         return fig, None
 
 
-class PLOTLYScatterPlot(PLOTLYPlotter, ScatterPlot):
+class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
     @classmethod
     @APPEND_PLOT_DOC
@@ -317,7 +317,7 @@ class PLOTLYScatterPlot(PLOTLYPlotter, ScatterPlot):
         return fig, None
 
 
-class PLOTLY_MSPlotter(BaseMSPlotter, PLOTLYPlotter, ABC):
+class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return PLOTLYLinePlot(data, x, y, **kwargs)
@@ -367,7 +367,7 @@ class PLOTLY_MSPlotter(BaseMSPlotter, PLOTLYPlotter, ABC):
         return "<br>".join(TOOLTIPS), column_stack(custom_hover_data)
 
 
-class PLOTLYChromatogramPlot(PLOTLY_MSPlotter, ChromatogramPlot):
+class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
 
     def _add_peak_boundaries(self, annotation_data, **kwargs):
         color_gen = ColorGenerator(
@@ -409,7 +409,7 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
     pass
 
 
-class PLOTLYSpectrumPlot(PLOTLY_MSPlotter, SpectrumPlot):
+class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
     def _prepare_data(
         self, spectrum: DataFrame, y: str, reference_spectrum: DataFrame | None
     ) -> Tuple[List]:
@@ -425,7 +425,7 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlotter, SpectrumPlot):
         return spectrum, reference_spectrum
 
 
-class PLOTLYFeatureHeatmapPlot(PLOTLY_MSPlotter, FeatureHeatmapPlot):
+class PLOTLYFeatureHeatmapPlot(PLOTLY_MSPlot, FeatureHeatmapPlot):
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
