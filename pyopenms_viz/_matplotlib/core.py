@@ -11,11 +11,11 @@ from .._config import LegendConfig
 
 from .._misc import ColorGenerator
 from .._core import (
-    BasePlotter,
+    BasePlot,
     LinePlot,
     VLinePlot,
     ScatterPlot,
-    BaseMSPlotter,
+    BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
@@ -24,7 +24,7 @@ from .._core import (
 )
 
 
-class MATPLOTLIBPlot(BasePlotter, ABC):
+class MATPLOTLIBPlot(BasePlot, ABC):
     """
     Base class for assembling a Matplotlib plot.
 
@@ -259,7 +259,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             return ax, (legend_lines, legend_labels)
 
 
-class MATPLOTLIB_MSPlotter(BaseMSPlotter, MATPLOTLIBPlot, ABC):
+class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
 
     def get_line_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBLinePlot(data, x, y, **kwargs)
@@ -279,7 +279,7 @@ class MATPLOTLIB_MSPlotter(BaseMSPlotter, MATPLOTLIBPlot, ABC):
 
 
 @APPEND_PLOT_DOC
-class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlotter, ChromatogramPlot):
+class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
     """
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
@@ -361,7 +361,7 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
 
 
 @APPEND_PLOT_DOC
-class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlotter, SpectrumPlot):
+class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     """
     Class for assembling a matplotlib spectrum plot
     """
@@ -369,7 +369,7 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlotter, SpectrumPlot):
     pass
 
 
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlotter, FeatureHeatmapPlot):
+class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """

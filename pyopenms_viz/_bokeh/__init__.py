@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from .core import BOKEHPlot
 
 if IS_SPHINX_BUILD:
-    from .core import BOKEH_MSPlotter, BOKEHPlot
+    from .core import BOKEH_MSPlot, BOKEHPlot
 
 
 PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {

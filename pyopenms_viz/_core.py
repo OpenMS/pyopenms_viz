@@ -10,7 +10,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from ._config import LegendConfig, FeatureConfig, _BasePlotterConfig
+from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import ColorGenerator
 
 
@@ -91,7 +91,7 @@ _baseplot_doc = f"""
 APPEND_PLOT_DOC = Appender(_baseplot_doc)
 
 
-class BasePlotter(ABC):
+class BasePlot(ABC):
     """
     This class shows functions which must be implemented by all backends
     """
@@ -124,7 +124,7 @@ class BasePlotter(ABC):
         show_plot: bool | None = None,
         legend: LegendConfig | Dict | None = None,
         feature_config: FeatureConfig | Dict | None = None,
-        _config: _BasePlotterConfig | None = None,
+        _config: _BasePlotConfig | None = None,
         **kwargs,
     ) -> None:
 
@@ -368,30 +368,30 @@ class BasePlotter(ABC):
         pass
 
 
-class LinePlot(BasePlotter, ABC):
+class LinePlot(BasePlot, ABC):
     @property
     def _kind(self):
         return "line"
 
 
-class VLinePlot(BasePlotter, ABC):
+class VLinePlot(BasePlot, ABC):
     @property
     def _kind(self):
         return "vline"
 
 
-class ScatterPlot(BasePlotter, ABC):
+class ScatterPlot(BasePlot, ABC):
     @property
     def _kind(self):
         return "scatter"
 
 
-class BaseMSPlotter(BasePlotter, ABC):
+class BaseMSPlot(BasePlot, ABC):
     """
     Abstract class for complex plots, such as chromatograms and mobilograms which are made up of simple plots such as ScatterPlots, VLines and LinePlots.
 
     Args:
-        BasePlotter (_type_): _description_
+        BasePlot (_type_): _description_
         ABC (_type_): _description_
     """
 
@@ -419,7 +419,7 @@ class BaseMSPlotter(BasePlotter, ABC):
         pass
 
 
-class ChromatogramPlot(BaseMSPlotter, ABC):
+class ChromatogramPlot(BaseMSPlot, ABC):
     @property
     def _kind(self):
         return "chromatogram"
@@ -429,7 +429,7 @@ class ChromatogramPlot(BaseMSPlotter, ABC):
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
+        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
 
         super().__init__(data, x, y, **kwargs)
 
@@ -496,7 +496,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
 
-class SpectrumPlot(BaseMSPlotter, ABC):
+class SpectrumPlot(BaseMSPlot, ABC):
     @property
     def _kind(self):
         return "spectrum"
@@ -512,7 +512,7 @@ class SpectrumPlot(BaseMSPlotter, ABC):
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
+        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
 
         super().__init__(data, x, y, **kwargs)
 
@@ -580,7 +580,7 @@ class SpectrumPlot(BaseMSPlotter, ABC):
         return spectrum, reference_spectrum
 
 
-class FeatureHeatmapPlot(BaseMSPlotter, ABC):
+class FeatureHeatmapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
     def _kind(self):
@@ -599,7 +599,7 @@ class FeatureHeatmapPlot(BaseMSPlotter, ABC):
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotterConfig(kind=self._kind)
+        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
 
         if add_marginals:
             kwargs["_config"].title = None

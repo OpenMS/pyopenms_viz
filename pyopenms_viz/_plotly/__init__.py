@@ -14,12 +14,12 @@ from .core import (
 )
 
 if TYPE_CHECKING:
-    from .core import PLOTLYPlotter
+    from .core import PLOTLYPlot
 
 if IS_SPHINX_BUILD:
-    from .core import PLOTLY_MSPlotter, PLOTLYPlotter
+    from .core import PLOTLY_MSPlot, PLOTLYPlot
 
-PLOT_CLASSES: dict[str, type[PLOTLYPlotter]] = {
+PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
     "line": PLOTLYLinePlot,
     "vline": PLOTLYVLinePlot,
     "scatter": PLOTLYScatterPlot,
