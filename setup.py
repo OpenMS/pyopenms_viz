@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="pyopenms_viz",
     version="0.1.0",
-    author="Joshua Charkow",
+    author="OpenMS Contributors",
     author_email="your.email@example.com",
     description="Visualization tools for pyOpenMS",
     long_description=long_description,
@@ -22,9 +22,9 @@ setup(
     ],
     entry_points={
         "pandas_plotting_backends": [
-            "MSBokeh = pyopenms_viz._bokeh",
-            "MSPlotly = pyopenms_viz._plotly",
-            "MSMatplotlib = pyopenms_viz._matplotlib",
+            "ms_bokeh = pyopenms_viz._bokeh",
+            "ms_plotly = pyopenms_viz._plotly",
+            "ms_matplotlib = pyopenms_viz._matplotlib",
         ],
     },
     classifiers=[

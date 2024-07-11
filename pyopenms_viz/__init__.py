@@ -125,7 +125,7 @@ def _load_backend(backend: str) -> types.ModuleType:
     """
     if backend == "bokeh":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._bokeh")
+            module = importlib.import_module("pyopenms_viz._bokeh")
         except ImportError:
             raise ImportError(
                 "Bokeh is required for plotting when the 'bokeh' backend is selected."
@@ -134,7 +134,7 @@ def _load_backend(backend: str) -> types.ModuleType:
 
     elif backend == "matplotlib":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._matplotlib")
+            module = importlib.import_module("pyopenms_viz._matplotlib")
         except ImportError:
             raise ImportError(
                 "Matplotlib is required for plotting when the 'matplotlib' backend is selected."
@@ -143,7 +143,7 @@ def _load_backend(backend: str) -> types.ModuleType:
 
     elif backend == "plotly":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._plotly")
+            module = importlib.import_module("pyopenms_viz._plotly")
         except ImportError:
             raise ImportError(
                 "Plotly is required for plotting when the 'plotly' backend is selected."
