@@ -1,0 +1,41 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name="pyopenms_viz"
+module = "pyopenms_viz"
+dist-name = "pyopenms_viz"
+author = "OpenMS Team"
+version = "0.1.0"
+author-email = "joshuacharkow@gmail.com"
+home-page = "https://github.com/jcharkow/pyopenms-viz"
+description = "A package for visualizing mass spectrometry data using pandas datafrmaes"
+description-file = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+requires-python = ">=3.9, <=3.12"
+dependencies = ["pandas>=0.17"]
+
+[project.optional-dependencies]
+testing = ["pytest", "syrupy"]
+all = ["bokeh>=3.4.1", "plotly", "matplotlib"]
+bokeh = ["bokeh>=3.4.1"]
+matplotlib = ["matplotlib"]
+plotly = ["plotly"]
+
+[project.entry-points.pandas_plotting_backends]
+ms_bokeh = "pyopenms_viz._bokeh"
+ms_plotly = "pyopenms_viz._plotly"
+ms_matplotlib = "pyopenms_viz._matplotlib"
+
+[tool.flit.sdist]
+exclude = ["tests*"]
