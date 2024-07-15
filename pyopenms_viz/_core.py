@@ -415,7 +415,28 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
     @abstractmethod
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries: dict, index: bool = True):
+        """
+        Create tooltipis based on entries dictionary with keys: label for tooltip and values: column names.
+
+        entries = {
+            "m/z": "mz"
+            "Retention Time: "RT"
+        }
+
+        Will result in tooltips where label and value are separated by colon:
+
+        m/z: 100.5
+        Retention Time: 50.1
+
+        Parameters:
+            entries (dict): Which data to put in tool tip and how display it with labels as keys and column names as values.
+            index (bool, optional): Wether to show dataframe index in tooltip. Defaults to True.
+
+        Returns:
+            Tooltip text.
+            Tooltip data.
+        """
         pass
 
 
@@ -531,12 +552,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         color_gen = ColorGenerator()
 
-        TOOLTIPS, custom_hover_data = self._create_tooltips()
+        TOOLTIPS, custom_hover_data = self._create_tooltips(entries={"m/z": x, "intensity": y}, index=False)
 
-        kwargs.pop(
-            "fig", None
-        )  # remove figure from **kwargs if exists, use the ChromatogramPlot figure object instead of creating a new figure
+        kwargs.pop("fig", None)  # remove figure from **kwargs if exists
+
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
+
         self.fig = spectrumPlot.generate(
             line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
         )
@@ -561,7 +582,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y: str,
         reference_spectrum: Union[DataFrame, None],
     ) -> tuple[list, list]:
-        """Prepares data for plotting based on configuration (ensures list format for input spectra, relative intensity, hover text)."""
+        """Prepares data for plotting based on configuration (copy, relative intensity)."""
 
         # copy spectrum data to not modify the original
         spectrum = spectrum.copy()

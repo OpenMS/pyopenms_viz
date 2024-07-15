@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 
 from pandas.core.frame import DataFrame
 
-from numpy import column_stack
+from numpy import column_stack, array
 
 from .._core import (
     BasePlot,
@@ -118,6 +118,11 @@ class PLOTLYPlot(BasePlot, ABC):
         pass
 
     def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+        # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
+        if len(fig.data) > 1:
+            for i in range(len(fig.data)):
+                fig.data[i].update(hovertemplate=tooltips, customdata=[custom_hover_data[i, :]]*len(fig.data[i].x))
+            return
         fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, fig, **kwargs):
@@ -331,40 +336,26 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
     def plot_x_axis_line(self, fig):
         fig.add_hline(y=0, line_color="black", line=dict(width=1))
 
-    def _create_tooltips(self):
-        available_columns = self.data.columns.tolist()
-        # Get index (not a column in dataframe) data first for customer hover data
-        custom_hover_data = [self.data.index]
+    def _create_tooltips(self, entries, index=True):
+        custom_hover_data = []
+        # Add data from index if required
+        if index:
+            custom_hover_data.append(self.data.index)
         # Get the rest of the columns
-        custom_hover_data += [
-            self.data[col]
-            for col in ["mz", "Annotation", "product_mz"]
-            if col in available_columns
-        ]
+        custom_hover_data += [self.data[col] for col in entries.values()]
 
-        TOOLTIPS = [
-            "Index: %{customdata[0]}",
-            "Retention Time: %{x:.2f}",
-            "Intensity: %{y:.2f}",
-        ]
+        tooltips = []
+        # Add tooltip text for index if required
+        if index:
+            tooltips.append("index: %{customdata[0]}")
 
-        custom_hover_data_index = 1
-        if "mz" in self.data.columns:
-            TOOLTIPS.append(
-                "m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}"
-            )
+        custom_hover_data_index = 1 if index else 0
+
+        for key in entries.keys():
+            tooltips.append(f"{key}"+": %{customdata[" + str(custom_hover_data_index) + "]}")
             custom_hover_data_index += 1
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append(
-                "Annotation: %{customdata[" + str(custom_hover_data_index) + "]}"
-            )
-            custom_hover_data_index += 1
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append(
-                "Target m/z: %{customdata[" + str(custom_hover_data_index) + "]:.4f}"
-            )
 
-        return "<br>".join(TOOLTIPS), column_stack(custom_hover_data)
+        return "<br>".join(tooltips), column_stack(custom_hover_data)
 
 
 class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
@@ -410,19 +401,7 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
 
 
 class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
-    def _prepare_data(
-        self, spectrum: DataFrame, y: str, reference_spectrum: DataFrame | None
-    ) -> Tuple[List]:
-        spectrum, reference_spectrum = super()._prepare_data(
-            spectrum, y, reference_spectrum
-        )
-
-        if reference_spectrum is not None:
-            # add a "ref" label to legend elements, useful when for plotly because reference elements and base elements are in the same legend
-            if self.by is not None:
-                reference_spectrum[self.by] = reference_spectrum[self.by] + " (ref)"
-
-        return spectrum, reference_spectrum
+    pass
 
 
 class PLOTLYFeatureHeatmapPlot(PLOTLY_MSPlot, FeatureHeatmapPlot):
