@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 
 from pandas.core.frame import DataFrame
 
-from numpy import column_stack, array
+from numpy import column_stack
 
 from .._core import (
     BasePlot,
