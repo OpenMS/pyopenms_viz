@@ -319,19 +319,14 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
         )
         fig.add_layout(zero_line)
 
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries, index=True):
         # Tooltips for interactive information
-        TOOLTIPS = [
-            ("index", "$index"),
-            ("Retention Time", "@rt{0.2f}"),
-            ("Intensity", "@int{0.2f}"),
-            ("m/z", "@mz{0.4f}"),
-        ]
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
-        return TOOLTIPS, None
+        tooltips = []
+        if index:
+            tooltips.append(("index", "$index"))
+        for key, value in entries.items():
+            tooltips.append((key, f"@{value}"))
+        return tooltips, None
 
 
 class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):

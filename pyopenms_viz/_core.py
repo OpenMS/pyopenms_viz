@@ -469,7 +469,12 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         Create the plot
         """
         color_gen = ColorGenerator()
-        TOOLTIPS, custom_hover_data = self._create_tooltips()
+        tooltip_entries = {"retention time": x, "intensity": y}
+        if "Annotation" in self.data.columns:
+            tooltip_entries["annotation"] = "Annotation"
+        if "product_mz" in self.data.columns:
+            tooltip_entries["product m/z"] = "product_mz"
+        TOOLTIPS, custom_hover_data = self._create_tooltips(tooltip_entries)
         kwargs.pop(
             "fig", None
         )  # remove figure from **kwargs if exists, use the ChromatogramPlot figure object instead of creating a new figure
