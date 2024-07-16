@@ -557,27 +557,28 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrum, reference_spectrum = self._prepare_data(
             self.data, y, self.reference_spectrum
         )
+        # ColorGenerators and custom colors for individual traces (applied if custom colors are specified)
+        color_gen = ColorGenerator(spectrum[self.peak_color]) if self.peak_color in spectrum.columns else ColorGenerator()
+        color_gen_mirror = ColorGenerator(reference_spectrum[self.peak_color]) if self.peak_color in reference_spectrum.columns else ColorGenerator()
+        color_individual_traces = self.peak_color in spectrum.columns
+        color_individual_traces_mirror = self.peak_color in reference_spectrum.columns
 
-        if self.peak_color is not None and self.peak_color in spectrum.columns:
-            color_gen = ColorGenerator(self.data[self.peak_color])
-        else:
-            color_gen = ColorGenerator("grayscale")
-
-        TOOLTIPS, custom_hover_data = self._create_tooltips(entries={"m/z": x, "intensity": y}, index=False)
+        TOOLTIPS, custom_hover_data = self._create_tooltips(
+            entries={"m/z": x, "intensity": y}, index=False
+        )
 
         kwargs.pop("fig", None)  # remove figure from **kwargs if exists
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
 
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
+            line_color=color_gen,
+            tooltips=TOOLTIPS,
+            custom_hover_data=custom_hover_data,
+            color_individual_traces=color_individual_traces,
         )
 
         if self.mirror_spectrum and reference_spectrum is not None:
-            if self.peak_color is not None and self.peak_color in reference_spectrum.columns:
-                color_gen_mirror = ColorGenerator(self.data[self.peak_color])
-            else:
-                color_gen_mirror = ColorGenerator("grayscale")
             ## create a mirror spectrum
             reference_spectrum[y] = reference_spectrum[y] * -1
             if "fig" in kwargs.keys():
@@ -587,7 +588,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
             mirror_spectrum = self.get_vline_renderer(
                 reference_spectrum, x, y, fig=self.fig, **kwargs
             )
-            mirror_spectrum.generate(line_color=color_gen_mirror)
+            mirror_spectrum.generate(
+                line_color=color_gen_mirror,
+                color_individual_traces=color_individual_traces_mirror,
+            )
             self.plot_x_axis_line(self.fig)
 
     def _prepare_data(

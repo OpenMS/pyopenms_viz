@@ -53,26 +53,25 @@ class ColorGenerator:
             n (int, optional): The number of colors to generate. Defaults to None.
         """
         if colormap is None:
-            self.color_cycle = cycle(self.color_blind_friendly_map.values())
+            colors = list(self.color_blind_friendly_map.values())
         else:
             if isinstance(colormap, str):
                 if colormap.lower() == "grayscale":
-                    if n is None:
-                        n = 1
-                    hex_colors = self._get_n_grayscale_colors(n)
-                    self.color_cycle = cycle(hex_colors)
+                    colors = self._get_n_grayscale_colors(n)
                 else:
                     cmap = plt.get_cmap(colormap, n)
                     colors = cmap(np.linspace(0, 1, n))
-                    hex_colors = [
+                    colors = [
                         "#{:02X}{:02X}{:02X}".format(
                             int(r * 255), int(g * 255), int(b * 255)
                         )
                         for r, g, b, _ in colors
                     ]
-                    self.color_cycle = cycle(hex_colors)
             else:
-                self.color_cycle = cycle(colormap)
+                colors = colormap
+        if n is not None:
+            colors = colors[:n]
+        self.color_cycle = cycle(colors)
 
     def __iter__(self):
         """

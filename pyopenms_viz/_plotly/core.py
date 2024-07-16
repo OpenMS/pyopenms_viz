@@ -239,16 +239,19 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
     @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
-
+        color_individual_traces = kwargs.pop("color_individual_traces", False)
         traces = []
         if by is None:
+            if not color_individual_traces:
+                line_color = next(color_gen)
             if "showlegend" in kwargs:
                 showlegend = kwargs["showlegend"]
                 first_group_trace_showlenged = showlegend
             else:
                 first_group_trace_showlenged = True
             for _, row in data.iterrows():
-                line_color = next(color_gen)
+                if color_individual_traces:
+                    line_color = next(color_gen)
                 trace = go.Scattergl(
                     x=[row[x]] * 2,
                     y=[0, row[y]],
@@ -262,13 +265,16 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 traces.append(trace)
         else:
             for group, df in data.groupby(by):
+                if not color_individual_traces:
+                    line_color = next(color_gen)
                 if "showlegend" in kwargs:
                     showlegend = kwargs["showlegend"]
                     first_group_trace_showlenged = showlegend
                 else:
                     first_group_trace_showlenged = True
                 for _, row in df.iterrows():
-                    line_color = next(color_gen)
+                    if color_individual_traces:
+                        line_color = next(color_gen)
                     trace = go.Scattergl(
                         x=[row[x]] * 2,
                         y=[0, row[y]],
