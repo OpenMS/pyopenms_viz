@@ -534,6 +534,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y,
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
+        relative_intensity: bool = False,
         peak_color: str | None = None,
         **kwargs,
     ) -> None:
@@ -546,6 +547,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.reference_spectrum = reference_spectrum
         self.mirror_spectrum = mirror_spectrum
         self.peak_color = peak_color
+        self.relative_intensity = relative_intensity
 
         self.plot(x, y, **kwargs)
         if self.show_plot:
