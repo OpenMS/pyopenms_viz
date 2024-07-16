@@ -1,0 +1,7 @@
+nbsphinx
+sphinx-copybutton
+sphinx-rtd-theme
+sphinx==5.3.0
+jupyterlab
+pydata-sphinx-theme
+pandoc
