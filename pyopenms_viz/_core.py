@@ -554,6 +554,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
             self.show()
 
     def plot(self, x, y, **kwargs):
+        # Legend only useful for grouped spectra
+        if self.by is None:
+            self.legend.show = False
+        # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
             self.data, y, self.reference_spectrum
         )
