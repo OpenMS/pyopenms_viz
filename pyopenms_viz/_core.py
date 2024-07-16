@@ -552,14 +552,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
             self.show()
 
     def plot(self, x, y, **kwargs):
-
-        import streamlit as st
-
         spectrum, reference_spectrum = self._prepare_data(
             self.data, y, self.reference_spectrum
         )
 
-        if self.peak_color is not None and self.peak_color in self.data.columns:
+        if self.peak_color is not None and self.peak_color in spectrum.columns:
             color_gen = ColorGenerator(self.data[self.peak_color])
         else:
             color_gen = ColorGenerator("grayscale")
@@ -575,8 +572,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         if self.mirror_spectrum and reference_spectrum is not None:
+            if self.peak_color is not None and self.peak_color in reference_spectrum.columns:
+                color_gen_mirror = ColorGenerator(self.data[self.peak_color])
+            else:
+                color_gen_mirror = ColorGenerator("grayscale")
             ## create a mirror spectrum
-            color_gen_mirror = ColorGenerator()
             reference_spectrum[y] = reference_spectrum[y] * -1
             if "fig" in kwargs.keys():
                 kwargs.pop(
