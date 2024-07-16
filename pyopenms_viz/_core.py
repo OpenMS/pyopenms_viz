@@ -598,6 +598,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
             )
             self.plot_x_axis_line(self.fig)
 
+        # Adjust x axis padding (Plotly cuts outermost peaks)
+        min_values = [spectrum[x].min()]
+        max_values = [spectrum[x].max()]
+        if reference_spectrum is not None:
+            min_values.append(reference_spectrum[x].min())
+            max_values.append(reference_spectrum[x].max())
+        self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.10))
+
     def _prepare_data(
         self,
         spectrum: DataFrame,
