@@ -248,7 +248,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 showlegend = kwargs["showlegend"]
                 first_group_trace_showlenged = showlegend
             else:
-                first_group_trace_showlenged = True
+                first_group_trace_showlenged = False
             for _, row in data.iterrows():
                 if color_individual_traces:
                     line_color = next(color_gen)
