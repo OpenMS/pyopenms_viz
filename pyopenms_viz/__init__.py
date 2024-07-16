@@ -1,9 +1,15 @@
+"""
+init
+"""
+
 from pandas.plotting._core import PlotAccessor
 from pandas.core.frame import DataFrame
 from typing import Any
 from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
+
+__version__ = "0.1.0"
 
 
 class PlotAccessor:
