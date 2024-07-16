@@ -242,13 +242,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
         traces = []
         if by is None:
-            line_color = next(color_gen)
             if "showlegend" in kwargs:
                 showlegend = kwargs["showlegend"]
                 first_group_trace_showlenged = showlegend
             else:
                 first_group_trace_showlenged = True
             for _, row in data.iterrows():
+                line_color = next(color_gen)
                 trace = go.Scattergl(
                     x=[row[x]] * 2,
                     y=[0, row[y]],
@@ -262,13 +262,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 traces.append(trace)
         else:
             for group, df in data.groupby(by):
-                line_color = next(color_gen)
                 if "showlegend" in kwargs:
                     showlegend = kwargs["showlegend"]
                     first_group_trace_showlenged = showlegend
                 else:
                     first_group_trace_showlenged = True
                 for _, row in df.iterrows():
+                    line_color = next(color_gen)
                     trace = go.Scattergl(
                         x=[row[x]] * 2,
                         y=[0, row[y]],

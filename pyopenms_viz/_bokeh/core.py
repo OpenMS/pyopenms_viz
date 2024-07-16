@@ -248,22 +248,19 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         """
         Plot a set of vertical lines
         """
-
         if by is None:
             color_gen = kwargs.pop("line_color", None)
-            source = ColumnDataSource(data)
             if color_gen is not None:
-                kwargs["line_color"] = next(color_gen)
-            line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
+                kwargs["line_color"] = [next(color_gen) for _ in range(len(data))]
+            line = fig.segment(x0=data[x], y0=0, x1=data[x], y1=data[y], **kwargs)
             return fig, None
         else:
             color_gen = kwargs.pop("line_color", None)
             legend_items = []
             for group, df in data.groupby(by):
-                source = ColumnDataSource(df)
                 if color_gen is not None:
-                    kwargs["line_color"] = next(color_gen)
-                line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
+                    kwargs["line_color"] = [next(color_gen) for _ in range(len(df))]
+                line = fig.segment(x0=df[x], y0=0, x1=df[x], y1=df[y], **kwargs)
                 legend_items.append((group, [line]))
 
             legend = Legend(items=legend_items)

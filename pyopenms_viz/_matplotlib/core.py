@@ -203,9 +203,8 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         legend_labels = []
 
         if by is None:
-            use_color = next(color_gen)
             for _, row in data.iterrows():
-                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=use_color)
+                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
 
             return ax, None
         else:
@@ -273,7 +272,7 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def plot_x_axis_line(self, fig):
         fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
 
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
 

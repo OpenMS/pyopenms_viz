@@ -534,6 +534,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y,
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
+        peak_color: str | None = None,
         **kwargs,
     ) -> None:
 
@@ -544,6 +545,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         self.reference_spectrum = reference_spectrum
         self.mirror_spectrum = mirror_spectrum
+        self.peak_color = peak_color
 
         self.plot(x, y, **kwargs)
         if self.show_plot:
@@ -551,11 +553,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def plot(self, x, y, **kwargs):
 
+        import streamlit as st
+
         spectrum, reference_spectrum = self._prepare_data(
             self.data, y, self.reference_spectrum
         )
 
-        color_gen = ColorGenerator()
+        if self.peak_color is not None and self.peak_color in self.data.columns:
+            color_gen = ColorGenerator(self.data[self.peak_color])
+        else:
+            color_gen = ColorGenerator("grayscale")
 
         TOOLTIPS, custom_hover_data = self._create_tooltips(entries={"m/z": x, "intensity": y}, index=False)
 

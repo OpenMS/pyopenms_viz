@@ -57,6 +57,8 @@ class ColorGenerator:
         else:
             if isinstance(colormap, str):
                 if colormap.lower() == "grayscale":
+                    if n is None:
+                        n = 1
                     hex_colors = self._get_n_grayscale_colors(n)
                     self.color_cycle = cycle(hex_colors)
                 else:

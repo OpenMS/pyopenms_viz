@@ -1,7 +1,8 @@
 __pycache__
 *~
-testing.ipynb
 peakmap.parquet
-ms_data.mzML
 *.d
 *.ipynb_checkpoints
+app-devel.py
+bokeh_graph.html
+dist/
