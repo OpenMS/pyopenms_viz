@@ -291,7 +291,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         annotations = []
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             annotation = go.layout.Annotation(
-                text="\n".join(text),
+                text=text.replace("\n", "<br>"),
                 x=x,
                 y=y,
                 showarrow=False,
@@ -304,7 +304,8 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             )
             annotations.append(annotation)
 
-        fig.update_layout(annotations=annotations)
+        for annotation in annotations:
+            fig.add_annotation(annotation)
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):

@@ -15,6 +15,7 @@ from bokeh.models import (
     Span,
     VStrip,
     GlyphRenderer,
+    Label
 )
 
 from pandas.core.frame import DataFrame
@@ -274,7 +275,17 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         ann_ys: list[float],
         ann_colors: list[str]
     ):
-        pass
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            label = Label(
+                x=x,
+                y=y,
+                text=text,
+                text_font_size="8pt",
+                text_color=color,
+                x_offset=1,
+                y_offset=0,
+            )
+            fig.add_layout(label)
 
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
