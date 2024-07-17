@@ -249,23 +249,16 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         Plot a set of vertical lines
         """
         color_gen = kwargs.pop("line_color", None)
-        color_individual_traces = kwargs.pop("color_individual_traces", False)
         if by is None:
             if color_gen is not None:
-                if not color_individual_traces:
-                    kwargs["line_color"] = next(color_gen)
-                else:
-                    kwargs["line_color"] = [next(color_gen) for _ in range(len(data))]
+                kwargs["line_color"] = [next(color_gen) for _ in range(len(data))]
             line = fig.segment(x0=data[x], y0=0, x1=data[x], y1=data[y], **kwargs)
             return fig, None
         else:
             legend_items = []
             for group, df in data.groupby(by):
                 if color_gen is not None:
-                    if not color_individual_traces:
-                        kwargs["line_color"] = next(color_gen)
-                    else:
-                        kwargs["line_color"] = [next(color_gen) for _ in range(len(df))]
+                    kwargs["line_color"] = [next(color_gen) for _ in range(len(df))]
                 line = fig.segment(x0=df[x], y0=0, x1=df[x], y1=df[y], **kwargs)
                 legend_items.append((group, [line]))
 
@@ -273,8 +266,14 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
 
             return fig, legend
 
-    def _add_annotation(self, fig, data, x, y, **kwargs):
-        # TODO: Implement text label annotations
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str]
+    ):
         pass
 
 

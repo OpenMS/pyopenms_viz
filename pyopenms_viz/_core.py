@@ -536,6 +536,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
         peak_color: str | None = None,
+        annotate_mz: int = 5,  # annotate top intensity peaks with x values (m/z)
+        annotation_color: str | None = None,
         **kwargs,
     ) -> None:
 
@@ -548,6 +550,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.mirror_spectrum = mirror_spectrum
         self.peak_color = peak_color
         self.relative_intensity = relative_intensity
+        self.annotate_mz = annotate_mz
+        self.annotation_color = annotation_color
 
         self.plot(x, y, **kwargs)
         if self.show_plot:
@@ -558,11 +562,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrum, reference_spectrum = self._prepare_data(
             self.data, y, self.reference_spectrum
         )
-        # ColorGenerators and custom colors for individual traces (applied if custom colors are specified)
-        color_gen = ColorGenerator(spectrum[self.peak_color]) if self.peak_color in spectrum.columns else ColorGenerator()
-        color_gen_mirror = ColorGenerator(reference_spectrum[self.peak_color]) if self.peak_color in reference_spectrum.columns else ColorGenerator()
-        color_individual_traces = self.peak_color in spectrum.columns
-        color_individual_traces_mirror = self.peak_color in reference_spectrum.columns
 
         TOOLTIPS, custom_hover_data = self._create_tooltips(
             entries={"m/z": x, "intensity": y}, index=False
@@ -572,12 +571,18 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
 
+        color_gen = self.get_colors(spectrum, "peak")
+
         self.fig = spectrumPlot.generate(
-            line_color=color_gen,
-            tooltips=TOOLTIPS,
-            custom_hover_data=custom_hover_data,
-            color_individual_traces=color_individual_traces,
+            line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
         )
+
+        # we need ann_texts, ann_xs, ann_xs and ann_colors (universal for all)
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+            spectrum, x, y, annotate_mz=self.annotate_mz
+        )
+        # each of the backends needs to add annotations based on lists of text, x and y positions
+        spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         if self.mirror_spectrum and reference_spectrum is not None:
             ## create a mirror spectrum
@@ -589,10 +594,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
             mirror_spectrum = self.get_vline_renderer(
                 reference_spectrum, x, y, fig=self.fig, **kwargs
             )
-            mirror_spectrum.generate(
-                line_color=color_gen_mirror,
-                color_individual_traces=color_individual_traces_mirror,
+
+            color_gen = self.get_colors(
+                reference_spectrum, "peak"
             )
+
+            mirror_spectrum.generate(line_color=color_gen)
             self.plot_x_axis_line(self.fig)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
@@ -626,6 +633,64 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 )
 
         return spectrum, reference_spectrum
+
+    def get_colors(
+        self, data: DataFrame, custom: Literal["peak", "annotation"] | None = None
+    ):
+        if custom is not None:
+            if custom == "peak" and self.peak_color in data.columns:
+                return ColorGenerator(data[self.peak_color])
+            elif custom == "annotation" and self.annotation_color in data.columns:
+                return ColorGenerator(data[self.annotation_color])
+        if self.by:
+            if self.by in data.columns:
+                uniques = data[self.by].unique()
+                color_gen = ColorGenerator()
+                colors = [next(color_gen) for _ in range(len(uniques))]
+                color_map = {uniques[i]: colors[i] for i in range(len(colors))}
+                all_colors = data[self.by].apply(lambda x: color_map[x])
+                return ColorGenerator(all_colors)
+        return ColorGenerator(None, 1)
+
+    def _get_annotations(self, data, x, y, **kwargs):
+        color_gen = self.get_colors(data, "annotation")
+
+        if self.by and self.annotation_color is None:
+            data["color"] = "#FF0000"
+        else:
+            data["color"] = [next(color_gen) for _ in range(len(data))]
+
+        annotate_mz = kwargs.pop("annotate_mz", 0)
+        ann_texts = []
+        if annotate_mz:
+            # sort values for top intensity peaks on top
+            data = data.sort_values(y, ascending=False).reset_index()
+        for i, row in data.iterrows():
+            texts = []
+            if i < annotate_mz:
+                texts.append(str(round(row[x], 4)))
+            ann_texts.append(texts)
+        return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
+
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        """
+        Add annotations to a Plotly figure.
+
+        Parameters:
+        fig (go.Figure): The Plotly figure to add annotations to.
+        ann_texts (list[str]): List of texts for the annotations.
+        ann_xs (list[float]): List of x-coordinates for the annotations.
+        ann_ys (list[float]): List of y-coordinates for the annotations.
+        ann_colors: (list[str]): List of colors for annotation text.
+        """
+        pass
 
 
 class FeatureHeatmapPlot(BaseMSPlot, ABC):

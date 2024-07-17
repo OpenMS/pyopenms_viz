@@ -198,34 +198,34 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         Plot a vertical line
         """
         color_gen = kwargs.pop("line_color", None)
-        color_individual_traces = kwargs.pop("color_individual_traces", False)
 
         legend_lines = []
         legend_labels = []
 
         if by is None:
-            if not color_individual_traces:
-                color = next(color_gen)
             for _, row in data.iterrows():
-                if color_individual_traces:
-                    color = next(color_gen)
-                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=color)
+                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                if not color_individual_traces:
-                    color = next(color_gen)
                 for _, row in df.iterrows():
-                    if color_individual_traces:
-                        color = next(color_gen)
-                    (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=color)
+                    (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
-    def _add_annotation(self, ax, data, x, y, **kwargs):
-        pass
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str]
+    ):
+        annotations = []
+        for x in ann_xs:
+            pass
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):

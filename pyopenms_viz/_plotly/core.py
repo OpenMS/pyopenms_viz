@@ -121,7 +121,10 @@ class PLOTLYPlot(BasePlot, ABC):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(fig.data) > 1:
             for i in range(len(fig.data)):
-                fig.data[i].update(hovertemplate=tooltips, customdata=[custom_hover_data[i, :]]*len(fig.data[i].x))
+                fig.data[i].update(
+                    hovertemplate=tooltips,
+                    customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
+                )
             return
         fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
@@ -239,14 +242,10 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
     @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
-        color_individual_traces = kwargs.pop("color_individual_traces", False)
         traces = []
         if by is None:
-            if not color_individual_traces:
-                line_color = next(color_gen)
             for _, row in data.iterrows():
-                if color_individual_traces:
-                    line_color = next(color_gen)
+                line_color = next(color_gen)
                 trace = go.Scattergl(
                     x=[row[x]] * 2,
                     y=[0, row[y]],
@@ -259,16 +258,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 traces.append(trace)
         else:
             for group, df in data.groupby(by):
-                if not color_individual_traces:
-                    line_color = next(color_gen)
                 if "showlegend" in kwargs:
                     showlegend = kwargs["showlegend"]
                     first_group_trace_showlenged = showlegend
                 else:
                     first_group_trace_showlenged = True
                 for _, row in df.iterrows():
-                    if color_individual_traces:
-                        line_color = next(color_gen)
+                    line_color = next(color_gen)
                     trace = go.Scattergl(
                         x=[row[x]] * 2,
                         y=[0, row[y]],
@@ -283,6 +279,32 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
         fig.add_traces(data=traces)
         return fig, None
+
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str]
+    ):
+        annotations = []
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            annotation = go.layout.Annotation(
+                text="\n".join(text),
+                x=x,
+                y=y,
+                showarrow=False,
+                xanchor="left",
+                font=dict(
+                    family="Open Sans Mono, monospace",
+                    size=12,
+                    color=color,
+                ),
+            )
+            annotations.append(annotation)
+
+        fig.update_layout(annotations=annotations)
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
@@ -352,7 +374,9 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
         custom_hover_data_index = 1 if index else 0
 
         for key in entries.keys():
-            tooltips.append(f"{key}"+": %{customdata[" + str(custom_hover_data_index) + "]}")
+            tooltips.append(
+                f"{key}" + ": %{customdata[" + str(custom_hover_data_index) + "]}"
+            )
             custom_hover_data_index += 1
 
         return "<br>".join(tooltips), column_stack(custom_hover_data)
