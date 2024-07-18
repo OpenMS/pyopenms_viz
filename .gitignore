@@ -3,6 +3,5 @@ __pycache__
 peakmap.parquet
 *.d
 *.ipynb_checkpoints
-app-devel.py
 bokeh_graph.html
 dist/
