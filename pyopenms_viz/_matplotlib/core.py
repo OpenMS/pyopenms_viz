@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 
+from itertools import cycle
+
 from .._config import LegendConfig
 
 from .._misc import ColorGenerator
@@ -210,7 +212,9 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         else:
             for group, df in data.groupby(by):
                 for _, row in df.iterrows():
-                    (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
+                    (line,) = ax.plot(
+                        [row[x], row[x]], [0, row[y]], color=next(color_gen)
+                    )
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -221,7 +225,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_texts: list[list[str]],
         ann_xs: list[float],
         ann_ys: list[float],
-        ann_colors: list[str]
+        ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             fig.annotate(
@@ -247,8 +251,20 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
+        # Colors
         color_gen = kwargs.pop("line_color", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        # Heatmap
         z = kwargs.pop("z", None)
+        if z is not None:
+            heatmap_kwargs = dict(
+                s=20,
+                edgecolors="none",
+                cmap="magma_r",
+            )
+        else:
+            heatmap_kwargs = dict()
 
         legend_lines = []
         legend_labels = []
@@ -257,18 +273,38 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 use_color = data[z]
             else:
                 use_color = next(color_gen)
-            scatter = ax.scatter(
-                [data[x], data[x]], [0, data[y]], c=use_color, **kwargs
-            )
+
+            scatter = ax.scatter(data[x], data[y], c=use_color, marker="s", **kwargs, **heatmap_kwargs)
 
             return ax, None
         else:
+            marker_cycler = cycle([
+                "o",   # circle
+                "s",   # square
+                "d",   # diamond
+                "+",   # cross
+                "x",   # x
+                "^",   # triangle-up
+                "v",   # triangle-down
+                "<",   # triangle-left
+                ">",   # triangle-right
+                "p",   # pentagon
+                "h"    # hexagon
+            ])
+            vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
-                    use_color = df[z]
+                    use_color = df[z].values
                 else:
                     use_color = next(color_gen)
-                scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
+                    vmin, vmax = None, None
+                
+                # Normalize colors if z is specified
+                if z is not None:
+                    normalize = plt.Normalize(vmin=vmin, vmax=vmax)
+                    scatter = ax.scatter(df[x], df[y], c=use_color, norm=normalize, marker=next(marker_cycler), **kwargs, **heatmap_kwargs)
+                else:
+                    scatter = ax.scatter(df[x], df[y], c=use_color, marker=next(marker_cycler), **kwargs)
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)

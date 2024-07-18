@@ -530,9 +530,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def __init__(
         self,
-        data,
-        x,
-        y,
+        data: DataFrame,
+        mz: str,
+        intensity: str,
+        ion_mobility: str | None = None,
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
@@ -549,12 +550,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotConfig(kind=self._kind)
 
-        super().__init__(data, x, y, **kwargs)
+        super().__init__(data, mz, intensity, **kwargs)
 
+        self.mz = mz
+        self.intensity = intensity
+        self.ion_mobility = ion_mobility
         self.reference_spectrum = reference_spectrum
         self.mirror_spectrum = mirror_spectrum
-        self.peak_color = peak_color
         self.relative_intensity = relative_intensity
+        self.peak_color = peak_color
         self.annotate_top_n_peaks = annotate_top_n_peaks
         self.annotate_mz = annotate_mz
         self.ion_annotation = ion_annotation
@@ -562,25 +566,28 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.custom_annotation = custom_annotation
         self.annotation_color = annotation_color
 
-        self.plot(x, y, **kwargs)
+        # Prepare data
+        spectrum, reference_spectrum = self._prepare_data(
+            self.data, self.intensity, self.reference_spectrum
+        )
+        # Plot either normal spectrum (including mirror) or ion mobility heat map
+        if self.ion_mobility is None:
+            self.plot(spectrum, reference_spectrum, mz, intensity, **kwargs)
+        else:
+            self.plot_ion_mobility(spectrum, mz, ion_mobility, intensity, **kwargs)
+        # Show plot
         if self.show_plot:
             self.show()
 
-    def plot(self, x, y, **kwargs):
-        # Prepare data
-        spectrum, reference_spectrum = self._prepare_data(
-            self.data, y, self.reference_spectrum
-        )
-
-        TOOLTIPS, custom_hover_data = self._create_tooltips(
-            entries={"m/z": x, "intensity": y}, index=False
-        )
-
+    def plot(self, spectrum, reference_spectrum, x, y, **kwargs):
+        """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
         kwargs.pop("fig", None)  # remove figure from **kwargs if exists
+
+        TOOLTIPS, custom_hover_data = self._get_tooltips()
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
 
-        color_gen = self.get_colors(spectrum, "peak")
+        color_gen = self._get_colors(spectrum, "peak")
 
         self.fig = spectrumPlot.generate(
             line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
@@ -592,24 +599,25 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
-            ## create a mirror spectrum
+            # Set intensity to negative values
             reference_spectrum[y] = reference_spectrum[y] * -1
-            if "fig" in kwargs.keys():
-                kwargs.pop(
-                    "fig"
-                )  # remove figure object from kwargs, use the same figure as above
+
             mirror_spectrum = self.get_vline_renderer(
                 reference_spectrum, x, y, fig=self.fig, **kwargs
             )
 
-            color_gen = self.get_colors(reference_spectrum, "peak")
+            color_gen = self._get_colors(reference_spectrum, "peak")
 
             mirror_spectrum.generate(line_color=color_gen)
             self.plot_x_axis_line(self.fig)
 
             # Annotations for reference spectrum
-            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(reference_spectrum, x, y)
-            spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
+            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+                reference_spectrum, x, y
+            )
+            spectrumPlot._add_annotations(
+                self.fig, ann_texts, ann_xs, ann_ys, ann_colors
+            )
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[x].min()]
@@ -628,8 +636,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
             min_value = reference_spectrum[y].min()
             min_padding = -0.2
             max_padding = 0.4
-        
+
         self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
+    
+    def plot_ion_mobility(self, spectrum, x, y, z, **kwargs):
+        """Plot ion mobility spectrum as Heatmap"""
+        TOOLTIPS, custom_hover_data = self._get_tooltips()
+        scatterPlot = self.get_scatter_renderer(spectrum, x, y, fig=self.fig, **kwargs)
+        self.fig = scatterPlot.generate(z=z, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
     def _prepare_data(
         self,
@@ -652,12 +666,26 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 reference_spectrum[y] = (
                     reference_spectrum[y] / reference_spectrum[y].max() * 100
                 )
-
         return spectrum, reference_spectrum
 
-    def get_colors(
+    def _get_tooltips(self):
+        """Constructs entries for tooltip and creates tooltips."""
+        entries = {"m/z": self.mz, "intensity": self.intensity}
+        for optional in (
+            self.ion_mobility,
+            "native_id",
+            self.ion_annotation,
+            self.sequence_annotation,
+        ):
+            if optional in self.data.columns:
+                entries[optional.replace("_", " ")] = optional
+
+        return self._create_tooltips(entries=entries, index=False)
+
+    def _get_colors(
         self, data: DataFrame, custom: Literal["peak", "annotation"] | None = None
     ):
+        """Get color generators for peaks or annotations based on config."""
         # Top priority: custom color
         if custom is not None:
             if custom == "peak" and self.peak_color in data.columns:
@@ -679,8 +707,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Lowest priority: return the first default color
         return ColorGenerator(None, 1)
 
-    def _get_annotations(self, data: DataFrame, x: str, y: str, **kwargs):
-        color_gen = self.get_colors(data, "annotation")
+    def _get_annotations(self, data: DataFrame, x: str, y: str):
+        """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
+        color_gen = self._get_colors(data, "annotation")
 
         if self.by and self.annotation_color is None:
             data["color"] = next(color_gen)
@@ -694,7 +723,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         elif top_n is None:
             top_n = 0
         # sort values for top intensity peaks on top (ascending for reference spectra with negative values)
-        data = data.sort_values(y, ascending=True if data[y].min() < 0 else False).reset_index()
+        data = data.sort_values(
+            y, ascending=True if data[y].min() < 0 else False
+        ).reset_index()
         for i, row in data.iterrows():
             texts = []
             if i < top_n:
@@ -702,7 +733,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     texts.append(str(round(row[x], 4)))
                 if self.ion_annotation and self.ion_annotation in data.columns:
                     texts.append(str(row[self.ion_annotation]))
-                if self.sequence_annotation and self.sequence_annotation in data.columns:
+                if (
+                    self.sequence_annotation
+                    and self.sequence_annotation in data.columns
+                ):
                     texts.append(str(row[self.sequence_annotation]))
                 if self.custom_annotation and self.custom_annotation in data.columns:
                     texts.append(str(row[self.custom_annotation]))
@@ -718,7 +752,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ann_colors: list[str],
     ):
         """
-        Add annotations to a Plotly figure.
+        Add annotations to a VLinePlot figure.
 
         Parameters:
         fig: The figure to add annotations to.

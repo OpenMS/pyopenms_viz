@@ -15,10 +15,12 @@ from bokeh.models import (
     Span,
     VStrip,
     GlyphRenderer,
-    Label
+    Label,
 )
 
 from pandas.core.frame import DataFrame
+
+from itertools import cycle
 
 # pyopenms_viz imports
 from .._core import (
@@ -273,7 +275,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
-        ann_colors: list[str]
+        ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             label = Label(
@@ -299,14 +301,43 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
+        z = kwargs.pop("z", None)
+        color_gen = kwargs.pop("color_gen", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        mapper = linear_cmap(
+            field_name=z,
+            palette=Plasma256[::-1],
+            low=min(data[z]),
+            high=max(data[z]),
+        )
+        kwargs["size"] = 10
+        kwargs["fill_color"] = mapper if z is not None else next(color_gen)
+        kwargs["line_width"] = 0
 
         if by is None:
             source = ColumnDataSource(data)
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
             return fig, None
         else:
+            # Define a cycle of marker shapes
+            shape_cycler = cycle([
+                'circle',
+                'square',
+                'diamond',
+                'cross',
+                'x',
+                'triangle',
+                'inverted_triangle',
+                'square_cross',
+                'circle_cross',
+                'diamond_cross',
+                'cross',
+                'hex',
+            ])
             legend_items = []
             for group, df in data.groupby(by):
+                kwargs["marker"] = next(shape_cycler)
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))

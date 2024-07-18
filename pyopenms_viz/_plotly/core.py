@@ -12,6 +12,8 @@ from pandas.core.frame import DataFrame
 
 from numpy import column_stack
 
+from itertools import cycle
+
 from .._core import (
     BasePlot,
     LinePlot,
@@ -286,7 +288,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
-        ann_colors: list[str]
+        ann_colors: list[str],
     ):
         annotations = []
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
@@ -315,6 +317,19 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
         marker_dict = kwargs.pop("marker", None)
+        # Check for z-dimension and plot heatmap
+        z = kwargs.pop("z", None)
+        # Plotting heatmaps with z dimension overwrites marker_dict.
+        if z:
+            marker_dict = dict(
+                colorscale="Plasma_r",
+                showscale=False,
+                symbol="square",
+                size=10,
+                opacity=0.8,
+                cmin=data[z].min(),
+                cmax=data[z].max(),
+            )
 
         if color_gen is None:
             color_gen = ColorGenerator()
@@ -322,15 +337,35 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         if by is None:
             if marker_dict is None:
                 marker_dict = dict(color=next(color_gen))
+            elif z is not None:
+                marker_dict["color"] = data[z]
             trace = go.Scattergl(
-                x=data[x], y=data[y], mode="markers", marker=dict(color=next(color_gen))
+                x=data[x], y=data[y], mode="markers", marker=marker_dict, name=""
             )
             traces.append(trace)
         else:
+            # Different shapes for markers in heatmap, since color is not based on group
+            shape_cycler = cycle(
+                [
+                    "circle",
+                    "square",
+                    "diamond",
+                    "cross",
+                    "x",
+                    "triangle-up",
+                    "triangle-down",
+                    "triangle-left",
+                    "triangle-right",
+                    "pentagon",
+                    "hexagon",
+                ]
+            )
             for group, df in data.groupby(by):
+                marker_dict["symbol"] = next(shape_cycler)
                 if marker_dict is None:
                     marker_dict = dict(color=next(color_gen))
-
+                elif z is not None:
+                    marker_dict["color"] = df[z]
                 trace = go.Scatter(
                     x=df[x],
                     y=df[y],
