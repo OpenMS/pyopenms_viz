@@ -70,7 +70,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             ax: The axes object.
             **kwargs: Additional keyword arguments.
         """
-        ax.grid(self.grid)
+        ax.grid(self.grid, zorder=0)
 
     def _add_legend(self, ax, legend):
         """
@@ -266,6 +266,8 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             ).items():
                 if k not in kwargs.keys():
                     kwargs[k] = v
+
+        kwargs["zorder"] = 2
 
         legend_lines = []
         legend_labels = []

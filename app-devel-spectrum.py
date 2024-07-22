@@ -28,6 +28,9 @@ st.bokeh_chart = use_file_for_bokeh
 df = pd.read_csv("test/test_data/TestSpectrumDf.tsv", sep="\t")
 
 st.write(df)
+c1, c2 = st.columns(2)
+by = c1.selectbox("by", ["None"] + df.columns.tolist())
+show_legend = c2.checkbox("show_legend", False)
 
 tabs = st.tabs(["spectrum", "ion mobility spectrum"])
 with tabs[0]:
@@ -39,10 +42,8 @@ with tabs[0]:
         "sequence_annotation", ["None"] + df.columns.tolist()
     )
     custom_annotation = c1.selectbox("custom_annotation", ["None"] + df.columns.tolist())
-    by = c1.selectbox("by", ["None"] + df.columns.tolist())
     mirror_spectrum = c2.checkbox("mirror_spectrum", False)
     relative_intensity = c2.checkbox("relative_intensity", False)
-    show_legend = c2.checkbox("show_legend", False)
     annotate_mz = c2.checkbox("annotate_mz", True)
     annotate_top_n_peaks = c2.number_input("annotate_top_n_peaks", 0, 100, 3, 1)
     kwargs = {
