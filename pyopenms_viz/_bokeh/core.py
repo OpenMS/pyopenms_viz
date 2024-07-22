@@ -254,15 +254,33 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         color_gen = kwargs.pop("line_color", None)
         if by is None:
             if color_gen is not None:
-                kwargs["line_color"] = [next(color_gen) for _ in range(len(data))]
-            line = fig.segment(x0=data[x], y0=0, x1=data[x], y1=data[y], **kwargs)
+                data["line_color"] = next(color_gen)
+            source = ColumnDataSource(data)
+            line = fig.segment(
+                x0=x,
+                y0=0,
+                x1=x,
+                y1=y,
+                source=source,
+                line_color="line_color" if color_gen is not None else "black",
+                **kwargs,
+            )
             return fig, None
         else:
             legend_items = []
+            if color_gen is not None:
+                data["line_color"] = [next(color_gen) for _ in range(len(data))]
             for group, df in data.groupby(by):
-                if color_gen is not None:
-                    kwargs["line_color"] = [next(color_gen) for _ in range(len(df))]
-                line = fig.segment(x0=df[x], y0=0, x1=df[x], y1=df[y], **kwargs)
+                source = ColumnDataSource(df)
+                line = fig.segment(
+                    x0=x,
+                    y0=0,
+                    x1=x,
+                    y1=y,
+                    source=source,
+                    line_color="line_color" if color_gen is not None else "black",
+                    **kwargs,
+                )
                 legend_items.append((group, [line]))
 
             legend = Legend(items=legend_items)
@@ -321,20 +339,22 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             return fig, None
         else:
             # Define a cycle of marker shapes
-            shape_cycler = cycle([
-                'circle',
-                'square',
-                'diamond',
-                'cross',
-                'x',
-                'triangle',
-                'inverted_triangle',
-                'square_cross',
-                'circle_cross',
-                'diamond_cross',
-                'cross',
-                'hex',
-            ])
+            shape_cycler = cycle(
+                [
+                    "circle",
+                    "square",
+                    "diamond",
+                    "cross",
+                    "x",
+                    "triangle",
+                    "inverted_triangle",
+                    "square_cross",
+                    "circle_cross",
+                    "diamond_cross",
+                    "cross",
+                    "hex",
+                ]
+            )
             legend_items = []
             for group, df in data.groupby(by):
                 kwargs["marker"] = next(shape_cycler)
