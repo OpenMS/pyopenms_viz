@@ -21,7 +21,7 @@ from .._core import (
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     APPEND_PLOT_DOC,
 )
 
@@ -255,16 +255,17 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         color_gen = kwargs.pop("line_color", None)
         if color_gen is None:
             color_gen = ColorGenerator()
-        # Heatmap
+        # Heatmap data and default config values
         z = kwargs.pop("z", None)
         if z is not None:
-            heatmap_kwargs = dict(
-                s=20,
+            for k, v in dict(
+                marker="s",
+                s=30,
                 edgecolors="none",
                 cmap="magma_r",
-            )
-        else:
-            heatmap_kwargs = dict()
+            ).items():
+                if k not in kwargs.keys():
+                    kwargs[k] = v
 
         legend_lines = []
         legend_labels = []
@@ -274,37 +275,44 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             else:
                 use_color = next(color_gen)
 
-            scatter = ax.scatter(data[x], data[y], c=use_color, marker="s", **kwargs, **heatmap_kwargs)
+            scatter = ax.scatter(data[x], data[y], c=use_color, **kwargs)
 
             return ax, None
         else:
-            marker_cycler = cycle([
-                "o",   # circle
-                "s",   # square
-                "d",   # diamond
-                "+",   # cross
-                "x",   # x
-                "^",   # triangle-up
-                "v",   # triangle-down
-                "<",   # triangle-left
-                ">",   # triangle-right
-                "p",   # pentagon
-                "h"    # hexagon
-            ])
+            marker_cycler = cycle(
+                [
+                    "o",  # circle
+                    "s",  # square
+                    "d",  # diamond
+                    "+",  # cross
+                    "x",  # x
+                    "^",  # triangle-up
+                    "v",  # triangle-down
+                    "<",  # triangle-left
+                    ">",  # triangle-right
+                    "p",  # pentagon
+                    "h",  # hexagon
+                ]
+            )
             vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
                     use_color = df[z].values
-                else:
-                    use_color = next(color_gen)
-                    vmin, vmax = None, None
-                
+                kwargs["marker"] = next(marker_cycler)
                 # Normalize colors if z is specified
                 if z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)
-                    scatter = ax.scatter(df[x], df[y], c=use_color, norm=normalize, marker=next(marker_cycler), **kwargs, **heatmap_kwargs)
+                    scatter = ax.scatter(
+                        df[x],
+                        df[y],
+                        c=use_color,
+                        norm=normalize,
+                        **kwargs,
+                    )
                 else:
-                    scatter = ax.scatter(df[x], df[y], c=use_color, marker=next(marker_cycler), **kwargs)
+                    scatter = ax.scatter(
+                        df[x], df[y], c=use_color, **kwargs
+                    )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -420,7 +428,7 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     pass
 
 
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
+class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """
@@ -504,14 +512,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         scatterPlot = self.get_scatter_renderer(
             self.data, x, y, z=z, fig=self.fig, **class_kwargs
         )
-        scatterPlot.generate(
-            z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
-            **other_kwargs,
-        )
+        scatterPlot.generate(z=z, **other_kwargs)
 
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
@@ -522,10 +523,6 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         )
         scatterPlot.generate(
             z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
             **other_kwargs,
         )
         self.ax_grid[1, 1].set_title(None)

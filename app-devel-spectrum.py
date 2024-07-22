@@ -2,9 +2,9 @@ import streamlit as st
 
 
 import pandas as pd
-from pyopenms_viz._matplotlib.core import MATPLOTLIBSpectrumPlot
-from pyopenms_viz._plotly.core import PLOTLYSpectrumPlot
-from pyopenms_viz._bokeh.core import BOKEHSpectrumPlot
+from pyopenms_viz._matplotlib.core import MATPLOTLIBSpectrumPlot, MATPLOTLIBPeakMapPlot
+from pyopenms_viz._plotly.core import PLOTLYSpectrumPlot, PLOTLYPeakMapPlot
+from pyopenms_viz._bokeh.core import BOKEHSpectrumPlot, BOKEHPeakMapPlot
 
 import pandas as pd
 from bokeh.plotting import figure, save
@@ -48,31 +48,54 @@ annotate_top_n_peaks = c2.number_input("annotate_top_n_peaks", 0, 100, 3, 1)
 
 kwargs = {
     "data": df,
-    "mz": "mz",
-    "ion_mobility": "ion_mobility" if ion_mobility else None,
-    "intensity": "intensity",
-    "reference_spectrum": df,
+    "x": "mz",
+    "y": "ion_mobility",
+    "z": "intensity",
     "show_plot": False,
     "relative_intensity": relative_intensity,
-    "peak_color": peak_color,
-    "annotation_color": annotation_color,
-    "ion_annotation": ion_annotation,
-    "sequence_annotation": sequence_annotation,
-    "custom_annotation": custom_annotation,
-    "annotate_mz": annotate_mz,
-    "mirror_spectrum": mirror_spectrum,
     "by": None if by == "None" else by,
     "legend": {"show": show_legend},
-    "annotate_top_n_peaks": annotate_top_n_peaks,
 }
-fig = PLOTLYSpectrumPlot(**kwargs).fig
+
+fig = PLOTLYPeakMapPlot(**kwargs).fig
 
 st.plotly_chart(fig)
 
-fig = MATPLOTLIBSpectrumPlot(**kwargs).superFig
+fig = MATPLOTLIBPeakMapPlot(**kwargs).superFig
 
 st.pyplot(fig)
 
-fig = BOKEHSpectrumPlot(**kwargs).fig
+fig = BOKEHPeakMapPlot(**kwargs).fig
 
 st.bokeh_chart(fig)
+
+# kwargs = {
+#     "data": df,
+#     "x": "mz",
+#     "y": "intensity",
+#     "reference_spectrum": df,
+#     "show_plot": False,
+#     "relative_intensity": relative_intensity,
+#     "peak_color": peak_color,
+#     "annotation_color": annotation_color,
+#     "ion_annotation": ion_annotation,
+#     "sequence_annotation": sequence_annotation,
+#     "custom_annotation": custom_annotation,
+#     "annotate_mz": annotate_mz,
+#     "mirror_spectrum": mirror_spectrum,
+#     "by": None if by == "None" else by,
+#     "legend": {"show": show_legend},
+#     "annotate_top_n_peaks": annotate_top_n_peaks,
+# }
+
+# fig = PLOTLYSpectrumPlot(**kwargs).fig
+
+# st.plotly_chart(fig)
+
+# fig = MATPLOTLIBSpectrumPlot(**kwargs).superFig
+
+# st.pyplot(fig)
+
+# fig = BOKEHSpectrumPlot(**kwargs).fig
+
+# st.bokeh_chart(fig)

@@ -227,8 +227,8 @@ class _BasePlotConfig(ABC):
                 "xlabel": "mass-to-charge",
                 "ylabel": "Intensity",
             },
-            "feature_heatmap": {
-                "title": "PeakMap of mass-to-charge vs. retention time",
+            "peakmap": {
+                "title": "PeakMap",
                 "xlabel": "Retention Time",
                 "ylabel": "mass-to-charge",
             },

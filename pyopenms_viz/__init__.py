@@ -13,7 +13,7 @@ class PlotAccessor:
     """
 
     _common_kinds = ("line", "vline", "scatter")
-    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
     _all_kinds = _common_kinds + _msdata_kinds
 
     def __init__(self, data: DataFrame) -> None:

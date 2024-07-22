@@ -10,7 +10,7 @@ from .core import (
     PLOTLYChromatogramPlot,
     PLOTLYMobilogramPlot,
     PLOTLYSpectrumPlot,
-    PLOTLYFeatureHeatmapPlot,
+    PLOTLYPeakMapPlot,
 )
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
     "chromatogram": PLOTLYChromatogramPlot,
     "mobilogram": PLOTLYMobilogramPlot,
     "spectrum": PLOTLYSpectrumPlot,
-    "feature_heatmap": PLOTLYFeatureHeatmapPlot,
+    "peakmap": PLOTLYPeakMapPlot,
 }
 
 

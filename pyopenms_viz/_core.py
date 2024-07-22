@@ -16,7 +16,7 @@ from ._misc import ColorGenerator
 
 
 _common_kinds = ("line", "vline", "scatter")
-_msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+_msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
 _all_kinds = _common_kinds + _msdata_kinds
 _entrypoint_backends = ("pomsvim", "pomsvib", "pomsvip")
 
@@ -176,13 +176,13 @@ class BasePlot(ABC):
             "chromatogram",
             "mobilogram",
             "spectrum",
-            "feature_heatmap",
+            "peakmap",
             "complex",
         }:
             self.x = self._verify_column(x, "x")
             self.y = self._verify_column(y, "y")
 
-        if self._kind in {"feature_heatmap"}:
+        if self._kind in {"peakmap"}:
             self.z = self._verify_column(z, "z")
 
         if self.by is not None:
@@ -794,11 +794,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
         return ColorGenerator(colors)
 
 
-class FeatureHeatmapPlot(BaseMSPlot, ABC):
+class PeakMapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
     def _kind(self):
-        return "feature_heatmap"
+        return "peakmap"
 
     def __init__(
         self,
@@ -961,7 +961,7 @@ class PlotAccessor:
     """
 
     _common_kinds = ("line", "vline", "scatter")
-    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
     _all_kinds = _common_kinds + _msdata_kinds
 
     def __init__(self, data: DataFrame) -> None:

@@ -23,7 +23,7 @@ from .._core import (
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     APPEND_PLOT_DOC,
 )
 
@@ -316,12 +316,16 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
     @APPEND_PLOT_DOC
     def plot(cls, fig, data, x, y, by=None, **kwargs) -> Tuple[Figure, "Legend"]:
         color_gen = kwargs.pop("line_color", None)
-        marker_dict = kwargs.pop("marker", None)
+        marker_dict = kwargs.pop("marker", dict())
+        if color_gen is None:
+            color_gen = ColorGenerator()
         # Check for z-dimension and plot heatmap
         z = kwargs.pop("z", None)
         # Plotting heatmaps with z dimension overwrites marker_dict.
         if z:
-            marker_dict = dict(
+            # Default values for heatmap
+            heatmap_defaults = dict(
+                color=data[z],
                 colorscale="Plasma_r",
                 showscale=False,
                 symbol="square",
@@ -330,15 +334,18 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 cmin=data[z].min(),
                 cmax=data[z].max(),
             )
+            # If no marker_dict was in kwargs, use default for heatmpas
+            if not marker_dict:
+                marker_dict = heatmap_defaults
+            # Else update existing marker dict with default values if key is missing
+            else:
+                for k, v in heatmap_defaults.items():
+                    if k not in marker_dict.keys():
+                        marker_dict[k] = v
 
-        if color_gen is None:
-            color_gen = ColorGenerator()
+        marker_dict["color"] = data[z] if z else next(color_gen)
         traces = []
         if by is None:
-            if marker_dict is None:
-                marker_dict = dict(color=next(color_gen))
-            elif z is not None:
-                marker_dict["color"] = data[z]
             trace = go.Scattergl(
                 x=data[x], y=data[y], mode="markers", marker=marker_dict, name=""
             )
@@ -347,8 +354,8 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
             # Different shapes for markers in heatmap, since color is not based on group
             shape_cycler = cycle(
                 [
-                    "circle",
                     "square",
+                    "circle",
                     "diamond",
                     "cross",
                     "x",
@@ -362,9 +369,8 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
             )
             for group, df in data.groupby(by):
                 marker_dict["symbol"] = next(shape_cycler)
-                if marker_dict is None:
-                    marker_dict = dict(color=next(color_gen))
-                elif z is not None:
+                marker_dict["color"] = next(color_gen)
+                if z is not None:
                     marker_dict["color"] = df[z]
                 trace = go.Scatter(
                     x=df[x],
@@ -464,23 +470,15 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
     pass
 
 
-class PLOTLYFeatureHeatmapPlot(PLOTLY_MSPlot, FeatureHeatmapPlot):
+class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        self.fig = scatterPlot.generate(
-            marker=dict(
-                color=self.data[z],
-                cmin=self.data[z].min(),
-                cmax=self.data[z].max(),
-                colorscale="Plasma_r",
-                showscale=False,
-                symbol="square",
-                size=10,
-                opacity=0.4,
-            ),
-            **other_kwargs,
-        )
+        self.fig = scatterPlot.generate(z=z, **other_kwargs)
+
+        tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y})
+
+        self._add_tooltips(self.fig, tooltips, custom_hover_data=custom_hover_data)
 
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)

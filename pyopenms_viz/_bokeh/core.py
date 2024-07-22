@@ -31,7 +31,7 @@ from .._core import (
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     SpectrumPlot,
     APPEND_PLOT_DOC,
 )
@@ -320,18 +320,22 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         Plot a scatter plot
         """
         z = kwargs.pop("z", None)
+
         color_gen = kwargs.pop("color_gen", None)
         if color_gen is None:
             color_gen = ColorGenerator()
+
         mapper = linear_cmap(
             field_name=z,
             palette=Plasma256[::-1],
             low=min(data[z]),
             high=max(data[z]),
         )
-        kwargs["size"] = 10
-        kwargs["fill_color"] = mapper if z is not None else next(color_gen)
-        kwargs["line_width"] = 0
+        # Set defaults if they have not been set in kwargs
+        defaults = {"marker": "square", "size": 10, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        for k, v in defaults.items():
+            if k not in kwargs.keys():
+                kwargs[k] = v
 
         if by is None:
             source = ColumnDataSource(data)
@@ -471,26 +475,22 @@ class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
     pass
 
 
-class BOKEHFeatureHeatmapPlot(BOKEH_MSPlot, FeatureHeatmapPlot):
+class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        mapper = linear_cmap(
-            field_name=z,
-            palette=Plasma256[::-1],
-            low=min(self.data[z]),
-            high=max(self.data[z]),
-        )
 
-        self.fig = scatterPlot.generate(
-            marker="square", line_color=mapper, fill_color=mapper, **other_kwargs
-        )
+        self.fig = scatterPlot.generate(z=z, **other_kwargs)
 
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
+
+        tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y})
+
+        self._add_tooltips(self.fig, tooltips)
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
