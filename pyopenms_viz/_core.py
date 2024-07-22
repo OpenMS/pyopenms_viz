@@ -531,9 +531,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def __init__(
         self,
         data: DataFrame,
-        mz: str,
-        intensity: str,
-        ion_mobility: str | None = None,
+        x: str,
+        y: str,
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
@@ -550,11 +549,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotConfig(kind=self._kind)
 
-        super().__init__(data, mz, intensity, **kwargs)
+        super().__init__(data, x, y, **kwargs)
 
-        self.mz = mz
-        self.intensity = intensity
-        self.ion_mobility = ion_mobility
         self.reference_spectrum = reference_spectrum
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
@@ -566,31 +562,36 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.custom_annotation = custom_annotation
         self.annotation_color = annotation_color
 
-        # Prepare data
-        spectrum, reference_spectrum = self._prepare_data(
-            self.data, self.intensity, self.reference_spectrum
-        )
-        # Plot either normal spectrum (including mirror) or ion mobility heat map
-        if self.ion_mobility is None:
-            self.plot(spectrum, reference_spectrum, mz, intensity, **kwargs)
-        else:
-            self.plot_ion_mobility(spectrum, mz, ion_mobility, intensity, **kwargs)
+        self.plot(x, y, **kwargs)
         # Show plot
         if self.show_plot:
             self.show()
 
-    def plot(self, spectrum, reference_spectrum, x, y, **kwargs):
+    def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
+        # Prepare data
+        spectrum, reference_spectrum = self._prepare_data(
+            self.data, y, self.reference_spectrum
+        )
         kwargs.pop("fig", None)  # remove figure from **kwargs if exists
 
-        TOOLTIPS, custom_hover_data = self._get_tooltips()
+        entries = {"m/z": x, "intensity": y}
+        for optional in (
+            "native_id",
+            self.ion_annotation,
+            self.sequence_annotation,
+        ):
+            if optional in self.data.columns:
+                entries[optional.replace("_", " ")] = optional
+
+        tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
 
         color_gen = self._get_colors(spectrum, "peak")
 
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
+            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
         )
 
         # Annotations for spectrum
@@ -638,12 +639,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
             max_padding = 0.4
 
         self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
-    
-    def plot_ion_mobility(self, spectrum, x, y, z, **kwargs):
-        """Plot ion mobility spectrum as Heatmap"""
-        TOOLTIPS, custom_hover_data = self._get_tooltips()
-        scatterPlot = self.get_scatter_renderer(spectrum, x, y, fig=self.fig, **kwargs)
-        self.fig = scatterPlot.generate(z=z, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data)
 
     def _prepare_data(
         self,
@@ -667,20 +662,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     reference_spectrum[y] / reference_spectrum[y].max() * 100
                 )
         return spectrum, reference_spectrum
-
-    def _get_tooltips(self):
-        """Constructs entries for tooltip and creates tooltips."""
-        entries = {"m/z": self.mz, "intensity": self.intensity}
-        for optional in (
-            self.ion_mobility,
-            "native_id",
-            self.ion_annotation,
-            self.sequence_annotation,
-        ):
-            if optional in self.data.columns:
-                entries[optional.replace("_", " ")] = optional
-
-        return self._create_tooltips(entries=entries, index=False)
 
     def _get_colors(
         self, data: DataFrame, custom: Literal["peak", "annotation"] | None = None

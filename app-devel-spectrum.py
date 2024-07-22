@@ -29,73 +29,74 @@ df = pd.read_csv("test/test_data/TestSpectrumDf.tsv", sep="\t")
 
 st.write(df)
 
-c1, c2 = st.columns(2)
-peak_color = c1.selectbox("peak_color", ["None"] + df.columns.tolist())
-annotation_color = c1.selectbox("annotation_color", ["None"] + df.columns.tolist())
-ion_annotation = c1.selectbox("ion_annotation", ["None"] + df.columns.tolist())
-sequence_annotation = c1.selectbox(
-    "sequence_annotation", ["None"] + df.columns.tolist()
-)
-custom_annotation = c1.selectbox("custom_annotation", ["None"] + df.columns.tolist())
-ion_mobility = c2.checkbox("ion_mobility", False)
-by = c1.selectbox("by", ["None"] + df.columns.tolist())
-mirror_spectrum = c2.checkbox("mirror_spectrum", False)
-relative_intensity = c2.checkbox("relative_intensity", False)
-show_legend = c2.checkbox("show_legend", False)
-annotate_mz = c2.checkbox("annotate_mz", True)
-annotate_top_n_peaks = c2.number_input("annotate_top_n_peaks", 0, 100, 3, 1)
+tabs = st.tabs(["spectrum", "ion mobility spectrum"])
+with tabs[0]:
+    c1, c2 = st.columns(2)
+    peak_color = c1.selectbox("peak_color", ["None"] + df.columns.tolist())
+    annotation_color = c1.selectbox("annotation_color", ["None"] + df.columns.tolist())
+    ion_annotation = c1.selectbox("ion_annotation", ["None"] + df.columns.tolist())
+    sequence_annotation = c1.selectbox(
+        "sequence_annotation", ["None"] + df.columns.tolist()
+    )
+    custom_annotation = c1.selectbox("custom_annotation", ["None"] + df.columns.tolist())
+    by = c1.selectbox("by", ["None"] + df.columns.tolist())
+    mirror_spectrum = c2.checkbox("mirror_spectrum", False)
+    relative_intensity = c2.checkbox("relative_intensity", False)
+    show_legend = c2.checkbox("show_legend", False)
+    annotate_mz = c2.checkbox("annotate_mz", True)
+    annotate_top_n_peaks = c2.number_input("annotate_top_n_peaks", 0, 100, 3, 1)
+    kwargs = {
+        "data": df,
+        "x": "mz",
+        "y": "intensity",
+        "reference_spectrum": df,
+        "show_plot": False,
+        "relative_intensity": relative_intensity,
+        "peak_color": peak_color,
+        "annotation_color": annotation_color,
+        "ion_annotation": ion_annotation,
+        "sequence_annotation": sequence_annotation,
+        "custom_annotation": custom_annotation,
+        "annotate_mz": annotate_mz,
+        "mirror_spectrum": mirror_spectrum,
+        "by": None if by == "None" else by,
+        "legend": {"show": show_legend},
+        "annotate_top_n_peaks": annotate_top_n_peaks,
+    }
+
+    fig = PLOTLYSpectrumPlot(**kwargs).fig
+
+    st.plotly_chart(fig)
+
+    fig = MATPLOTLIBSpectrumPlot(**kwargs).superFig
+
+    st.pyplot(fig)
+
+    fig = BOKEHSpectrumPlot(**kwargs).fig
+
+    st.bokeh_chart(fig)
 
 
-kwargs = {
-    "data": df,
-    "x": "mz",
-    "y": "ion_mobility",
-    "z": "intensity",
-    "show_plot": False,
-    "relative_intensity": relative_intensity,
-    "by": None if by == "None" else by,
-    "legend": {"show": show_legend},
-}
+with tabs[1]:
+    kwargs = {
+        "data": df,
+        "x": "mz",
+        "y": "ion_mobility",
+        "z": "intensity",
+        "show_plot": False,
+        "relative_intensity": relative_intensity,
+        "by": None if by == "None" else by,
+        "legend": {"show": show_legend},
+    }
 
-fig = PLOTLYPeakMapPlot(**kwargs).fig
+    fig = PLOTLYPeakMapPlot(**kwargs).fig
 
-st.plotly_chart(fig)
+    st.plotly_chart(fig)
 
-fig = MATPLOTLIBPeakMapPlot(**kwargs).superFig
+    fig = MATPLOTLIBPeakMapPlot(**kwargs).superFig
 
-st.pyplot(fig)
+    st.pyplot(fig)
 
-fig = BOKEHPeakMapPlot(**kwargs).fig
+    fig = BOKEHPeakMapPlot(**kwargs).fig
 
-st.bokeh_chart(fig)
-
-# kwargs = {
-#     "data": df,
-#     "x": "mz",
-#     "y": "intensity",
-#     "reference_spectrum": df,
-#     "show_plot": False,
-#     "relative_intensity": relative_intensity,
-#     "peak_color": peak_color,
-#     "annotation_color": annotation_color,
-#     "ion_annotation": ion_annotation,
-#     "sequence_annotation": sequence_annotation,
-#     "custom_annotation": custom_annotation,
-#     "annotate_mz": annotate_mz,
-#     "mirror_spectrum": mirror_spectrum,
-#     "by": None if by == "None" else by,
-#     "legend": {"show": show_legend},
-#     "annotate_top_n_peaks": annotate_top_n_peaks,
-# }
-
-# fig = PLOTLYSpectrumPlot(**kwargs).fig
-
-# st.plotly_chart(fig)
-
-# fig = MATPLOTLIBSpectrumPlot(**kwargs).superFig
-
-# st.pyplot(fig)
-
-# fig = BOKEHSpectrumPlot(**kwargs).fig
-
-# st.bokeh_chart(fig)
+    st.bokeh_chart(fig)
