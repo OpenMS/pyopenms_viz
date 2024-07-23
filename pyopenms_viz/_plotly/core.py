@@ -348,7 +348,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         if by is None:
             marker_dict["symbol"] = next(marker_gen)
             trace = go.Scattergl(
-                x=data[x], y=data[y], mode="markers", marker=marker_dict, name=""
+                x=data[x], y=data[y], mode="markers", marker=marker_dict, showlegend=False
             )
             traces.append(trace)
         else:
