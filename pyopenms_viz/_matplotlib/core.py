@@ -7,11 +7,9 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 
-from itertools import cycle
-
 from .._config import LegendConfig
 
-from .._misc import ColorGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator
 from .._core import (
     BasePlot,
     LinePlot,
@@ -253,13 +251,17 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
         # Colors
         color_gen = kwargs.pop("line_color", None)
+        # Marker shapes
+        shape_gen = kwargs.pop("shape_gen", None)
         if color_gen is None:
             color_gen = ColorGenerator()
+        if shape_gen is None:
+            shape_gen = MarkerShapeGenerator(engine="MATPLOTLIB")
         # Heatmap data and default config values
         z = kwargs.pop("z", None)
         if z is not None:
             for k, v in dict(
-                marker="s",
+                # marker="s",
                 s=30,
                 edgecolors="none",
                 cmap="magma_r",
@@ -272,6 +274,8 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         legend_lines = []
         legend_labels = []
         if by is None:
+            if "marker" not in kwargs.keys():
+                kwargs["marker"] = next(shape_gen)
             if z is not None:
                 use_color = data[z]
             else:
@@ -281,26 +285,11 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
 
             return ax, None
         else:
-            marker_cycler = cycle(
-                [
-                    "o",  # circle
-                    "s",  # square
-                    "d",  # diamond
-                    "+",  # cross
-                    "x",  # x
-                    "^",  # triangle-up
-                    "v",  # triangle-down
-                    "<",  # triangle-left
-                    ">",  # triangle-right
-                    "p",  # pentagon
-                    "h",  # hexagon
-                ]
-            )
             vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
                     use_color = df[z].values
-                kwargs["marker"] = next(marker_cycler)
+                kwargs["marker"] = next(shape_gen)
                 # Normalize colors if z is specified
                 if z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)

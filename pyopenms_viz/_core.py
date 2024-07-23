@@ -12,7 +12,7 @@ from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator
+from ._misc import ColorGenerator, MarkerShapeGenerator
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -584,7 +584,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
 
-        tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
+        tooltips, custom_hover_data = self._create_tooltips(
+            entries=entries, index=False
+        )
 
         spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
 

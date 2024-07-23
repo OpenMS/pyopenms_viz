@@ -20,8 +20,6 @@ from bokeh.models import (
 
 from pandas.core.frame import DataFrame
 
-from itertools import cycle
-
 # pyopenms_viz imports
 from .._core import (
     BasePlot,
@@ -35,7 +33,7 @@ from .._core import (
     SpectrumPlot,
     APPEND_PLOT_DOC,
 )
-from .._misc import ColorGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
@@ -325,6 +323,10 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         if color_gen is None:
             color_gen = ColorGenerator()
 
+        marker_gen = kwargs.pop("marker_gen", None)
+        if marker_gen is None:
+            marker_gen = MarkerShapeGenerator(engine="BOKEH")
+
         mapper = linear_cmap(
             field_name=z,
             palette=Plasma256[::-1],
@@ -332,36 +334,20 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             high=max(data[z]),
         )
         # Set defaults if they have not been set in kwargs
-        defaults = {"marker": "square", "size": 10, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        defaults = {"size": 10, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
         for k, v in defaults.items():
             if k not in kwargs.keys():
                 kwargs[k] = v
 
         if by is None:
+            kwargs["marker"] = next(marker_gen)
             source = ColumnDataSource(data)
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
             return fig, None
         else:
-            # Define a cycle of marker shapes
-            shape_cycler = cycle(
-                [
-                    "circle",
-                    "square",
-                    "diamond",
-                    "cross",
-                    "x",
-                    "triangle",
-                    "inverted_triangle",
-                    "square_cross",
-                    "circle_cross",
-                    "diamond_cross",
-                    "cross",
-                    "hex",
-                ]
-            )
             legend_items = []
             for group, df in data.groupby(by):
-                kwargs["marker"] = next(shape_cycler)
+                kwargs["marker"] = next(marker_gen)
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
