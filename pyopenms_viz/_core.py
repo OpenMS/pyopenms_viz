@@ -12,8 +12,10 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
+from numpy import log1p
+
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator, MarkerShapeGenerator
+from ._misc import ColorGenerator
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -792,6 +794,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         num_x_bins: int = 50,
         num_y_bins: int = 50,
+        z_log_scale: bool = False,
         **kwargs,
     ) -> None:
 
@@ -831,6 +834,10 @@ class PeakMapPlot(BaseMSPlot, ABC):
             data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
             data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
             data = data.fillna(0)
+
+        # Log intensity scale
+        if z_log_scale:
+            data[z] = log1p(data[z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         data = data.sort_values(z)
