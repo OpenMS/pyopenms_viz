@@ -380,6 +380,25 @@ class VLinePlot(BasePlot, ABC):
     def _kind(self):
         return "vline"
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        """
+        Add annotations to a VLinePlot figure.
+
+        Parameters:
+        fig: The figure to add annotations to.
+        ann_texts (list[str]): List of texts for the annotations.
+        ann_xs (list[float]): List of x-coordinates for the annotations.
+        ann_ys (list[float]): List of y-coordinates for the annotations.
+        ann_colors: (list[str]): List of colors for annotation text.
+        """
+        pass
 
 class ScatterPlot(BasePlot, ABC):
     @property
@@ -725,26 +744,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     texts.append(str(row[self.custom_annotation]))
             ann_texts.append("\n".join(texts))
         return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
-
-    def _add_annotations(
-        self,
-        fig,
-        ann_texts: list[str],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-    ):
-        """
-        Add annotations to a VLinePlot figure.
-
-        Parameters:
-        fig: The figure to add annotations to.
-        ann_texts (list[str]): List of texts for the annotations.
-        ann_xs (list[float]): List of x-coordinates for the annotations.
-        ann_ys (list[float]): List of y-coordinates for the annotations.
-        ann_colors: (list[str]): List of colors for annotation text.
-        """
-        pass
 
     def _get_ion_color_annotation(self, data: DataFrame) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
