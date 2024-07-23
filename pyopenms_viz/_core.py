@@ -18,7 +18,7 @@ from ._misc import ColorGenerator, MarkerShapeGenerator
 _common_kinds = ("line", "vline", "scatter")
 _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
 _all_kinds = _common_kinds + _msdata_kinds
-_entrypoint_backends = ("pomsvim", "pomsvib", "pomsvip")
+_entrypoint_backends = ("ms_matplotlib", "ms_bokeh", "ms_plotly")
 
 _baseplot_doc = f"""
     Plot method for creating plots from a Pandas DataFrame.
