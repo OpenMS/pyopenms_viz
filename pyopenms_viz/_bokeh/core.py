@@ -250,9 +250,10 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         Plot a set of vertical lines
         """
         color_gen = kwargs.pop("line_color", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        data["line_color"] = [next(color_gen) for _ in range(len(data))]
         if by is None:
-            if color_gen is not None:
-                data["line_color"] = next(color_gen)
             source = ColumnDataSource(data)
             line = fig.segment(
                 x0=x,
@@ -260,14 +261,12 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 x1=x,
                 y1=y,
                 source=source,
-                line_color="line_color" if color_gen is not None else "black",
+                line_color="line_color",
                 **kwargs,
             )
             return fig, None
         else:
             legend_items = []
-            if color_gen is not None:
-                data["line_color"] = [next(color_gen) for _ in range(len(data))]
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 line = fig.segment(
@@ -276,7 +275,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     x1=x,
                     y1=y,
                     source=source,
-                    line_color="line_color" if color_gen is not None else "black",
+                    line_color="line_color",
                     **kwargs,
                 )
                 legend_items.append((group, [line]))

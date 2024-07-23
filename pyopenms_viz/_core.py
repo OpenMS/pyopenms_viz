@@ -685,14 +685,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         return spectrum, reference_spectrum
 
     def _get_colors(
-        self, data: DataFrame, custom: Literal["peak", "annotation"] | None = None
+        self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None
     ):
         """Get color generators for peaks or annotations based on config."""
         # Top priority: custom color
-        if custom is not None:
-            if custom == "peak" and self.peak_color in data.columns:
+        if kind is not None:
+            if kind == "peak" and self.peak_color in data.columns:
                 return ColorGenerator(data[self.peak_color])
-            elif custom == "annotation" and self.annotation_color in data.columns:
+            elif kind == "annotation" and self.annotation_color in data.columns:
                 return ColorGenerator(data[self.annotation_color])
         # Colors based on ion annotation for peaks and annotation text
         if self.ion_annotation is not None and self.ion_annotation in data.columns:
@@ -713,10 +713,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
         color_gen = self._get_colors(data, "annotation")
 
-        if self.by and self.annotation_color is None:
-            data["color"] = next(color_gen)
-        else:
-            data["color"] = [next(color_gen) for _ in range(len(data))]
+        data["color"] = [next(color_gen) for _ in range(len(data))]
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
