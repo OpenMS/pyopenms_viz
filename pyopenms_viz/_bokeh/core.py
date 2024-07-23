@@ -473,7 +473,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
 
-        tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y})
+        tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
 
         self._add_tooltips(self.fig, tooltips)
 

@@ -6,6 +6,7 @@ import importlib
 import types
 import re
 
+from pandas import cut
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
@@ -788,6 +789,9 @@ class PeakMapPlot(BaseMSPlot, ABC):
         zlabel=None,
         add_marginals=False,
         annotation_data: DataFrame | None = None,
+        bin_peaks: Union[Literal["auto"], bool] = "auto",
+        num_x_bins: int = 50,
+        num_y_bins: int = 50,
         **kwargs,
     ) -> None:
 
@@ -804,6 +808,33 @@ class PeakMapPlot(BaseMSPlot, ABC):
             self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
+
+        # Convert intensity values to relative intensity if required
+        relative_intensity = kwargs.pop("relative_intensity", False)
+        if relative_intensity:
+            data[z] = data[z] / max(data[z]) * 100
+
+        # Bin peaks if required
+        if bin_peaks == True or (
+            data.shape[0] > num_x_bins * num_y_bins
+            and bin_peaks == "auto"
+        ):
+            data[x] = cut(data[x], bins=num_x_bins)
+            data[y] = cut(data[y], bins=num_y_bins)
+
+            # Group by x and y bins and calculate the mean intensity within each bin
+            data = (
+                data.groupby([x, y], observed=True)
+                .agg({z: "mean"})
+                .reset_index()
+            )
+            data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
+            data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
+            data = data.fillna(0)
+
+        # Sort values by intensity in ascending order to plot highest intensity peaks last
+        data = data.sort_values(z)
+
         super().__init__(data, x, y, z=z, **kwargs)
 
         self.plot(x, y, z, **kwargs)
