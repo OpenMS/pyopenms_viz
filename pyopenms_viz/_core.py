@@ -797,6 +797,8 @@ class PeakMapPlot(BaseMSPlot, ABC):
         z_log_scale: bool = False,
         **kwargs,
     ) -> None:
+        # Copy data since it will be modified
+        data = data.copy()
 
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotConfig(kind=self._kind)
