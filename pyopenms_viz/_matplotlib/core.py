@@ -9,7 +9,7 @@ from matplotlib.patches import Rectangle
 
 from .._config import LegendConfig
 
-from .._misc import ColorGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator
 from .._core import (
     BasePlot,
     LinePlot,
@@ -19,7 +19,7 @@ from .._core import (
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     APPEND_PLOT_DOC,
 )
 
@@ -68,7 +68,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             ax: The axes object.
             **kwargs: Additional keyword arguments.
         """
-        ax.grid(self.grid)
+        ax.grid(self.grid, zorder=0)
 
     def _add_legend(self, ax, legend):
         """
@@ -203,20 +203,37 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         legend_labels = []
 
         if by is None:
-            use_color = next(color_gen)
             for _, row in data.iterrows():
-                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=use_color)
+                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
+                for _, row in df.iterrows():
+                    (line,) = ax.plot(
+                        [row[x], row[x]], [0, row[y]], color=next(color_gen)
+                    )
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
 
-    def _add_annotation(self, ax, data, x, y, **kwargs):
-        pass
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            fig.annotate(
+                text,
+                xy=(x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                fontsize=8,
+                color=color,
+            )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
@@ -232,28 +249,61 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
+        # Colors
         color_gen = kwargs.pop("line_color", None)
+        # Marker shapes
+        shape_gen = kwargs.pop("shape_gen", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        if shape_gen is None:
+            shape_gen = MarkerShapeGenerator(engine="MATPLOTLIB")
+        # Heatmap data and default config values
         z = kwargs.pop("z", None)
+        if z is not None:
+            for k, v in dict(
+                # marker="s",
+                s=30,
+                edgecolors="none",
+                cmap="magma_r",
+            ).items():
+                if k not in kwargs.keys():
+                    kwargs[k] = v
+
+        kwargs["zorder"] = 2
 
         legend_lines = []
         legend_labels = []
         if by is None:
+            if "marker" not in kwargs.keys():
+                kwargs["marker"] = next(shape_gen)
             if z is not None:
                 use_color = data[z]
             else:
                 use_color = next(color_gen)
-            scatter = ax.scatter(
-                [data[x], data[x]], [0, data[y]], c=use_color, **kwargs
-            )
+
+            scatter = ax.scatter(data[x], data[y], c=use_color, **kwargs)
 
             return ax, None
         else:
+            vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
-                    use_color = df[z]
+                    use_color = df[z].values
+                kwargs["marker"] = next(shape_gen)
+                # Normalize colors if z is specified
+                if z is not None:
+                    normalize = plt.Normalize(vmin=vmin, vmax=vmax)
+                    scatter = ax.scatter(
+                        df[x],
+                        df[y],
+                        c=use_color,
+                        norm=normalize,
+                        **kwargs,
+                    )
                 else:
-                    use_color = next(color_gen)
-                scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
+                    scatter = ax.scatter(
+                        df[x], df[y], c=use_color, **kwargs
+                    )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -273,7 +323,7 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def plot_x_axis_line(self, fig):
         fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
 
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
 
@@ -369,7 +419,7 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     pass
 
 
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
+class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """
@@ -453,14 +503,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         scatterPlot = self.get_scatter_renderer(
             self.data, x, y, z=z, fig=self.fig, **class_kwargs
         )
-        scatterPlot.generate(
-            z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
-            **other_kwargs,
-        )
+        scatterPlot.generate(z=z, **other_kwargs)
 
         if self.annotation_data is not None:
             self._add_box_boundaries(self.annotation_data)
@@ -471,10 +514,6 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         )
         scatterPlot.generate(
             z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
             **other_kwargs,
         )
         self.ax_grid[1, 1].set_title(None)

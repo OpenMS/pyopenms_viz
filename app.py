@@ -8,7 +8,7 @@ from pyopenms_viz.ChromatogramPlotter import plotChromatogram
 from pyopenms_viz.plotting._bokeh import (
     ChromatogramPlot,
     SpectrumPlot,
-    FeatureHeatmapPlot
+    PeakMapPlot
 )
 
 import pyopenms as oms
@@ -81,7 +81,7 @@ def get_common_parameters(plot_type="spectrum", cols=None, all_cols=None):
     params = {}
     with st.sidebar:
         params["engine"] = st.selectbox("engine", ["MATPLOTLIB", "BOKEH", "PLOTLY"])
-        if plot_type =="feature_heatmap":
+        if plot_type =="peakmap":
             st_cols = st.sidebar.columns(3)
             params["x"] = st_cols[0].selectbox("x", cols)
             params["y"] = st_cols[1].selectbox("y", cols)
@@ -94,7 +94,7 @@ def get_common_parameters(plot_type="spectrum", cols=None, all_cols=None):
             all_cols = ['None'] + all_cols
             params['by'] = st.selectbox("by", all_cols)
         params["relative_intensity"] = st.checkbox("relative_intensity", False, help="If true, plot relative intensity values. Defaults to False.")
-        if plot_type == "feature_heatmap":
+        if plot_type == "peakmap":
             params["add_marginals"] = st.checkbox("add_marginals", False, help="If true, add marginal plots for ion mobility and retention time to the heatmap. Defaults to False.")
         
         params["width"] = st.number_input("width", 50, 1000, 500, 50)
@@ -142,7 +142,7 @@ def filter_params_for_plotting(params):
     return {k: v for k, v in params.items() if v is not None}
 
 def get_input_col_kind(params, plot_type):
-    if plot_type == "feature_heatmap":
+    if plot_type == "peakmap":
         return {"x":params['x'], "y":params['y'], "z":params['z'], "kind":plot_type}
     else:
         return {"x":params['x'], "y":params['y'], "kind":plot_type}
@@ -160,7 +160,7 @@ tabs = st.tabs(["📊 **Figure**", "📂 **Data**", "📑 **API docs**"])
 if demo == "Test DataFrame Input":
     with st.sidebar:
         st.markdown("**Common Parameters**")
-        plot_type = st.sidebar.selectbox("plot_type", ["spectrum", "chromatogram", "mobilogram", "feature_heatmap"])
+        plot_type = st.sidebar.selectbox("plot_type", ["spectrum", "chromatogram", "mobilogram", "peakmap"])
     data_dimension_cols = ["mz", "rt", "int"]
     if "chrom_df" not in st.session_state or plot_type in ['chromatogram', 'spectrum']:
         load_demo_chromatogram_xic()
@@ -194,7 +194,7 @@ if demo == "Test DataFrame Input":
         
         fig = st.session_state.chrom_df.fillna({'native_id': 'NA'}).groupby(['native_id', 'ms_level', 'precursor_mz', 'Annotation', 'product_mz', 'im'])['int'].sum().reset_index().plot(**main_input_args, backend=backend_map[engine], show_plot=False, **common_params)
         
-    elif plot_type=='feature_heatmap':
+    elif plot_type=='peakmap':
         load_demo_diapasef_featuremap()    
         all_cols = list(st.session_state.chrom_df.columns)
         common_params = get_common_parameters(plot_type=plot_type, cols=data_dimension_cols + ['im'], all_cols=all_cols)
