@@ -24,7 +24,7 @@ jobs:
         with:
           file-path: pyopenms_viz/__init__.py
           commit-msg: Bump patch version 
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Create new patch release
         run: python .github/workflows/scripts/release.py
         env:
