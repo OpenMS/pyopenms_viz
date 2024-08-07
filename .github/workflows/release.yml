@@ -6,8 +6,6 @@ jobs:
   resources:
     name: Update __init__.py patch version
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -27,16 +25,6 @@ jobs:
           file-path: pyopenms_viz/__init__.py
           commit-msg: Bump patch version 
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      - name: Install GitHub CLI
-        run: |
-          type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-      - name: Authenticate GitHub CLI
-        run: echo "${{ secrets.PERSONAL_ACCESS_TOKEN }}" | gh auth login --with-token
       - name: Create new patch release
         run: python .github/workflows/scripts/release.py
         env:
