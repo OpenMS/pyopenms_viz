@@ -9,7 +9,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 class PlotAccessor:
