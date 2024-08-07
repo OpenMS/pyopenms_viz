@@ -1,0 +1,26 @@
+name: Create a new patch release
+
+on: [workflow_dispatch]
+
+jobs:
+  resources:
+    name: Update __init__.py patch version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+      - name: Update version
+        run: |
+             pwd 
+             $PWD/.github/workflows/scripts/update_init_version.py --file-path $PWD/pyopenms_viz/__init__.py
+      - name: Commit version update
+        uses: test-room-7/action-update-file@v1
+        with:
+              file-path: pyopenms_viz/__init__.py
+              commit-msg: Bump patch version 
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Create new patch release
+        run: $PWD/.github/workflows/scripts/release.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
