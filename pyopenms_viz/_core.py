@@ -121,6 +121,7 @@ class BasePlot(ABC):
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str | None = None,
+        zlabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
         line_type: str | None = None,
@@ -152,6 +153,7 @@ class BasePlot(ABC):
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.zlabel = zlabel
         self.x_axis_location = x_axis_location
         self.y_axis_location = y_axis_location
         self.line_type = line_type
