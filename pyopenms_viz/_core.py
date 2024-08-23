@@ -12,7 +12,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import log1p
+from numpy import ceil, log1p, log2
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import ColorGenerator
@@ -579,7 +579,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
         self.bin_peaks = bin_peaks
-        self.num_x_bins = num_x_bins
+        if self.bin_peaks == "auto":
+            # Sturges' Rule
+            n = len(data[x])
+            self.num_x_bins = int(ceil(log2(n) + 1))
+        else:
+            self.num_x_bins = num_x_bins
         self.peak_color = peak_color
         self.annotate_top_n_peaks = annotate_top_n_peaks
         self.annotate_mz = annotate_mz
