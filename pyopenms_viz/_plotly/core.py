@@ -716,5 +716,3 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 )
             )
             
-    # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
-    #     pass
