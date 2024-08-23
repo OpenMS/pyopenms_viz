@@ -686,10 +686,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        
         data[x] = cut(data[x], bins=self.num_x_bins)
-        # data[y] = cut(data[y], bins=self.num_y_bins)
-
         if self.by is not None:
             # Group by x bin and by column and calculate the mean intensity within each bin
             data = (
@@ -705,7 +702,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 .reset_index()
             )
         data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
-        # data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
         data = data.fillna(0)
         return data
 
