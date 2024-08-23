@@ -62,6 +62,8 @@ class PLOTLYPlot(BasePlot, ABC):
                 yaxis_title=self.ylabel,
                 width=self.width,
                 height=self.height,
+                template="simple_white",
+                dragmode="select"
             )
 
     def _update_plot_aes(self, fig, **kwargs) -> None:
