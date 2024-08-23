@@ -15,7 +15,7 @@ from pandas.util._decorators import Appender
 from numpy import ceil, log1p, log2
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator
+from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -580,9 +580,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.relative_intensity = relative_intensity
         self.bin_peaks = bin_peaks
         if self.bin_peaks == "auto":
-            # Sturges' Rule
-            n = len(data[x])
-            self.num_x_bins = int(ceil(log2(n) + 1))
+            # self.num_x_bins = sturges_rule(data, x)
+            self.num_x_bins = freedman_diaconis_rule(data, x)
         else:
             self.num_x_bins = num_x_bins
         self.peak_color = peak_color

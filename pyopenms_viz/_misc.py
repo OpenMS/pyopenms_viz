@@ -225,3 +225,45 @@ class MarkerShapeGenerator:
         Returns the next shape in the shape cycle.
         """
         return next(self.shape_cycle)
+
+
+def sturges_rule(df, value):
+    """
+    Calculate the number of bins using Sturges' rule.
+    
+    Args:
+        df (pd.DataFrame): A pandas DataFrame containing the data.
+        value (str): The column name of the data.
+        
+    Returns:
+        int: The number of bins.
+    """
+    n = len(df[value])
+    num_bins = int(np.ceil(1 + np.log2(n)))
+    return num_bins
+
+def freedman_diaconis_rule(df, value):
+    """
+    Calculate the number of bins using the Freedman-Diaconis rule.
+    
+    Args:
+        df (pd.DataFrame): A pandas DataFrame containing the data.
+        value (str): The column name of the data.
+        
+    Returns:
+        int: The number of bins.
+    """
+    # Calculate IQR
+    Q1 = df[value].quantile(0.25)
+    Q3 = df[value].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Number of observations
+    n = len(df)
+
+    # Calculate bin width using the Freedman-Diaconis rule
+    bin_width = 2 * IQR / (n ** (1/3))
+
+    # Calculate the number of bins
+    num_bins = int((df[value].max() - df[value].min()) / bin_width)
+    return num_bins
