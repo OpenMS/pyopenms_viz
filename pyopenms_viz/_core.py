@@ -108,6 +108,7 @@ class BasePlot(ABC):
         z: str | None = None,
         kind=None,
         by: str | None = None,
+        plot_3d: bool = False,
         relative_intensity: bool = False,
         subplots: bool | None = None,
         sharex: bool | None = None,
@@ -136,6 +137,7 @@ class BasePlot(ABC):
         self.data = data.copy()
         self.kind = kind
         self.by = by
+        self.plot_3d = plot_3d
         self.relative_intensity = relative_intensity
 
         # Plotting attributes
@@ -298,7 +300,7 @@ class BasePlot(ABC):
         tooltips = kwargs.pop("tooltips", None)
         custom_hover_data = kwargs.pop("custom_hover_data", None)
 
-        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -308,7 +310,7 @@ class BasePlot(ABC):
             self._add_tooltips(newlines, tooltips, custom_hover_data)
 
     @abstractmethod
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs):
         """
         Create the plot
         """
@@ -795,7 +797,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
-        plot_3d: bool = False,
+        # plot_3d: bool = False,
         **kwargs,
     ) -> None:
         # Copy data since it will be modified
@@ -847,10 +849,10 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, z=z, **kwargs)
 
-        if not plot_3d:
-            self.plot(x, y, z, **kwargs)
-        else:
-            self.plot_3d(x, y, z, **kwargs)
+        # if not plot_3d:
+        self.plot(x, y, z, **kwargs)
+        # else:
+        #     self.plot_3d(x, y, z, **kwargs)
             
         if self.show_plot:
             self.show()
@@ -879,11 +881,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
             self.combine_plots(x_fig, y_fig)
     
-    def plot_3d(self, x, y, z, measure, **kwargs):
-        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+    # def plot_3d(self, x, y, z, **kwargs):
+    #     class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
         
-        self.create_main_plot_3d(x, y, z, class_kwargs, other_kwargs)
-        pass
+    #     self.create_main_plot_3d(x, y, z, class_kwargs, other_kwargs)
+    #     pass
 
     @staticmethod
     def _integrate_data_along_dim(
@@ -908,9 +910,9 @@ class PeakMapPlot(BaseMSPlot, ABC):
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
         
-    @abstractmethod
-    def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
-        pass
+    # @abstractmethod
+    # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
+    #     pass
 
     @abstractmethod
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
