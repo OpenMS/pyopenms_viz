@@ -795,6 +795,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
+        plot_3d: bool = False,
         **kwargs,
     ) -> None:
         # Copy data since it will be modified
@@ -846,7 +847,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, z=z, **kwargs)
 
-        self.plot(x, y, z, **kwargs)
+        if not plot_3d:
+            self.plot(x, y, z, **kwargs)
+        else:
+            self.plot_3d(x, y, z, **kwargs)
+            
         if self.show_plot:
             self.show()
 
@@ -873,6 +878,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
             y_fig = self.create_y_axis_plot(y, z, class_kwargs_copy)
 
             self.combine_plots(x_fig, y_fig)
+    
+    def plot_3d(self, x, y, z, measure, **kwargs):
+        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+        
+        self.create_main_plot_3d(x, y, z, class_kwargs, other_kwargs)
+        pass
 
     @staticmethod
     def _integrate_data_along_dim(
@@ -896,6 +907,10 @@ class PeakMapPlot(BaseMSPlot, ABC):
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
+        
+    @abstractmethod
+    def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
+        pass
 
     @abstractmethod
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
