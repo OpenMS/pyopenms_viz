@@ -288,6 +288,9 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         else:
             if 'z' in kwargs:
                 z = kwargs.pop('z')
+            xlabel = kwargs.pop("xlabel", "X")
+            ylabel = kwargs.pop("ylabel", "Y")
+            zlabel = kwargs.pop("zlabel", "Z")
             if by is None:
                 x_vert = []
                 y_vert = []
@@ -305,12 +308,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     x_vert.append(None)
                     y_vert.append(None)
                     z_vert.append(None)
-                # Normalize z values for color mapping
-                normalized_z = [(z_val - z_min) / (z_max - z_min) for z_val in data[z]]
-                
-                import matplotlib.pyplot as plt
-                # Create a list of colors based on the z_vert values, excluding None
-                # colors = [plt.cm.magma_r((z - z_min) / (z_max - z_min)) for z in data[z]]
 
                 fig.add_trace(go.Scatter3d(
                     x=x_vert,
@@ -322,13 +319,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                               colorscale='magma_r',
                               cmin=z_min,
                               cmax=z_max,
-                              colorbar=dict(
-                            title="Z",
-                            titleside="right",
-                            titlefont=dict(
-                                size=14,
-                                family="Arial"
-                            ))
+                            #   colorbar=dict(
+                            # title=zlabel,
+                            # titleside="right",
+                            # titlefont=dict(
+                            #     size=14,
+                            #     family="Arial"
+                            # ))
                             ),
                     name="",
                     showlegend=False
@@ -363,9 +360,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     ))
 
             # Add gridlines
-            xlabel = kwargs.pop("xlabel", "X")
-            ylabel = kwargs.pop("ylabel", "Y")
-            zlabel = kwargs.pop("zlabel", "Z")
             fig.update_layout(
                 scene=dict(
                     xaxis=dict(
