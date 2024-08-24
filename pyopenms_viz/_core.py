@@ -831,13 +831,23 @@ class PeakMapPlot(BaseMSPlot, ABC):
         ):
             data[x] = cut(data[x], bins=num_x_bins)
             data[y] = cut(data[y], bins=num_y_bins)
-
-            # Group by x and y bins and calculate the mean intensity within each bin
-            data = (
-                data.groupby([x, y], observed=True)
-                .agg({z: "mean"})
-                .reset_index()
-            )
+            by = kwargs.pop("by", None)
+            if by is not None:
+                # Group by x, y and by columns and calculate the mean intensity within each bin
+                data = (
+                    data.groupby([x, y, by], observed=True)
+                    .agg({z: "mean"})
+                    .reset_index()
+                )
+                # Add by back to kwargs
+                kwargs["by"] = by
+            else:
+                # Group by x and y bins and calculate the mean intensity within each bin
+                data = (
+                    data.groupby([x, y], observed=True)
+                    .agg({z: "mean"})
+                    .reset_index()
+                )
             data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
             data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
             data = data.fillna(0)
@@ -1025,6 +1035,7 @@ class PlotAccessor:
         # Call the plot method of the selected backend
         if "backend" in kwargs:
             kwargs.pop("backend")
+        
         return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
 
     @staticmethod
