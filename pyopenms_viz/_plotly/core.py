@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 
 from pandas.core.frame import DataFrame
 
-from numpy import column_stack
+from numpy import column_stack, log
 
 from .._core import (
     BasePlot,
@@ -212,7 +212,8 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
         data: DataFrame,
         x: Union[str, int],
         y: Union[str, int],
-        by: str | None = None,
+        by: str | None = None, 
+        plot_3d=False,
         **kwargs,
     ) -> Tuple[Figure, "Legend"]:  # note legend is always none for consistency
         color_gen = kwargs.pop("line_color", None)
@@ -246,6 +247,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         color_gen = kwargs.pop("line_color", None)
         if color_gen is None:
             color_gen = ColorGenerator()
+
         if not plot_3d:
             traces = []
             if by is None:
@@ -290,41 +292,62 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 x_vert = []
                 y_vert = []
                 z_vert = []
-                for x, y, z in zip(data[x], data[y], data[z]):
+                z_min = data[z].min()
+                z_max = data[z].max()
+                for x_val, y_val, z_val in zip(data[x], data[y], data[z]):
                     for i in range(2):
-                        x_vert.append(x)
-                        y_vert.append(y)
+                        x_vert.append(x_val)
+                        y_vert.append(y_val)
                         if i==0:
                             z_vert.append(0)
                         else:
-                            z_vert.append(z)
+                            z_vert.append(z_val)
                     x_vert.append(None)
                     y_vert.append(None)
                     z_vert.append(None)
+                # Normalize z values for color mapping
+                normalized_z = [(z_val - z_min) / (z_max - z_min) for z_val in data[z]]
+                
+                import matplotlib.pyplot as plt
+                # Create a list of colors based on the z_vert values, excluding None
+                # colors = [plt.cm.magma_r((z - z_min) / (z_max - z_min)) for z in data[z]]
 
                 fig.add_trace(go.Scatter3d(
                     x=x_vert,
                     y=y_vert,
                     z=z_vert,
                     mode="lines",
-                    line=dict(width=5, color=next(color_gen)),
+                    line=dict(width=5, 
+                              color = [z if z is not None else 0 for z in z_vert],
+                              colorscale='magma_r',
+                              cmin=z_min,
+                              cmax=z_max,
+                              colorbar=dict(
+                            title="Z",
+                            titleside="right",
+                            titlefont=dict(
+                                size=14,
+                                family="Arial"
+                            ))
+                            ),
                     name="",
                     showlegend=False
                 ))
             else:
                 for group, df in data.groupby(by):
+                    use_color = next(color_gen)
                     # Transform to vertical line data with no connections
                     x_vert = []
                     y_vert = []
                     z_vert = []
-                    for x, y, z, in zip(df(x), df(y), df(z)):
+                    for x_val, y_val, z_val, in zip(df[x], df[y], df[z]):
                         for i in range(2):
-                            x_vert.append(x)
-                            y_vert.append(y)
+                            x_vert.append(x_val)
+                            y_vert.append(y_val)
                             if i==0:
                                 z_vert.append(0)
                             else:
-                                z_vert.append(z)
+                                z_vert.append(z_val)
                         x_vert.append(None)
                         y_vert.append(None)
                         z_vert.append(None)
@@ -334,7 +357,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                         y=y_vert,
                         z=z_vert,
                         mode="lines",
-                        line=dict(width=5, color=next(color_gen)),
+                        line=dict(width=5, color=use_color),
                         name=group,
                         legendgroup=group
                     ))
