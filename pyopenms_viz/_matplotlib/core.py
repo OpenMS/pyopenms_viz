@@ -192,7 +192,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a line plot
@@ -240,7 +240,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 for _, row in data.iterrows():
                     (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
 
-                
+                return ax, None
             else:
                 for group, df in data.groupby(by):
                     for _, row in df.iterrows():
@@ -256,16 +256,32 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 z = kwargs.pop('z')
             if by is None:
                 for i in range(len(data)):
-                    ax.plot(
-                        [data[x].iloc[i], data[x].iloc[i]],
-                        [data[z].iloc[i], 0],
+                    (line,) = ax.plot(
                         [data[y].iloc[i], data[y].iloc[i]],
+                        [data[z].iloc[i], 0],
+                        [data[x].iloc[i], data[x].iloc[i]],
                         zdir="x",
                         color=plt.cm.magma_r((data[z].iloc[i] / data[z].max())),
                     )
                 return ax, None
             else:
-                raiseValueError("Cannot plot 3D data with 'by' parameter")
+                legend_lines = []
+                legend_labels = []
+
+                for group, df in data.groupby(by):
+                    use_color = next(color_gen)
+                    for i in range(len(df)):
+                        (line,) = ax.plot(
+                            [df[y].iloc[i], df[y].iloc[i]],
+                            [df[z].iloc[i], 0],
+                            [df[x].iloc[i], df[x].iloc[i]],
+                            zdir="x",
+                            color=use_color,
+                        )
+                    legend_lines.append(line)
+                    legend_labels.append(group)
+                    
+                return ax, (legend_lines, legend_labels)
         
         
     def _add_annotations(
@@ -560,7 +576,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
         else:
-            vlinePlot = self.get_vline_renderer(self.data, x, y, **class_kwargs)
+            vlinePlot = self.get_vline_renderer(self.data, x, y, fig=self.fig, **class_kwargs)
             vlinePlot.generate(z=z, xlabel=self.xlabel, ylabel=self.ylabel, zlabel=self.zlabel, **other_kwargs)
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
