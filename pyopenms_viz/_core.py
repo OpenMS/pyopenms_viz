@@ -495,7 +495,11 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         """
         Create the plot
         """
-        color_gen = ColorGenerator()
+        if 'line_color' not in kwargs:
+            color_gen = ColorGenerator()
+        else:
+            color_gen = kwargs['line_color']
+        
         tooltip_entries = {"retention time": x, "intensity": y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"

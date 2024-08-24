@@ -219,7 +219,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         if by is None:
             source = ColumnDataSource(data)
             if color_gen is not None:
-                kwargs["line_color"] = next(color_gen)
+                kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
             line = fig.line(x=x, y=y, source=source, **kwargs)
 
             return fig, None
@@ -229,7 +229,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
-                    kwargs["line_color"] = next(color_gen)
+                    kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
                 line = fig.line(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
 

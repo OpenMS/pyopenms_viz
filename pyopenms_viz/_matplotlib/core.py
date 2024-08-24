@@ -204,12 +204,12 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_labels = []
 
         if by is None:
-            (line,) = ax.plot(data[x], data[y], color=next(color_gen))
+            (line,) = ax.plot(data[x], data[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
+                (line,) = ax.plot(df[x], df[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)

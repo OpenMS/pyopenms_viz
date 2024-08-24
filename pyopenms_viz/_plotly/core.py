@@ -221,7 +221,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
         traces = []
         if by is None:
             trace = go.Scatter(
-                x=data[x], y=data[y], mode="lines", line=dict(color=next(color_gen))
+                x=data[x], y=data[y], mode="lines", line=dict(color=color_gen if isinstance(color_gen, str) else next(color_gen))
             )
             traces.append(trace)
         else:
@@ -231,7 +231,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
                     y=df[y],
                     mode="lines",
                     name=group,
-                    line=dict(color=next(color_gen)),
+                    line=dict(color=color_gen if isinstance(color_gen, str) else next(color_gen)),
                 )
                 traces.append(trace)
 
