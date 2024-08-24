@@ -210,7 +210,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a line plot
         """
@@ -245,7 +245,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a set of vertical lines
         """
@@ -253,22 +253,9 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         if color_gen is None:
             color_gen = ColorGenerator()
         data["line_color"] = [next(color_gen) for _ in range(len(data))]
-        if by is None:
-            source = ColumnDataSource(data)
-            line = fig.segment(
-                x0=x,
-                y0=0,
-                x1=x,
-                y1=y,
-                source=source,
-                line_color="line_color",
-                **kwargs,
-            )
-            return fig, None
-        else:
-            legend_items = []
-            for group, df in data.groupby(by):
-                source = ColumnDataSource(df)
+        if not plot_3d:
+            if by is None:
+                source = ColumnDataSource(data)
                 line = fig.segment(
                     x0=x,
                     y0=0,
@@ -278,11 +265,27 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     line_color="line_color",
                     **kwargs,
                 )
-                legend_items.append((group, [line]))
+                return fig, None
+            else:
+                legend_items = []
+                for group, df in data.groupby(by):
+                    source = ColumnDataSource(df)
+                    line = fig.segment(
+                        x0=x,
+                        y0=0,
+                        x1=x,
+                        y1=y,
+                        source=source,
+                        line_color="line_color",
+                        **kwargs,
+                    )
+                    legend_items.append((group, [line]))
 
-            legend = Legend(items=legend_items)
-
-            return fig, legend
+                legend = Legend(items=legend_items)
+        
+                return fig, legend
+        else:
+            raise NotImplementedError("3D Vline plots are not supported in Bokeh")
 
     def _add_annotations(
         self,
@@ -312,7 +315,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a scatter plot
         """
@@ -466,16 +469,19 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     """
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
 
-        self.fig = scatterPlot.generate(z=z, **other_kwargs)
+            self.fig = scatterPlot.generate(z=z, **other_kwargs)
 
-        if self.annotation_data is not None:
-            self._add_box_boundaries(self.annotation_data)
+            if self.annotation_data is not None:
+                self._add_box_boundaries(self.annotation_data)
 
-        tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
+            tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
 
-        self._add_tooltips(self.fig, tooltips)
+            self._add_tooltips(self.fig, tooltips)
+        else:
+            raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
