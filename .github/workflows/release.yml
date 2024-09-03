@@ -19,6 +19,7 @@ jobs:
         run: |
           pwd 
           python .github/workflows/scripts/update_init_version.py --file-path pyopenms_viz/__init__.py
+          python .github/workflows/scripts/version_update_script.py --file-path pyproject.toml --init_file_path pyopenms_viz/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
