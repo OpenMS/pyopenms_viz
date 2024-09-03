@@ -52,13 +52,44 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the self.fig object stores the matplotlib axes object
         """
-        if self.fig is None and self.width is not None and self.height is not None:
+        if self.fig is None and self.width is not None and self.height is not None and not self.plot_3d:
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
             self.fig.set_title(self.title)
             self.fig.set_xlabel(self.xlabel)
             self.fig.set_ylabel(self.ylabel)
+        elif self.fig is None and self.width is not None and self.height is not None and self.plot_3d:
+            self.superFig = plt.figure(
+                figsize=(self.width / 100, self.height / 100), 
+                layout="constrained"
+            )
+            self.fig = self.superFig.add_subplot(111, projection="3d")
+            self.fig.set_title(self.title)
+            self.fig.set_xlabel(self.xlabel,
+                                fontsize=9,
+                                labelpad=-2,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                                style="italic")
+            self.fig.set_ylabel(self.ylabel,
+                                fontsize=9,
+                                labelpad=-2,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
+            self.fig.set_zlabel(self.zlabel,
+                                fontsize=10,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                                labelpad=-2)
+            
+            for axis in ("x", "y", "z"):
+                self.fig.tick_params(axis=axis, labelsize=8, pad=-2, colors=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
+
+            self.fig.set_box_aspect(aspect=None, zoom=0.88)
+            self.fig.ticklabel_format(axis="z", style="sci", useMathText=True, scilimits=(0,0))
+            self.fig.grid(color="#FF0000", linewidth=0.8)
+            self.fig.xaxis.pane.fill = False
+            self.fig.yaxis.pane.fill = False
+            self.fig.zaxis.pane.fill = False
+            self.fig.view_init(elev=25, azim=-45, roll=0)
 
     def _update_plot_aes(self, ax, **kwargs):
         """
@@ -161,7 +192,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a line plot
@@ -173,12 +204,12 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_labels = []
 
         if by is None:
-            (line,) = ax.plot(data[x], data[y], color=next(color_gen))
+            (line,) = ax.plot(data[x], data[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
+                (line,) = ax.plot(df[x], df[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -192,31 +223,67 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a vertical line
         """
         color_gen = kwargs.pop("line_color", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        
+        if not plot_3d:
+            legend_lines = []
+            legend_labels = []
 
-        legend_lines = []
-        legend_labels = []
+            if by is None:
+                for _, row in data.iterrows():
+                    (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
 
-        if by is None:
-            for _, row in data.iterrows():
-                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
-
-            return ax, None
+                return ax, None
+            else:
+                for group, df in data.groupby(by):
+                    for _, row in df.iterrows():
+                        (line,) = ax.plot(
+                            [row[x], row[x]], [0, row[y]], color=next(color_gen)
+                        )
+                    legend_lines.append(line)
+                    legend_labels.append(group)
+                    
+                return ax, (legend_lines, legend_labels)
         else:
-            for group, df in data.groupby(by):
-                for _, row in df.iterrows():
+            if 'z' in kwargs:
+                z = kwargs.pop('z')
+            if by is None:
+                for i in range(len(data)):
                     (line,) = ax.plot(
-                        [row[x], row[x]], [0, row[y]], color=next(color_gen)
+                        [data[y].iloc[i], data[y].iloc[i]],
+                        [data[z].iloc[i], 0],
+                        [data[x].iloc[i], data[x].iloc[i]],
+                        zdir="x",
+                        color=plt.cm.magma_r((data[z].iloc[i] / data[z].max())),
                     )
-                legend_lines.append(line)
-                legend_labels.append(group)
-            return ax, (legend_lines, legend_labels)
+                return ax, None
+            else:
+                legend_lines = []
+                legend_labels = []
 
+                for group, df in data.groupby(by):
+                    use_color = next(color_gen)
+                    for i in range(len(df)):
+                        (line,) = ax.plot(
+                            [df[y].iloc[i], df[y].iloc[i]],
+                            [df[z].iloc[i], 0],
+                            [df[x].iloc[i], df[x].iloc[i]],
+                            zdir="x",
+                            color=use_color,
+                        )
+                    legend_lines.append(line)
+                    legend_labels.append(group)
+                    
+                return ax, (legend_lines, legend_labels)
+        
+        
     def _add_annotations(
         self,
         fig,
@@ -244,7 +311,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a scatter plot
@@ -500,13 +567,17 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        scatterPlot = self.get_scatter_renderer(
-            self.data, x, y, z=z, fig=self.fig, **class_kwargs
-        )
-        scatterPlot.generate(z=z, **other_kwargs)
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(
+                self.data, x, y, z=z, fig=self.fig, **class_kwargs
+            )
+            scatterPlot.generate(z=z, **other_kwargs)
 
-        if self.annotation_data is not None:
-            self._add_box_boundaries(self.annotation_data)
+            if self.annotation_data is not None:
+                self._add_box_boundaries(self.annotation_data)
+        else:
+            vlinePlot = self.get_vline_renderer(self.data, x, y, fig=self.fig, **class_kwargs)
+            vlinePlot.generate(z=z, xlabel=self.xlabel, ylabel=self.ylabel, zlabel=self.zlabel, **other_kwargs)
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(

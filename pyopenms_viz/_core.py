@@ -108,6 +108,7 @@ class BasePlot(ABC):
         z: str | None = None,
         kind=None,
         by: str | None = None,
+        plot_3d: bool = False,
         relative_intensity: bool = False,
         subplots: bool | None = None,
         sharex: bool | None = None,
@@ -120,6 +121,7 @@ class BasePlot(ABC):
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str | None = None,
+        zlabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
         line_type: str | None = None,
@@ -136,6 +138,7 @@ class BasePlot(ABC):
         self.data = data.copy()
         self.kind = kind
         self.by = by
+        self.plot_3d = plot_3d
         self.relative_intensity = relative_intensity
 
         # Plotting attributes
@@ -150,6 +153,7 @@ class BasePlot(ABC):
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.zlabel = zlabel
         self.x_axis_location = x_axis_location
         self.y_axis_location = y_axis_location
         self.line_type = line_type
@@ -298,7 +302,7 @@ class BasePlot(ABC):
         tooltips = kwargs.pop("tooltips", None)
         custom_hover_data = kwargs.pop("custom_hover_data", None)
 
-        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, **kwargs)
+        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs)
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -308,7 +312,7 @@ class BasePlot(ABC):
             self._add_tooltips(newlines, tooltips, custom_hover_data)
 
     @abstractmethod
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs):
         """
         Create the plot
         """
@@ -491,7 +495,11 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         """
         Create the plot
         """
-        color_gen = ColorGenerator()
+        if 'line_color' not in kwargs:
+            color_gen = ColorGenerator()
+        else:
+            color_gen = kwargs['line_color']
+        
         tooltip_entries = {"retention time": x, "intensity": y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"
@@ -795,6 +803,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
+        # plot_3d: bool = False,
         **kwargs,
     ) -> None:
         # Copy data since it will be modified
@@ -826,13 +835,23 @@ class PeakMapPlot(BaseMSPlot, ABC):
         ):
             data[x] = cut(data[x], bins=num_x_bins)
             data[y] = cut(data[y], bins=num_y_bins)
-
-            # Group by x and y bins and calculate the mean intensity within each bin
-            data = (
-                data.groupby([x, y], observed=True)
-                .agg({z: "mean"})
-                .reset_index()
-            )
+            by = kwargs.pop("by", None)
+            if by is not None:
+                # Group by x, y and by columns and calculate the mean intensity within each bin
+                data = (
+                    data.groupby([x, y, by], observed=True)
+                    .agg({z: "mean"})
+                    .reset_index()
+                )
+                # Add by back to kwargs
+                kwargs["by"] = by
+            else:
+                # Group by x and y bins and calculate the mean intensity within each bin
+                data = (
+                    data.groupby([x, y], observed=True)
+                    .agg({z: "mean"})
+                    .reset_index()
+                )
             data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
             data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
             data = data.fillna(0)
@@ -846,7 +865,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, z=z, **kwargs)
 
+        # if not plot_3d:
         self.plot(x, y, z, **kwargs)
+        # else:
+        #     self.plot_3d(x, y, z, **kwargs)
+            
         if self.show_plot:
             self.show()
 
@@ -873,6 +896,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
             y_fig = self.create_y_axis_plot(y, z, class_kwargs_copy)
 
             self.combine_plots(x_fig, y_fig)
+    
+    # def plot_3d(self, x, y, z, **kwargs):
+    #     class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+        
+    #     self.create_main_plot_3d(x, y, z, class_kwargs, other_kwargs)
+    #     pass
 
     @staticmethod
     def _integrate_data_along_dim(
@@ -896,6 +925,10 @@ class PeakMapPlot(BaseMSPlot, ABC):
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
+        
+    # @abstractmethod
+    # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
+    #     pass
 
     @abstractmethod
     def create_x_axis_plot(self, x, z, class_kwargs) -> "figure":
@@ -1006,6 +1039,7 @@ class PlotAccessor:
         # Call the plot method of the selected backend
         if "backend" in kwargs:
             kwargs.pop("backend")
+        
         return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
 
     @staticmethod

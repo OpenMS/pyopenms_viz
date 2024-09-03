@@ -178,6 +178,7 @@ class _BasePlotConfig(ABC):
     title: str = "1D Plot"
     xlabel: str = "X-axis"
     ylabel: str = "Y-axis"
+    zlabel: str = "Z-axis"
     x_axis_location: str = "below"
     y_axis_location: str = "left"
     min_border: str = 0
@@ -231,6 +232,7 @@ class _BasePlotConfig(ABC):
                 "title": "PeakMap",
                 "xlabel": "Retention Time",
                 "ylabel": "mass-to-charge",
+                "zlabel": "Intensity",
             },
             # Add more plot types as needed
         }
@@ -239,6 +241,8 @@ class _BasePlotConfig(ABC):
             self.title = plot_configs[self.kind]["title"]
             self.xlabel = plot_configs[self.kind]["xlabel"]
             self.ylabel = plot_configs[self.kind]["ylabel"]
+            if self.kind == "peakmap":
+                self.zlabel = plot_configs[self.kind]["zlabel"]
 
             if self.relative_intensity and "Intensity" in self.ylabel:
                 self.ylabel = "Relative " + self.ylabel
