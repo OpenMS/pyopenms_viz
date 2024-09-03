@@ -6,16 +6,16 @@ import importlib
 import types
 import re
 
-from pandas import cut
+from pandas import cut, merge
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import log1p
+from numpy import ceil, log1p, log2
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator
+from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -566,6 +566,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
+        bin_peaks: Union[Literal["auto"], bool] = "auto",
+        bin_method: Literal['none', 'sturges', 'freedman-diaconis'] = 'freedman-diaconis',
+        num_x_bins: int = 50,
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,
         annotate_mz: bool = True,
@@ -584,6 +587,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.reference_spectrum = reference_spectrum
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
+        self.bin_peaks = bin_peaks
+        self.bin_method = bin_method
+        if self.bin_peaks == "auto":
+            if self.bin_method == 'sturges':
+                self.num_x_bins = sturges_rule(data, x)
+            elif self.bin_method == 'freedman-diaconis':
+                self.num_x_bins = freedman_diaconis_rule(data, x)
+            elif self.bin_method == 'none':
+                self.num_x_bins = num_x_bins
+        else:
+            self.num_x_bins = num_x_bins
         self.peak_color = peak_color
         self.annotate_top_n_peaks = annotate_top_n_peaks
         self.annotate_mz = annotate_mz
@@ -599,9 +613,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
+        
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
-            self.data, y, self.reference_spectrum
+            self.data, x, y, self.reference_spectrum
         )
         kwargs.pop("fig", None)  # remove figure from **kwargs if exists
 
@@ -672,9 +687,46 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
 
+    def _bin_peaks(
+        self,
+        data: DataFrame,
+        x: str,
+        y: str
+    ) -> DataFrame:
+        """
+        Bin peaks based on x-axis values.
+        
+        Args:
+            data (DataFrame): The data to bin.
+            x (str): The column name for the x-axis data.
+            y (str): The column name for the y-axis data.
+            
+        Returns:
+            DataFrame: The binned data.
+        """
+        data[x] = cut(data[x], bins=self.num_x_bins)
+        if self.by is not None:
+            # Group by x bin and by column and calculate the mean intensity within each bin
+            data = (
+                data.groupby([x, self.by], observed=True)
+                .agg({y: "mean"})
+                .reset_index()
+            )
+        else:
+            # Group by x bins and calculate the mean intensity within each bin
+            data = (
+                data.groupby([x], observed=True)
+                .agg({y: "mean"})
+                .reset_index()
+            )
+        data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
+        data = data.fillna(0)
+        return data
+
     def _prepare_data(
         self,
         spectrum: DataFrame,
+        x: str,
         y: str,
         reference_spectrum: Union[DataFrame, None],
     ) -> tuple[list, list]:
@@ -693,6 +745,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 reference_spectrum[y] = (
                     reference_spectrum[y] / reference_spectrum[y].max() * 100
                 )
+        
+        # Bin peaks if required
+        if self.bin_peaks == True or (self.bin_peaks == "auto"
+        ):
+            spectrum = self._bin_peaks(spectrum, x, y)
+            if reference_spectrum is not None:
+                reference_spectrum = self._bin_peaks(reference_spectrum, x, y)
+            
         return spectrum, reference_spectrum
 
     def _get_colors(
