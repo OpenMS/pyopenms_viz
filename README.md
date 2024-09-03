@@ -1,4 +1,8 @@
 # Python Pandas-Based OpenMS Visualization Library
+[![pypipv](https://img.shields.io/pypi/pyversions/pyopenms_viz.svg)](https://img.shields.io/pypi/pyversions/pyopenms_viz)
+[![pypiv](https://img.shields.io/pypi/v/pyopenms_viz.svg)](https://img.shields.io/pypi/v/pyopenms_viz
+)
+[![pypidownload](https://img.shields.io/pypi/dm/pyopenms_viz?color=orange)](https://pypistats.org/packages/pyopenms_viz)
 
 pyopenms_viz is a Python library that provides a simple interface for extending the plotting capabilities of Pandas DataFrames for creating static or interactive visualizations of mass spectrometry data. It integrates seamlessly with various plotting library backends (matpotlib, bokeh and plotly) and leverages the power of Pandas for data manipulation and representation.
 
