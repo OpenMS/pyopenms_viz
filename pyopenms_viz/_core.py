@@ -705,20 +705,27 @@ class SpectrumPlot(BaseMSPlot, ABC):
             DataFrame: The binned data.
         """
         data[x] = cut(data[x], bins=self.num_x_bins)
+        # TODO: Find a better way to retain other columns
+        cols = [x]
         if self.by is not None:
-            # Group by x bin and by column and calculate the mean intensity within each bin
-            data = (
-                data.groupby([x, self.by], observed=True)
-                .agg({y: "mean"})
-                .reset_index()
-            )
-        else:
-            # Group by x bins and calculate the mean intensity within each bin
-            data = (
-                data.groupby([x], observed=True)
-                .agg({y: "mean"})
-                .reset_index()
-            )
+            cols.append(self.by)
+        if self.peak_color is not None:
+            cols.append(self.peak_color)
+        if self.ion_annotation is not None:
+            cols.append(self.ion_annotation)
+        if self.sequence_annotation is not None:
+            cols.append(self.sequence_annotation)
+        if self.custom_annotation is not None:
+            cols.append(self.custom_annotation)
+        if self.annotation_color is not None:
+            cols.append(self.annotation_color)
+        
+        # Group by x bins and calculate the mean intensity within each bin
+        data = (
+            data.groupby(cols, observed=True)
+            .agg({y: "mean"})
+            .reset_index()
+        )
         data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
         data = data.fillna(0)
         return data
@@ -796,6 +803,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         data = data.sort_values(
             y, ascending=True if data[y].min() < 0 else False
         ).reset_index()
+        
         for i, row in data.iterrows():
             texts = []
             if i < top_n:
@@ -833,7 +841,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     if ion == key:
                         return colormap[key]
                     # Fragment ions via regex
-                    x = re.search(r"^[abcxyz]{1}[0-9]*[+-]$", ion)
+                    ## Check if ion format is a1+, a1-, etc. or if it's a1^1, a1^2, etc.
+                    if re.search(r"^[abcxyz]{1}[0-9]*[+-]$", ion):
+                        x = re.search(r"^[abcxyz]{1}[0-9]*[+-]$", ion)
+                    elif re.search(r"^[abcxyz]{1}[0-9]*\^[0-9]*$", ion):
+                        x = re.search(r"^[abcxyz]{1}[0-9]*\^[0-9]*$", ion)
+                    else:
+                        x = None
                     if x:
                         return colormap[ion[0]]
             return ColorGenerator.color_blind_friendly_map[
