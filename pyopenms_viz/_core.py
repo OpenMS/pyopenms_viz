@@ -559,6 +559,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
         bin_peaks: Union[Literal["auto"], bool] = "auto",
+        bin_method: Literal['none', 'sturges', 'freedman-diaconis'] = 'freedman-diaconis',
         num_x_bins: int = 50,
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,
@@ -579,9 +580,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
         self.bin_peaks = bin_peaks
+        self.bin_method = bin_method
         if self.bin_peaks == "auto":
-            # self.num_x_bins = sturges_rule(data, x)
-            self.num_x_bins = freedman_diaconis_rule(data, x)
+            if self.bin_method == 'sturges':
+                self.num_x_bins = sturges_rule(data, x)
+            elif self.bin_method == 'freedman-diaconis':
+                self.num_x_bins = freedman_diaconis_rule(data, x)
+            elif self.bin_method == 'none':
+                self.num_x_bins = num_x_bins
         else:
             self.num_x_bins = num_x_bins
         self.peak_color = peak_color
