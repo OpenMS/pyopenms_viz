@@ -73,6 +73,15 @@ class BOKEHPlot(BasePlot, ABC):
         """
         fig.grid.visible = self.grid
         fig.toolbar_location = self.toolbar_location
+        # Update title, axis title and axis tick label sizes
+        if fig.title is not None:
+            fig.title.text_font_size = f"{self.title_font_size}pt"
+        fig.xaxis.axis_label_text_font_size = f"{self.xaxis_label_font_size}pt"
+        fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
+        fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
+        fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
+        
+        
 
     def _add_legend(self, fig, legend):
         """
@@ -300,7 +309,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 x=x,
                 y=y,
                 text=text,
-                text_font_size="8pt",
+                text_font_size="13pt",
                 text_color=color,
                 x_offset=1,
                 y_offset=0,
@@ -340,7 +349,6 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         for k, v in defaults.items():
             if k not in kwargs.keys():
                 kwargs[k] = v
-
         if by is None:
             kwargs["marker"] = next(marker_gen)
             source = ColumnDataSource(data)
@@ -469,6 +477,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     """
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
+        
         if not self.plot_3d:
             scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
 
