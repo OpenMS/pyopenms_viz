@@ -99,7 +99,14 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             ax: The axes object.
             **kwargs: Additional keyword arguments.
         """
-        ax.grid(self.grid, zorder=0)
+        ax.grid(self.grid)
+        # Update the title, xlabel, and ylabel
+        ax.set_title(self.title, fontsize=self.title_font_size)
+        ax.set_xlabel(self.xlabel, fontsize=self.xaxis_label_font_size)
+        ax.set_ylabel(self.ylabel, fontsize=self.yaxis_label_font_size)
+        # Update axis tick labels
+        ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
+        ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
 
     def _add_legend(self, ax, legend):
         """
@@ -298,7 +305,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 xy=(x, y),
                 xytext=(3, 0),
                 textcoords="offset points",
-                fontsize=8,
+                fontsize=self.annotation_font_size,
                 color=color,
             )
 
