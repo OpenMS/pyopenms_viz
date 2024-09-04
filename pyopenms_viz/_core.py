@@ -1074,14 +1074,16 @@ class PeakMapPlot(BaseMSPlot, ABC):
             y_plot_obj = self.get_line_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
+            y_fig = y_plot_obj.generate(line_color=color_gen)
         elif self.y_kind == 'spectrum':
             direction = 'horizontal'
             y_plot_obj = self.get_vline_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
+            y_fig = y_plot_obj.generate(line_color=color_gen, direction=direction)
         else:
             raise ValueError(f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'")
-        y_fig = y_plot_obj.generate(line_color=color_gen, direction=direction)
+        
         self.plot_x_axis_line(y_fig)
 
         return y_fig
