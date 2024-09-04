@@ -124,6 +124,12 @@ class BasePlot(ABC):
         zlabel: str | None = None,
         x_axis_location: str | None = None,
         y_axis_location: str | None = None,
+        title_font_size: int | None = None,
+        xaxis_label_font_size: int | None = None,
+        yaxis_label_font_size: int | None = None,
+        xaxis_tick_font_size: int | None = None,
+        yaxis_tick_font_size: int | None = None,
+        annotation_font_size: int | None = None,
         line_type: str | None = None,
         line_width: float | None = None,
         min_border: int | None = None,
@@ -156,6 +162,12 @@ class BasePlot(ABC):
         self.zlabel = zlabel
         self.x_axis_location = x_axis_location
         self.y_axis_location = y_axis_location
+        self.title_font_size = title_font_size
+        self.xaxis_label_font_size = xaxis_label_font_size
+        self.yaxis_label_font_size = yaxis_label_font_size
+        self.xaxis_tick_font_size = xaxis_tick_font_size
+        self.yaxis_tick_font_size = yaxis_tick_font_size
+        self.annotation_font_size = annotation_font_size
         self.line_type = line_type
         self.line_width = line_width
         self.min_border = min_border

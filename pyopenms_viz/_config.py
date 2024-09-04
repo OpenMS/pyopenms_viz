@@ -181,6 +181,12 @@ class _BasePlotConfig(ABC):
     zlabel: str = "Z-axis"
     x_axis_location: str = "below"
     y_axis_location: str = "left"
+    title_font_size: int = 18
+    xaxis_label_font_size: int = 16
+    yaxis_label_font_size: int = 16
+    xaxis_tick_font_size: int = 14
+    yaxis_tick_font_size: int = 14
+    annotation_font_size: int = 12
     min_border: str = 0
     engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY"
     height: int = 500
