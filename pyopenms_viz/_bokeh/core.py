@@ -261,17 +261,29 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         color_gen = kwargs.pop("line_color", None)
         if color_gen is None:
             color_gen = ColorGenerator()
+        line_width = kwargs.pop("line_width", 2.5)
         data["line_color"] = [next(color_gen) for _ in range(len(data))]
+        data["line_width"] = [line_width for _ in range(len(data))]
         if not plot_3d:
+            direction = kwargs.pop("direction", "vertical")
             if by is None:
                 source = ColumnDataSource(data)
+                if direction == "horizontal":
+                    x0_data_var = 0
+                    x1_data_var = x
+                    y0_data_var = y1_data_var = y
+                else:
+                    x0_data_var = x1_data_var = x
+                    y0_data_var = 0
+                    y1_data_var = y
                 line = fig.segment(
-                    x0=x,
-                    y0=0,
-                    x1=x,
-                    y1=y,
+                    x0=x0_data_var,
+                    y0=y0_data_var,
+                    x1=x1_data_var,
+                    y1=y1_data_var,
                     source=source,
                     line_color="line_color",
+                    line_width="line_width",
                     **kwargs,
                 )
                 return fig, None
@@ -279,13 +291,23 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 legend_items = []
                 for group, df in data.groupby(by):
                     source = ColumnDataSource(df)
+                    if direction == "horizontal":
+                        x0_data_var = 0
+                        x1_data_var = x
+                        y0_data_var = y1_data_var = y
+                    else:
+                        x0_data_var = x1_data_var = x
+                        y0_data_var = 0
+                        y1_data_var = y
+                        
                     line = fig.segment(
-                        x0=x,
-                        y0=0,
-                        x1=x,
-                        y1=y,
+                        x0=x0_data_var,
+                        y0=y0_data_var,
+                        x1=x1_data_var,
+                        y1=y1_data_var,
                         source=source,
                         line_color="line_color",
+                        line_width="line_width",
                         **kwargs,
                     )
                     legend_items.append((group, [line]))
