@@ -107,6 +107,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         # Update axis tick labels
         ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
         ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
+        if self.plot_3d:
+            ax.set_zlabel(self.zlabel, fontsize=self.yaxis_label_font_size)
+            ax.tick_params(axis="z", labelsize=self.yaxis_tick_font_size)
 
     def _add_legend(self, ax, legend):
         """
@@ -240,19 +243,32 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
             color_gen = ColorGenerator()
         
         if not plot_3d:
+            direction = kwargs.pop("direction", "vertical")
             legend_lines = []
             legend_labels = []
-
-            if by is None:
+            
+            if by is None:                   
                 for _, row in data.iterrows():
-                    (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=next(color_gen))
+                    if direction == "vertical":
+                        x_data = [row[x], row[x]]
+                        y_data = [0, row[y]]
+                    elif direction == "horizontal":
+                        x_data = [0, row[x]]
+                        y_data = [row[y], row[y]]
+                    (line,) = ax.plot(x_data, y_data, color=next(color_gen))
 
                 return ax, None
             else:
                 for group, df in data.groupby(by):
                     for _, row in df.iterrows():
+                        if direction == "vertical":
+                            x_data = [row[x], row[x]]
+                            y_data = [0, row[y]]
+                        elif direction == "horizontal":
+                            x_data = [0, row[x]]
+                            y_data = [row[y], row[y]]
                         (line,) = ax.plot(
-                            [row[x], row[x]], [0, row[y]], color=next(color_gen)
+                            x_data, y_data, color=next(color_gen)
                         )
                     legend_lines.append(line)
                     legend_labels.append(group)
@@ -549,7 +565,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         y_config.xlabel = self.zlabel
         y_config.ylabel = self.ylabel
         y_config.y_axis_location = "left"
-        y_config.legend.show = True
+        y_config.legend.show = self.legend.show
         y_config.legend.loc = "below"
         y_config.legend.orientation = "horizontal"
         y_config.legend.bbox_to_anchor = (1, -0.4)
@@ -561,10 +577,17 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
         color_gen = ColorGenerator()
 
-        y_plot_obj = self.get_line_renderer(
-            y_data, z, y, by=self.by, _config=y_config, **class_kwargs
-        )
-        y_fig = y_plot_obj.generate(line_color=color_gen)
+        if self.y_kind in ['chromatogram', 'mobilogram']:
+            y_plot_obj = self.get_line_renderer(
+                y_data, z, y, by=self.by, _config=y_config, **class_kwargs
+            )
+            y_fig = y_plot_obj.generate(line_color=color_gen)
+        elif self.y_kind == 'spectrum':
+            direction = 'horizontal'
+            y_plot_obj = self.get_vline_renderer(
+                y_data, z, y, by=self.by, _config=y_config, **class_kwargs
+            )
+            y_fig = y_plot_obj.generate(direction=direction, line_color=color_gen)
         self.plot_x_axis_line(y_fig)
         self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))
         self.ax_grid[1, 0].invert_xaxis()
