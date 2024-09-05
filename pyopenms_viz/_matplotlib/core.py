@@ -249,24 +249,24 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
             
             if by is None:                   
                 for _, row in data.iterrows():
-                    if direction == "vertical":
-                        x_data = [row[x], row[x]]
-                        y_data = [0, row[y]]
-                    elif direction == "horizontal":
+                    if direction == "horizontal":
                         x_data = [0, row[x]]
                         y_data = [row[y], row[y]]
+                    else:
+                        x_data = [row[x], row[x]]
+                        y_data = [0, row[y]]
                     (line,) = ax.plot(x_data, y_data, color=next(color_gen))
 
                 return ax, None
             else:
                 for group, df in data.groupby(by):
                     for _, row in df.iterrows():
-                        if direction == "vertical":
-                            x_data = [row[x], row[x]]
-                            y_data = [0, row[y]]
-                        elif direction == "horizontal":
+                        if direction == "horizontal":
                             x_data = [0, row[x]]
                             y_data = [row[y], row[y]]
+                        else:
+                            x_data = [row[x], row[x]]
+                            y_data = [0, row[y]]
                         (line,) = ax.plot(
                             x_data, y_data, color=next(color_gen)
                         )

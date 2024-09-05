@@ -255,13 +255,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             if by is None:
                 for _, row in data.iterrows():
                     line_color = next(color_gen)
-                    if direction == "vertical":
-                        x_data = [row[x]] * 2
-                        y_data = [0, row[y]]
-                    elif direction == "horizontal":
+                    if direction == "horizontal":
                         x_data = [0, row[x]]
                         y_data = [row[y]] * 2
-
+                    else:
+                        x_data = [row[x]] * 2
+                        y_data = [0, row[y]]
+                        
                     trace = go.Scattergl(
                         x=x_data,
                         y=y_data,
@@ -280,12 +280,12 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     else:
                         first_group_trace_showlenged = True
                     for _, row in df.iterrows():
-                        if direction == "vertical":
-                            x_data = [row[x]] * 2
-                            y_data = [0, row[y]]
-                        elif direction == "horizontal":
+                        if direction == "horizontal":
                             x_data = [0, row[x]]
                             y_data = [row[y]] * 2
+                        else:
+                            x_data = [row[x]] * 2
+                            y_data = [0, row[y]]
                             
                         line_color = next(color_gen)
                         trace = go.Scattergl(
