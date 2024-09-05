@@ -224,6 +224,8 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         Plot a line plot
         """
         color_gen = kwargs.pop("line_color", None)
+        if 'line_width' not in kwargs:
+            kwargs['line_width'] = 2.5
 
         if by is None:
             source = ColumnDataSource(data)
@@ -538,6 +540,13 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     def combine_plots(self, x_fig, y_fig):
         # Modify the main plot
         self.fig.yaxis.visible = False
+        # Ensure all plots have the same dimensions
+        x_fig.frame_height = self.height
+        x_fig.frame_width = self.width
+        y_fig.frame_width = self.width
+        y_fig.frame_height = self.height
+        self.fig.frame_width = self.width
+        self.fig.frame_height = self.height
 
         from bokeh.layouts import gridplot
 
