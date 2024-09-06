@@ -349,10 +349,11 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             shape_gen = MarkerShapeGenerator(engine="MATPLOTLIB")
         # Heatmap data and default config values
         z = kwargs.pop("z", None)
+        
         if z is not None:
             for k, v in dict(
                 # marker="s",
-                s=30,
+                s=60,
                 edgecolors="none",
                 cmap="magma_r",
             ).items():
@@ -375,10 +376,13 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
 
             return ax, None
         else:
-            vmin, vmax = data[z].min(), data[z].max()
+            if z is not None:
+                vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
                     use_color = df[z].values
+                else:
+                    use_color = next(color_gen)
                 kwargs["marker"] = next(shape_gen)
                 # Normalize colors if z is specified
                 if z is not None:

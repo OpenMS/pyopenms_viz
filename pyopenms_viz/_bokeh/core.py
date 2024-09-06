@@ -362,12 +362,13 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         if marker_gen is None:
             marker_gen = MarkerShapeGenerator(engine="BOKEH")
 
-        mapper = linear_cmap(
-            field_name=z,
-            palette=Plasma256[::-1],
-            low=min(data[z]),
-            high=max(data[z]),
-        )
+        if z is not None:
+            mapper = linear_cmap(
+                field_name=z,
+                palette=Plasma256[::-1],
+                low=min(data[z]),
+                high=max(data[z]),
+            )
         # Set defaults if they have not been set in kwargs
         defaults = {"size": 10, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
         for k, v in defaults.items():
@@ -382,6 +383,8 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             legend_items = []
             for group, df in data.groupby(by):
                 kwargs["marker"] = next(marker_gen)
+                if z is None:
+                    kwargs['fill_color'] = next(color_gen)
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))

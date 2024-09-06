@@ -891,7 +891,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
-        # plot_3d: bool = False,
+        fill_by_z: bool = True,
         **kwargs,
     ) -> None:
         # Copy data since it will be modified
@@ -907,6 +907,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.add_marginals = add_marginals
         self.y_kind = y_kind
         self.x_kind = x_kind
+        self.fill_by_z = fill_by_z
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -955,6 +956,10 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, z=z, **kwargs)
 
+        # If we do not want to fill/color based on z value, set to none prior to plotting
+        if not fill_by_z:
+            z = None
+            
         self.plot(x, y, z, **kwargs)
             
         if self.show_plot:

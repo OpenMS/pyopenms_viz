@@ -590,7 +590,10 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
             self.fig = scatterPlot.generate(z=z, **other_kwargs)
 
-            tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
+            if z is not None:
+                tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
+            else:
+                tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y})
 
             self._add_tooltips(self.fig, tooltips, custom_hover_data=custom_hover_data)
 
