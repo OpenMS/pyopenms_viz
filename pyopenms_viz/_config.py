@@ -198,6 +198,7 @@ class _BasePlotConfig(ABC):
     grid: bool = True
     line_type: str = "solid"
     line_width: float = 1
+    marker_size: int = 30
     toolbar_location: str = "above"
 
     legend: LegendConfig = field(default_factory=default_legend_factory)
