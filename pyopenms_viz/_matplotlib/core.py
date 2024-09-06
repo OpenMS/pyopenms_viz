@@ -343,7 +343,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         color_gen = kwargs.pop("line_color", None)
         # Marker shapes
         shape_gen = kwargs.pop("shape_gen", None)
-        marker_size = kwargs.pop("marker_size", None)
+        marker_size = kwargs.pop("marker_size", 30)
         if color_gen is None:
             color_gen = ColorGenerator()
         if shape_gen is None:

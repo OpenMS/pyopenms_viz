@@ -448,6 +448,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         if marker_gen is None:
             marker_gen = MarkerShapeGenerator(engine="PLOTLY")
         marker_dict = kwargs.pop("marker", dict())
+        marker_size = kwargs.pop("marker_size", 10)
         # Check for z-dimension and plot heatmap
         z = kwargs.pop("z", None)
         # Plotting heatmaps with z dimension overwrites marker_dict.
@@ -457,7 +458,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 color=data[z],
                 colorscale="Inferno_r",
                 showscale=False,
-                size=10,
+                size=marker_size,
                 opacity=0.8,
                 cmin=data[z].min(),
                 cmax=data[z].max(),

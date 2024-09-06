@@ -361,7 +361,8 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         marker_gen = kwargs.pop("marker_gen", None)
         if marker_gen is None:
             marker_gen = MarkerShapeGenerator(engine="BOKEH")
-
+        marker_size = kwargs.pop("marker_size", 10)
+        
         if z is not None:
             mapper = linear_cmap(
                 field_name=z,
@@ -370,7 +371,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 high=max(data[z]),
             )
         # Set defaults if they have not been set in kwargs
-        defaults = {"size": 10, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        defaults = {"size": marker_size, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
         for k, v in defaults.items():
             if k not in kwargs.keys():
                 kwargs[k] = v
