@@ -218,14 +218,16 @@ class BasePlot(ABC):
                 col for col in self.known_columns if col != self.y
             ]
 
-        print(self.data[known_columns_without_int].drop_duplicates().shape[0])
         if (
             self.data[known_columns_without_int].drop_duplicates().shape[0]
             < self.data.shape[0]
         ):
             if self.aggregate_duplicates:
                 self.data = (
-                    self.data.groupby(known_columns_without_int).sum().reset_index()
+                    self.data[self.known_columns]
+                    .groupby(known_columns_without_int)
+                    .sum()
+                    .reset_index()
                 )
             else:
                 warnings.warn(
@@ -287,6 +289,7 @@ class BasePlot(ABC):
         """
         known_columns = [self.x, self.y]
         known_columns.extend([self.by] if self.by is not None else [])
+        known_columns.extend([self.z] if self.z is not None else [])
         return known_columns
 
     @property
@@ -963,15 +966,15 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         # Bin peaks if required
         if bin_peaks == True or (
-            data.shape[0] > num_x_bins * num_y_bins and bin_peaks == "auto"
+            self.data.shape[0] > num_x_bins * num_y_bins and bin_peaks == "auto"
         ):
-            data[x] = cut(data[x], bins=num_x_bins)
-            data[y] = cut(data[y], bins=num_y_bins)
+            self.data[x] = cut(self.data[x], bins=num_x_bins)
+            self.data[y] = cut(self.data[y], bins=num_y_bins)
             by = kwargs.pop("by", None)
             if by is not None:
                 # Group by x, y and by columns and calculate the mean intensity within each bin
-                data = (
-                    data.groupby([x, y, by], observed=True)
+                self.data = (
+                    self.data.groupby([x, y, by], observed=True)
                     .agg({z: "mean"})
                     .reset_index()
                 )
@@ -979,19 +982,25 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 kwargs["by"] = by
             else:
                 # Group by x and y bins and calculate the mean intensity within each bin
-                data = (
-                    data.groupby([x, y], observed=True).agg({z: "mean"}).reset_index()
+                self.data = (
+                    self.data.groupby([x, y], observed=True)
+                    .agg({z: "mean"})
+                    .reset_index()
                 )
-            data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
-            data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
-            data = data.fillna(0)
+            self.data[x] = (
+                self.data[x].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data[y] = (
+                self.data[y].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data = self.data.fillna(0)
 
         # Log intensity scale
         if z_log_scale:
-            data[z] = log1p(data[z])
+            self.data[z] = log1p(self.data[z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
-        data = data.sort_values(z)
+        self.data = self.data.sort_values(z)
 
         # if not plot_3d:
         self.plot(x, y, z, **kwargs)
