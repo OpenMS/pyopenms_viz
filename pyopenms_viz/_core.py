@@ -289,7 +289,6 @@ class BasePlot(ABC):
         """
         known_columns = [self.x, self.y]
         known_columns.extend([self.by] if self.by is not None else [])
-        known_columns.extend([self.z] if self.z is not None else [])
         return known_columns
 
     @property
@@ -920,6 +919,15 @@ class PeakMapPlot(BaseMSPlot, ABC):
     @property
     def _kind(self):
         return "peakmap"
+
+    @property
+    def known_columns(self) -> List[str]:
+        """
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        """
+        known_columns = super().known_columns
+        known_columns.extend([self.z] if self.z is not None else [])
+        return known_columns
 
     def __init__(
         self,
