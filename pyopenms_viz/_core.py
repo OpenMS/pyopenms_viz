@@ -586,10 +586,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         bin_method: Literal[
             "none", "sturges", "freedman-diaconis", "mz-tol-bin"
-        ] = "freedman-diaconis",
+        ] = "mz-tol-bin",
         num_x_bins: int = 50,
-        mz_tol: float = 0.1,
-        aggregation_method: Literal['mean', 'sum'] = 'sum', 
+        mz_tol: float = 1,
+        aggregation_method: Literal['mean', 'sum', 'max'] = 'max', 
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,
         annotate_mz: bool = True,
