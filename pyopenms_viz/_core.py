@@ -6,16 +6,16 @@ import importlib
 import types
 import re
 
-from pandas import cut, merge
+from pandas import cut, merge, Interval
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import ceil, log1p, log2
+from numpy import ceil, log1p, log2, nan, mean
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule
+from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule, mz_tolerance_binning
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -573,9 +573,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
         relative_intensity: bool = False,
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         bin_method: Literal[
-            "none", "sturges", "freedman-diaconis"
+            "none", "sturges", "freedman-diaconis", "mz-tol-bin"
         ] = "freedman-diaconis",
         num_x_bins: int = 50,
+        mz_tol: float = 0.1,
+        aggregation_method: Literal['mean', 'sum'] = 'sum', 
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,
         annotate_mz: bool = True,
@@ -601,10 +603,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.num_x_bins = sturges_rule(data, x)
             elif self.bin_method == "freedman-diaconis":
                 self.num_x_bins = freedman_diaconis_rule(data, x)
+            elif self.bin_method == "mz-tol-bin":
+                self.num_x_bins = mz_tolerance_binning(data, x, mz_tol)
             elif self.bin_method == "none":
                 self.num_x_bins = num_x_bins
         else:
             self.num_x_bins = num_x_bins
+        self.aggregation_method = aggregation_method
         self.peak_color = peak_color
         self.annotate_top_n_peaks = annotate_top_n_peaks
         self.annotate_mz = annotate_mz
@@ -706,7 +711,19 @@ class SpectrumPlot(BaseMSPlot, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        data[x] = cut(data[x], bins=self.num_x_bins)
+        if isinstance(self.num_x_bins, int):
+            data[x] = cut(data[x], bins=self.num_x_bins)
+        elif isinstance(self.num_x_bins, list) and all(isinstance(item, tuple) for item in self.num_x_bins):
+            # Function to assign each value to a bin
+            def assign_bin(value):
+                for low, high in self.num_x_bins:
+                    if low <= value <= high:
+                        return f"{low:.4f}-{high:.4f}"
+                return nan  # For values that don't fall into any bin
+            
+            # Apply the binning
+            data[x] = data[x].apply(assign_bin)
+            
         # TODO: Find a better way to retain other columns
         cols = [x]
         if self.by is not None:
@@ -723,8 +740,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
             cols.append(self.annotation_color)
 
         # Group by x bins and calculate the sum intensity within each bin
-        data = data.groupby(cols, observed=True).agg({y: "sum"}).reset_index()
-        data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
+        data = data.groupby(cols, observed=True).agg({y: self.aggregation_method}).reset_index()
+        def convert_to_numeric(value):
+            if isinstance(value, Interval):
+                return value.mid
+            elif isinstance(value, str):
+                return mean([float(i) for i in value.split('-')])
+            else:
+                return value
+
+        data[x] = data[x].apply(convert_to_numeric).astype(float)
+        
         data = data.fillna(0)
         return data
 

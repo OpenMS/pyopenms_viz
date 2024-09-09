@@ -267,3 +267,41 @@ def freedman_diaconis_rule(df, value):
     # Calculate the number of bins
     num_bins = int((df[value].max() - df[value].min()) / bin_width)
     return num_bins
+
+def mz_tolerance_binning(df, value, tolerance=0.1):
+    """
+    Bin data based on a fixed m/z tolerance and return bin ranges.
+    
+    Args:
+        df (pd.DataFrame): A pandas DataFrame containing the data.
+        value (str): The column name of the m/z data.
+        tolerance (float): The m/z tolerance to define bin width.
+        
+    Returns:
+        list of tuples: A list where each tuple represents a bin's (min, max) range.
+    """
+    # Sort the data by m/z values
+    sorted_df = df.sort_values(by=value)
+    values = sorted_df[value].values
+    
+    # Initialize bins
+    bins = []
+    current_bin_start = values[0]
+    current_bin_end = values[0]
+
+    # Iterate over the data and group by tolerance
+    for i in range(1, len(values)):
+        if values[i] - current_bin_start <= tolerance:
+            current_bin_end = values[i]
+        else:
+            # Append the bin range to the bins list
+            bins.append((current_bin_start, current_bin_end))
+            # Start a new bin
+            current_bin_start = values[i]
+            current_bin_end = values[i]
+
+    # Append the last bin
+    bins.append((current_bin_start, current_bin_end))
+
+    return bins
+
