@@ -588,7 +588,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             "none", "sturges", "freedman-diaconis", "mz-tol-bin"
         ] = "mz-tol-bin",
         num_x_bins: int = 50,
-        mz_tol: float = 1,
+        mz_tol:  Literal[float, 'freedman-diaconis', '1pct-diff'] = '1pct-diff',
         aggregation_method: Literal['mean', 'sum', 'max'] = 'max', 
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,

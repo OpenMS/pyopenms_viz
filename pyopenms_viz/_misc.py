@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
 from typing import Literal
+import warnings
 
 
 class ColorGenerator:
@@ -242,7 +243,7 @@ def sturges_rule(df, value):
     num_bins = int(np.ceil(1 + np.log2(n)))
     return num_bins
 
-def freedman_diaconis_rule(df, value):
+def freedman_diaconis_rule(df, value, return_bin_width=False):
     """
     Calculate the number of bins using the Freedman-Diaconis rule.
     
@@ -263,45 +264,66 @@ def freedman_diaconis_rule(df, value):
 
     # Calculate bin width using the Freedman-Diaconis rule
     bin_width = 2 * IQR / (n ** (1/3))
+    if return_bin_width:
+        return bin_width
 
     # Calculate the number of bins
     num_bins = int((df[value].max() - df[value].min()) / bin_width)
     return num_bins
 
-def mz_tolerance_binning(df, value, tolerance=0.1):
+def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis', '1pct-diff'] = '1pct-diff'):
     """
     Bin data based on a fixed m/z tolerance and return bin ranges.
     
     Args:
         df (pd.DataFrame): A pandas DataFrame containing the data.
         value (str): The column name of the m/z data.
-        tolerance (float): The m/z tolerance to define bin width.
-        
+        tolerance (Union[int, str]): The method to define bin width. 
+            - If an float, it specifies the fixed m/z tolerance.
+            - If 'freedman-diaconis', it calculates the tolerance as the bin width using the Freedman-Diaconis rule.
+            - If '1pct-diff', it calculates the tolerance as the 1% percentile of the non-zero differences between values.
+
     Returns:
         list of tuples: A list where each tuple represents a bin's (min, max) range.
     """
-    # Sort the data by m/z values
-    sorted_df = df.sort_values(by=value)
-    values = sorted_df[value].values
+    # Convert to Numpy array and sort the values
+    values = np.sort(df[value].values)
+
+    # Initialize bins - differences with first element of the bin
+    bin_starts = [0]  # List to store bin start indices
+    current_bin_start_value = values[0]
     
-    # Initialize bins
-    bins = []
-    current_bin_start = values[0]
-    current_bin_end = values[0]
-
-    # Iterate over the data and group by tolerance
-    for i in range(1, len(values)):
-        if values[i] - current_bin_start <= tolerance:
-            current_bin_end = values[i]
+    method=""
+    if isinstance(tolerance, str):
+        method=f"auto computed ({tolerance}) "
+        if tolerance == "freedman-diaconis":
+            tolerance = np.floor(freedman_diaconis_rule(df, value))
+        elif tolerance == "1pct-diff":
+            diffs = values - current_bin_start_value
+            tolerance = np.floor(np.percentile(diffs[diffs!=0], 0.01))
         else:
-            # Append the bin range to the bins list
-            bins.append((current_bin_start, current_bin_end))
-            # Start a new bin
-            current_bin_start = values[i]
-            current_bin_end = values[i]
+            raise ValueError(f"Invalid tolerance method: {tolerance}.\n Valid options are a float value or 'freedman-diaconis' or '1pct-diff'.")
 
-    # Append the last bin
-    bins.append((current_bin_start, current_bin_end))
+    if tolerance == 0:
+        warnings.warn(f"{method}tolerance is 0. Using default tolerance value of 1", UserWarning)
+        tolerance = 1
 
+    # Iterate over the values and calculate where bins should start
+    for i in range(1, len(values)):
+        if values[i] - current_bin_start_value > tolerance:
+            bin_starts.append(i)  # Record bin start index
+            current_bin_start_value = values[i]  # Reset the current bin start value
+
+    # Ensure the last bin covers the remaining values
+    if bin_starts[-1] != len(values):
+        bin_starts.append(len(values))  # Append the end index
+
+    # Split the values array into bins using the identified bin start indices
+    bin_edges = np.split(values, bin_starts)
+
+    # Remove empty bins, if any, and create tuples of (min, max)
+    bins = [(bin_edge[0], bin_edge[-1]) for bin_edge in bin_edges if len(bin_edge) > 0]
+
+    # print(f"Number of bins: {len(bins)}")
+    # print(f"bins: {bins}")
     return bins
-
