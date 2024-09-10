@@ -297,7 +297,7 @@ def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis
     if isinstance(tolerance, str):
         method=f"auto computed ({tolerance}) "
         if tolerance == "freedman-diaconis":
-            tolerance = np.floor(freedman_diaconis_rule(df, value))
+            tolerance = np.floor(freedman_diaconis_rule(df, value, True))
         elif tolerance == "1pct-diff":
             diffs = values - current_bin_start_value
             tolerance = np.floor(np.percentile(diffs[diffs!=0], 0.01))
