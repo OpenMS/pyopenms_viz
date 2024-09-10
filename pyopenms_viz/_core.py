@@ -485,7 +485,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         return "chromatogram"
 
     def __init__(
-        self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
+        self, data, x, y, annotation_data: DataFrame | None = None, relative_intensity=False, **kwargs
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
@@ -498,6 +498,10 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         else:
             self.annotation_data = None
         self.label_suffix = self.x  # set label suffix for bounding box
+        
+        # Convert to relative intensity if required
+        if relative_intensity:
+            self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self.plot(self.data, self.x, self.y, **kwargs)
         if self.show_plot:
