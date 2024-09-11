@@ -160,7 +160,7 @@ class LineConfig(BasePlotConfig):
 
 @dataclass(kw_only=True)
 class VLineConfig(LineConfig):
-    direction: Literal["horizontal", "vertical"] = "horizontal"
+    direction: Literal["horizontal", "vertical"] = "vertical"
 
 
 @dataclass(kw_only=True)
@@ -218,7 +218,7 @@ class ChromatogramConfig(LineConfig):
 
 
 @dataclass(kw_only=True)
-class SpectrumConfig:
+class SpectrumConfig(VLineConfig):
     mirror_spectrum: bool = False
     peak_color: str | None = None
 

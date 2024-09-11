@@ -273,7 +273,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         if not plot_3d:
             if by is None:
                 source = ColumnDataSource(data)
-                if self.plot_config.direction == "horizontal":
+                if self.direction == "horizontal":
                     x0_data_var = 0
                     x1_data_var = x
                     y0_data_var = y1_data_var = y
@@ -296,7 +296,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 legend_items = []
                 for group, df in data.groupby(by):
                     source = ColumnDataSource(df)
-                    if self.plot_config.direction == "horizontal":
+                    if self.direction == "horizontal":
                         x0_data_var = 0
                         x1_data_var = x
                         y0_data_var = y1_data_var = y

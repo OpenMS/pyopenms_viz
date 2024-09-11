@@ -120,6 +120,7 @@ class BasePlot(BasePlotConfig, ABC):
     z: str = None
     by: str = None
     fig: "figure" = None
+    _config: BasePlotConfig = None
 
     # Note priority is keyword arguments > config > default values
     # This allows for plots to have their own default configurations which can be overridden by the user
@@ -127,33 +128,40 @@ class BasePlot(BasePlotConfig, ABC):
         """
         Load the configuration settings for the plot.
         """
-        config_mapper = {
-            ChromatogramPlot: ChromatogramConfig,
-            MobilogramPlot: ChromatogramConfig,
-            SpectrumPlot: SpectrumConfig,
-            PeakMapPlot: PeakMapConfig,
-            LinePlot: LineConfig,
-            ScatterPlot: ScatterConfig,
-            VLinePlot: VLineConfig,
-        }
-        for plotClass, configClass in config_mapper.items():
-            print(
-                f"Checking if {self.__class__.__name__} is a subclass of {plotClass.__name__}"
-            )
-            print(
-                f"issubclass({self.__class__.__name__}, {plotClass.__name__}) = {issubclass(self.__class__, plotClass)}"
-            )
-            if issubclass(self.__class__, plotClass):
+        if self._config is None:
+            config_mapper = {
+                ChromatogramPlot: ChromatogramConfig,
+                MobilogramPlot: ChromatogramConfig,
+                SpectrumPlot: SpectrumConfig,
+                PeakMapPlot: PeakMapConfig,
+                LinePlot: LineConfig,
+                ScatterPlot: ScatterConfig,
+                VLinePlot: VLineConfig,
+            }
+            for plotClass, configClass in config_mapper.items():
                 print(
-                    f"{self.__class__.__name__} is a subclass of {plotClass.__name__}"
+                    f"Checking if {self.__class__.__name__} is a subclass of {plotClass.__name__}"
                 )
-                config = configClass(**kwargs)
-                self._update_from_config(config)
-                break
+                print(
+                    f"issubclass({self.__class__.__name__}, {plotClass.__name__}) = {issubclass(self.__class__, plotClass)}"
+                )
+                if issubclass(self.__class__, plotClass):
+                    print(
+                        f"{self.__class__.__name__} is a subclass of {plotClass.__name__}"
+                    )
+                    self._config = configClass(**kwargs)
+                    self._update_from_config(self._config)
+                    self.update_config()
+                    break
+            else:
+                raise ValueError(
+                    f"No matching plot class found for {self.__class__.__name__}"
+                )
         else:
-            raise ValueError(
-                f"No matching plot class found for {self.__class__.__name__}"
-            )
+            assert (
+                kwargs == {}
+            )  # if kwargs is preset then setting via config is not supported.
+            self._update_from_config(self._config)
 
     def __post_init__(self):
         # data verification
@@ -268,11 +276,15 @@ class BasePlot(BasePlotConfig, ABC):
         for attr, value in config.__dict__.items():
             if value is not None and hasattr(self, attr):
                 setattr(self, attr, value)
+            else:
+                print(f"Attribute {attr} not found in {self.__class__.__name__}")
 
     def update_config(self) -> None:
         """
         Update the _config object based on the provided kwargs. This means that the _config will store an accurate representation of the parameters
         """
+        print(self._config.__dict__.keys())
+        print(self.__dict__.keys())
         for attr in self._config.__dict__.keys():
             setattr(self._config, attr, self.__dict__[attr])
 
@@ -496,6 +508,7 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
     ) -> None:
 
         super().__init__(data, x, y, z, by)
+        ChromatogramConfig.__init__(self)
         self.load_config(**kwargs)
 
         if annotation_data is not None:
@@ -566,33 +579,26 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
 class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
     @property
-    def plot_config(self):
-        return self._plot_config
-
-    @plot_config.setter
-    def plot_config(self, value):
-        if value is None:
-            self._plot_config = SpectrumConfig()
-        elif isinstance(value, dict):
-            self._plot_config = SpectrumConfig.from_dict(value)
-        elif isinstance(value, SpectrumConfig):
-            self._plot_config = value
-        else:
-            raise ValueError("plot_config must be a dict, SpectrumConfig, or None")
+    def _kind(self):
+        return "spectrum"
 
     def __init__(
         self,
         data: DataFrame,
         x: str,
         y: str,
+        by: str | None = None,
         reference_spectrum: DataFrame | None = None,
         **kwargs,
     ) -> None:
 
-        # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
+        super().__init__(data, x, y, z=None, by=by)
+        SpectrumConfig.__init__(self)
+        self.load_config(**kwargs)
 
-        super().__init__(data, x, y, **kwargs)
+        # Set default config attributes if not passed as keyword arguments
+        # kwargs["_config"] = _BasePlotConfig(kind=self._kind)
+
         self.reference_spectrum = reference_spectrum
 
         self.plot(x, y, by=self.by)
@@ -603,6 +609,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
     def plot(self, x, y, by=None):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
+        super().plot(self.data, self.fig, x, y, by=by)
+
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
             self.data, x, y, self.reference_spectrum
@@ -611,8 +619,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         entries = {"m/z": x, "intensity": y}
         for optional in (
             "native_id",
-            self.plot_config.ion_annotation,
-            self.plot_config.sequence_annotation,
+            self.ion_annotation,
+            self.sequence_annotation,
         ):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
@@ -625,10 +633,10 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             spectrum, x, y, by=by, fig=self.fig, _config=self._config
         )
 
-        color_gen = self._get_colors(spectrum, "peak")
+        # color_gen = self._get_colors(spectrum, "peak")
 
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
+            tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
         )
 
         # Annotations for spectrum
@@ -636,7 +644,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
-        if self.plot_config.mirror_spectrum and reference_spectrum is not None:
+        if self.mirror_spectrum and reference_spectrum is not None:
             ## create a mirror spectrum
             # Set intensity to negative values
             reference_spectrum[y] = reference_spectrum[y] * -1
@@ -645,9 +653,9 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
                 reference_spectrum, x, y, by=by, fig=self.fig, _config=self._config
             )
 
-            color_gen_mirror = self._get_colors(reference_spectrum, "peak")
+            # color_gen_mirror = self._get_colors(reference_spectrum, "peak")
 
-            mirror_spectrum.generate(line_color=color_gen_mirror)
+            mirror_spectrum.generate()
             self.plot_x_axis_line(self.fig)
 
             # Annotations for reference spectrum
