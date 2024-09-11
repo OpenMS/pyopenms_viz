@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Tuple, Literal, Union, List, Dict, Optional
+from typing import Any, Tuple, Literal, Union, List, Dict, Optional, Iterator
 import importlib
 import types
+from dataclasses import dataclass, asdict, field
 
 from pandas import cut, merge
 from pandas.core.frame import DataFrame
@@ -15,12 +16,19 @@ import re
 from numpy import ceil, log1p, log2
 from ._config import (
     LegendConfig,
-    _BasePlotConfig,
+    BasePlotConfig,
     SpectrumConfig,
     ChromatogramConfig,
     PeakMapConfig,
+    LineConfig,
+    VLineConfig,
+    ScatterConfig,
 )
-from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule
+from ._misc import (
+    ColorGenerator,
+    sturges_rule,
+    freedman_diaconis_rule,
+)
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -101,85 +109,67 @@ APPEND_PLOT_DOC = Appender(_baseplot_doc)
 
 
 @dataclass
-class BasePlot(ABC):
+class BasePlot(BasePlotConfig, ABC):
     """
     This class shows functions which must be implemented by all backends
     """
 
-    # Data Attributes
-    data: DataFrame
-    x: str | None = None
-    y: str | None = None
-    z: str | None = None
-    kind: (
-        Literal[
-            "line",
-            "vline",
-            "scatter",
-            "chromatogram",
-            "mobilogram",
-            "spectrum",
-            "feature_heatmap",
-            "complex",
-        ]
-        | None
-    ) = None
-    by: str | None = None
-    relative_intensity: bool = False
+    data: DataFrame = None
+    x: str = None
+    y: str = None
+    z: str = None
+    by: str = None
+    fig: "figure" = None
 
-    # Plotting Attributes
-    height: int | None = None
-    width: int | None = None
-    grid: bool | None = None
-    toolbar_location: str | None = None
-    fig: "figure" | None = None
-    title: str | None = None
-    xlabel: str | None = None
-    ylabel: str | None = None
-    zlabel: str | None = None
-    line_type: str | None = None
-    line_width: float | None = None
-    show_plot: bool | None = None
+    # def __post_init__(self):
+    #    self.load_config()
 
-    # Configurations
-    legend_config: LegendConfig | Dict | None = None
-    plot_config: SpectrumConfig | ChromatogramConfig | PeakMapConfig | Dict | None = (
-        None  # plot specific configuration
-    )
-    _config: _BasePlotConfig | None = None
+    def load_config(self, **kwargs):
+        """
+        Load the configuration settings for the plot.
+        """
+        config_mapper = {
+            ChromatogramPlot: ChromatogramConfig,
+            MobilogramPlot: ChromatogramConfig,
+            SpectrumPlot: SpectrumConfig,
+            PeakMapPlot: PeakMapConfig,
+            LinePlot: LineConfig,
+            ScatterPlot: ScatterConfig,
+            VLinePlot: VLineConfig,
+        }
+        for plotClass, configClass in config_mapper.items():
+            print(
+                f"Checking if {self.__class__.__name__} is a subclass of {plotClass.__name__}"
+            )
+            print(
+                f"issubclass({self.__class__.__name__}, {plotClass.__name__}) = {issubclass(self.__class__, plotClass)}"
+            )
+            if issubclass(self.__class__, plotClass):
+                print(
+                    f"{self.__class__.__name__} is a subclass of {plotClass.__name__}"
+                )
+                config = configClass(**kwargs)
+                self._update_from_config(config)
+                break
+        else:
+            raise ValueError(
+                f"No matching plot class found for {self.__class__.__name__}"
+            )
 
     # Note priority is keyword arguments > config > default values
     # This allows for plots to have their own default configurations which can be overridden by the user
-    def __post_init__(self):
+    def setup_figure(self):
         self.data = self.data.copy()
-        if self._config is not None:
-            self._update_from_config(self._config)
 
-        if self.legend_config is not None:
-            if isinstance(self.legend_config, dict):
-                self.legend_config = LegendConfig.from_dict(self.legend_config)
-        else:
-            self.legend_config = LegendConfig()
+        # if self._config is not None:
+        #    self._update_from_config(self._config)
 
         # update the base plot config based on kwargs
-        self.update_config()
+        # self.update_config()
 
-        ### get x and y data
-        if self._kind in {
-            "line",
-            "vline",
-            "scatter",
-            "chromatogram",
-            "mobilogram",
-            "spectrum",
-            "peakmap",
-            "complex",
-        }:
-            self.x = self._verify_column(self.x, "x")
-            self.y = self._verify_column(self.y, "y")
-
-        if self._kind in {"peakmap"}:
-            self.z = self._verify_column(self.z, "z")
+        # all plots have x and y columns
+        self.x = self._verify_column(self.x, "x")
+        self.y = self._verify_column(self.y, "y")
 
         if self.by is not None:
             # Ensure by column data is string
@@ -246,6 +236,30 @@ class BasePlot(ABC):
         """
         return NotImplementedError
 
+    @property
+    def current_color(self) -> str:
+        """
+        Get the current color for the plot.
+
+        Returns:
+            str: The current color.
+        """
+        return self.color if isinstance(self.color, str) else next(self.color)
+
+    @property
+    def current_type(self) -> str:
+        """
+        Get the current type for the plot.
+
+        Returns:
+            str: The current type.
+        """
+        return (
+            self.element_type
+            if isinstance(self.element_type, str)
+            else next(self.element_type)
+        )
+
     def _update_from_config(self, config) -> None:
         """
         Updates the plot configuration based on the provided `config` object.
@@ -257,11 +271,9 @@ class BasePlot(ABC):
             None
         """
         for attr, value in config.__dict__.items():
-            if (
-                value is not None
-                and hasattr(self, attr)
-                and self.__dict__[attr] is None
-            ):
+            print("parsing attr:", attr)
+            print("self has attibute:", hasattr(self, attr))
+            if value is not None and hasattr(self, attr):
                 setattr(self, attr, value)
 
     def update_config(self) -> None:
@@ -378,13 +390,14 @@ class BasePlot(ABC):
         pass
 
 
-class LinePlot(BasePlot, ABC):
+class LinePlot(BasePlot, LineConfig, ABC):
+
     @property
     def _kind(self):
         return "line"
 
 
-class VLinePlot(BasePlot, ABC):
+class VLinePlot(BasePlot, VLineConfig, ABC):
     @property
     def _kind(self):
         return "vline"
@@ -410,7 +423,7 @@ class VLinePlot(BasePlot, ABC):
         pass
 
 
-class ScatterPlot(BasePlot, ABC):
+class ScatterPlot(BasePlot, ScatterConfig, ABC):
     @property
     def _kind(self):
         return "scatter"
@@ -470,7 +483,8 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
 
-class ChromatogramPlot(BaseMSPlot, ABC):
+class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
+
     @property
     def _kind(self):
         return "chromatogram"
@@ -491,13 +505,33 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             raise ValueError("plot_config must be a dict, ChromatogramConfig, or None")
 
     def __init__(
-        self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
+        self,
+        data,
+        x,
+        y,
+        z=None,
+        by=None,
+        annotation_data: DataFrame | None = None,
+        **kwargs,
     ) -> None:
 
-        # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
+        super().__init__(data, x, y, z, by)
+        self.load_config(**kwargs)
 
-        super().__init__(data, x, y, **kwargs)
+        # contains the keyword arguments meant to overwrite the _config
+        # new_config = ChromatogramConfig(**kwargs)
+        # self._update_from_config(new_config)
+        # self.update_config()
+
+        # self.update
+        # **kwargs)
+        # BaseMSPlot().__init__(data, x, y)
+        # if values are none, then overwrite them with chromatogram config
+        # default_chrom_config = ChromatogramConfig()
+        # self._config.update_none_fields
+
+        print("xlabel", self.xlabel)
+        print("annotation", self.annotation_colormap)
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -565,7 +599,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
 
 
-class SpectrumPlot(BaseMSPlot, ABC):
+class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
     @property
     def _kind(self):
         return "spectrum"
@@ -844,7 +878,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         return ColorGenerator(colors)
 
 
-class PeakMapPlot(BaseMSPlot, ABC):
+class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
     def _kind(self):
@@ -875,11 +909,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
         **kwargs,
     ) -> None:
 
-        # Copy data since it will be modified
-        data = data.copy()
+        super().__init__(data, x, y, z=z, **kwargs)
+        self.z = self._verify_column(self.z, "z")
 
         # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
+        kwargs["_config"] = BasePlotConfig(kind=self._kind)
 
         if self.plot_config.add_marginals:
             kwargs["_config"].title = None
@@ -926,8 +960,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         data = data.sort_values(z)
-
-        super().__init__(data, x, y, z=z, **kwargs)
 
         # If we do not want to fill/color based on z value, set to none prior to plotting
         if not self.plot_config.fill_by_z:
