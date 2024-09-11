@@ -909,7 +909,7 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         if not self.fill_by_z:
             z = None
 
-        self.plot(x, y, by=by)
+        self.plot()
 
         if self.show_plot:
             self.show()
@@ -918,23 +918,18 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         """
         Create the plot
         """
-        super().plot()
-
         if self.add_marginals:
-            self.create_main_plot_marginals(x, y, self.z, by)
+            self.create_main_plot_marginals()
         else:
-            self.create_main_plot(x, y, self.z, by)
+            self.create_main_plot()
 
-        self.manual_bbox_renderer = (
-            self._add_bounding_box_drawer(self.fig) if self._interactive else None
-        )
+        if self._interactive:
+            self._add_bounding_box_drawer()
 
         if self.add_marginals:
 
-            x_fig = self.create_x_axis_plot(x, self.z, by)
-
-            y_fig = self.create_y_axis_plot(y, self.z, by)
-
+            x_fig = self.create_x_axis_plot(self.x, self.z, self.by)
+            y_fig = self.create_y_axis_plot(self.y, self.z, self.by)
             self.combine_plots(x_fig, y_fig)
 
     @staticmethod
@@ -953,12 +948,12 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         return grouped
 
     @abstractmethod
-    def create_main_plot(self, x, y, z, by):
+    def create_main_plot(self):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
-    def create_main_plot_marginals(self, x, y, z, by):
-        self.create_main_plot(x, y, z, by)
+    def create_main_plot_marginals(self):
+        self.create_main_plot()
 
     # @abstractmethod
     # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
@@ -967,11 +962,11 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
     @abstractmethod
     def create_x_axis_plot(self, x, z, by) -> "figure":
         # get cols to integrate over and exclude y and z
-        group_cols = [x]
+        group_cols = [self.x]
         if self.by is not None:
             group_cols.append(self.by)
 
-        x_data = self._integrate_data_along_dim(self.data, group_cols, z)
+        x_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
 
         x_config = self._config.copy()
         x_config.ylabel = self.zlabel
@@ -981,27 +976,31 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
 
         color_gen = ColorGenerator()
 
-        if self.plot_config.x_kind in ["chromatogram", "mobilogram"]:
-            x_plot_obj = self.get_line_renderer(x_data, x, z, by=by, _config=x_config)
-        elif self.plot_config.x_kind == "spectrum":
-            x_plot_obj = self.get_vline_renderer(x_data, x, z, by=by, _config=x_config)
+        if self.x_kind in ["chromatogram", "mobilogram"]:
+            x_plot_obj = self.get_line_renderer(
+                x_data, x=self.x, y=self.z, by=by, _config=x_config
+            )
+        elif self.x_kind == "spectrum":
+            x_plot_obj = self.get_vline_renderer(
+                data=x_data, x=self.x, y=self.z, by=by, _config=x_config
+            )
         else:
             raise ValueError(
-                f"x_kind {self.plot_config.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
+                f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
             )
 
-        x_fig = x_plot_obj.generate(line_color=color_gen)
-        self.plot_x_axis_line(x_fig)
+        x_fig = x_plot_obj.generate()
+        self.plot_x_axis_line()
 
         return x_fig
 
     @abstractmethod
-    def create_y_axis_plot(self, y, z, by) -> "figure":
-        group_cols = [y]
-        if by is not None:
-            group_cols.append(by)
+    def create_y_axis_plot(self) -> "figure":
+        group_cols = [self.y]
+        if self.by is not None:
+            group_cols.append(self.by)
 
-        y_data = self._integrate_data_along_dim(self.data, group_cols, z)
+        y_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
 
         y_config = self._config.copy()
         y_config.xlabel = self.zlabel
@@ -1010,17 +1009,17 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         y_config.legend_config.show = True
         y_config.legend_config.loc = "below"
 
-        color_gen = ColorGenerator()
-
-        if self.plot_config.y_kind in ["chromatogram", "mobilogram"]:
-            y_plot_obj = self.get_line_renderer(y_data, z, y, by=by, _config=y_config)
-            y_fig = y_plot_obj.generate(line_color=color_gen)
-        elif self.plot_config.y_kind == "spectrum":
-            direction = "horizontal"
-            y_plot_obj = self.get_vline_renderer(
-                y_data, z, y, by=self.by, _config=y_config
+        if self.y_kind in ["chromatogram", "mobilogram"]:
+            y_plot_obj = self.get_line_renderer(
+                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
             )
-            y_fig = y_plot_obj.generate(line_color=color_gen, direction=direction)
+            y_fig = y_plot_obj.generate()
+        elif self.y_kind == "spectrum":
+            self.spectrum_config.direction = "horizontal"
+            y_plot_obj = self.get_vline_renderer(
+                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
+            )
+            y_fig = y_plot_obj.generate()
         else:
             raise ValueError(
                 f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
@@ -1031,7 +1030,7 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         return y_fig
 
     @abstractmethod
-    def combine_plots(self, x_fig, y_fig):
+    def combine_plots(self, fig, x_fig, y_fig):
         pass
 
     @abstractmethod

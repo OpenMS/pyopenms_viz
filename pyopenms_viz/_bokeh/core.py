@@ -349,52 +349,47 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             self.marker = MarkerShapeGenerator(engine="BOKEH")
 
     @APPEND_PLOT_DOC
-    def plot(
-        self, fig, data, x, y, z=None, by: str | None = None, plot_3d=False, **kwargs
-    ):
+    def plot(self):
         """
         Plot a scatter plot
         """
 
-        if z is not None:
+        if self.z is not None:
             mapper = linear_cmap(
-                field_name=z,
+                field_name=self.z,
                 palette=Plasma256[::-1],
-                low=min(data[z]),
-                high=max(data[z]),
+                low=min(self.data[self.z]),
+                high=max(self.data[self.z]),
             )
         # Set defaults if they have not been set in kwargs
         # unknown line width?
 
-        fill_color = mapper if z is not None else self.current_color
-        if by is None:
-            source = ColumnDataSource(data)
-            line = fig.scatter(
-                x=x,
-                y=y,
+        fill_color = mapper if self.z is not None else self.current_color
+        if self.by is None:
+            source = ColumnDataSource(self.data)
+            line = self.fig.scatter(
+                x=self.x,
+                y=self.y,
                 source=source,
                 marker=self.current_marker,
                 fill_color=fill_color,
-                **kwargs,
             )
-            return fig, None
+            return self.fig, None
         else:
             legend_items = []
-            print(by)
-            for group, df in data.groupby(by):
+            for group, df in self.data.groupby(self.by):
                 source = ColumnDataSource(df)
-                line = fig.scatter(
-                    x=x,
-                    y=y,
+                line = self.fig.scatter(
+                    x=self.x,
+                    y=self.y,
                     source=source,
                     fill_color=fill_color,
                     marker=self.current_marker,
-                    **kwargs,
                 )
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
-            return fig, legend
+            return self.fig, legend
 
 
 class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
@@ -507,29 +502,29 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     Class for assembling a Bokeh feature heatmap plot
     """
 
-    def create_main_plot(self, x, y, z, by):
+    def create_main_plot(self):
 
         if not self.plot_3d:
+
             scatterPlot = self.get_scatter_renderer(
-                self.data, x, y, by=by, _config=self._config
+                data=self.data,
+                x=self.x,
+                y=self.y,
+                by=self.by,
+                z=self.z,
+                _config=self._config,
             )
 
-            mapper = linear_cmap(
-                field_name=z,
-                palette=Plasma256[::-1],
-                low=min(self.data[z]),
-                high=max(self.data[z]),
+            tooltips, custom_hover_data = self._create_tooltips(
+                {self.xlabel: self.x, self.ylabel: self.y, "intensity": self.z}
             )
-            self.fig = scatterPlot.generate()
+
+            self.fig = scatterPlot.generate(tooltips, custom_hover_data)
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
 
-            tooltips, _ = self._create_tooltips(
-                {self.xlabel: x, self.ylabel: y, "intensity": z}
-            )
-
-            self._add_tooltips(self.fig, tooltips)
+            # self._add_tooltips(self.fig, tooltips)
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
