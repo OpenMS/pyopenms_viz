@@ -140,7 +140,6 @@ class BasePlot(BasePlotConfig, ABC):
             for plotClass, configClass in config_mapper.items():
                 if issubclass(self.__class__, plotClass):
                     self._config = configClass(**kwargs)
-                    print(self._config)
                     self._update_from_config(self._config)
                     self.update_config()
                     break
@@ -334,8 +333,6 @@ class BasePlot(BasePlotConfig, ABC):
         """
         self._load_extension()
         if fig is None:
-            print("creating figure")
-            print("self.xlabel is:", self.xlabel)
             fig = self._create_figure()
         plot_out, legend = self.plot(fig)
 
@@ -609,8 +606,6 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             by=self.by,
             _config=self._config,
         )
-        print("vlineplot config is:", vlinePlot._config)
-        print("vlineplot xlabel is:", vlinePlot.xlabel)
 
         # color_gen = self._get_colors(spectrum, "peak")
 
@@ -636,7 +631,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
                 _config=self._config,
             )
 
-            mirror_spectrum.generate(spectrum_fig)
+            mirror_spectrum.generate(None, None, fig=spectrum_fig)
             self.plot_x_axis_line(spectrum_fig)
 
             # Annotations for reference spectrum
@@ -923,16 +918,16 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         """
         if self.add_marginals:
             main_plot = self.create_main_plot_marginals()
-            x_fig = self.create_x_axis_plot(main_plot, self.x, self.z, self.by)
-            y_fig = self.create_y_axis_plot(main_plot, self.y, self.z, self.by)
-            out = self.combine_plots(main_plot, x_fig, y_fig)
+            x_fig = self.create_x_axis_plot(main_plot)
+            y_fig = self.create_y_axis_plot(main_plot)
+            if self._interactive:
+                self._add_bounding_vertical_drawer(main_plot)
+            return self.combine_plots(main_plot, x_fig, y_fig)
         else:
             out = self.create_main_plot()
-
-        if self._interactive:
-            self._add_bounding_box_drawer(out)
-
-        return out
+            if self._interactive:
+                self._add_bounding_box_drawer(out)
+            return out
 
     @staticmethod
     def _integrate_data_along_dim(
@@ -955,14 +950,14 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
     def create_main_plot_marginals(self):
-        self.create_main_plot()
+        return self.create_main_plot()
 
     # @abstractmethod
     # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
     #     pass
 
     @abstractmethod
-    def create_x_axis_plot(self, x, z, by) -> "figure":
+    def create_x_axis_plot(self, main_fig) -> "figure":
         # get cols to integrate over and exclude y and z
         group_cols = [self.x]
         if self.by is not None:
@@ -976,35 +971,42 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         x_config.legend_config.show = True
         x_config.legend_config.loc = "right"
 
-        color_gen = ColorGenerator()
-
         if self.x_kind in ["chromatogram", "mobilogram"]:
             x_plot_obj = self.get_line_renderer(
-                x_data, x=self.x, y=self.z, by=by, _config=x_config
+                data=x_data, x=self.x, y=self.z, by=self.by, _config=x_config
             )
         elif self.x_kind == "spectrum":
             x_plot_obj = self.get_vline_renderer(
-                data=x_data, x=self.x, y=self.z, by=by, _config=x_config
+                data=x_data, x=self.x, y=self.z, by=self.by, _config=x_config
             )
         else:
             raise ValueError(
                 f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
             )
 
-        x_fig = x_plot_obj.generate()
-        self.plot_x_axis_line()
+        x_fig = x_plot_obj.generate(None, None)
+        self.plot_x_axis_line(x_fig)
 
         return x_fig
 
     @abstractmethod
-    def create_y_axis_plot(self) -> "figure":
+    def create_y_axis_plot(self, main_fig) -> "figure":
         group_cols = [self.y]
         if self.by is not None:
             group_cols.append(self.by)
 
         y_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
 
-        y_config = self._config.copy()
+        if self.y_kind in ["chromatogram", "mobilogram"]:
+            y_config = self.chromatogram_config.copy()
+        elif self.y_kind == "spectrum":
+            y_config = self.spectrum_config.copy()
+            y_config.direction = "horizontal"
+        else:
+            raise ValueError(
+                f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
+            )
+
         y_config.xlabel = self.zlabel
         y_config.ylabel = self.ylabel
         y_config.y_axis_location = "left"
@@ -1015,17 +1017,12 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             y_plot_obj = self.get_line_renderer(
                 data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
             )
-            y_fig = y_plot_obj.generate()
+            y_fig = y_plot_obj.generate(None, None)
         elif self.y_kind == "spectrum":
-            self.spectrum_config.direction = "horizontal"
             y_plot_obj = self.get_vline_renderer(
                 data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
             )
-            y_fig = y_plot_obj.generate()
-        else:
-            raise ValueError(
-                f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
-            )
+            y_fig = y_plot_obj.generate(None, None)
 
         self.plot_x_axis_line(y_fig)
 

@@ -350,6 +350,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
 
     def __post_init__(self):
+        super().__post_init__()
         if self.marker is None:
             self.marker = MarkerShapeGenerator(engine="BOKEH")
 
@@ -533,8 +534,8 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, main_fig, x, z, by):
-        x_fig = super().create_x_axis_plot(x, z, by)
+    def create_x_axis_plot(self, main_fig):
+        x_fig = super().create_x_axis_plot(main_fig)
 
         # Modify plot
         x_fig.x_range = main_fig.x_range
@@ -543,8 +544,8 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         x_fig.min_border = 0
         return x_fig
 
-    def create_y_axis_plot(self, main_fig, y, z, by):
-        y_fig = super().create_y_axis_plot(y, z, by)
+    def create_y_axis_plot(self, main_fig):
+        y_fig = super().create_y_axis_plot(main_fig)
 
         # Modify plot
         y_fig.y_range = main_fig.y_range
