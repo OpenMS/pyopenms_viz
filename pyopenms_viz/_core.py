@@ -156,6 +156,7 @@ class BasePlot(BasePlotConfig, ABC):
             )
 
     def __post_init__(self):
+        # data verification
         self.data = self.data.copy()
 
         # if self._config is not None:
@@ -172,9 +173,6 @@ class BasePlot(BasePlotConfig, ABC):
             # Ensure by column data is string
             self.by = self._verify_column(self.by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
-
-        self._load_extension()
-        self._create_figure()
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -320,12 +318,14 @@ class BasePlot(BasePlotConfig, ABC):
 
     @abstractmethod
     def plot(
-        cls, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs
+        self, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs
     ):
         """
         Create the plot
         """
-        pass
+        self._load_extension()
+        self._create_figure()
+        ### Plot logic for subclasses is here
 
     @abstractmethod
     def _update_plot_aes(self, fig, **kwargs):
@@ -496,9 +496,7 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
     ) -> None:
 
         super().__init__(data, x, y, z, by)
-        print("kwargs:", kwargs)
         self.load_config(**kwargs)
-        print("kwargs:", kwargs)
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -518,7 +516,7 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         """
         Create the plot
         """
-        # color_gen = ColorGenerator()
+        super().plot(data, self.fig, x, y, by=by)
 
         tooltip_entries = {"retention time": x, "intensity": y}
         if "Annotation" in self.data.columns:

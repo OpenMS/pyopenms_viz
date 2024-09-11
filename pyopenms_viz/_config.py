@@ -148,45 +148,6 @@ class BasePlotConfig(ABC):
     def copy(self):
         return deepcopy(self)
 
-    def set_plot_labels(self):
-        """
-        Set the title, xlabel, and ylabel, zlabel based on the kind of plot.
-        """
-        plot_configs = {
-            "chromatogram": {
-                "title": "Chromatogram",
-                "xlabel": "Retention Time",
-                "ylabel": "Intensity",
-            },
-            "mobilogram": {
-                "title": "Mobilogram",
-                "xlabel": "Ion Mobility",
-                "ylabel": "Intensity",
-            },
-            "spectrum": {
-                "title": "Mass Spectrum",
-                "xlabel": "mass-to-charge",
-                "ylabel": "Intensity",
-            },
-            "peakmap": {
-                "title": "PeakMap",
-                "xlabel": "Retention Time",
-                "ylabel": "mass-to-charge",
-                "zlabel": "Intensity",
-            },
-            # Add more plot types as needed
-        }
-
-        if self.kind in plot_configs:
-            self.title = plot_configs[self.kind]["title"]
-            self.xlabel = plot_configs[self.kind]["xlabel"]
-            self.ylabel = plot_configs[self.kind]["ylabel"]
-            if self.kind == "peakmap":
-                self.zlabel = plot_configs[self.kind]["zlabel"]
-
-            if self.relative_intensity and "Intensity" in self.ylabel:
-                self.ylabel = "Relative " + self.ylabel
-
 
 ## Additional parameters specific to each plot type
 
@@ -227,9 +188,7 @@ class ChromatogramConfig(LineConfig):
     ### override from previous class
     xlabel: str = "Retention Time"
     ylabel: str = "Intensity"
-
-    def __post_init__(self):
-        print("chromatogram post init self.xlabel", self.xlabel)
+    title: str = "Chromatogram"
 
     @classmethod
     def from_dict(
