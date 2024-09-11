@@ -57,46 +57,44 @@ class BOKEHPlot(BasePlot, ABC):
             )
 
     def _create_figure(self) -> None:
-        if self.fig is None:
-            self.fig = figure(
-                title=self.title,
-                x_axis_label=self.xlabel,
-                y_axis_label=self.ylabel,
-                x_axis_location=self.x_axis_location,
-                y_axis_location=self.y_axis_location,
-                width=self.width,
-                height=self.height,
-                min_border=self.min_border,
-            )
+        """Creates a figure from scratch"""
+        return figure(
+            title=self.title,
+            x_axis_label=self.xlabel,
+            y_axis_label=self.ylabel,
+            x_axis_location=self.x_axis_location,
+            y_axis_location=self.y_axis_location,
+            width=self.width,
+            height=self.height,
+            min_border=self.min_border,
+        )
 
-    def _update_plot_aes(self):
+    def _update_plot_aes(self, fig):
         """
         Update the aesthetics of the plot
         """
-        self.fig.grid.visible = self.grid
-        self.fig.toolbar_location = self.toolbar_location
+        fig.grid.visible = self.grid
+        fig.toolbar_location = self.toolbar_location
         # Update title, axis title and axis tick label sizes
-        if self.fig.title is not None:
-            self.fig.title.text_font_size = f"{self.title_font_size}pt"
-        self.fig.xaxis.axis_label_text_font_size = f"{self.xaxis_label_font_size}pt"
-        self.fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
-        self.fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
-        self.fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
+        if fig.title is not None:
+            fig.title.text_font_size = f"{self.title_font_size}pt"
+        fig.xaxis.axis_label_text_font_size = f"{self.xaxis_label_font_size}pt"
+        fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
+        fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
+        fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
 
-    def _add_legend(self, legend):
+    def _add_legend(self, fig, legend):
         """
         Add the legend
         """
         if self.legend_config.show:
-            self.fig.add_layout(legend, self.legend_config.loc)
-            self.fig.legend.orientation = self.legend_config.orientation
-            self.fig.legend.click_policy = self.legend_config.onClick
-            self.fig.legend.title = self.legend_config.title
-            self.fig.legend.label_text_font_size = (
-                str(self.legend_config.fontsize) + "pt"
-            )
+            fig.add_layout(legend, self.legend_config.loc)
+            fig.legend.orientation = self.legend_config.orientation
+            fig.legend.click_policy = self.legend_config.onClick
+            fig.legend.title = self.legend_config.title
+            fig.legend.label_text_font_size = str(self.legend_config.fontsize) + "pt"
 
-    def _add_tooltips(self, tooltips, custom_hover_data):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data):
         """
         Add tooltips to the plot
         """
@@ -104,9 +102,9 @@ class BOKEHPlot(BasePlot, ABC):
 
         hover = HoverTool()
         hover.tooltips = tooltips
-        self.fig.add_tools(hover)
+        fig.add_tools(hover)
 
-    def _add_bounding_box_drawer(self):
+    def _add_bounding_box_drawer(self, fig):
         """
         Add a BoxEditTool to the figure for drawing bounding boxes.
 
@@ -116,7 +114,7 @@ class BOKEHPlot(BasePlot, ABC):
         Returns:
             The renderer object that is used to draw the bounding box.
         """
-        r = self.fig.rect(
+        r = fig.rect(
             [],
             [],
             [],
@@ -132,10 +130,10 @@ class BOKEHPlot(BasePlot, ABC):
         draw_tool.name = "Draw Bounding Box"
 
         # Add the tool to the figure
-        self.fig.add_tools(draw_tool)
+        fig.add_tools(draw_tool)
         return r
 
-    def _add_bounding_vertical_drawer(self):
+    def _add_bounding_vertical_drawer(self, fig):
         """
         Add a BoxEditTool to the figure for drawing bounding vertical strips.
 
@@ -162,7 +160,7 @@ class BOKEHPlot(BasePlot, ABC):
         renderer = GlyphRenderer(data_source=source, glyph=glyph)
 
         # Add the GlyphRenderer to the fig object's renderers list
-        self.fig.renderers.append(renderer)
+        fig.renderers.append(renderer)
 
         draw_tool = BoxEditTool(renderers=[renderer], empty_value=0)
         # TODO: change how icon path is defined
@@ -170,11 +168,14 @@ class BOKEHPlot(BasePlot, ABC):
         draw_tool.name = "Draw Peak Boundary Strip"
 
         # Add the tool to the figure
-        self.fig.add_tools(draw_tool)
+        fig.add_tools(draw_tool)
         return renderer
 
     def _modify_x_range(
-        self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+        self,
+        fig,
+        x_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
     ):
         """
         Modify the x-axis range.
@@ -187,10 +188,13 @@ class BOKEHPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        self.fig.x_range = Range1d(start=start, end=end)
+        fig.x_range = Range1d(start=start, end=end)
 
     def _modify_y_range(
-        self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+        self,
+        fig,
+        y_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
     ):
         """
         Modifies the y-axis range of the plot.
@@ -203,13 +207,13 @@ class BOKEHPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        self.fig.y_range = Range1d(start=start, end=end)
+        fig.y_range = Range1d(start=start, end=end)
 
-    def show(self):
+    def show(self, fig):
         from bokeh.io import show
 
         def app(doc):
-            doc.add_root(self.fig)
+            doc.add_root(fig)
 
         show(app)
 
@@ -220,13 +224,13 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(self):
+    def plot(self, fig):
         """
         Plot a line plot
         """
         if self.by is None:
             source = ColumnDataSource(self.data)
-            line = self.fig.line(
+            line = fig.line(
                 x=self.x,
                 y=self.y,
                 source=source,
@@ -234,13 +238,13 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
                 line_width=self.line_width,
             )
 
-            return self.fig, None
+            return fig, None
         else:
 
             legend_items = []
             for group, df in self.data.groupby(self.by):
                 source = ColumnDataSource(df)
-                line = self.fig.line(
+                line = fig.line(
                     x=self.x,
                     y=self.y,
                     source=source,
@@ -251,7 +255,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
 
             legend = Legend(items=legend_items)
 
-            return self.fig, legend
+            return fig, legend
 
 
 class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
@@ -260,7 +264,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(self):
+    def plot(self, fig):
         """
         Plot a set of vertical lines
         """
@@ -278,7 +282,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     x0_data_var = x1_data_var = self.x
                     y0_data_var = 0
                     y1_data_var = self.y
-                line = self.fig.segment(
+                line = fig.segment(
                     x0=x0_data_var,
                     y0=y0_data_var,
                     x1=x1_data_var,
@@ -287,7 +291,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     line_color="line_color",
                     line_width="line_width",
                 )
-                return self.fig, None
+                return fig, None
             else:
                 legend_items = []
                 for group, df in self.data.groupby(self.by):
@@ -301,7 +305,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                         y0_data_var = 0
                         y1_data_var = self.y
 
-                    line = self.fig.segment(
+                    line = fig.segment(
                         x0=x0_data_var,
                         y0=y0_data_var,
                         x1=x1_data_var,
@@ -315,12 +319,13 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
 
                 legend = Legend(items=legend_items)
 
-                return self.fig, legend
+                return fig, legend
         else:
             raise NotImplementedError("3D Vline plots are not supported in Bokeh")
 
     def _add_annotations(
         self,
+        fig,
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -336,7 +341,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 x_offset=1,
                 y_offset=0,
             )
-            self.fig.add_layout(label)
+            fig.add_layout(label)
 
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
@@ -349,7 +354,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             self.marker = MarkerShapeGenerator(engine="BOKEH")
 
     @APPEND_PLOT_DOC
-    def plot(self):
+    def plot(self, fig):
         """
         Plot a scatter plot
         """
@@ -367,19 +372,19 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         fill_color = mapper if self.z is not None else self.current_color
         if self.by is None:
             source = ColumnDataSource(self.data)
-            line = self.fig.scatter(
+            line = fig.scatter(
                 x=self.x,
                 y=self.y,
                 source=source,
                 marker=self.current_marker,
                 fill_color=fill_color,
             )
-            return self.fig, None
+            return fig, None
         else:
             legend_items = []
             for group, df in self.data.groupby(self.by):
                 source = ColumnDataSource(df)
-                line = self.fig.scatter(
+                line = fig.scatter(
                     x=self.x,
                     y=self.y,
                     source=source,
@@ -389,7 +394,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
-            return self.fig, legend
+            return fig, legend
 
 
 class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
@@ -403,11 +408,11 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
     def get_scatter_renderer(self, **kwargs) -> None:
         return BOKEHScatterPlot(**kwargs)
 
-    def plot_x_axis_line(self):
+    def plot_x_axis_line(self, fig):
         zero_line = Span(
             location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
         )
-        self.fig.add_layout(zero_line)
+        fig.add_layout(zero_line)
 
     def _create_tooltips(self, entries, index=True):
         # Tooltips for interactive information
@@ -424,7 +429,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
     Class for assembling a Bokeh extracted ion chromatogram plot
     """
 
-    def _add_peak_boundaries(self, annotation_data):
+    def _add_peak_boundaries(self, fig, annotation_data):
         """
         Add peak boundaries to the plot.
 
@@ -439,7 +444,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
         )
         legend_items = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            peak_boundary_lines = self.fig.segment(
+            peak_boundary_lines = fig.segment(
                 x0=[feature["leftWidth"], feature["rightWidth"]],
                 y0=[0, 0],
                 x1=[feature["leftWidth"], feature["rightWidth"]],
@@ -466,7 +471,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
             legend.label_text_font_size = (
                 str(self.annotation_legend_config.fontsize) + "pt"
             )
-            self.fig.add_layout(legend, self.annotation_legend_config.loc)
+            fig.add_layout(legend, self.annotation_legend_config.loc)
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source
@@ -519,51 +524,51 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 {self.xlabel: self.x, self.ylabel: self.y, "intensity": self.z}
             )
 
-            self.fig = scatterPlot.generate(tooltips, custom_hover_data)
+            fig = scatterPlot.generate(tooltips, custom_hover_data)
 
             if self.annotation_data is not None:
-                self._add_box_boundaries(self.annotation_data)
+                self._add_box_boundaries(fig, self.annotation_data)
+            return fig
 
-            # self._add_tooltips(self.fig, tooltips)
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, x, z, by):
+    def create_x_axis_plot(self, main_fig, x, z, by):
         x_fig = super().create_x_axis_plot(x, z, by)
 
         # Modify plot
-        x_fig.x_range = self.fig.x_range
-        x_fig.width = self.fig.width
+        x_fig.x_range = main_fig.x_range
+        x_fig.width = main_fig.width
         x_fig.xaxis.visible = False
         x_fig.min_border = 0
         return x_fig
 
-    def create_y_axis_plot(self, y, z, by):
+    def create_y_axis_plot(self, main_fig, y, z, by):
         y_fig = super().create_y_axis_plot(y, z, by)
 
         # Modify plot
-        y_fig.y_range = self.fig.y_range
-        y_fig.height = self.fig.height
+        y_fig.y_range = main_fig.y_range
+        y_fig.height = main_fig.height
         y_fig.legend.orientation = "horizontal"
         y_fig.x_range.flipped = True
         y_fig.min_border = 0
         return y_fig
 
-    def combine_plots(self, x_fig, y_fig):
+    def combine_plots(self, main_fig, x_fig, y_fig):
         # Modify the main plot
-        self.fig.yaxis.visible = False
+        main_fig.yaxis.visible = False
 
         # Ensure all plots have the same dimensions
         x_fig.frame_height = self.height
         x_fig.frame_width = self.width
         y_fig.frame_width = self.width
         y_fig.frame_height = self.height
-        self.fig.frame_width = self.width
-        self.fig.frame_height = self.height
+        main_fig.frame_width = self.width
+        main_fig.frame_height = self.height
 
         from bokeh.layouts import gridplot
 
-        self.fig = gridplot([[None, x_fig], [y_fig, self.fig]])
+        return gridplot([[None, x_fig], [y_fig, main_fig]])
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source
@@ -590,7 +595,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
             }
         )
 
-    def _add_box_boundaries(self, annotation_data):
+    def _add_box_boundaries(self, fig, annotation_data):
         color_gen = ColorGenerator(
             colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
@@ -607,7 +612,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
             width = abs(x1 - x0)
             height = abs(y1 - y0)
 
-            box_boundary_lines = self.fig.rect(
+            box_boundary_lines = fig.rect(
                 x=center_x,
                 y=center_y,
                 width=width,
@@ -635,4 +640,4 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
             legend.label_text_font_size = (
                 str(self.annotation_legend_config.fontsize) + "pt"
             )
-            self.fig.add_layout(legend, self.annotation_legend_config.loc)
+            fig.add_layout(legend, self.annotation_legend_config.loc)

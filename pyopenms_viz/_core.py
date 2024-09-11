@@ -119,7 +119,6 @@ class BasePlot(BasePlotConfig, ABC):
     y: str = None
     z: str = None
     by: str = None
-    fig: "figure" = None
     _config: BasePlotConfig = None
 
     # Note priority is keyword arguments > config > default values
@@ -297,23 +296,26 @@ class BasePlot(BasePlotConfig, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def plot(self) -> None:
+    def plot(self, fig) -> None:
         """
         Create the plot
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _update_plot_aes(self):
+    def _update_plot_aes(self, fig):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_legend(self, legend):
+    def _add_legend(self, fig, legend):
         raise NotImplementedError
 
     @abstractmethod
     def _modify_x_range(
-        self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+        self,
+        fig,
+        x_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
     ):
         """
         Modify the x-axis range.
@@ -326,7 +328,10 @@ class BasePlot(BasePlotConfig, ABC):
 
     @abstractmethod
     def _modify_y_range(
-        self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None
+        self,
+        fig,
+        y_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
     ):
         """
         Modify the y-axis range.
@@ -337,38 +342,39 @@ class BasePlot(BasePlotConfig, ABC):
         """
         pass
 
-    def generate(self, tooltips, custom_hover_data):
+    def generate(self, tooltips, custom_hover_data, fig=None):
         """
         Generate the plot
         """
         self._load_extension()
-        self._create_figure()
-        plot_out, legend = self.plot()
+        if fig is None:
+            fig = self._create_figure()
+        plot_out, legend = self.plot(fig)
 
         if legend is not None:
-            self._add_legend(legend)
-        self._update_plot_aes()
+            self._add_legend(plot_out, legend)
+        self._update_plot_aes(plot_out)
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+            self._add_tooltips(plot_out, tooltips, custom_hover_data)
 
-        return self.fig
+        return plot_out
 
     @abstractmethod
-    def show(self):
+    def show(self, fig):
         raise NotImplementedError
 
     # methods only for interactive plotting
     @abstractmethod
-    def _add_tooltips(self, tooltips, custom_hover_data):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_bounding_box_drawer(self):
+    def _add_bounding_box_drawer(self, fig):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_bounding_vertical_drawer(self):
+    def _add_bounding_vertical_drawer(self, fig):
         raise NotImplementedError
 
 
@@ -387,6 +393,7 @@ class VLinePlot(BasePlot, VLineConfig, ABC):
     @abstractmethod
     def _add_annotations(
         self,
+        fig,
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -506,9 +513,9 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         if self.relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
-        self.plot()
+        fig = self.plot()
         if self.show_plot:
-            self.show()
+            self.show(fig)
 
     def plot(self):
         """
@@ -521,19 +528,19 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
             tooltip_entries["product m/z"] = "product_mz"
         tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
         linePlot = self.get_line_renderer(
-            data=self.data, x=self.x, y=self.y, by=self.by, fig=self.fig
+            data=self.data, x=self.x, y=self.y, by=self.by
         )
 
-        self.fig = linePlot.generate(tooltips, custom_hover_data)
+        fig = linePlot.generate(tooltips, custom_hover_data)
 
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        self._modify_y_range(fig, (0, self.data[self.y].max()), (0, 0.1))
 
-        self.manual_boundary_renderer = (
-            self._add_bounding_vertical_drawer() if self._interactive else None
-        )
+        if self._interactive:
+            self.manual_boundary_renderer = self._add_bounding_box_drawer(fig)
 
         if self.annotation_data is not None:
-            self._add_peak_boundaries(self.annotation_data)
+            self._add_peak_boundaries(fig, self.annotation_data)
+        return fig
 
     @abstractmethod
     def _add_peak_boundaries(self, annotation_data):
@@ -584,10 +591,10 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
         self.reference_spectrum = reference_spectrum
 
-        self.plot()
+        fig = self.plot()
         # Show plot
         if self.show_plot:
-            self.show()
+            self.show(fig)
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -610,24 +617,23 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             entries=entries, index=False
         )
 
-        spectrumPlot = self.get_vline_renderer(
+        vlinePlot = self.get_vline_renderer(
             data=spectrum,
             x=self.x,
             y=self.y,
             by=self.by,
-            fig=self.fig,
             _config=self._config,
         )
 
         # color_gen = self._get_colors(spectrum, "peak")
 
-        self.fig = spectrumPlot.generate(tooltips, custom_hover_data)
+        spectrum_fig = vlinePlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
             spectrum, self.x, self.y
         )
-        spectrumPlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
+        vlinePlot._add_annotations(spectrum_fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
@@ -640,20 +646,19 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
                 x=self.x,
                 y=self.y,
                 by=self.by,
-                fig=self.fig,
                 _config=self._config,
             )
 
-            # color_gen_mirror = self._get_colors(reference_spectrum, "peak")
-
-            mirror_spectrum.generate()
-            self.plot_x_axis_line()
+            mirror_spectrum.generate(spectrum_fig)
+            self.plot_x_axis_line(spectrum_fig)
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
                 reference_spectrum, self.x, self.y
             )
-            spectrumPlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
+            vlinePlot._add_annotations(
+                spectrum_fig, ann_texts, ann_xs, ann_ys, ann_colors
+            )
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
@@ -661,7 +666,9 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         if reference_spectrum is not None:
             min_values.append(reference_spectrum[self.x].min())
             max_values.append(reference_spectrum[self.x].max())
-        self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
+        self._modify_x_range(
+            spectrum_fig, (min(min_values), max(max_values)), padding=(0.20, 0.20)
+        )
 
         # Adjust y axis padding (annotations should stay inside plot)
         max_value = spectrum[self.y].max()
@@ -673,7 +680,10 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             min_padding = -0.2
             max_padding = 0.4
 
-        self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
+        self._modify_y_range(
+            spectrum_fig, (min_value, max_value), padding=(min_padding, max_padding)
+        )
+        return spectrum_fig
 
     def _bin_peaks(self, data: DataFrame, x: str, y: str) -> DataFrame:
         """
@@ -909,28 +919,27 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         if not self.fill_by_z:
             z = None
 
-        self.plot()
+        fig = self.plot()
 
         if self.show_plot:
-            self.show()
+            self.show(fig)
 
     def plot(self):
         """
         Create the plot
         """
         if self.add_marginals:
-            self.create_main_plot_marginals()
+            main_plot = self.create_main_plot_marginals()
+            x_fig = self.create_x_axis_plot(main_plot, self.x, self.z, self.by)
+            y_fig = self.create_y_axis_plot(main_plot, self.y, self.z, self.by)
+            out = self.combine_plots(main_plot, x_fig, y_fig)
         else:
-            self.create_main_plot()
+            out = self.create_main_plot()
 
         if self._interactive:
-            self._add_bounding_box_drawer()
+            self._add_bounding_box_drawer(out)
 
-        if self.add_marginals:
-
-            x_fig = self.create_x_axis_plot(self.x, self.z, self.by)
-            y_fig = self.create_y_axis_plot(self.y, self.z, self.by)
-            self.combine_plots(x_fig, y_fig)
+        return out
 
     @staticmethod
     def _integrate_data_along_dim(
