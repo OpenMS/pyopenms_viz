@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict, fields
 from typing import Tuple, Literal, Dict, Any, Union, Iterator
 from enum import Enum
 from copy import deepcopy
-from ._misc import ColorGenerator
+from ._misc import ColorGenerator, MarkerShapeGenerator
 
 
 @dataclass(kw_only=True)
@@ -164,13 +164,14 @@ class VLineConfig(LineConfig):
 
 
 @dataclass(kw_only=True)
-class ScatterConfig:
+class ScatterConfig(BasePlotConfig):
     bin_peaks: Union[Literal["auto"], bool] = "auto"
     num_x_bins: int = 50
     num_y_bins: int = 50
     z_log_scale: bool = False
     fill_by_z: bool = True
     marker_size: int = 30
+    marker: Iterator[str] | None = None
 
 
 @dataclass(kw_only=True)

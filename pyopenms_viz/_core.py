@@ -288,22 +288,6 @@ class BasePlot(BasePlotConfig, ABC):
         for attr in self._config.__dict__.keys():
             setattr(self._config, attr, self.__dict__[attr])
 
-    def _separate_class_kwargs(self, **kwargs):
-        """
-        Separates the keyword arguments into class-specific arguments and other arguments.
-
-        Parameters:
-            **kwargs: Keyword arguments passed to the method.
-
-        Returns:
-            class_kwargs: A dictionary containing the class-specific keyword arguments.
-            other_kwargs: A dictionary containing the remaining keyword arguments.
-
-        """
-        class_kwargs = {k: v for k, v in kwargs.items() if k in dir(self)}
-        other_kwargs = {k: v for k, v in kwargs.items() if k not in dir(self)}
-        return class_kwargs, other_kwargs
-
     @abstractmethod
     def _load_extension(self) -> None:
         raise NotImplementedError
@@ -312,40 +296,20 @@ class BasePlot(BasePlotConfig, ABC):
     def _create_figure(self) -> None:
         raise NotImplementedError
 
-    def _make_plot(self, fig, **kwargs) -> None:
-        # Check for tooltips in kwargs and pop
-        tooltips = kwargs.pop("tooltips", None)
-        custom_hover_data = kwargs.pop("custom_hover_data", None)
-
-        newlines, legend = self.plot(
-            fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs
-        )
-
-        if legend is not None:
-            self._add_legend(newlines, legend)
-        self._update_plot_aes(newlines, **kwargs)
-
-        if tooltips is not None and self._interactive:
-            self._add_tooltips(newlines, tooltips, custom_hover_data)
-
     @abstractmethod
-    def plot(
-        self, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs
-    ):
+    def plot(self) -> None:
         """
         Create the plot
         """
-        self._load_extension()
-        self._create_figure()
-        ### Plot logic for subclasses is here
+        raise NotImplementedError
 
     @abstractmethod
-    def _update_plot_aes(self, fig, **kwargs):
-        pass
+    def _update_plot_aes(self):
+        raise NotImplementedError
 
     @abstractmethod
-    def _add_legend(self, fig, legend):
-        pass
+    def _add_legend(self, legend):
+        raise NotImplementedError
 
     @abstractmethod
     def _modify_x_range(
@@ -373,28 +337,39 @@ class BasePlot(BasePlotConfig, ABC):
         """
         pass
 
-    def generate(self, **kwargs):
+    def generate(self, tooltips, custom_hover_data):
         """
         Generate the plot
         """
-        self._make_plot(self.fig, **kwargs)
+        self._load_extension()
+        self._create_figure()
+        plot_out, legend = self.plot()
+
+        if legend is not None:
+            self._add_legend(legend)
+        self._update_plot_aes()
+
+        if tooltips is not None and self._interactive:
+            self._add_tooltips(tooltips, custom_hover_data)
+
         return self.fig
 
     @abstractmethod
     def show(self):
-        pass
+        raise NotImplementedError
 
     # methods only for interactive plotting
     @abstractmethod
-    def _add_tooltips(self, fig, tooltips):
-        pass
+    def _add_tooltips(self, tooltips, custom_hover_data):
+        raise NotImplementedError
 
     @abstractmethod
-    def _add_bounding_box_drawer(self, fig, **kwargs):
-        pass
+    def _add_bounding_box_drawer(self):
+        raise NotImplementedError
 
-    def _add_bounding_vertical_drawer(self, fig, **kwargs):
-        pass
+    @abstractmethod
+    def _add_bounding_vertical_drawer(self):
+        raise NotImplementedError
 
 
 class LinePlot(BasePlot, LineConfig, ABC):
@@ -409,9 +384,9 @@ class VLinePlot(BasePlot, VLineConfig, ABC):
     def _kind(self):
         return "vline"
 
+    @abstractmethod
     def _add_annotations(
         self,
-        fig,
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -427,13 +402,23 @@ class VLinePlot(BasePlot, VLineConfig, ABC):
         ann_ys (list[float]): List of y-coordinates for the annotations.
         ann_colors: (list[str]): List of colors for annotation text.
         """
-        pass
+        raise NotImplementedError
 
 
 class ScatterPlot(BasePlot, ScatterConfig, ABC):
     @property
     def _kind(self):
         return "scatter"
+
+    @property
+    def current_marker(self) -> str:
+        """
+        Get the current color for the plot.
+
+        Returns:
+            str: The current color.
+        """
+        return self.marker if isinstance(self.marker, str) else next(self.marker)
 
 
 class BaseMSPlot(BasePlot, ABC):
@@ -446,19 +431,19 @@ class BaseMSPlot(BasePlot, ABC):
     """
 
     @abstractmethod
-    def get_line_renderer(self, data, x, y, **kwargs):
+    def get_line_renderer(self, **kwargs):
         pass
 
     @abstractmethod
-    def get_vline_renderer(self, data, x, y, **kwargs):
+    def get_vline_renderer(self, **kwargs):
         pass
 
     @abstractmethod
-    def get_scatter_renderer(self, data, x, y, **kwargs):
+    def get_scatter_renderer(self, **kwargs):
         pass
 
     @abstractmethod
-    def plot_x_axis_line(self, fig):
+    def plot_x_axis_line(self):
         """
         plot line across x axis
         """
@@ -521,32 +506,30 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         if self.relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
-        self.plot(self.data, self.x, self.y, self.by)
+        self.plot()
         if self.show_plot:
             self.show()
 
-    def plot(self, data, x, y, by=None):
+    def plot(self):
         """
         Create the plot
         """
-        super().plot(data, self.fig, x, y, by=by)
-
-        tooltip_entries = {"retention time": x, "intensity": y}
+        tooltip_entries = {"retention time": self.x, "intensity": self.y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"
         if "product_mz" in self.data.columns:
             tooltip_entries["product m/z"] = "product_mz"
-        TOOLTIPS, custom_hover_data = self._create_tooltips(tooltip_entries)
-        linePlot = self.get_line_renderer(data, x, y, by=by, fig=self.fig)
-
-        self.fig = linePlot.generate(
-            tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
+        tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
+        linePlot = self.get_line_renderer(
+            data=self.data, x=self.x, y=self.y, by=self.by, fig=self.fig
         )
 
-        self._modify_y_range((0, self.data[y].max()), (0, 0.1))
+        self.fig = linePlot.generate(tooltips, custom_hover_data)
+
+        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
         self.manual_boundary_renderer = (
-            self._add_bounding_vertical_drawer(self.fig) if self._interactive else None
+            self._add_bounding_vertical_drawer() if self._interactive else None
         )
 
         if self.annotation_data is not None:
@@ -601,22 +584,20 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
         self.reference_spectrum = reference_spectrum
 
-        self.plot(x, y, by=self.by)
+        self.plot()
         # Show plot
         if self.show_plot:
             self.show()
 
-    def plot(self, x, y, by=None):
+    def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
-
-        super().plot(self.data, self.fig, x, y, by=by)
 
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
-            self.data, x, y, self.reference_spectrum
+            self.data, self.x, self.y, self.reference_spectrum
         )
 
-        entries = {"m/z": x, "intensity": y}
+        entries = {"m/z": self.x, "intensity": self.y}
         for optional in (
             "native_id",
             self.ion_annotation,
@@ -625,62 +606,70 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
 
-        TOOLTIPS, custom_hover_data = self._create_tooltips(
+        tooltips, custom_hover_data = self._create_tooltips(
             entries=entries, index=False
         )
 
         spectrumPlot = self.get_vline_renderer(
-            spectrum, x, y, by=by, fig=self.fig, _config=self._config
+            data=spectrum,
+            x=self.x,
+            y=self.y,
+            by=self.by,
+            fig=self.fig,
+            _config=self._config,
         )
 
         # color_gen = self._get_colors(spectrum, "peak")
 
-        self.fig = spectrumPlot.generate(
-            tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
-        )
+        self.fig = spectrumPlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
-        spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+            spectrum, self.x, self.y
+        )
+        spectrumPlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
             ## create a mirror spectrum
             # Set intensity to negative values
-            reference_spectrum[y] = reference_spectrum[y] * -1
+            reference_spectrum[self.y] = reference_spectrum[self.y] * -1
 
             mirror_spectrum = self.get_vline_renderer(
-                reference_spectrum, x, y, by=by, fig=self.fig, _config=self._config
+                data=self.reference_spectrum,
+                x=self.x,
+                y=self.y,
+                by=self.by,
+                fig=self.fig,
+                _config=self._config,
             )
 
             # color_gen_mirror = self._get_colors(reference_spectrum, "peak")
 
             mirror_spectrum.generate()
-            self.plot_x_axis_line(self.fig)
+            self.plot_x_axis_line()
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-                reference_spectrum, x, y
+                reference_spectrum, self.x, self.y
             )
-            spectrumPlot._add_annotations(
-                self.fig, ann_texts, ann_xs, ann_ys, ann_colors
-            )
+            spectrumPlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
-        min_values = [spectrum[x].min()]
-        max_values = [spectrum[x].max()]
+        min_values = [spectrum[self.x].min()]
+        max_values = [spectrum[self.x].max()]
         if reference_spectrum is not None:
-            min_values.append(reference_spectrum[x].min())
-            max_values.append(reference_spectrum[x].max())
+            min_values.append(reference_spectrum[self.x].min())
+            max_values.append(reference_spectrum[self.x].max())
         self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
 
         # Adjust y axis padding (annotations should stay inside plot)
-        max_value = spectrum[y].max()
+        max_value = spectrum[self.y].max()
         min_value = 0
         min_padding = 0
         max_padding = 0.15
         if reference_spectrum is not None and self.mirror_spectrum:
-            min_value = reference_spectrum[y].min()
+            min_value = reference_spectrum[self.y].min()
             min_padding = -0.2
             max_padding = 0.4
 
@@ -850,19 +839,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
-    def plot_config(self):
-        return self._plot_config
-
-    @plot_config.setter
-    def plot_config(self, value):
-        if value is None:
-            self._plot_config = PeakMapConfig()
-        elif isinstance(value, dict):
-            self._plot_config = PeakMapConfig.from_dict(value)
-        elif isinstance(value, PeakMapConfig):
-            self._plot_config = value
-        else:
-            raise ValueError("plot_config must be a dict, PeakMapConfig, or None")
+    def _kind(self):
+        return "peakmap"
 
     def __init__(
         self,
@@ -870,18 +848,22 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         x,
         y,
         z,
+        by=None,
         annotation_data: DataFrame | None = None,
         **kwargs,
     ) -> None:
 
-        super().__init__(data, x, y, z=z, **kwargs)
-        self.z = self._verify_column(self.z, "z")
+        super().__init__(data, x, y, z=z, by=by)
+        PeakMapConfig.__init__(self)
+        self.load_config(
+            **kwargs
+        )  ## seems that kwargs not getting absorbed in load_config?
 
-        # Set default config attributes if not passed as keyword arguments
-        kwargs["_config"] = BasePlotConfig(kind=self._kind)
+        print("line 881", kwargs)
 
-        if self.plot_config.add_marginals:
-            kwargs["_config"].title = None
+        # remove title if marginals are added
+        if self.add_marginals:
+            self.title = ""
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -889,18 +871,17 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             self.annotation_data = None
 
         # Convert intensity values to relative intensity if required
-        relative_intensity = kwargs.pop("relative_intensity", False)
-        if relative_intensity:
+        if self.relative_intensity:
             data[z] = data[z] / max(data[z]) * 100
 
         # Bin peaks if required
-        if self.plot_config.bin_peaks == True or (
-            data.shape[0] > self.plot_config.num_x_bins * self.plot_config.num_y_bins
-            and self.plot_config.bin_peaks == "auto"
+        if self.bin_peaks == True or (
+            data.shape[0] > self.num_x_bins * self.num_y_bins
+            and self.bin_peaks == "auto"
         ):
-            data[x] = cut(data[x], bins=self.plot_config.num_x_bins)
-            data[y] = cut(data[y], bins=self.plot_config.num_y_bins)
-            by = kwargs.pop("by", None)
+            print(self.num_x_bins)
+            data[x] = cut(data[x], bins=self.num_x_bins)
+            data[y] = cut(data[y], bins=self.num_y_bins)
             if by is not None:
                 # Group by x, y and by columns and calculate the mean intensity within each bin
                 data = (
@@ -908,8 +889,6 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                     .agg({z: "mean"})
                     .reset_index()
                 )
-                # Add by back to kwargs
-                kwargs["by"] = by
             else:
                 # Group by x and y bins and calculate the mean intensity within each bin
                 data = (
@@ -920,37 +899,41 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             data = data.fillna(0)
 
         # Log intensity scale
-        if self.plot_config.z_log_scale:
+        if self.z_log_scale:
             data[z] = log1p(data[z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         data = data.sort_values(z)
 
         # If we do not want to fill/color based on z value, set to none prior to plotting
-        if not self.plot_config.fill_by_z:
+        if not self.fill_by_z:
             z = None
 
-        self.plot(x, y, z, **kwargs)
+        self.plot(x, y, by=by)
 
         if self.show_plot:
             self.show()
 
-    def plot(self, x, y, z, by=None):
+    def plot(self):
+        """
+        Create the plot
+        """
+        super().plot()
 
-        if self.plot_config.add_marginals:
-            self.create_main_plot_marginals(x, y, z, by)
+        if self.add_marginals:
+            self.create_main_plot_marginals(x, y, self.z, by)
         else:
-            self.create_main_plot(x, y, z, by)
+            self.create_main_plot(x, y, self.z, by)
 
         self.manual_bbox_renderer = (
             self._add_bounding_box_drawer(self.fig) if self._interactive else None
         )
 
-        if self.plot_config.add_marginals:
+        if self.add_marginals:
 
-            x_fig = self.create_x_axis_plot(x, z, by)
+            x_fig = self.create_x_axis_plot(x, self.z, by)
 
-            y_fig = self.create_y_axis_plot(y, z, by)
+            y_fig = self.create_y_axis_plot(y, self.z, by)
 
             self.combine_plots(x_fig, y_fig)
 
