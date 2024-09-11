@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from abc import ABC
 
-from typing import Tuple
+from typing import Tuple, Iterator
+from dataclasses import dataclass
 
 from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
@@ -42,6 +43,9 @@ class BOKEHPlot(BasePlot, ABC):
     Base class for assembling a Bokeh plot
     """
 
+    #### override the following parameters from BasePlot
+    # marker: str | Iterator[str] = MarkerShapeGenerator(engine="BOKEH")
+
     def _interactive(self):
         return False
 
@@ -55,6 +59,7 @@ class BOKEHPlot(BasePlot, ABC):
             )
 
     def _create_figure(self) -> None:
+        print(self.min_border)
         if self.fig is None:
             self.fig = figure(
                 title=self.title,
@@ -80,19 +85,17 @@ class BOKEHPlot(BasePlot, ABC):
         fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
         fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
         fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
-        
-        
 
     def _add_legend(self, fig, legend):
         """
         Add the legend
         """
-        if self.legend.show:
-            fig.add_layout(legend, self.legend.loc)
-            fig.legend.orientation = self.legend.orientation
-            fig.legend.click_policy = self.legend.onClick
-            fig.legend.title = self.legend.title
-            fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
+        if self.legend_config.show:
+            fig.add_layout(legend, self.legend_config.loc)
+            fig.legend.orientation = self.legend_config.orientation
+            fig.legend.click_policy = self.legend_config.onClick
+            fig.legend.title = self.legend_config.title
+            fig.legend.label_text_font_size = str(self.legend_config.fontsize) + "pt"
 
     def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
         """
@@ -217,21 +220,21 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
     Class for assembling a collection of Bokeh line plots
     """
 
-    @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
+    def plot(self, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a line plot
         """
-        color_gen = kwargs.pop("line_color", None)
-        if 'line_width' not in kwargs:
-            kwargs['line_width'] = 2.5
-
         if by is None:
             source = ColumnDataSource(data)
-            if color_gen is not None:
-                kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
-            line = fig.line(x=x, y=y, source=source, **kwargs)
+            line = fig.line(
+                x=x,
+                y=y,
+                source=source,
+                line_color=self.current_color,
+                line_width=self.line_width,
+                **kwargs,
+            )
 
             return fig, None
         else:
@@ -239,9 +242,14 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
             legend_items = []
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
-                if color_gen is not None:
-                    kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
-                line = fig.line(x=x, y=y, source=source, **kwargs)
+                line = fig.line(
+                    x=x,
+                    y=y,
+                    source=source,
+                    line_color=self.current_color,
+                    line_width=self.line_width,
+                    **kwargs,
+                )
                 legend_items.append((group, [line]))
 
             legend = Legend(items=legend_items)
@@ -254,27 +262,22 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     Class for assembling a series of vertical line plots in Bokeh
     """
 
-    @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
+    def plot(self, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a set of vertical lines
         """
-        color_gen = kwargs.pop("line_color", None)
-        if color_gen is None:
-            color_gen = ColorGenerator()
-        line_width = kwargs.pop("line_width", 2.5)
-        data["line_color"] = [next(color_gen) for _ in range(len(data))]
-        data["line_width"] = [line_width for _ in range(len(data))]
+
+        data["line_color"] = [self.current_color for _ in range(len(data))]
+        data["line_width"] = [self.line_width for _ in range(len(data))]
         if not plot_3d:
-            direction = kwargs.pop("direction", "vertical")
             if by is None:
                 source = ColumnDataSource(data)
-                if direction == "horizontal":
+                if self.plot_config.direction == "horizontal":
                     x0_data_var = 0
                     x1_data_var = x
                     y0_data_var = y1_data_var = y
-                else:
+                else:  # self.plot_config.direction == "vertical"
                     x0_data_var = x1_data_var = x
                     y0_data_var = 0
                     y1_data_var = y
@@ -293,15 +296,15 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 legend_items = []
                 for group, df in data.groupby(by):
                     source = ColumnDataSource(df)
-                    if direction == "horizontal":
+                    if self.plot_config.direction == "horizontal":
                         x0_data_var = 0
                         x1_data_var = x
                         y0_data_var = y1_data_var = y
-                    else:
+                    else:  # self.plot_config.direction == "vertical"
                         x0_data_var = x1_data_var = x
                         y0_data_var = 0
                         y1_data_var = y
-                        
+
                     line = fig.segment(
                         x0=x0_data_var,
                         y0=y0_data_var,
@@ -315,7 +318,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     legend_items.append((group, [line]))
 
                 legend = Legend(items=legend_items)
-        
+
                 return fig, legend
         else:
             raise NotImplementedError("3D Vline plots are not supported in Bokeh")
@@ -346,23 +349,14 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     Class for assembling a Bokeh scatter plot
     """
 
-    @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
+    def plot(
+        self, fig, data, x, y, z=None, by: str | None = None, plot_3d=False, **kwargs
+    ):
         """
         Plot a scatter plot
         """
-        z = kwargs.pop("z", None)
 
-        color_gen = kwargs.pop("color_gen", None)
-        if color_gen is None:
-            color_gen = ColorGenerator()
-
-        marker_gen = kwargs.pop("marker_gen", None)
-        if marker_gen is None:
-            marker_gen = MarkerShapeGenerator(engine="BOKEH")
-        marker_size = kwargs.pop("marker_size", 10)
-        
         if z is not None:
             mapper = linear_cmap(
                 field_name=z,
@@ -371,23 +365,35 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 high=max(data[z]),
             )
         # Set defaults if they have not been set in kwargs
-        defaults = {"size": marker_size, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        defaults = {
+            "size": self.marker_size,
+            "line_width": 0,
+            "fill_color": mapper if z is not None else next(self.color),
+        }
         for k, v in defaults.items():
             if k not in kwargs.keys():
                 kwargs[k] = v
         if by is None:
-            kwargs["marker"] = next(marker_gen)
             source = ColumnDataSource(data)
-            line = fig.scatter(x=x, y=y, source=source, **kwargs)
+            line = fig.scatter(
+                x=x, y=y, source=source, marker=self.current_type, **kwargs
+            )
             return fig, None
         else:
             legend_items = []
             for group, df in data.groupby(by):
                 kwargs["marker"] = next(marker_gen)
                 if z is None:
-                    kwargs['fill_color'] = next(color_gen)
+                    kwargs["fill_color"] = next(color_gen)
                 source = ColumnDataSource(df)
-                line = fig.scatter(x=x, y=y, source=source, **kwargs)
+                line = fig.scatter(
+                    x=x,
+                    y=y,
+                    source=source,
+                    fill_color=self.current_color,
+                    marker=self.current_type,
+                    **kwargs,
+                )
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
@@ -437,7 +443,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
             None
         """
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.plot_config.annotation_colormap, n=annotation_data.shape[0]
         )
         legend_items = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
@@ -447,8 +453,8 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
                 x1=[feature["leftWidth"], feature["rightWidth"]],
                 y1=[feature["apexIntensity"], feature["apexIntensity"]],
                 color=next(color_gen),
-                line_dash=self.feature_config.line_type,
-                line_width=self.feature_config.line_width,
+                line_dash=self.plot_config.annotation_line_type,
+                line_width=self.plot_config.annotation_line_width,
             )
             if "name" in annotation_data.columns:
                 use_name = feature["name"]
@@ -460,15 +466,15 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
                 legend_label = f"{use_name}"
             legend_items.append((legend_label, [peak_boundary_lines]))
 
-        if self.feature_config.legend.show:
+        if self.plot_config.annotation_legend_config.show:
             legend = Legend(items=legend_items)
-            legend.click_policy = self.feature_config.legend.onClick
-            legend.title = self.feature_config.legend.title
-            legend.orientation = self.feature_config.legend.orientation
+            legend.click_policy = self.plot_config.annotation_legend_config.onClick
+            legend.title = self.plot_config.annotation_legend_config.title
+            legend.orientation = self.plot_config.annotation_legend_config.orientation
             legend.label_text_font_size = (
-                str(self.feature_config.legend.fontsize) + "pt"
+                str(self.plot_config.annotation_legend_config.fontsize) + "pt"
             )
-            self.fig.add_layout(legend, self.feature_config.legend.loc)
+            self.fig.add_layout(legend, self.plot_config.annotation_legend_config.loc)
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source
@@ -504,24 +510,36 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     Class for assembling a Bokeh feature heatmap plot
     """
 
-    def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        
-        if not self.plot_3d:
-            scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
+    def create_main_plot(self, x, y, z, by):
 
-            self.fig = scatterPlot.generate(z=z, **other_kwargs)
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(
+                self.data, x, y, by=by, _config=self._config
+            )
+
+            mapper = linear_cmap(
+                field_name=z,
+                palette=Plasma256[::-1],
+                low=min(self.data[z]),
+                high=max(self.data[z]),
+            )
+            self.fig = scatterPlot.generate(
+                z=z, marker="square", line_color=mapper, fill_color=mapper
+            )
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
 
-            tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
+            tooltips, _ = self._create_tooltips(
+                {self.xlabel: x, self.ylabel: y, "intensity": z}
+            )
 
             self._add_tooltips(self.fig, tooltips)
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, x, z, class_kwargs):
-        x_fig = super().create_x_axis_plot(x, z, class_kwargs)
+    def create_x_axis_plot(self, x, z, by):
+        x_fig = super().create_x_axis_plot(x, z, by)
 
         # Modify plot
         x_fig.x_range = self.fig.x_range
@@ -530,8 +548,8 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         x_fig.min_border = 0
         return x_fig
 
-    def create_y_axis_plot(self, y, z, class_kwargs):
-        y_fig = super().create_y_axis_plot(y, z, class_kwargs)
+    def create_y_axis_plot(self, y, z, by):
+        y_fig = super().create_y_axis_plot(y, z, by)
 
         # Modify plot
         y_fig.y_range = self.fig.y_range
@@ -544,6 +562,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     def combine_plots(self, x_fig, y_fig):
         # Modify the main plot
         self.fig.yaxis.visible = False
+
         # Ensure all plots have the same dimensions
         x_fig.frame_height = self.height
         x_fig.frame_width = self.width
@@ -555,9 +574,6 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         from bokeh.layouts import gridplot
 
         self.fig = gridplot([[None, x_fig], [y_fig, self.fig]])
-
-    def get_scatter_renderer(self, data, x, y, **kwargs):
-        return BOKEHScatterPlot(data, x, y, **kwargs)
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source
@@ -586,7 +602,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
 
     def _add_box_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.plot_config.annotation_colormap, n=annotation_data.shape[0]
         )
         legend_items = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
@@ -607,8 +623,8 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 width=width,
                 height=height,
                 color=next(color_gen),
-                line_dash=self.feature_config.line_type,
-                line_width=self.feature_config.line_width,
+                line_dash=self.plot_config.annotation_line_type,
+                line_width=self.plot_config.annotation_line_width,
                 fill_alpha=0,
             )
             if "name" in annotation_data.columns:
@@ -621,12 +637,12 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 legend_label = f"{use_name}"
             legend_items.append((legend_label, [box_boundary_lines]))
 
-        if self.feature_config.legend.show:
+        if self.plot_config.annotation_legend_config.show:
             legend = Legend(items=legend_items)
-            legend.click_policy = self.feature_config.legend.onClick
-            legend.title = self.feature_config.legend.title
-            legend.orientation = self.feature_config.legend.orientation
+            legend.click_policy = self.plot_config.annotation_legend_config.onClick
+            legend.title = self.plot_config.annotation_legend_config.title
+            legend.orientation = self.plot_config.annotation_legend_config.orientation
             legend.label_text_font_size = (
-                str(self.feature_config.legend.fontsize) + "pt"
+                str(self.plot_config.annotation_legend_config.fontsize) + "pt"
             )
-            self.fig.add_layout(legend, self.feature_config.legend.loc)
+            self.fig.add_layout(legend, self.plot_config.annotation_legend_config.loc)

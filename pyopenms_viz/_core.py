@@ -121,9 +121,8 @@ class BasePlot(BasePlotConfig, ABC):
     by: str = None
     fig: "figure" = None
 
-    # def __post_init__(self):
-    #    self.load_config()
-
+    # Note priority is keyword arguments > config > default values
+    # This allows for plots to have their own default configurations which can be overridden by the user
     def load_config(self, **kwargs):
         """
         Load the configuration settings for the plot.
@@ -156,9 +155,7 @@ class BasePlot(BasePlotConfig, ABC):
                 f"No matching plot class found for {self.__class__.__name__}"
             )
 
-    # Note priority is keyword arguments > config > default values
-    # This allows for plots to have their own default configurations which can be overridden by the user
-    def setup_figure(self):
+    def __post_init__(self):
         self.data = self.data.copy()
 
         # if self._config is not None:
@@ -271,8 +268,6 @@ class BasePlot(BasePlotConfig, ABC):
             None
         """
         for attr, value in config.__dict__.items():
-            print("parsing attr:", attr)
-            print("self has attibute:", hasattr(self, attr))
             if value is not None and hasattr(self, attr):
                 setattr(self, attr, value)
 
@@ -489,21 +484,6 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
     def _kind(self):
         return "chromatogram"
 
-    @property
-    def plot_config(self):
-        return self._plot_config
-
-    @plot_config.setter
-    def plot_config(self, value):
-        if value is None:
-            self._plot_config = ChromatogramConfig()
-        elif isinstance(value, dict):
-            self._plot_config = ChromatogramConfig.from_dict(value)
-        elif isinstance(value, ChromatogramConfig):
-            self._plot_config = value
-        else:
-            raise ValueError("plot_config must be a dict, ChromatogramConfig, or None")
-
     def __init__(
         self,
         data,
@@ -516,22 +496,9 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
     ) -> None:
 
         super().__init__(data, x, y, z, by)
+        print("kwargs:", kwargs)
         self.load_config(**kwargs)
-
-        # contains the keyword arguments meant to overwrite the _config
-        # new_config = ChromatogramConfig(**kwargs)
-        # self._update_from_config(new_config)
-        # self.update_config()
-
-        # self.update
-        # **kwargs)
-        # BaseMSPlot().__init__(data, x, y)
-        # if values are none, then overwrite them with chromatogram config
-        # default_chrom_config = ChromatogramConfig()
-        # self._config.update_none_fields
-
-        print("xlabel", self.xlabel)
-        print("annotation", self.annotation_colormap)
+        print("kwargs:", kwargs)
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -540,10 +507,10 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         self.label_suffix = self.x  # set label suffix for bounding box
 
         # Convert to relative intensity if required
-        if self.plot_config.relative_intensity:
+        if self.relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
-        self.plot(self.data, self.x, self.y, self.by, **kwargs)
+        self.plot(self.data, self.x, self.y, self.by)
         if self.show_plot:
             self.show()
 
@@ -551,13 +518,18 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         """
         Create the plot
         """
-        color_gen = ColorGenerator()
-        TOOLTIPS, custom_hover_data = self._create_tooltips()
-        linePlot = self.get_line_renderer(
-            data, x, y, by=by, fig=self.fig, _config=self._config
-        )
+        # color_gen = ColorGenerator()
+
+        tooltip_entries = {"retention time": x, "intensity": y}
+        if "Annotation" in self.data.columns:
+            tooltip_entries["annotation"] = "Annotation"
+        if "product_mz" in self.data.columns:
+            tooltip_entries["product m/z"] = "product_mz"
+        TOOLTIPS, custom_hover_data = self._create_tooltips(tooltip_entries)
+        linePlot = self.get_line_renderer(data, x, y, by=by, fig=self.fig)
+
         self.fig = linePlot.generate(
-            line_color=color_gen, tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
+            tooltips=TOOLTIPS, custom_hover_data=custom_hover_data
         )
 
         self._modify_y_range((0, self.data[y].max()), (0, 0.1))
@@ -584,11 +556,6 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
-
-    @property
-    def _kind(self):
-        return "mobilogram"
-
     def __init__(
         self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
     ) -> None:
@@ -600,10 +567,6 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
 
 class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
-    @property
-    def _kind(self):
-        return "spectrum"
-
     @property
     def plot_config(self):
         return self._plot_config
@@ -880,10 +843,6 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
 class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
-    @property
-    def _kind(self):
-        return "peakmap"
-
     @property
     def plot_config(self):
         return self._plot_config

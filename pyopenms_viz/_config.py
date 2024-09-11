@@ -113,26 +113,26 @@ class BasePlotConfig(ABC):
     ) = None
 
     # Plotting Attributes
-    height: int | None = None
-    width: int | None = None
-    grid: bool | None = None
-    toolbar_location: str | None = None
-    title: str | None = None
-    xlabel: str | None = None
-    ylabel: str | None = None
-    zlabel: str | None = None
-    x_axis_location: str | None = None
-    y_axis_location: str | None = None
-    title_font_size: int | None = None
-    xaxis_label_font_size: int | None = None
-    yaxis_label_font_size: int | None = None
-    xaxis_tick_font_size: int | None = None
-    yaxis_tick_font_size: int | None = None
-    annotation_font_size: int | None = None
+    height: int = 500
+    width: int = 500
+    grid: bool = True
+    toolbar_location: str = "above"
+    title: str = ""
+    xlabel: str = ""
+    ylabel: str = ""
+    zlabel: str = ""
+    x_axis_location: str = "below"
+    y_axis_location: str = "left"
+    title_font_size: int = 18
+    xaxis_label_font_size: int = 16
+    yaxis_label_font_size: int = 16
+    xaxis_tick_font_size: int = 14
+    yaxis_tick_font_size: int = 14
+    annotation_font_size: int = 12
     color: str | Iterator[str] = ColorGenerator()
     plot_3d: bool = False
     min_border: int | None = None
-    show_plot: bool | None = None
+    show_plot: bool = True
     relative_intensity: bool = False
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
 
@@ -209,6 +209,7 @@ class ScatterConfig:
     num_y_bins: int = 50
     z_log_scale: bool = False
     fill_by_z: bool = True
+    marker_size: int = 30
 
 
 @dataclass(kw_only=True)
