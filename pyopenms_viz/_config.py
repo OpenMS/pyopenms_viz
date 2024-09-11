@@ -238,6 +238,11 @@ class SpectrumConfig(VLineConfig):
     custom_annotation: str | None = None
     annotation_color: str | None = None
 
+    ### override axes and title labels
+    xlabel: str = "m/z"
+    ylabel: str = "Intensity"
+    title: str = "Spectrum"
+
 
 @dataclass(kw_only=True)
 class PeakMapConfig(ScatterConfig):
@@ -246,6 +251,11 @@ class PeakMapConfig(ScatterConfig):
     x_kind = "chromatogram"
     chromatogram_config: ChromatogramConfig = field(default_factory=ChromatogramConfig)
     spectrum_config: SpectrumConfig = field(default_factory=SpectrumConfig)
+
+    ### override axes and title labels
+    xlabel: str = "Retention Time"
+    ylabel: str = "m/z"
+    title: str = "Peak Map"
 
 
 def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):

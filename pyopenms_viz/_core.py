@@ -138,17 +138,9 @@ class BasePlot(BasePlotConfig, ABC):
                 VLinePlot: VLineConfig,
             }
             for plotClass, configClass in config_mapper.items():
-                print(
-                    f"Checking if {self.__class__.__name__} is a subclass of {plotClass.__name__}"
-                )
-                print(
-                    f"issubclass({self.__class__.__name__}, {plotClass.__name__}) = {issubclass(self.__class__, plotClass)}"
-                )
                 if issubclass(self.__class__, plotClass):
-                    print(
-                        f"{self.__class__.__name__} is a subclass of {plotClass.__name__}"
-                    )
                     self._config = configClass(**kwargs)
+                    print(self._config)
                     self._update_from_config(self._config)
                     self.update_config()
                     break
@@ -166,11 +158,9 @@ class BasePlot(BasePlotConfig, ABC):
         # data verification
         self.data = self.data.copy()
 
-        # if self._config is not None:
-        #    self._update_from_config(self._config)
-
-        # update the base plot config based on kwargs
-        # self.update_config()
+        ### NOTE: if config is set assume there are no **kwargs
+        if self._config is not None:
+            self._update_from_config(self._config)
 
         # all plots have x and y columns
         self.x = self._verify_column(self.x, "x")
@@ -275,15 +265,11 @@ class BasePlot(BasePlotConfig, ABC):
         for attr, value in config.__dict__.items():
             if value is not None and hasattr(self, attr):
                 setattr(self, attr, value)
-            else:
-                print(f"Attribute {attr} not found in {self.__class__.__name__}")
 
     def update_config(self) -> None:
         """
         Update the _config object based on the provided kwargs. This means that the _config will store an accurate representation of the parameters
         """
-        print(self._config.__dict__.keys())
-        print(self.__dict__.keys())
         for attr in self._config.__dict__.keys():
             setattr(self._config, attr, self.__dict__[attr])
 
@@ -348,6 +334,8 @@ class BasePlot(BasePlotConfig, ABC):
         """
         self._load_extension()
         if fig is None:
+            print("creating figure")
+            print("self.xlabel is:", self.xlabel)
             fig = self._create_figure()
         plot_out, legend = self.plot(fig)
 
@@ -586,9 +574,6 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         SpectrumConfig.__init__(self)
         self.load_config(**kwargs)
 
-        # Set default config attributes if not passed as keyword arguments
-        # kwargs["_config"] = _BasePlotConfig(kind=self._kind)
-
         self.reference_spectrum = reference_spectrum
 
         fig = self.plot()
@@ -624,6 +609,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             by=self.by,
             _config=self._config,
         )
+        print("vlineplot config is:", vlinePlot._config)
+        print("vlineplot xlabel is:", vlinePlot.xlabel)
 
         # color_gen = self._get_colors(spectrum, "peak")
 
@@ -869,8 +856,6 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             **kwargs
         )  ## seems that kwargs not getting absorbed in load_config?
 
-        print("line 881", kwargs)
-
         # remove title if marginals are added
         if self.add_marginals:
             self.title = ""
@@ -880,40 +865,7 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         else:
             self.annotation_data = None
 
-        # Convert intensity values to relative intensity if required
-        if self.relative_intensity:
-            data[z] = data[z] / max(data[z]) * 100
-
-        # Bin peaks if required
-        if self.bin_peaks == True or (
-            data.shape[0] > self.num_x_bins * self.num_y_bins
-            and self.bin_peaks == "auto"
-        ):
-            print(self.num_x_bins)
-            data[x] = cut(data[x], bins=self.num_x_bins)
-            data[y] = cut(data[y], bins=self.num_y_bins)
-            if by is not None:
-                # Group by x, y and by columns and calculate the mean intensity within each bin
-                data = (
-                    data.groupby([x, y, by], observed=True)
-                    .agg({z: "mean"})
-                    .reset_index()
-                )
-            else:
-                # Group by x and y bins and calculate the mean intensity within each bin
-                data = (
-                    data.groupby([x, y], observed=True).agg({z: "mean"}).reset_index()
-                )
-            data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
-            data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
-            data = data.fillna(0)
-
-        # Log intensity scale
-        if self.z_log_scale:
-            data[z] = log1p(data[z])
-
-        # Sort values by intensity in ascending order to plot highest intensity peaks last
-        data = data.sort_values(z)
+        self.prepare_data()
 
         # If we do not want to fill/color based on z value, set to none prior to plotting
         if not self.fill_by_z:
@@ -923,6 +875,47 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
 
         if self.show_plot:
             self.show(fig)
+
+    def prepare_data(self):
+        # Convert intensity values to relative intensity if required
+        if self.relative_intensity:
+            self.data[self.z] = self.data[self.z] / max(self.data[self.z]) * 100
+
+        # Bin peaks if required
+        if self.bin_peaks == True or (
+            self.data.shape[0] > self.num_x_bins * self.num_y_bins
+            and self.bin_peaks == "auto"
+        ):
+            self.data[self.x] = cut(self.data[self.x], bins=self.num_x_bins)
+            self.data[self.y] = cut(self.data[self.y], bins=self.num_y_bins)
+            if self.by is not None:
+                # Group by x, y and by columns and calculate the mean intensity within each bin
+                self.data = (
+                    self.data.groupby([self.x, self.y, self.by], observed=True)
+                    .agg({self.z: "mean"})
+                    .reset_index()
+                )
+            else:
+                # Group by x and y bins and calculate the mean intensity within each bin
+                self.data = (
+                    self.data.groupby([self.x, self.y], observed=True)
+                    .agg({self.z: "mean"})
+                    .reset_index()
+                )
+            self.data[self.x] = (
+                self.data[self.x].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data[self.y] = (
+                self.data[self.y].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data = self.data.fillna(0)
+
+        # Log intensity scale
+        if self.z_log_scale:
+            self.data[self.z] = log1p(self.data[self.z])
+
+        # Sort values by intensity in ascending order to plot highest intensity peaks last
+        self.data = self.data.sort_values(self.z)
 
     def plot(self):
         """
