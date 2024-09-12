@@ -945,19 +945,21 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         return grouped
 
     @abstractmethod
-    def create_main_plot(self):
+    def create_main_plot(self, ax=None):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
-    def create_main_plot_marginals(self):
-        return self.create_main_plot()
-
-    # @abstractmethod
-    # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
-    #     pass
+    # for matplotlib, a figure object is passed
+    def create_main_plot_marginals(self, ax=None):
+        return self.create_main_plot(ax=ax)
 
     @abstractmethod
-    def create_x_axis_plot(self, main_fig) -> "figure":
+    def create_x_axis_plot(self, ax=None) -> "figure":
+        """
+        main_fig = figure of the main plot (used for measurements in bokeh)
+        ax = ax to plot the x_axis on (specific for matplotlib)
+        """
+
         # get cols to integrate over and exclude y and z
         group_cols = [self.x]
         if self.by is not None:
@@ -965,32 +967,32 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
 
         x_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
 
-        x_config = self._config.copy()
-        x_config.ylabel = self.zlabel
-        x_config.legend_config.y_axis_location = "right"
-        x_config.legend_config.show = True
-        x_config.legend_config.loc = "right"
+        # x_config = self._config.copy()
+        # x_config.ylabel = self.zlabel
+        # x_config.legend_config.y_axis_location = "right"
+        # x_config.legend_config.show = True
+        # x_config.legend_config.loc = "right"
 
         if self.x_kind in ["chromatogram", "mobilogram"]:
             x_plot_obj = self.get_line_renderer(
-                data=x_data, x=self.x, y=self.z, by=self.by, _config=x_config
+                data=x_data, x=self.x, y=self.z, by=self.by, _config=self.x_plot_config
             )
         elif self.x_kind == "spectrum":
             x_plot_obj = self.get_vline_renderer(
-                data=x_data, x=self.x, y=self.z, by=self.by, _config=x_config
+                data=x_data, x=self.x, y=self.z, by=self.by, _config=self.x_plot_config
             )
         else:
             raise ValueError(
                 f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
             )
 
-        x_fig = x_plot_obj.generate(None, None)
+        x_fig = x_plot_obj.generate(None, None, fig=ax)
         self.plot_x_axis_line(x_fig)
 
         return x_fig
 
     @abstractmethod
-    def create_y_axis_plot(self, main_fig) -> "figure":
+    def create_y_axis_plot(self, ax=None) -> "figure":
         group_cols = [self.y]
         if self.by is not None:
             group_cols.append(self.by)
@@ -998,29 +1000,23 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         y_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
 
         if self.y_kind in ["chromatogram", "mobilogram"]:
-            y_config = self.chromatogram_config.copy()
-        elif self.y_kind == "spectrum":
-            y_config = self.spectrum_config.copy()
-            y_config.direction = "horizontal"
-        else:
-            raise ValueError(
-                f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
-            )
-
-        y_config.xlabel = self.zlabel
-        y_config.ylabel = self.ylabel
-        y_config.y_axis_location = "left"
-        y_config.legend_config.show = True
-        y_config.legend_config.loc = "below"
-
-        if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
+                data=y_data,
+                x=self.z,
+                y=self.y,
+                by=self.by,
+                _config=self.y_plot_config,
+                fig=ax,
             )
             y_fig = y_plot_obj.generate(None, None)
         elif self.y_kind == "spectrum":
             y_plot_obj = self.get_vline_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
+                data=y_data,
+                x=self.z,
+                y=self.y,
+                by=self.by,
+                _config=self.y_plot_config,
+                fig=ax,
             )
             y_fig = y_plot_obj.generate(None, None)
 
