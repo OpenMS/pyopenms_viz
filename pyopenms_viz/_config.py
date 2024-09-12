@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict, fields
 from typing import Tuple, Literal, Dict, Any, Union, Iterator
 from enum import Enum
 from copy import deepcopy
-from ._misc import ColorGenerator, MarkerShapeGenerator
+from ._misc import ColorGenerator
 
 
 @dataclass(kw_only=True)
@@ -128,22 +128,21 @@ class BasePlotConfig(ABC):
     yaxis_label_font_size: int = 16
     xaxis_tick_font_size: int = 14
     yaxis_tick_font_size: int = 14
+    y_axis_location: Literal["left", "right"] = "left"
+    x_axis_location: Literal["above", "below"] = "below"
     annotation_font_size: int = 12
     color: str | Iterator[str] = ColorGenerator()
     plot_3d: bool = False
-    min_border: int | None = None
+    min_border: int = 0
     show_plot: bool = True
     relative_intensity: bool = False
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
 
-    # _config: BasePlotConfig | dict = None
-
     def __post_init__(self):
         # if legend_config is a dictionary, update it to LegendConfig object
+        print("xlabel is ", self.xlabel)
         if isinstance(self.legend_config, dict):
             self.legend_config = LegendConfig.from_dict(self.legend_config)
-        else:
-            self.legend_config = LegendConfig()
 
     def copy(self):
         return deepcopy(self)
@@ -170,7 +169,7 @@ class ScatterConfig(BasePlotConfig):
     num_y_bins: int = 50
     z_log_scale: bool = False
     fill_by_z: bool = True
-    marker_size: int = 30
+    marker_size: int = 10
     marker: Iterator[str] | None = None
 
 
@@ -241,7 +240,7 @@ class SpectrumConfig(VLineConfig):
     ### override axes and title labels
     xlabel: str = "m/z"
     ylabel: str = "Intensity"
-    title: str = "Spectrum"
+    title: str = "Mass Spectrum"
 
 
 @dataclass(kw_only=True)
@@ -266,6 +265,7 @@ class PeakMapConfig(ScatterConfig):
     y_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
 
     def __post_init__(self):
+        super().__post_init__()
         # initial marginal configs
         self.y_plot_config = PeakMapConfig.marginal_config_factory(self.y_kind)
         self.x_plot_config = PeakMapConfig.marginal_config_factory(self.x_kind)
@@ -273,8 +273,8 @@ class PeakMapConfig(ScatterConfig):
         # update y-axis labels and positioning to defaults
         self.y_plot_config.xlabel = self.zlabel
         self.y_plot_config.ylabel = self.ylabel
-        # self.y_plot_config.y_axis_location = "left"
-        self.y_plot_config.legend_config.show = self.legend_config.show
+        self.y_plot_config.y_axis_location = "left"
+        self.y_plot_config.legend_config.show = True
         self.y_plot_config.legend_config.loc = "below"
         self.y_plot_config.legend_config.orientation = "horizontal"
         self.y_plot_config.legend_config.bbox_to_anchor = (1, -0.4)
@@ -285,7 +285,7 @@ class PeakMapConfig(ScatterConfig):
 
         # update x-axis labels and positioning to defaults
         self.x_plot_config.ylabel = self.zlabel
-        # self.x_plot_config.legend_config.y_axis_location = "right"
+        self.x_plot_config.y_axis_location = "right"
         self.x_plot_config.legend_config.show = True
         self.x_plot_config.legend_config.loc = "right"
         self.x_plot_config.width = self.width

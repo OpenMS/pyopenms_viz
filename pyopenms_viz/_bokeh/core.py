@@ -58,6 +58,7 @@ class BOKEHPlot(BasePlot, ABC):
 
     def _create_figure(self) -> None:
         """Creates a figure from scratch"""
+        print("self.xlabel is:", self.xlabel)
         return figure(
             title=self.title,
             x_axis_label=self.xlabel,
@@ -370,15 +371,15 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         # Set defaults if they have not been set in kwargs
         # unknown line width?
 
-        fill_color = mapper if self.z is not None else self.current_color
+        kwargs = dict(
+            size=self.marker_size,
+            line_width=0,
+            fill_color=mapper if self.z is not None else self.current_color,
+        )
         if self.by is None:
             source = ColumnDataSource(self.data)
             line = fig.scatter(
-                x=self.x,
-                y=self.y,
-                source=source,
-                marker=self.current_marker,
-                fill_color=fill_color,
+                x=self.x, y=self.y, source=source, marker=self.current_marker, **kwargs
             )
             return fig, None
         else:
@@ -389,8 +390,8 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                     x=self.x,
                     y=self.y,
                     source=source,
-                    fill_color=fill_color,
                     marker=self.current_marker,
+                    **kwargs,
                 )
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
@@ -534,25 +535,24 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, main_fig=None):
-        x_fig = super().create_x_axis_plot()
+    def create_x_axis_plot(self, main_fig=None, ax=None):
+        x_fig = super().create_x_axis_plot(main_fig=main_fig, ax=ax)
 
         # Modify plot
-        # x_fig.x_range = main_fig.x_range
+        x_fig.x_range = main_fig.x_range
         x_fig.width = self.x_plot_config.width
         x_fig.xaxis.visible = False
-        x_fig.min_border = self.x_plot_config.min_border
+
         return x_fig
 
-    def create_y_axis_plot(self, main_fig):
-        y_fig = super().create_y_axis_plot(main_fig)
+    def create_y_axis_plot(self, main_fig=None, ax=None):
+        y_fig = super().create_y_axis_plot(main_fig=main_fig, ax=ax)
 
         # Modify plot
         y_fig.y_range = main_fig.y_range
         y_fig.height = self.y_plot_config.height
         y_fig.legend.orientation = self.y_plot_config.legend_config.orientation
         y_fig.x_range.flipped = True
-        y_fig.min_border = self.y_plot_config.min_border
         return y_fig
 
     def combine_plots(self, main_fig, x_fig, y_fig):

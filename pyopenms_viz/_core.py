@@ -24,11 +24,7 @@ from ._config import (
     VLineConfig,
     ScatterConfig,
 )
-from ._misc import (
-    ColorGenerator,
-    sturges_rule,
-    freedman_diaconis_rule,
-)
+from ._misc import ColorGenerator, freedman_diaconis_rule, sturges_rule
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -488,6 +484,8 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         ChromatogramConfig.__init__(self)
         self.load_config(**kwargs)
 
+        print("self.xlabel", self.xlabel)
+
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
         else:
@@ -506,6 +504,7 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         """
         Create the plot
         """
+        print("line 507 self.xlabel", self.xlabel)
         tooltip_entries = {"retention time": self.x, "intensity": self.y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"
@@ -513,7 +512,7 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
             tooltip_entries["product m/z"] = "product_mz"
         tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
         linePlot = self.get_line_renderer(
-            data=self.data, x=self.x, y=self.y, by=self.by
+            data=self.data, x=self.x, y=self.y, by=self.by, _config=self._config
         )
 
         fig = linePlot.generate(tooltips, custom_hover_data)
@@ -542,20 +541,34 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
-    def __init__(
-        self, data, x, y, annotation_data: DataFrame | None = None, **kwargs
-    ) -> None:
-        super().__init__(data, x, y, annotation_data=annotation_data, **kwargs)
 
-    def plot(self, data, x, y, by=None):
-        super().plot(data, x, y, by=by)
-        self._modify_y_range((0, self.data[y].max()), (0, 0.1))
+    def plot(self):
+        fig = super().plot()
+        fig._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
 
 class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
     @property
     def _kind(self):
         return "spectrum"
+
+    @property
+    def _computed_num_bins(self):
+        """
+        Compute the number of bins based on the number of peaks in the data.
+
+        Returns:
+            int: The number of bins.
+        """
+        if self.bin_peaks == "auto":
+            if self.bin_method == "sturges":
+                self.num_x_bins = sturges_rule(self.data, self.x)
+            elif self.bin_method == "freedman-diaconis":
+                return freedman_diaconis_rule(self.data, self.x)
+            else:  # self.bin_method == 'none'
+                return self.num_x_bins
+
+        return self.num_x_bins
 
     def __init__(
         self,
@@ -571,7 +584,9 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         SpectrumConfig.__init__(self)
         self.load_config(**kwargs)
 
-        self.reference_spectrum = reference_spectrum
+        self.reference_spectrum = (
+            None if reference_spectrum is None else reference_spectrum.copy()
+        )
 
         fig = self.plot()
         # Show plot
@@ -582,9 +597,11 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
         # Prepare data
-        spectrum, reference_spectrum = self._prepare_data(
-            self.data, self.x, self.y, self.reference_spectrum
-        )
+        spectrum = self._prepare_data(self.data)
+        if self.reference_spectrum is not None:
+            reference_spectrum = self._prepare_data(self.reference_spectrum)
+        else:
+            reference_spectrum = None
 
         entries = {"m/z": self.x, "intensity": self.y}
         for optional in (
@@ -667,7 +684,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         )
         return spectrum_fig
 
-    def _bin_peaks(self, data: DataFrame, x: str, y: str) -> DataFrame:
+    def _bin_peaks(self, df: DataFrame) -> DataFrame:
         """
         Bin peaks based on x-axis values.
 
@@ -679,9 +696,9 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        data[x] = cut(data[x], bins=self.num_x_bins)
+        df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
         # TODO: Find a better way to retain other columns
-        cols = [x]
+        cols = [self.x]
         if self.by is not None:
             cols.append(self.by)
         if self.peak_color is not None:
@@ -696,11 +713,33 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             cols.append(self.annotation_color)
 
         # Group by x bins and calculate the mean intensity within each bin
-        data = data.groupby(cols, observed=True).agg({y: "mean"}).reset_index()
-        data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
-        data = data.fillna(0)
-        return data
+        df = df.groupby(cols, observed=True).agg({self.y: "mean"}).reset_index()
+        df[self.x] = df[self.x].apply(lambda interval: interval.mid).astype(float)
+        df = df.fillna(0)
+        return df
 
+    def _prepare_data(self, df):
+        """
+        Prepare data for plotting based on configuration
+
+        Args:
+            df (DataFrame): The data to prepare.
+
+        Returns:
+            DataFrame: The prepared data.
+        """
+
+        # Convert to relative intensity if required
+        if self.relative_intensity or self.mirror_spectrum:
+            df[self.y] = df[self.y] / df[self.y].max() * 100
+
+        # Bin peaks if required
+        if self.bin_peaks == True or (self.bin_peaks == "auto"):
+            df = self._bin_peaks(df)
+
+        return df
+
+    '''
     def _prepare_data(
         self,
         spectrum: DataFrame,
@@ -711,7 +750,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         """Prepares data for plotting based on configuration (copy, relative intensity)."""
 
         # copy spectrum data to not modify the original
-        spectrum = spectrum.copy()
+        spectrum = spectrum.copy() # TODO is this needed could already be copied
         reference_spectrum = (
             self.reference_spectrum.copy() if reference_spectrum is not None else None
         )
@@ -726,11 +765,12 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
         # Bin peaks if required
         if self.bin_peaks == True or (self.bin_peaks == "auto"):
-            spectrum = self._bin_peaks(spectrum, x, y)
+            spectrum = self._bin_peaks(spectrum)
             if reference_spectrum is not None:
-                reference_spectrum = self._bin_peaks(reference_spectrum, x, y)
+                reference_spectrum = self._bin_peaks(reference_spectrum)
 
         return spectrum, reference_spectrum
+    '''
 
     def _get_colors(
         self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None
@@ -854,6 +894,9 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         # remove title if marginals are added
         if self.add_marginals:
             self.title = ""
+            self.x_plot_config.title = ""
+            self.y_plot_config.title = ""
+        self.update_config()
 
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
@@ -945,16 +988,16 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         return grouped
 
     @abstractmethod
-    def create_main_plot(self, ax=None):
+    def create_main_plot(self):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
     # for matplotlib, a figure object is passed
-    def create_main_plot_marginals(self, ax=None):
-        return self.create_main_plot(ax=ax)
+    def create_main_plot_marginals(self):
+        return self.create_main_plot()
 
     @abstractmethod
-    def create_x_axis_plot(self, ax=None) -> "figure":
+    def create_x_axis_plot(self, main_fig=None, ax=None) -> "figure":
         """
         main_fig = figure of the main plot (used for measurements in bokeh)
         ax = ax to plot the x_axis on (specific for matplotlib)
@@ -992,7 +1035,7 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         return x_fig
 
     @abstractmethod
-    def create_y_axis_plot(self, ax=None) -> "figure":
+    def create_y_axis_plot(self, main_fig=None, ax=None) -> "figure":
         group_cols = [self.y]
         if self.by is not None:
             group_cols.append(self.by)
@@ -1006,9 +1049,8 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 y=self.y,
                 by=self.by,
                 _config=self.y_plot_config,
-                fig=ax,
             )
-            y_fig = y_plot_obj.generate(None, None)
+            y_fig = y_plot_obj.generate(None, None, fig=ax)
         elif self.y_kind == "spectrum":
             y_plot_obj = self.get_vline_renderer(
                 data=y_data,
@@ -1016,9 +1058,8 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 y=self.y,
                 by=self.by,
                 _config=self.y_plot_config,
-                fig=ax,
             )
-            y_fig = y_plot_obj.generate(None, None)
+            y_fig = y_plot_obj.generate(None, None, fig=ax)
 
         self.plot_x_axis_line(y_fig)
 
