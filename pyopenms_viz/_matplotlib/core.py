@@ -559,43 +559,33 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
         return ax
 
-    def create_y_axis_plot(self, main_plot=None, ax=None) -> "figure":
+    def create_y_axis_plot(self, ax=None) -> "figure":
         # Note y_config is different so we cannot use the base class methods
         group_cols = [self.y]
         if self.by is not None:
             group_cols.append(self.by)
 
         y_data = self._integrate_data_along_dim(self.data, group_cols, self.z)
-        ## TODO could this just be the defaults of the spectrum config?
-        y_config = self._config.copy()
-        y_config.xlabel = self.zlabel
-        y_config.ylabel = self.ylabel
-        y_config.y_axis_location = "left"
-        y_config.legend_config.show = self.legend_config.show
-        y_config.legend_config.loc = "below"
-        y_config.legend_config.orientation = "horizontal"
-        y_config.legend_config.bbox_to_anchor = (1, -0.4)
-        y_config.kind = self.y_kind
 
         if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
+                data=y_data, x=self.z, y=self.y, by=self.by, _config=self.y_plot_config
             )
-            y_fig = y_plot_obj.generate(None, None, fig=ax)
         elif self.y_kind == "spectrum":
-            y_config.direction = "horizontal"
             y_plot_obj = self.get_vline_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=y_config
+                data=y_data, x=self.z, y=self.y, by=self.by, _config=self.y_plot_config
             )
-            y_fig = y_plot_obj.generate(None, None, fig=ax)
+        else:
+            raise ValueError(f"Invalid y_kind: {self.y_kind}")
+        y_fig = y_plot_obj.generate(None, None, fig=ax)
 
         self.plot_x_axis_line(y_fig)
 
         ax.set_xlim((0, y_data[self.z].max() + y_data[self.z].max() * 0.1))
         ax.invert_xaxis()
         ax.set_title(None)
-        ax.set_xlabel(self.zlabel)
-        ax.set_ylabel(self.ylabel)
+        ax.set_xlabel(self.y_plot_config.xlabel)
+        ax.set_ylabel(self.y_plot_config.ylabel)
         ax.set_ylim(ax.get_ylim())
 
         return ax

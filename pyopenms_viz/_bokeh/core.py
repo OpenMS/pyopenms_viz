@@ -534,14 +534,14 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, main_fig):
-        x_fig = super().create_x_axis_plot(main_fig)
+    def create_x_axis_plot(self, main_fig=None):
+        x_fig = super().create_x_axis_plot()
 
         # Modify plot
-        x_fig.x_range = main_fig.x_range
-        x_fig.width = main_fig.width
+        # x_fig.x_range = main_fig.x_range
+        x_fig.width = self.x_plot_config.width
         x_fig.xaxis.visible = False
-        x_fig.min_border = 0
+        x_fig.min_border = self.x_plot_config.min_border
         return x_fig
 
     def create_y_axis_plot(self, main_fig):
@@ -549,10 +549,10 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
 
         # Modify plot
         y_fig.y_range = main_fig.y_range
-        y_fig.height = main_fig.height
-        y_fig.legend.orientation = "horizontal"
+        y_fig.height = self.y_plot_config.height
+        y_fig.legend.orientation = self.y_plot_config.legend_config.orientation
         y_fig.x_range.flipped = True
-        y_fig.min_border = 0
+        y_fig.min_border = self.y_plot_config.min_border
         return y_fig
 
     def combine_plots(self, main_fig, x_fig, y_fig):

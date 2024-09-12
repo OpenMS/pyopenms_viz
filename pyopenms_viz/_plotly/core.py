@@ -612,8 +612,8 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
             # self._add_tooltips(fig, tooltips, custom_hover_data=custom_hover_data
 
-    def create_x_axis_plot(self, main_fig) -> "figure":
-        x_fig = super().create_x_axis_plot(main_fig)
+    def create_x_axis_plot(self) -> "figure":
+        x_fig = super().create_x_axis_plot()
         x_fig.update_xaxes(visible=False)
 
         return x_fig
@@ -622,7 +622,9 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
         y_fig = super().create_y_axis_plot(main_fig)
         y_fig.update_xaxes(range=[0, self.data[self.z].max()])
         y_fig.update_yaxes(range=[self.data[self.y].min(), self.data[self.y].max()])
-        y_fig.update_layout(xaxis_title=self.ylabel, yaxis_title=self.zlabel)
+        y_fig.update_layout(
+            xaxis_title=self.y_plot_config.xlabel, yaxis_title=self.y_plot_config.ylabel
+        )
 
         return y_fig
 

@@ -246,16 +246,50 @@ class SpectrumConfig(VLineConfig):
 
 @dataclass(kw_only=True)
 class PeakMapConfig(ScatterConfig):
+
+    @staticmethod
+    def marginal_config_factory(kind):
+        if kind == "chromatogram":
+            return ChromatogramConfig()
+        if kind == "spectrum":
+            return SpectrumConfig()
+
     add_marginals: bool = False
-    y_kind = "spectrum"
-    x_kind = "chromatogram"
-    chromatogram_config: ChromatogramConfig = field(default_factory=ChromatogramConfig)
-    spectrum_config: SpectrumConfig = field(default_factory=SpectrumConfig)
+    y_kind: str = "spectrum"
+    x_kind: str = "chromatogram"
 
     ### override axes and title labels
     xlabel: str = "Retention Time"
     ylabel: str = "m/z"
     title: str = "Peak Map"
+    x_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
+    y_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
+
+    def __post_init__(self):
+        # initial marginal configs
+        self.y_plot_config = PeakMapConfig.marginal_config_factory(self.y_kind)
+        self.x_plot_config = PeakMapConfig.marginal_config_factory(self.x_kind)
+
+        # update y-axis labels and positioning to defaults
+        self.y_plot_config.xlabel = self.zlabel
+        self.y_plot_config.ylabel = self.ylabel
+        # self.y_plot_config.y_axis_location = "left"
+        self.y_plot_config.legend_config.show = self.legend_config.show
+        self.y_plot_config.legend_config.loc = "below"
+        self.y_plot_config.legend_config.orientation = "horizontal"
+        self.y_plot_config.legend_config.bbox_to_anchor = (1, -0.4)
+        self.y_plot_config.min_border = 0
+        self.y_plot_config.height = self.height
+        if self.y_kind == "spectrum":
+            self.y_plot_config.direction = "horizontal"
+
+        # update x-axis labels and positioning to defaults
+        self.x_plot_config.ylabel = self.zlabel
+        # self.x_plot_config.legend_config.y_axis_location = "right"
+        self.x_plot_config.legend_config.show = True
+        self.x_plot_config.legend_config.loc = "right"
+        self.x_plot_config.width = self.width
+        self.x_plot_config.min_border = 0
 
 
 def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):
