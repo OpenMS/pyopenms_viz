@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Tuple
 
+from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -316,7 +317,8 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            fig.annotate(
+            if text is not nan and text != "" and text != "nan":
+                fig.annotate(
                 text,
                 xy=(x, y),
                 xytext=(3, 0),
@@ -324,6 +326,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 fontsize=self.annotation_font_size,
                 color=color,
             )
+
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
