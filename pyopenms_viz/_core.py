@@ -911,6 +911,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         x_kind="chromatogram",
         annotation_data: DataFrame | None = None,
         bin_peaks: Union[Literal["auto"], bool] = "auto",
+        aggregation_method: Literal['mean', 'sum', 'max'] = 'mean',
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
@@ -953,14 +954,14 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 # Group by x, y and by columns and calculate the sum intensity within each bin
                 data = (
                     data.groupby([x, y, by], observed=True)
-                    .agg({z: "sum"})
+                    .agg({z: aggregation_method})
                     .reset_index()
                 )
                 # Add by back to kwargs
                 kwargs["by"] = by
             else:
                 # Group by x and y bins and calculate the sum intensity within each bin
-                data = data.groupby([x, y], observed=True).agg({z: "sum"}).reset_index()
+                data = data.groupby([x, y], observed=True).agg({z: aggregation_method}).reset_index()
             data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
             data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
             data = data.fillna(0)
