@@ -15,6 +15,7 @@ from bokeh.models import (
     Span,
     VStrip,
     GlyphRenderer,
+    Label,
 )
 
 from pandas.core.frame import DataFrame
@@ -28,11 +29,11 @@ from .._core import (
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     SpectrumPlot,
     APPEND_PLOT_DOC,
 )
-from .._misc import ColorGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
@@ -72,6 +73,15 @@ class BOKEHPlot(BasePlot, ABC):
         """
         fig.grid.visible = self.grid
         fig.toolbar_location = self.toolbar_location
+        # Update title, axis title and axis tick label sizes
+        if fig.title is not None:
+            fig.title.text_font_size = f"{self.title_font_size}pt"
+        fig.xaxis.axis_label_text_font_size = f"{self.xaxis_label_font_size}pt"
+        fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
+        fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
+        fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
+        
+        
 
     def _add_legend(self, fig, legend):
         """
@@ -209,16 +219,18 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a line plot
         """
         color_gen = kwargs.pop("line_color", None)
+        if 'line_width' not in kwargs:
+            kwargs['line_width'] = 2.5
 
         if by is None:
             source = ColumnDataSource(data)
             if color_gen is not None:
-                kwargs["line_color"] = next(color_gen)
+                kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
             line = fig.line(x=x, y=y, source=source, **kwargs)
 
             return fig, None
@@ -228,7 +240,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
-                    kwargs["line_color"] = next(color_gen)
+                    kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
                 line = fig.line(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
 
@@ -244,35 +256,89 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a set of vertical lines
         """
+        color_gen = kwargs.pop("line_color", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        line_width = kwargs.pop("line_width", 2.5)
+        data["line_color"] = [next(color_gen) for _ in range(len(data))]
+        data["line_width"] = [line_width for _ in range(len(data))]
+        if not plot_3d:
+            direction = kwargs.pop("direction", "vertical")
+            if by is None:
+                source = ColumnDataSource(data)
+                if direction == "horizontal":
+                    x0_data_var = 0
+                    x1_data_var = x
+                    y0_data_var = y1_data_var = y
+                else:
+                    x0_data_var = x1_data_var = x
+                    y0_data_var = 0
+                    y1_data_var = y
+                line = fig.segment(
+                    x0=x0_data_var,
+                    y0=y0_data_var,
+                    x1=x1_data_var,
+                    y1=y1_data_var,
+                    source=source,
+                    line_color="line_color",
+                    line_width="line_width",
+                    **kwargs,
+                )
+                return fig, None
+            else:
+                legend_items = []
+                for group, df in data.groupby(by):
+                    source = ColumnDataSource(df)
+                    if direction == "horizontal":
+                        x0_data_var = 0
+                        x1_data_var = x
+                        y0_data_var = y1_data_var = y
+                    else:
+                        x0_data_var = x1_data_var = x
+                        y0_data_var = 0
+                        y1_data_var = y
+                        
+                    line = fig.segment(
+                        x0=x0_data_var,
+                        y0=y0_data_var,
+                        x1=x1_data_var,
+                        y1=y1_data_var,
+                        source=source,
+                        line_color="line_color",
+                        line_width="line_width",
+                        **kwargs,
+                    )
+                    legend_items.append((group, [line]))
 
-        if by is None:
-            color_gen = kwargs.pop("line_color", None)
-            source = ColumnDataSource(data)
-            if color_gen is not None:
-                kwargs["line_color"] = next(color_gen)
-            line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
-            return fig, None
+                legend = Legend(items=legend_items)
+        
+                return fig, legend
         else:
-            color_gen = kwargs.pop("line_color", None)
-            legend_items = []
-            for group, df in data.groupby(by):
-                source = ColumnDataSource(df)
-                if color_gen is not None:
-                    kwargs["line_color"] = next(color_gen)
-                line = fig.segment(x0=x, y0=0, x1=x, y1=y, source=source, **kwargs)
-                legend_items.append((group, [line]))
+            raise NotImplementedError("3D Vline plots are not supported in Bokeh")
 
-            legend = Legend(items=legend_items)
-
-            return fig, legend
-
-    def _add_annotation(self, fig, data, x, y, **kwargs):
-        # TODO: Implement text label annotations
-        pass
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            label = Label(
+                x=x,
+                y=y,
+                text=text,
+                text_font_size="13pt",
+                text_color=color,
+                x_offset=1,
+                y_offset=0,
+            )
+            fig.add_layout(label)
 
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
@@ -282,18 +348,44 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
 
     @classmethod
     @APPEND_PLOT_DOC
-    def plot(cls, fig, data, x, y, by: str | None = None, **kwargs):
+    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d=False, **kwargs):
         """
         Plot a scatter plot
         """
+        z = kwargs.pop("z", None)
 
+        color_gen = kwargs.pop("color_gen", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+
+        marker_gen = kwargs.pop("marker_gen", None)
+        if marker_gen is None:
+            marker_gen = MarkerShapeGenerator(engine="BOKEH")
+        marker_size = kwargs.pop("marker_size", 10)
+        
+        if z is not None:
+            mapper = linear_cmap(
+                field_name=z,
+                palette=Plasma256[::-1],
+                low=min(data[z]),
+                high=max(data[z]),
+            )
+        # Set defaults if they have not been set in kwargs
+        defaults = {"size": marker_size, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        for k, v in defaults.items():
+            if k not in kwargs.keys():
+                kwargs[k] = v
         if by is None:
+            kwargs["marker"] = next(marker_gen)
             source = ColumnDataSource(data)
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
             return fig, None
         else:
             legend_items = []
             for group, df in data.groupby(by):
+                kwargs["marker"] = next(marker_gen)
+                if z is None:
+                    kwargs['fill_color'] = next(color_gen)
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
@@ -319,19 +411,14 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
         )
         fig.add_layout(zero_line)
 
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries, index=True):
         # Tooltips for interactive information
-        TOOLTIPS = [
-            ("index", "$index"),
-            ("Retention Time", "@rt{0.2f}"),
-            ("Intensity", "@int{0.2f}"),
-            ("m/z", "@mz{0.4f}"),
-        ]
-        if "Annotation" in self.data.columns:
-            TOOLTIPS.append(("Annotation", "@Annotation"))
-        if "product_mz" in self.data.columns:
-            TOOLTIPS.append(("Target m/z", "@product_mz{0.4f}"))
-        return TOOLTIPS, None
+        tooltips = []
+        if index:
+            tooltips.append(("index", "$index"))
+        for key, value in entries.items():
+            tooltips.append((key, f"@{value}"))
+        return tooltips, None
 
 
 class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
@@ -412,26 +499,26 @@ class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
     pass
 
 
-class BOKEHFeatureHeatmapPlot(BOKEH_MSPlot, FeatureHeatmapPlot):
+class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     """
     Class for assembling a Bokeh feature heatmap plot
     """
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
-        mapper = linear_cmap(
-            field_name=z,
-            palette=Plasma256[::-1],
-            low=min(self.data[z]),
-            high=max(self.data[z]),
-        )
+        
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
 
-        self.fig = scatterPlot.generate(
-            marker="square", line_color=mapper, fill_color=mapper, **other_kwargs
-        )
+            self.fig = scatterPlot.generate(z=z, **other_kwargs)
 
-        if self.annotation_data is not None:
-            self._add_box_boundaries(self.annotation_data)
+            if self.annotation_data is not None:
+                self._add_box_boundaries(self.annotation_data)
+
+            tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
+
+            self._add_tooltips(self.fig, tooltips)
+        else:
+            raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
     def create_x_axis_plot(self, x, z, class_kwargs):
         x_fig = super().create_x_axis_plot(x, z, class_kwargs)
@@ -457,6 +544,13 @@ class BOKEHFeatureHeatmapPlot(BOKEH_MSPlot, FeatureHeatmapPlot):
     def combine_plots(self, x_fig, y_fig):
         # Modify the main plot
         self.fig.yaxis.visible = False
+        # Ensure all plots have the same dimensions
+        x_fig.frame_height = self.height
+        x_fig.frame_width = self.width
+        y_fig.frame_width = self.width
+        y_fig.frame_height = self.height
+        self.fig.frame_width = self.width
+        self.fig.frame_height = self.height
 
         from bokeh.layouts import gridplot
 

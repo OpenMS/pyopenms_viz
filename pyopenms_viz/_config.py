@@ -178,8 +178,15 @@ class _BasePlotConfig(ABC):
     title: str = "1D Plot"
     xlabel: str = "X-axis"
     ylabel: str = "Y-axis"
+    zlabel: str = "Z-axis"
     x_axis_location: str = "below"
     y_axis_location: str = "left"
+    title_font_size: int = 18
+    xaxis_label_font_size: int = 16
+    yaxis_label_font_size: int = 16
+    xaxis_tick_font_size: int = 14
+    yaxis_tick_font_size: int = 14
+    annotation_font_size: int = 12
     min_border: str = 0
     engine: Literal["PLOTLY", "BOKEH", "MATPLOTLIB"] = "PLOTLY"
     height: int = 500
@@ -191,6 +198,7 @@ class _BasePlotConfig(ABC):
     grid: bool = True
     line_type: str = "solid"
     line_width: float = 1
+    marker_size: int = 30
     toolbar_location: str = "above"
 
     legend: LegendConfig = field(default_factory=default_legend_factory)
@@ -227,10 +235,11 @@ class _BasePlotConfig(ABC):
                 "xlabel": "mass-to-charge",
                 "ylabel": "Intensity",
             },
-            "feature_heatmap": {
-                "title": "PeakMap of mass-to-charge vs. retention time",
+            "peakmap": {
+                "title": "PeakMap",
                 "xlabel": "Retention Time",
                 "ylabel": "mass-to-charge",
+                "zlabel": "Intensity",
             },
             # Add more plot types as needed
         }
@@ -239,6 +248,8 @@ class _BasePlotConfig(ABC):
             self.title = plot_configs[self.kind]["title"]
             self.xlabel = plot_configs[self.kind]["xlabel"]
             self.ylabel = plot_configs[self.kind]["ylabel"]
+            if self.kind == "peakmap":
+                self.zlabel = plot_configs[self.kind]["zlabel"]
 
             if self.relative_intensity and "Intensity" in self.ylabel:
                 self.ylabel = "Relative " + self.ylabel

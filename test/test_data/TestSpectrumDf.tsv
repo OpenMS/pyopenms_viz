@@ -1,0 +1,7 @@
+mz	intensity	ion_mobility	ion_annotation	ion_mobility_unit	precursor_mz	precursor_charge	native_id	spectrum	color_peak	custom_annotation	color_annotation	sequence
+50.989	10	2	a+	ms	221.08	1	spec_0	A	green	custom1	blue	DMAGCH
+74.1324	20	4	b3+	ms	221.08	1	spec_0	A	green	custom2	blue	DMAGCH
+100.5332	25	17	c5+	ms	221.08	1	spec_0	B	red	custom3	red	DMAGCH
+101.545	12	1	y9+	ms	221.08	1	spec_0	B	blue	custom4	green	DMAGCH
+102.5343	6	3	z3+	ms	221.08	1	spec_0	B	green	custom5	yellow	DMAGCH
+200.4232	17	1	x4+	ms	221.08	1	spec_0	C	green	custom6	blue	DMAGCH

@@ -1,0 +1,32 @@
+name: Create a new patch release
+
+on: [workflow_dispatch]
+
+jobs:
+  resources:
+    name: Update __init__.py patch version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Set script permissions
+        run: |
+          chmod +x .github/workflows/scripts/update_init_version.py
+          chmod +x .github/workflows/scripts/release.py
+      - name: Update version
+        run: |
+          pwd 
+          python .github/workflows/scripts/update_init_version.py --file-path pyopenms_viz/__init__.py
+          python .github/workflows/scripts/version_update_script.py --file-path pyproject.toml --init_file_path pyopenms_viz/__init__.py
+      - name: Commit version update
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: pyopenms_viz/__init__.py
+          commit-msg: Bump patch version 
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Create new patch release
+        run: python .github/workflows/scripts/release.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

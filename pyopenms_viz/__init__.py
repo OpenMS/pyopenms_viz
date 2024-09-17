@@ -1,9 +1,15 @@
+"""
+init
+"""
+
 from pandas.plotting._core import PlotAccessor
 from pandas.core.frame import DataFrame
 from typing import Any
 from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
+
+__version__ = "0.1.3"
 
 
 class PlotAccessor:
@@ -13,7 +19,7 @@ class PlotAccessor:
     """
 
     _common_kinds = ("line", "vline", "scatter")
-    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "feature_heatmap")
+    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
     _all_kinds = _common_kinds + _msdata_kinds
 
     def __init__(self, data: DataFrame) -> None:

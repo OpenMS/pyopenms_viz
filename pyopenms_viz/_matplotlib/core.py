@@ -9,7 +9,7 @@ from matplotlib.patches import Rectangle
 
 from .._config import LegendConfig
 
-from .._misc import ColorGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator
 from .._core import (
     BasePlot,
     LinePlot,
@@ -19,7 +19,7 @@ from .._core import (
     ChromatogramPlot,
     MobilogramPlot,
     SpectrumPlot,
-    FeatureHeatmapPlot,
+    PeakMapPlot,
     APPEND_PLOT_DOC,
 )
 
@@ -52,13 +52,44 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the self.fig object stores the matplotlib axes object
         """
-        if self.fig is None and self.width is not None and self.height is not None:
+        if self.fig is None and self.width is not None and self.height is not None and not self.plot_3d:
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
             self.fig.set_title(self.title)
             self.fig.set_xlabel(self.xlabel)
             self.fig.set_ylabel(self.ylabel)
+        elif self.fig is None and self.width is not None and self.height is not None and self.plot_3d:
+            self.superFig = plt.figure(
+                figsize=(self.width / 100, self.height / 100), 
+                layout="constrained"
+            )
+            self.fig = self.superFig.add_subplot(111, projection="3d")
+            self.fig.set_title(self.title)
+            self.fig.set_xlabel(self.xlabel,
+                                fontsize=9,
+                                labelpad=-2,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                                style="italic")
+            self.fig.set_ylabel(self.ylabel,
+                                fontsize=9,
+                                labelpad=-2,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
+            self.fig.set_zlabel(self.zlabel,
+                                fontsize=10,
+                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                                labelpad=-2)
+            
+            for axis in ("x", "y", "z"):
+                self.fig.tick_params(axis=axis, labelsize=8, pad=-2, colors=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
+
+            self.fig.set_box_aspect(aspect=None, zoom=0.88)
+            self.fig.ticklabel_format(axis="z", style="sci", useMathText=True, scilimits=(0,0))
+            self.fig.grid(color="#FF0000", linewidth=0.8)
+            self.fig.xaxis.pane.fill = False
+            self.fig.yaxis.pane.fill = False
+            self.fig.zaxis.pane.fill = False
+            self.fig.view_init(elev=25, azim=-45, roll=0)
 
     def _update_plot_aes(self, ax, **kwargs):
         """
@@ -69,6 +100,16 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             **kwargs: Additional keyword arguments.
         """
         ax.grid(self.grid)
+        # Update the title, xlabel, and ylabel
+        ax.set_title(self.title, fontsize=self.title_font_size)
+        ax.set_xlabel(self.xlabel, fontsize=self.xaxis_label_font_size)
+        ax.set_ylabel(self.ylabel, fontsize=self.yaxis_label_font_size)
+        # Update axis tick labels
+        ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
+        ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
+        if self.plot_3d:
+            ax.set_zlabel(self.zlabel, fontsize=self.yaxis_label_font_size)
+            ax.tick_params(axis="z", labelsize=self.yaxis_tick_font_size)
 
     def _add_legend(self, ax, legend):
         """
@@ -161,7 +202,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a line plot
@@ -173,12 +214,12 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_labels = []
 
         if by is None:
-            (line,) = ax.plot(data[x], data[y], color=next(color_gen))
+            (line,) = ax.plot(data[x], data[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
+                (line,) = ax.plot(df[x], df[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -192,31 +233,97 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a vertical line
         """
         color_gen = kwargs.pop("line_color", None)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        
+        if not plot_3d:
+            direction = kwargs.pop("direction", "vertical")
+            legend_lines = []
+            legend_labels = []
+            
+            if by is None:                   
+                for _, row in data.iterrows():
+                    if direction == "horizontal":
+                        x_data = [0, row[x]]
+                        y_data = [row[y], row[y]]
+                    else:
+                        x_data = [row[x], row[x]]
+                        y_data = [0, row[y]]
+                    (line,) = ax.plot(x_data, y_data, color=next(color_gen))
 
-        legend_lines = []
-        legend_labels = []
-
-        if by is None:
-            use_color = next(color_gen)
-            for _, row in data.iterrows():
-                (line,) = ax.plot([row[x], row[x]], [0, row[y]], color=use_color)
-
-            return ax, None
+                return ax, None
+            else:
+                for group, df in data.groupby(by):
+                    for _, row in df.iterrows():
+                        if direction == "horizontal":
+                            x_data = [0, row[x]]
+                            y_data = [row[y], row[y]]
+                        else:
+                            x_data = [row[x], row[x]]
+                            y_data = [0, row[y]]
+                        (line,) = ax.plot(
+                            x_data, y_data, color=next(color_gen)
+                        )
+                    legend_lines.append(line)
+                    legend_labels.append(group)
+                    
+                return ax, (legend_lines, legend_labels)
         else:
-            for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=next(color_gen))
-                legend_lines.append(line)
-                legend_labels.append(group)
-            return ax, (legend_lines, legend_labels)
+            if 'z' in kwargs:
+                z = kwargs.pop('z')
+            if by is None:
+                for i in range(len(data)):
+                    (line,) = ax.plot(
+                        [data[y].iloc[i], data[y].iloc[i]],
+                        [data[z].iloc[i], 0],
+                        [data[x].iloc[i], data[x].iloc[i]],
+                        zdir="x",
+                        color=plt.cm.magma_r((data[z].iloc[i] / data[z].max())),
+                    )
+                return ax, None
+            else:
+                legend_lines = []
+                legend_labels = []
 
-    def _add_annotation(self, ax, data, x, y, **kwargs):
-        pass
+                for group, df in data.groupby(by):
+                    use_color = next(color_gen)
+                    for i in range(len(df)):
+                        (line,) = ax.plot(
+                            [df[y].iloc[i], df[y].iloc[i]],
+                            [df[z].iloc[i], 0],
+                            [df[x].iloc[i], df[x].iloc[i]],
+                            zdir="x",
+                            color=use_color,
+                        )
+                    legend_lines.append(line)
+                    legend_labels.append(group)
+                    
+                return ax, (legend_lines, legend_labels)
+        
+        
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            fig.annotate(
+                text,
+                xy=(x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                fontsize=self.annotation_font_size,
+                color=color,
+            )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
@@ -227,33 +334,71 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     @classmethod
     @APPEND_PLOT_DOC
     def plot(
-        cls, ax, data, x, y, by: str | None = None, **kwargs
+        cls, ax, data, x, y, by: str | None = None, plot_3d=False, **kwargs
     ) -> Tuple[Axes, "Legend"]:
         """
         Plot a scatter plot
         """
+        # Colors
         color_gen = kwargs.pop("line_color", None)
+        # Marker shapes
+        shape_gen = kwargs.pop("shape_gen", None)
+        marker_size = kwargs.pop("marker_size", 30)
+        if color_gen is None:
+            color_gen = ColorGenerator()
+        if shape_gen is None:
+            shape_gen = MarkerShapeGenerator(engine="MATPLOTLIB")
+        # Heatmap data and default config values
         z = kwargs.pop("z", None)
+        
+        if z is not None:
+            for k, v in dict(
+                # marker="s",
+                s=marker_size,
+                edgecolors="none",
+                cmap="magma_r",
+            ).items():
+                if k not in kwargs.keys():
+                    kwargs[k] = v
+
+        kwargs["zorder"] = 2
 
         legend_lines = []
         legend_labels = []
         if by is None:
+            if "marker" not in kwargs.keys():
+                kwargs["marker"] = next(shape_gen)
             if z is not None:
                 use_color = data[z]
             else:
                 use_color = next(color_gen)
-            scatter = ax.scatter(
-                [data[x], data[x]], [0, data[y]], c=use_color, **kwargs
-            )
+
+            scatter = ax.scatter(data[x], data[y], c=use_color, **kwargs)
 
             return ax, None
         else:
+            if z is not None:
+                vmin, vmax = data[z].min(), data[z].max()
             for group, df in data.groupby(by):
                 if z is not None:
-                    use_color = df[z]
+                    use_color = df[z].values
                 else:
                     use_color = next(color_gen)
-                scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
+                kwargs["marker"] = next(shape_gen)
+                # Normalize colors if z is specified
+                if z is not None:
+                    normalize = plt.Normalize(vmin=vmin, vmax=vmax)
+                    scatter = ax.scatter(
+                        df[x],
+                        df[y],
+                        c=use_color,
+                        norm=normalize,
+                        **kwargs,
+                    )
+                else:
+                    scatter = ax.scatter(
+                        df[x], df[y], c=use_color, **kwargs
+                    )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -273,7 +418,7 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def plot_x_axis_line(self, fig):
         fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
 
-    def _create_tooltips(self):
+    def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive
         return None, None
 
@@ -369,7 +514,7 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     pass
 
 
-class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
+class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     """
     Class for assembling a matplotlib feature heatmap plot
     """
@@ -425,7 +570,7 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         y_config.xlabel = self.zlabel
         y_config.ylabel = self.ylabel
         y_config.y_axis_location = "left"
-        y_config.legend.show = True
+        y_config.legend.show = self.legend.show
         y_config.legend.loc = "below"
         y_config.legend.orientation = "horizontal"
         y_config.legend.bbox_to_anchor = (1, -0.4)
@@ -437,10 +582,17 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
 
         color_gen = ColorGenerator()
 
-        y_plot_obj = self.get_line_renderer(
-            y_data, z, y, by=self.by, _config=y_config, **class_kwargs
-        )
-        y_fig = y_plot_obj.generate(line_color=color_gen)
+        if self.y_kind in ['chromatogram', 'mobilogram']:
+            y_plot_obj = self.get_line_renderer(
+                y_data, z, y, by=self.by, _config=y_config, **class_kwargs
+            )
+            y_fig = y_plot_obj.generate(line_color=color_gen)
+        elif self.y_kind == 'spectrum':
+            direction = 'horizontal'
+            y_plot_obj = self.get_vline_renderer(
+                y_data, z, y, by=self.by, _config=y_config, **class_kwargs
+            )
+            y_fig = y_plot_obj.generate(direction=direction, line_color=color_gen)
         self.plot_x_axis_line(y_fig)
         self.ax_grid[1, 0].set_xlim((0, y_data[z].max() + y_data[z].max() * 0.1))
         self.ax_grid[1, 0].invert_xaxis()
@@ -450,20 +602,17 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         self.ax_grid[1, 0].set_ylim(self.ax_grid[1, 1].get_ylim())
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        scatterPlot = self.get_scatter_renderer(
-            self.data, x, y, z=z, fig=self.fig, **class_kwargs
-        )
-        scatterPlot.generate(
-            z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
-            **other_kwargs,
-        )
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(
+                self.data, x, y, z=z, fig=self.fig, **class_kwargs
+            )
+            scatterPlot.generate(z=z, **other_kwargs)
 
-        if self.annotation_data is not None:
-            self._add_box_boundaries(self.annotation_data)
+            if self.annotation_data is not None:
+                self._add_box_boundaries(self.annotation_data)
+        else:
+            vlinePlot = self.get_vline_renderer(self.data, x, y, fig=self.fig, **class_kwargs)
+            vlinePlot.generate(z=z, xlabel=self.xlabel, ylabel=self.ylabel, zlabel=self.zlabel, **other_kwargs)
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
@@ -471,10 +620,6 @@ class MATPLOTLIBFeatureHeatmapPlot(MATPLOTLIB_MSPlot, FeatureHeatmapPlot):
         )
         scatterPlot.generate(
             z=z,
-            marker="s",
-            s=20,
-            edgecolors="none",
-            cmap="afmhot_r",
             **other_kwargs,
         )
         self.ax_grid[1, 1].set_title(None)

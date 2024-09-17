@@ -1,28 +1,42 @@
-This repository holds the interactive visualization library for PyOpenMS.
+# Python Pandas-Based OpenMS Visualization Library
+[![pypipv](https://img.shields.io/pypi/pyversions/pyopenms_viz.svg)](https://img.shields.io/pypi/pyversions/pyopenms_viz)
+[![pypiv](https://img.shields.io/pypi/v/pyopenms_viz.svg)](https://img.shields.io/pypi/v/pyopenms_viz
+)
+[![pypidownload](https://img.shields.io/pypi/dm/pyopenms_viz?color=orange)](https://pypistats.org/packages/pyopenms_viz)
 
+pyopenms_viz is a Python library that provides a simple interface for extending the plotting capabilities of Pandas DataFrames for creating static or interactive visualizations of mass spectrometry data. It integrates seamlessly with various plotting library backends (matpotlib, bokeh and plotly) and leverages the power of Pandas for data manipulation and representation.
 
-Organization
-_core.py:
-1. BasePlotter: Abstract BaseClass which all PyOpenMSViz objects are derived from
-    - Defines methods that must be implemented by the backends 
-    - Initiates objects and does common error checking - checking was previously done in `PlannarPlot()` class has been moved here
-3. LinePlot, ScatterPlot etc. Simple Plots, plot method is defined in the specific modules 
-4.  ComplexPlot: Abstract class which contains one or more simple plots 
-     - ChromatogramPlot, MobilogramPlot, FeatureHeatmapPlot, SpectrumPlot all inherit from this
-     - Contains methods that generate a simple plot object
-     - For the most part, complex plots should allow plotting independent from each backend, should be able to construct the plots with commonly defined pyopenmsViz methods defined in the BasePlotter
-5. ChromatogramPlot, SpectrumPlot, FeatureHeatMapPlot: Complex plots. Must have a plot() function defined in general their plot methods should only consist of common functions defined in BasePlotter
+## Features
 
-core.py
-All backends follow the same structure, as an example look at _bokeh/core.py
-1. BOKEHPlot: Inherits from BasePlotter, implements abstract methods using bokeh
-2. BOKEHLinePlot, BOKEHVLinePlot, BOKEHScattePlot - simple plots, plotting methods rely heavily on BOKEH specifics. Inherit from BOKEHPlot and the base simple plot classes (e.g. LinePlot, VLinePlot etc.)
-3. BOKEHComplexPlot: Inherits from ComplexPlot and BOKEHPlot, provides framework for complex plots using bokeh
+- Flexible plotting API that interfaces directly with Pandas DataFrames
+- Support for multiple plotting backends: matplotlib (static), bokeh and plotly (interactive)
+- Visualization of various mass spectrometry data types, including 1D chromatograms, spectra, and 2D peak maps
+- Versatile column selection for easy adaptation to different data formats
+- Consistent API across different plotting backends for easy switching between static and interactive plots
+- Suitable for use in scripts, Jupyter notebooks, and web applications
 
-4. BOKEHChromatogramPlot: Inherits  from BOKEHComplexPlot and ChromatogramPlot. Defines bokeh specific methods for chromatogram. The plot() method from the parent ChromatogramPlot class does not have to be redefined 
-    - Some plots and some backends have to supplement the plot() method but in most cases it does not have to be changed dramatically from the base _core.py
-    - MobilogramPlot, SpectrumPlot etc all follow a similar format.
+## (Recommended) Pip Installation
 
-See jupyter notebooks for examples of how to use the different plotters.
+The recommended way of installing pyopenms_viz is through the Python Package Index (PyPI). We recommend installing pyopenms_viz in its own virtual environment using Anaconda to avoid packaging conflicts.
 
-To run the demo streamlit app, run `streamlit run app.py` in the root directory of this repository.
+First create a new environemnt:
+
+```bash
+conda create --name=pyopenms_viz python=3.10
+conda activate pyopenms_viz 
+```
+Then in the new environment install pyopenms_viz.
+
+```bash
+pip install pyopenms_viz --upgrade
+```
+
+## Documentation
+
+Documentation (*work in progress*).
+
+## References
+
+- Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods 21, 365–367 (2024). [https://doi.org/10.1038/s41592-024-02197-7](https://doi.org/10.1038/s41592-024-02197-7)
+
+- Röst HL, Schmitt U, Aebersold R, Malmström L. pyOpenMS: a Python-based interface to the OpenMS mass-spectrometry algorithm library. Proteomics. 2014 Jan;14(1):74-7. [https://doi.org/10.1002/pmic.201300246](https://doi.org/10.1002/pmic.201300246). PMID: [24420968](https://pubmed.ncbi.nlm.nih.gov/24420968/).
