@@ -544,7 +544,8 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
     def plot(self):
         fig = super().plot()
-        fig._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        self._modify_y_range(fig, (0, self.data[self.y].max()), (0, 0.1))
+        return fig
 
 
 class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
