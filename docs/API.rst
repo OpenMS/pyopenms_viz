@@ -46,7 +46,7 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    ChromatogramPlot
    MobilogramPlot
    SpectrumPlot
-   FeatureHeatmapPlot
+   PeakMapPlot
 
 Extenstion: BOKEH
 *****************
@@ -89,7 +89,7 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    BOKEHChromatogramPlot
    BOKEHMobilogramPlot
    BOKEHSpectrumPlot
-   BOKEHFeatureHeatmapPlot
+   BOKEHPeakMapPlot
 
 Extenstion: PLOTLY
 ******************
@@ -128,7 +128,7 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    PLOTLYChromatogramPlot
    PLOTLYMobilogramPlot
    PLOTLYSpectrumPlot
-   PLOTLYFeatureHeatmapPlot
+   PLOTLYPeakMapPlot
 
 Extenstion: MATPLOTLIB
 **********************
@@ -171,5 +171,5 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    MATPLOTLIBChromatogramPlot
    MATPLOTLIBMobilogramPlot
    MATPLOTLIBSpectrumPlot
-   MATPLOTLIBFeatureHeatmapPlot
+   MATPLOTLIBPeakMapPlot
 
