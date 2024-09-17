@@ -30,7 +30,7 @@ version='0.0.1'
 release=version
 
 # if the variable is not set (e.g., when building locally and not on RTD)
-rtd_branch = os.environ.get('READTHEDOCS_GIT_IDENTIFIR', '')
+rtd_branch = os.environ.get('READTHEDOCS_GIT_IDENTIFIER', '')
 if not rtd_branch:
     release += 'local'
 
@@ -59,7 +59,7 @@ pygments_style = 'sphinx'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'nbsphinx', 'sphinx.ext.autosectionlabel', 'sphinx_copybutton']
+extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.autosectionlabel', 'sphinx_copybutton', 'sphinx_gallery.gen_gallery']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -134,8 +134,8 @@ html_sidebars = {
     "**": ["search-field.html", "sidebar-nav-bs.html"]
 }
 
-html_favicon = 'img/pyOpenMSlogo_color.svg'
-html_logo = 'img/pyOpenMSlogo_color.svg'
+html_favicon = 'img/pyOpenMSviz_logo_color.png'
+html_logo = 'img/pyOpenMSviz_logo_color.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -144,7 +144,7 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 # adding custom icons probably only possible with newest pydata theme version
-html_js_files = ["piwik.js", "custom.js"] #, "custom_icon.js"]
+#html_js_files = ["piwik.js", "custom.js"] #, "custom_icon.js"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -159,6 +159,10 @@ numfig = True
 
 def setup(app):
     app.add_css_file("custom.css") 
+
+sphinx_gallery_conf = {
+        'examples_dirs': 'gallery_scripts',
+        'gallery_dirs': 'gallery' }
 
 
 # --- Always execute notebooks -------------
