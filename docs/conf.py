@@ -17,9 +17,13 @@ docs/conf
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+from pathlib import Path
 import sys
 from datetime import datetime
 sys.path.insert(0, os.path.abspath('..'))
+
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery'
 
 
 # -- Project information -----------------------------------------------------
@@ -59,7 +63,7 @@ pygments_style = 'sphinx'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.autosectionlabel', 'sphinx_copybutton', 'sphinx_gallery.gen_gallery']
+extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.autosectionlabel', 'sphinx_copybutton', 'sphinx_gallery.gen_gallery', "bokeh.sphinxext.bokeh_plot"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -160,9 +164,44 @@ numfig = True
 def setup(app):
     app.add_css_file("custom.css") 
 
+    ########### create custom scripts for each backend #######
+    # Iterate over all the files in the folder
+
+    gallery_scripts_template = Path("gallery_scripts_template") # input directory
+    gallery_scripts = Path("gallery_scripts") # output directory
+
+
+    # create output directory structure, organized by backend
+    gallery_scripts.mkdir(exist_ok=True)
+
+    for backend in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]:
+
+        os.makedirs(os.path.join(gallery_scripts, backend), exist_ok=True)
+
+        # get valid files (filter out special files)
+        files = [ f for f in gallery_scripts_template.iterdir() if not (f.name.startswith('.') or f.name.endswith('~') or (not f.is_file())) ]
+
+        for file_name in files:
+
+            # Define the paths to the original file and the new file
+
+
+            # Open the original file, read the contents, and replace 'TEMPLATE' with backend
+            with open(file_name, 'r') as file:
+                file_contents = file.read()
+
+            # Replace all occurrences of 'TEMPLATE' with 'ms_matplotlib'
+            new_contents = file_contents.replace('TEMPLATE', backend)
+
+            # Save the modified content to a new file
+            with open(gallery_scripts / Path(backend) / f'{file_name.stem}_{backend}.py', 'w') as new_file:
+                new_file.write(new_contents)
+
 sphinx_gallery_conf = {
         'examples_dirs': 'gallery_scripts',
-        'gallery_dirs': 'gallery' }
+        'gallery_dirs': 'gallery'}
+
+
 
 
 # --- Always execute notebooks -------------
