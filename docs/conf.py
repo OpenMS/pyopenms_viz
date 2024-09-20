@@ -197,9 +197,29 @@ def setup(app):
             with open(gallery_scripts / Path(backend) / f'{file_name.stem}_{backend}.py', 'w') as new_file:
                 new_file.write(new_contents)
 
+def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
+    # note this currently only supports one block e.g. will have the format ('comments', 'code')
+    from bokeh.plotting import show
+    if 'bokeh' in block[1]:
+        #image_path_iterator = block_vars["image_path_iterator"]
+        image_rsts = []
+        srcset = gallery_conf["image_srcset"]
+
+        # add rst header
+        code_block = ".. bokeh-plot::\n:source-position: none\n\n" + str(block[1])
+        # add indendation
+        code_block = code_block.replace("\n", "\n    ")
+
+        return code_block
+    else:
+        return ""
+
 sphinx_gallery_conf = {
         'examples_dirs': 'gallery_scripts',
-        'gallery_dirs': 'gallery'}
+        'gallery_dirs': 'gallery',
+        'capture_repr': ('_repr_html_', '__repr__'),
+        'image_scrapers':('matplotlib', bokeh_scraper),
+        'nested_sections':True}
 
 
 
