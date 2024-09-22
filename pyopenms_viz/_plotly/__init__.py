@@ -32,7 +32,10 @@ PLOT_CLASSES: dict[str, type[PLOTLYPlot]] = {
 
 def plot(data, kind, **kwargs):
     plot_obj = PLOT_CLASSES[kind](data, **kwargs)
-    return plot_obj
+    if plot_obj.show_plot:
+        return plot_obj.show()
+    else:
+        return plot_obj.fig
 
 
 __all__ = ["plot"]

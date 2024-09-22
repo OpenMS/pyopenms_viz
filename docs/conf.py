@@ -20,6 +20,7 @@ import os
 from pathlib import Path
 import sys
 from datetime import datetime
+import shutil
 sys.path.insert(0, os.path.abspath('..'))
 
 import plotly.io as pio
@@ -170,16 +171,23 @@ def setup(app):
     gallery_scripts_template = Path("gallery_scripts_template") # input directory
     gallery_scripts = Path("gallery_scripts") # output directory
 
-
     # create output directory structure, organized by backend
     gallery_scripts.mkdir(exist_ok=True)
 
-    for backend in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]:
+    for backend in [ Path(i) for i in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]]:
 
-        os.makedirs(os.path.join(gallery_scripts, backend), exist_ok=True)
+        if backend.name == 'ms_matplotlib': # no subfolder for matplotlib
+            subfolder = Path()
+        else:
+            subfolder = backend
+            (gallery_scripts / backend).mkdir(exist_ok=True)
+
+
+        shutil.copy(gallery_scripts_template / f"GALLERY_HEADER_{backend.name}.rst", gallery_scripts / subfolder / Path("GALLERY_HEADER.rst"))
 
         # get valid files (filter out special files)
-        files = [ f for f in gallery_scripts_template.iterdir() if not (f.name.startswith('.') or f.name.endswith('~') or (not f.is_file())) ]
+        files = [ f for f in gallery_scripts_template.iterdir() if (f.suffix == ".py") and f.is_file() and not (f.name.startswith('.'))  ]
+        print(files)
 
         for file_name in files:
 
@@ -190,11 +198,11 @@ def setup(app):
             with open(file_name, 'r') as file:
                 file_contents = file.read()
 
-            # Replace all occurrences of 'TEMPLATE' with 'ms_matplotlib'
-            new_contents = file_contents.replace('TEMPLATE', backend)
+            # Replace all occurrences of 'TEMPLATE' with backend (e.g.) 'ms_matplotlib'
+            new_contents = file_contents.replace('TEMPLATE', backend.name)
 
             # Save the modified content to a new file
-            with open(gallery_scripts / Path(backend) / f'{file_name.stem}_{backend}.py', 'w') as new_file:
+            with open(gallery_scripts / subfolder / f'{file_name.stem}_{backend.name}.py', 'w') as new_file:
                 new_file.write(new_contents)
 
 def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
@@ -206,7 +214,7 @@ def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
         srcset = gallery_conf["image_srcset"]
 
         # add rst header
-        code_block = ".. bokeh-plot::\n:source-position: none\n\n" + str(block[1])
+        code_block = ".. bokeh-plot::\n:source-position: none\n\n" + "from bokeh.plotting import show\n" + str(block[1])
         # add indendation
         code_block = code_block.replace("\n", "\n    ")
 
@@ -215,8 +223,8 @@ def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
         return ""
 
 sphinx_gallery_conf = {
-        'examples_dirs': 'gallery_scripts',
-        'gallery_dirs': 'gallery',
+        'examples_dirs': ['gallery_scripts'],
+        'gallery_dirs': ['gallery'],
         'capture_repr': ('_repr_html_', '__repr__'),
         'image_scrapers':('matplotlib', bokeh_scraper),
         'nested_sections':True}
