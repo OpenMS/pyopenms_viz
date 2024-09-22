@@ -173,14 +173,14 @@ def setup(app):
 
     # create output directory structure, organized by backend
     gallery_scripts.mkdir(exist_ok=True)
+    shutil.copy(gallery_scripts_template / 'GALLERY_HEADER.rst', gallery_scripts / 'GALLERY_HEADER.rst')
 
     for backend in [ Path(i) for i in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]]:
 
-        if backend.name == 'ms_matplotlib': # no subfolder for matplotlib
-            subfolder = Path()
-        else:
-            subfolder = backend
-            (gallery_scripts / backend).mkdir(exist_ok=True)
+        #if backend.name == 'ms_matplotlib': # no subfolder for matplotlib
+        #    subfolder = Path()
+        subfolder = backend
+        (gallery_scripts / backend).mkdir(exist_ok=True)
 
 
         shutil.copy(gallery_scripts_template / f"GALLERY_HEADER_{backend.name}.rst", gallery_scripts / subfolder / Path("GALLERY_HEADER.rst"))
