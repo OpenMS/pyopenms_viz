@@ -1,10 +1,9 @@
 """
-PeakMap TEMPLATE
+Chromatogram TEMPLATE
 ================
 
-This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
+This example shows a chromatogram colored by mass trace. Since all fragment ion spectra coelute this provides strong evidence that the peptide is present.
 """
-
 import pandas as pd
 import requests
 
@@ -31,5 +30,5 @@ except IOError as e:
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="peakmap", x="rt", y="mz", z="int")
+df.plot(kind="chromatogram", x="rt", y="int", by="Annotation")
 

@@ -2,9 +2,9 @@
 PeakMap TEMPLATE
 ================
 
-This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
+This example makes a simple plot
+This example shows how to use different approaches.
 """
-
 import pandas as pd
 import requests
 
@@ -31,5 +31,5 @@ except IOError as e:
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="peakmap", x="rt", y="mz", z="int")
+df.plot(kind="mobilogram", x="im", y="int", by="Annotation")
 

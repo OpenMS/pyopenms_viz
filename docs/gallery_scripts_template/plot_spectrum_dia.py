@@ -1,10 +1,9 @@
 """
-PeakMap TEMPLATE
-================
+Spectrum of Extracted DIA Data TEMPLATE
+=======================================
 
-This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
+This example shows a spectrum from extracted data. No binning is applied.
 """
-
 import pandas as pd
 import requests
 
@@ -29,7 +28,11 @@ except requests.RequestException as e:
 except IOError as e:
     print(f"Error writing file: {e}")
 
+
+
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="peakmap", x="rt", y="mz", z="int")
+
+df.plot(kind="spectrum", x="mz", y="int", custom_annotation='Annotation', annotate_mz=True, bin_method='none', annotate_top_n_peaks=5)
+
 

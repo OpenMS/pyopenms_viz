@@ -2,9 +2,9 @@
 PeakMap TEMPLATE
 ================
 
-This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
+This example plots a peakmap with marginals by setting `add_marginals=True`
+A chromatogram is shown along the x-axis and a spectrum is shown along the y-axis.
 """
-
 import pandas as pd
 import requests
 
@@ -31,5 +31,5 @@ except IOError as e:
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="peakmap", x="rt", y="mz", z="int")
+df.plot(kind="peakmap", x="rt", y="mz", z="int", add_marginals=True)
 
