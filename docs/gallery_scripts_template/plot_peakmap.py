@@ -1,14 +1,14 @@
 """
-"This" is my example-script
-===========================
+PeakMap TEMPLATE
+================
 
 This example makes a simple plot
+This example shows how to use different approaches.
 """
-
 import pandas as pd
 import requests
 
-pd.options.plotting.backend = 'ms_matplotlib'
+pd.options.plotting.backend = 'TEMPLATE'
 
 # # Download test file
 
@@ -31,4 +31,5 @@ except IOError as e:
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-peakmap_plot = df.plot(kind="peakmap", x="rt", y="mz", z="int")
+df.plot(kind="peakmap", x="rt", y="mz", z="int")
+
