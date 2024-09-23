@@ -1,4 +1,5 @@
 from enum import Enum, auto
+import re
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
@@ -267,3 +268,19 @@ def freedman_diaconis_rule(df, value):
     # Calculate the number of bins
     num_bins = int((df[value].max() - df[value].min()) / bin_width)
     return num_bins
+
+def is_latex_formatted(text):
+    # LaTeX-specific patterns
+    latex_patterns = [
+        r'\{.*?\}',  # Curly braces
+        r'\^',       # Superscript
+        r'_',        # Subscript
+        r'\\[a-zA-Z]+', # LaTeX commands
+    ]
+    
+    # Check if any LaTeX pattern is present in the text
+    for pattern in latex_patterns:
+        if re.search(pattern, text):
+            return True
+    
+    return False
