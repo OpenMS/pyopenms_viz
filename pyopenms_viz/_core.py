@@ -21,6 +21,7 @@ from ._misc import (
     freedman_diaconis_rule,
     mz_tolerance_binning,
 )
+from .constants import IS_SPHINX_BUILD
 
 
 _common_kinds = ("line", "vline", "scatter", "sequence")
@@ -380,9 +381,19 @@ class BasePlot(ABC):
         self._make_plot(self.fig, **kwargs)
         return self.fig
 
-    @abstractmethod
     def show(self):
+        if IS_SPHINX_BUILD:
+            return self.show_sphinx()
+        else:
+            return self.show_default()
+
+    @abstractmethod
+    def show_default(self):
         pass
+
+    # show method for running in sphinx build
+    def show_sphinx(self):
+        return self.show_default()
 
     # methods only for interactive plotting
     @abstractmethod
@@ -579,8 +590,6 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self.plot(self.data, self.x, self.y, **kwargs)
-        if self.show_plot:
-            self.show()
 
     def plot(self, data, x, y, **kwargs):
         """
@@ -705,9 +714,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.annotation_color = annotation_color
 
         self.plot(x, y, **kwargs)
-        # Show plot
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -1065,9 +1071,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
             z = None
 
         self.plot(x, y, z, **kwargs)
-
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, z, **kwargs):
 

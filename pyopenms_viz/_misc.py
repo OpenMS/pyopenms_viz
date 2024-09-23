@@ -1,4 +1,5 @@
 from enum import Enum, auto
+import re
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
@@ -327,3 +328,19 @@ def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis
     # print(f"Number of bins: {len(bins)}")
     # print(f"bins: {bins}")
     return bins
+
+def is_latex_formatted(text):
+    # LaTeX-specific patterns
+    latex_patterns = [
+        r'\{.*?\}',  # Curly braces
+        r'\^',       # Superscript
+        r'_',        # Subscript
+        r'\\[a-zA-Z]+', # LaTeX commands
+    ]
+    
+    # Check if any LaTeX pattern is present in the text
+    for pattern in latex_patterns:
+        if re.search(pattern, text):
+            return True
+    
+    return False

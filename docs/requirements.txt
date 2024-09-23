@@ -1,0 +1,9 @@
+sphinx
+sphinx-copybutton
+pydata-sphinx-theme
+pandoc
+sphinx-gallery
+bokeh
+plotly
+matplotlib
+

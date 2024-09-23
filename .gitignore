@@ -5,4 +5,7 @@ peakmap.parquet
 *.ipynb_checkpoints
 bokeh_graph.html
 dist/
-docs/
+docs/build
+docs/gallery
+docs/generated
+docs/gallery_scripts
