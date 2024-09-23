@@ -1,4 +1,7 @@
-![logo](https://github.com/OpenMS/pyopenms_viz/blob/main/docs/img/pyOpenMSviz_logo_color.png)
+<div align="center">
+    <img src="https://github.com/OpenMS/pyopenms_viz/blob/main/docs/img/pyOpenMSviz_logo_color.png" alt="description" width="300"/>
+</div>
+
 # pyOpenMS-viz: The Python Pandas-Based Mass Spectrometry Visualization Library
 [![pypipv](https://img.shields.io/pypi/pyversions/pyopenms_viz.svg)](https://img.shields.io/pypi/pyversions/pyopenms_viz)
 [![pypiv](https://img.shields.io/pypi/v/pyopenms_viz.svg)](https://img.shields.io/pypi/v/pyopenms_viz
@@ -17,6 +20,16 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 - Versatile column selection for easy adaptation to different data formats
 - Consistent API across different plotting backends for easy switching between static and interactive plots
 - Suitable for use in scripts, Jupyter notebooks, and web applications
+
+## Suported Plots
+| **Plot Type**   | **Required Dimensions** | **pyopenms_viz Name**                                     | **Matplotlib** | **Bokeh** | **Plotly** |
+|-----------------|-------------------------|-----------------------------------------------------------|----------------|-----------|------------|
+| Chromatogram    | x, y                    | chromatogram                                              | ✓              | ✓         | ✓          |
+| Mobilogram      | x, y                    | mobilogram                                                | ✓              | ✓         | ✓          |
+| Spectrum        | x, y                    | spectrum                                                  | ✓              | ✓         | ✓          |
+| PeakMap 2D      | x, y, z                 | peakmap                                                   | ✓              | ✓         | ✓          |
+| PeakMap 3D      | x, y, z                 | peakmap (plot3d=True)                                     | ✓              |           | ✓          |
+
 
 ## (Recommended) Pip Installation
 
