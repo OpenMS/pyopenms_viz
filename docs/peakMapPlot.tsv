@@ -1,0 +1,23 @@
+Parameter	Default	Type	Description
+x*		str	The column name for x-axis data
+y*		str	The column name for y-axis data
+z*		str	The column name for z-axis data
+backend		Literal[“ms_matplotlib”, “ms_bokeh”, “ms_plotly”]	'Backend to use. Must be specified if not set globally
+by		str	The column name to group by
+add_marginals	False	bool	Whether to add marginal plots, ( x vs z and y vs z plots)
+relative_intensity	False	bool	Convert y-axis values to relative intensity
+height		int	Height of plot, units dependent on backend.
+width		int	Width of plot in pixels, units dependent on backend.
+grid	False	bool	Whether to show grid on the plot
+toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
+fig	None	fig	Existing Figure object to plot on. Useful for matplotlib backend where need to specify the figure object before plotting. If not supplied will create a figure object
+xlabel	“”	str	Label for x axis
+ylabel 	“”	str	Label for y axis
+zlabel	'’	str	Label for z-axis
+show_plot	True	bool	Whether to display the plot
+bin_peaks			
+aggregation_method	“mean”	Literal[“mean”, “sum”, “max”]	How to aggregate duplicate entries
+num_x_bins	50	int	Number of x-bins in heatmap
+num_y_bins	50	int	Number of y-bins in heatmap
+z_log_scale	False		
+fill_by_z	True	bool	

@@ -1,0 +1,27 @@
+Parameter	Default	Type	Description
+x*		str	The column name for x-axis data
+y*		str	The column name for y-axis data
+by		str	The column name to group by
+backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
+reference_spectrum		DataFrame	alternative dataframe to plot as the reference spectrum.
+mirror_spectrum	False	bool	Whether to plot a mirror spectrum
+relative_intensity	False	bool	Convert y-axis values to relative intensity
+height		int	Height of plot, units dependent on backend.
+width		int	Width of plot in pixels, units dependent on backend.
+grid	False	bool	Whether to show grid on the plot
+toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
+fig	None	fig	Existing Figure object to plot on
+xlabel	None	str	Label for x axis
+ylabel 	None	str	Label for y axis
+show_plot	True	bool	Whether to display the plot
+bin_peaks	“auto”	bool | “auto”	
+bin_method		“mz-tol-bin”	Binning method, one of [ “none”, “sturges”, “freedman-diaconis”, “mz-tol-bin”]
+num_x_bins	50	int	Number of bins, will be adjusted if bin_peaks is “auto”
+aggregation_method		“mean	How to aggregate duplicate dataframe entries, one of [ “mean”, “sum”, “max” ]
+mz_tol	“1pct-diff”		
+peak_color			
+annotate_top_n_peaks	5	int	Number of peaks to annotate
+annotate_mz	True	bool	
+sequence_annotation		str	column containing sequence_annotation information. 
+custom_annotation		str	column containing custom annotation
+annotation_color		str	
