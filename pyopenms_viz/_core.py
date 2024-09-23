@@ -436,6 +436,29 @@ class ScatterPlot(BasePlot, ABC):
 
 
 class SequencePlot(BasePlot, ABC):
+    """
+    Plot peptide sequence with matched fragments indicated.
+
+    Plot Specific Parameters
+    ------------------------
+    seq_col : string, optional
+        The name for sequence column
+    ion_annotation : string, optional
+        The name for the ion annotation column
+    color_annotation : string, optional
+        The name for the color annotation column
+    x_pos : float, optional
+        The center horizontal position of the peptide sequence.
+    y_pos : float, optional
+        The center vertical position of the peptide sequence.
+    spacing : float, optional
+        The horizontal spacing between amino acids.
+    seq_fontsize : str, optional
+        The font size of the amino acids.
+    frag_len : float, optional
+        The length of the fragment lines.
+    """
+
     @property
     def _kind(self):
         return "sequence"
