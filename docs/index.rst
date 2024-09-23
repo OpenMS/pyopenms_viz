@@ -1,6 +1,17 @@
 PyOpenMS-Viz
 ============
 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :hidden:
+
+   Installation
+   User Guide
+   gallery/index
+   API
+
+
 Welcome to PyOpenMS-Viz Documentation! PyOpenMS-Viz is a visualization package for mass spectrometry data directly from pandas dataframes
 
 Key Features Include:
@@ -40,19 +51,6 @@ Plotting a Chromatogram
         ms_data = pd.read_csv("path/to/ms_data.csv")
         pd.set_option("plotting.backend", "ms_bokeh") # try changing backend to "ms_plotly" or "ms_matplotlib"
         ms_data.plot(x="rt", y="intensity", kind="chromatogram")
-
-
-User Guide
-**********
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   Installation
-   User Guide
-   gallery/index
-   API
 
 
 Support
