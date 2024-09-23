@@ -1,6 +1,2 @@
-pyopenms
-bokeh
-plotly
-# testing
-pytest
-syrupy
+pandas
+
