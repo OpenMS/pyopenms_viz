@@ -218,10 +218,7 @@ class BasePlot(ABC):
             self.by = self._verify_column(by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
-        self._load_extension()
-        self._create_figure()
-
-    def _check_and_aggregate_duplicates(self):
+        if self.data[known_columns_without_int].duplicated().any():
         """
         Check if duplicate data is present and aggregate if specified.
         Modifies self.data
@@ -1008,7 +1005,8 @@ class PeakMapPlot(BaseMSPlot, ABC):
         z_log_scale: bool = False,
         fill_by_z: bool = True,
         **kwargs,
-    ) -> None:
+        # Sort values by intensity in ascending order to plot highest intensity peaks last
+        data = data.sort_values(z)
 
         # Copy data since it will be modified
         data = data.copy()
