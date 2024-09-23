@@ -531,7 +531,6 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self.plot(self.data, self.x, self.y, **kwargs)
-        return self.show()
 
     def plot(self, data, x, y, **kwargs):
         """
@@ -656,9 +655,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.annotation_color = annotation_color
 
         self.plot(x, y, **kwargs)
-        # Show plot
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -1016,8 +1012,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
             z = None
 
         self.plot(x, y, z, **kwargs)
-
-        # return self.show()
 
     def plot(self, x, y, z, **kwargs):
 
