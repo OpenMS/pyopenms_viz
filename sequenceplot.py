@@ -1,4 +1,4 @@
-def plot(ax, data, x=0.5, y=0.5, spacing=0.1, fontsize="xx-large", fontsize_frag="medium", frag_len=0.05):
+def plot(ax, data, x=0.5, y=0.5, spacing=0.06, fontsize="xx-large", fontsize_frag="medium", frag_len=0.06):
     """
     Plot peptide sequence with matched fragments indicated.
 
@@ -42,14 +42,27 @@ def plot(ax, data, x=0.5, y=0.5, spacing=0.1, fontsize="xx-large", fontsize_frag
         ion_i = int(i) if (i := annot[1:].rstrip("+")) else 1
         x_i = x + spacing / 2 + (ion_i - 1) * spacing
 
+        # Length of the fragment line.
+        if ion_type in "ax":
+            y_i = 2 * frag_len
+        elif ion_type in "by":
+            y_i = frag_len
+        elif ion_type in "cz":
+            y_i = 3 * frag_len
+        else:
+            # Ignore unknown ion types.
+            continue
+
+        # N-terminal fragmentation.
         if ion_type in "abc":
-            xs = [x_i, x_i, x_i + spacing / 4]
-            ys = [y, y + frag_len, y + frag_len * 4 / 3]
-            top = True
+            xs = [x_i, x_i, x_i - spacing / 2]
+            ys = [y, y + y_i, y + y_i]
+            nterm = True
+        # C-terminal fragmentation.
         elif ion_type in "xyz":
-            xs = [x_i - spacing / 4, x_i, x_i]
-            ys = [y - frag_len * 4 / 3, y - frag_len, y]
-            top = False
+            xs = [x_i + spacing / 2, x_i, x_i]
+            ys = [y - y_i, y - y_i, y]
+            nterm = False
         else:
             # Ignore unknown ion types.
             continue
@@ -60,11 +73,11 @@ def plot(ax, data, x=0.5, y=0.5, spacing=0.1, fontsize="xx-large", fontsize_frag
 
         ax.text(
             x_i,
-            y + frag_len * 5 / 3 if top else y - frag_len * 5 / 3,
+            y + (1.05 if nterm else -1.05) * y_i,
             annot,
             color=color,
             fontsize=fontsize_frag,
-            ha="center",
+            ha="right" if nterm else "left",
             transform=ax.transAxes,
-            va="top" if not top else "bottom",
+            va="top" if not nterm else "bottom",
         )
