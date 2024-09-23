@@ -1,0 +1,2 @@
+Parameter	Default	Type	Description
+annotation_data		DataFrame	DataFrame of annotation data with columns [‘leftWidth’, ‘rightWidth’]
