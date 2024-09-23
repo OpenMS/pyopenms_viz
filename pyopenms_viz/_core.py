@@ -6,16 +6,22 @@ import importlib
 import types
 import re
 
-from pandas import cut, merge
+from pandas import cut, merge, Interval
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import ceil, log1p, log2
+from numpy import ceil, log1p, log2, nan, mean
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
-from ._misc import ColorGenerator, sturges_rule, freedman_diaconis_rule
+from ._misc import (
+    ColorGenerator,
+    sturges_rule,
+    freedman_diaconis_rule,
+    mz_tolerance_binning,
+)
+from .constants import IS_SPHINX_BUILD
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -314,7 +320,9 @@ class BasePlot(ABC):
         tooltips = kwargs.pop("tooltips", None)
         custom_hover_data = kwargs.pop("custom_hover_data", None)
 
-        newlines, legend = self.plot(fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs)
+        newlines, legend = self.plot(
+            fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs
+        )
 
         if legend is not None:
             self._add_legend(newlines, legend)
@@ -324,7 +332,9 @@ class BasePlot(ABC):
             self._add_tooltips(newlines, tooltips, custom_hover_data)
 
     @abstractmethod
-    def plot(cls, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs):
+    def plot(
+        cls, fig, data, x, y, by: str | None = None, plot_3d: bool = False, **kwargs
+    ):
         """
         Create the plot
         """
@@ -371,9 +381,19 @@ class BasePlot(ABC):
         self._make_plot(self.fig, **kwargs)
         return self.fig
 
-    @abstractmethod
     def show(self):
+        if IS_SPHINX_BUILD:
+            return self.show_sphinx()
+        else:
+            return self.show_default()
+
+    @abstractmethod
+    def show_default(self):
         pass
+
+    # show method for running in sphinx build
+    def show_sphinx(self):
+        return self.show_default()
 
     # methods only for interactive plotting
     @abstractmethod
@@ -418,6 +438,7 @@ class VLinePlot(BasePlot, ABC):
         ann_colors: (list[str]): List of colors for annotation text.
         """
         pass
+
 
 class ScatterPlot(BasePlot, ABC):
     @property
@@ -485,7 +506,13 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         return "chromatogram"
 
     def __init__(
-        self, data, x, y, annotation_data: DataFrame | None = None, relative_intensity=False, **kwargs
+        self,
+        data,
+        x,
+        y,
+        annotation_data: DataFrame | None = None,
+        relative_intensity=False,
+        **kwargs,
     ) -> None:
 
         # Set default config attributes if not passed as keyword arguments
@@ -498,24 +525,22 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         else:
             self.annotation_data = None
         self.label_suffix = self.x  # set label suffix for bounding box
-        
+
         # Convert to relative intensity if required
         if relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self.plot(self.data, self.x, self.y, **kwargs)
-        if self.show_plot:
-            self.show()
 
     def plot(self, data, x, y, **kwargs):
         """
         Create the plot
         """
-        if 'line_color' not in kwargs:
+        if "line_color" not in kwargs:
             color_gen = ColorGenerator()
         else:
-            color_gen = kwargs['line_color']
-        
+            color_gen = kwargs["line_color"]
+
         tooltip_entries = {"retention time": x, "intensity": y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"
@@ -583,8 +608,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
         bin_peaks: Union[Literal["auto"], bool] = "auto",
-        bin_method: Literal['none', 'sturges', 'freedman-diaconis'] = 'freedman-diaconis',
+        bin_method: Literal[
+            "none", "sturges", "freedman-diaconis", "mz-tol-bin"
+        ] = "mz-tol-bin",
         num_x_bins: int = 50,
+        mz_tol: Literal[float, "freedman-diaconis", "1pct-diff"] = "1pct-diff",
+        aggregation_method: Literal["mean", "sum", "max"] = "max",
         peak_color: str | None = None,
         annotate_top_n_peaks: int | None | Literal["all"] = 5,
         annotate_mz: bool = True,
@@ -606,14 +635,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.bin_peaks = bin_peaks
         self.bin_method = bin_method
         if self.bin_peaks == "auto":
-            if self.bin_method == 'sturges':
+            if self.bin_method == "sturges":
                 self.num_x_bins = sturges_rule(data, x)
-            elif self.bin_method == 'freedman-diaconis':
+            elif self.bin_method == "freedman-diaconis":
                 self.num_x_bins = freedman_diaconis_rule(data, x)
-            elif self.bin_method == 'none':
+            elif self.bin_method == "mz-tol-bin":
+                self.num_x_bins = mz_tolerance_binning(data, x, mz_tol)
+            elif self.bin_method == "none":
                 self.num_x_bins = num_x_bins
         else:
             self.num_x_bins = num_x_bins
+        self.aggregation_method = aggregation_method
         self.peak_color = peak_color
         self.annotate_top_n_peaks = annotate_top_n_peaks
         self.annotate_mz = annotate_mz
@@ -623,13 +655,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.annotation_color = annotation_color
 
         self.plot(x, y, **kwargs)
-        # Show plot
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
-        
+
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
             self.data, x, y, self.reference_spectrum
@@ -703,24 +732,33 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
 
-    def _bin_peaks(
-        self,
-        data: DataFrame,
-        x: str,
-        y: str
-    ) -> DataFrame:
+    def _bin_peaks(self, data: DataFrame, x: str, y: str) -> DataFrame:
         """
         Bin peaks based on x-axis values.
-        
+
         Args:
             data (DataFrame): The data to bin.
             x (str): The column name for the x-axis data.
             y (str): The column name for the y-axis data.
-            
+
         Returns:
             DataFrame: The binned data.
         """
-        data[x] = cut(data[x], bins=self.num_x_bins)
+        if isinstance(self.num_x_bins, int):
+            data[x] = cut(data[x], bins=self.num_x_bins)
+        elif isinstance(self.num_x_bins, list) and all(
+            isinstance(item, tuple) for item in self.num_x_bins
+        ):
+            # Function to assign each value to a bin
+            def assign_bin(value):
+                for low, high in self.num_x_bins:
+                    if low <= value <= high:
+                        return f"{low:.4f}-{high:.4f}"
+                return nan  # For values that don't fall into any bin
+
+            # Apply the binning
+            data[x] = data[x].apply(assign_bin)
+
         # TODO: Find a better way to retain other columns
         cols = [x]
         if self.by is not None:
@@ -735,14 +773,24 @@ class SpectrumPlot(BaseMSPlot, ABC):
             cols.append(self.custom_annotation)
         if self.annotation_color is not None:
             cols.append(self.annotation_color)
-        
-        # Group by x bins and calculate the mean intensity within each bin
+
+        # Group by x bins and calculate the sum intensity within each bin
         data = (
             data.groupby(cols, observed=True)
-            .agg({y: "mean"})
+            .agg({y: self.aggregation_method})
             .reset_index()
         )
-        data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
+
+        def convert_to_numeric(value):
+            if isinstance(value, Interval):
+                return value.mid
+            elif isinstance(value, str):
+                return mean([float(i) for i in value.split("-")])
+            else:
+                return value
+
+        data[x] = data[x].apply(convert_to_numeric).astype(float)
+
         data = data.fillna(0)
         return data
 
@@ -768,14 +816,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 reference_spectrum[y] = (
                     reference_spectrum[y] / reference_spectrum[y].max() * 100
                 )
-        
+
         # Bin peaks if required
-        if self.bin_peaks == True or (self.bin_peaks == "auto"
-        ):
+        if self.bin_peaks == True or (self.bin_peaks == "auto"):
             spectrum = self._bin_peaks(spectrum, x, y)
             if reference_spectrum is not None:
                 reference_spectrum = self._bin_peaks(reference_spectrum, x, y)
-            
+
         return spectrum, reference_spectrum
 
     def _get_colors(
@@ -819,7 +866,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         data = data.sort_values(
             y, ascending=True if data[y].min() < 0 else False
         ).reset_index()
-        
+
         for i, row in data.iterrows():
             texts = []
             if i < top_n:
@@ -892,6 +939,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         x_kind="chromatogram",
         annotation_data: DataFrame | None = None,
         bin_peaks: Union[Literal["auto"], bool] = "auto",
+        aggregation_method: Literal["mean", "sum", "max"] = "mean",
         num_x_bins: int = 50,
         num_y_bins: int = 50,
         z_log_scale: bool = False,
@@ -925,26 +973,25 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         # Bin peaks if required
         if bin_peaks == True or (
-            data.shape[0] > num_x_bins * num_y_bins
-            and bin_peaks == "auto"
+            data.shape[0] > num_x_bins * num_y_bins and bin_peaks == "auto"
         ):
             data[x] = cut(data[x], bins=num_x_bins)
             data[y] = cut(data[y], bins=num_y_bins)
             by = kwargs.pop("by", None)
             if by is not None:
-                # Group by x, y and by columns and calculate the mean intensity within each bin
+                # Group by x, y and by columns and calculate the sum intensity within each bin
                 data = (
                     data.groupby([x, y, by], observed=True)
-                    .agg({z: "mean"})
+                    .agg({z: aggregation_method})
                     .reset_index()
                 )
                 # Add by back to kwargs
                 kwargs["by"] = by
             else:
-                # Group by x and y bins and calculate the mean intensity within each bin
+                # Group by x and y bins and calculate the sum intensity within each bin
                 data = (
                     data.groupby([x, y], observed=True)
-                    .agg({z: "mean"})
+                    .agg({z: aggregation_method})
                     .reset_index()
                 )
             data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
@@ -963,14 +1010,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
         # If we do not want to fill/color based on z value, set to none prior to plotting
         if not fill_by_z:
             z = None
-            
+
         self.plot(x, y, z, **kwargs)
-            
-        if self.show_plot:
-            self.show()
 
     def plot(self, x, y, z, **kwargs):
-        
+
         class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
 
         if self.add_marginals:
@@ -1016,7 +1060,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
-        
+
     # @abstractmethod
     # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
     #     pass
@@ -1042,17 +1086,19 @@ class PeakMapPlot(BaseMSPlot, ABC):
         class_kwargs.pop("legend", None)
         class_kwargs.pop("ylabel", None)
 
-        if self.x_kind in ['chromatogram', 'mobilogram']:  
+        if self.x_kind in ["chromatogram", "mobilogram"]:
             x_plot_obj = self.get_line_renderer(
                 x_data, x, z, by=self.by, _config=x_config, **class_kwargs
             )
-        elif self.x_kind == 'spectrum':
+        elif self.x_kind == "spectrum":
             x_plot_obj = self.get_vline_renderer(
                 x_data, x, z, by=self.by, _config=x_config, **class_kwargs
             )
         else:
-            raise ValueError(f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'")
-        
+            raise ValueError(
+                f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
+            )
+
         x_fig = x_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(x_fig)
 
@@ -1079,20 +1125,22 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         color_gen = ColorGenerator()
 
-        if self.y_kind in ['chromatogram', 'mobilogram']:  
+        if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
             y_fig = y_plot_obj.generate(line_color=color_gen)
-        elif self.y_kind == 'spectrum':
-            direction = 'horizontal'
+        elif self.y_kind == "spectrum":
+            direction = "horizontal"
             y_plot_obj = self.get_vline_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
             y_fig = y_plot_obj.generate(line_color=color_gen, direction=direction)
         else:
-            raise ValueError(f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'")
-        
+            raise ValueError(
+                f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
+            )
+
         self.plot_x_axis_line(y_fig)
 
         return y_fig
@@ -1148,7 +1196,7 @@ class PlotAccessor:
         # Call the plot method of the selected backend
         if "backend" in kwargs:
             kwargs.pop("backend")
-        
+
         return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
 
     @staticmethod
@@ -1191,12 +1239,12 @@ class PlotAccessor:
                 ("ylabel", None),
                 ("x_axis_location", None),
                 ("y_axis_location", None),
-                ('title_font_size', None),
-                ('xaxis_label_font_size', None),
-                ('yaxis_label_font_size', None),
-                ('xaxis_tick_font_size', None),
-                ('yaxis_tick_font_size', None),
-                ('annotation_font_size', None),
+                ("title_font_size", None),
+                ("xaxis_label_font_size", None),
+                ("yaxis_label_font_size", None),
+                ("xaxis_tick_font_size", None),
+                ("yaxis_tick_font_size", None),
+                ("annotation_font_size", None),
                 ("line_type", None),
                 ("line_width", None),
                 ("min_border", None),
