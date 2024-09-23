@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 
 from pandas.core.frame import DataFrame
 
-from numpy import column_stack, log
+from numpy import column_stack, log, nan
 
 from .._core import (
     BasePlot,
@@ -26,7 +26,7 @@ from .._core import (
 )
 
 from .._config import bokeh_line_dash_mapper
-from .._misc import ColorGenerator, MarkerShapeGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
@@ -441,19 +441,24 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
     ):
         annotations = []
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            annotation = go.layout.Annotation(
-                text=text.replace("\n", "<br>"),
-                x=x,
-                y=y,
-                showarrow=False,
-                xanchor="left",
-                font=dict(
-                    family="Open Sans Mono, monospace",
-                    size=self.annotation_font_size,
-                    color=color,
-                ),
-            )
-            annotations.append(annotation)
+            if text is not nan and text != "" and text != "nan":
+                # Check if the text contains LaTeX-style expressions
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = r'${}$'.format(text)
+                annotation = go.layout.Annotation(
+                    text=text.replace("\n", "<br>"),
+                    x=x,
+                    y=y,
+                    showarrow=False,
+                    xanchor="left",
+                    font=dict(
+                        family="Open Sans Mono, monospace",
+                        size=self.annotation_font_size,
+                        color=color,
+                    ),
+                )
+                annotations.append(annotation)
 
         for annotation in annotations:
             fig.add_annotation(annotation)

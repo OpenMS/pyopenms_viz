@@ -2,14 +2,15 @@ from __future__ import annotations
 
 from abc import ABC
 from typing import Tuple
-
+import re
+from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 
 from .._config import LegendConfig
 
-from .._misc import ColorGenerator, MarkerShapeGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from .._core import (
     BasePlot,
     LinePlot,
@@ -351,14 +352,20 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            fig.annotate(
+            if text is not nan and text != "" and text != "nan":
+                # Check if the text contains LaTeX-style expressions
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = r'${}$'.format(text)
+                fig.annotate(
                 text,
                 xy=(x, y),
                 xytext=(3, 0),
                 textcoords="offset points",
                 fontsize=self.annotation_font_size,
-                color=color,
+                color=color
             )
+
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
