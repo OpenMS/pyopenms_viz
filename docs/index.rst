@@ -46,14 +46,12 @@ User Guide
 **********
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
 
    Installation
    User Guide
-   Parameters
    gallery/index
-   Testing
    API
 
 

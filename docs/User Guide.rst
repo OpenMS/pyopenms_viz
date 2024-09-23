@@ -6,4 +6,13 @@ Pyopenms-viz plotting occurs by calling the `.plot()` method on a pandas datafra
 General Options include (mandatory fields in bold)
 
 
-General Plotting Options are listed below:
+Below is a list of the currently supported plot types. 
+
+.. toctree::
+   :maxdepth: 1
+
+   Spectrum
+   Chromatogram
+   Mobilogram
+   PeakMap
+
