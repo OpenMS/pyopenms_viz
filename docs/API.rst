@@ -113,7 +113,7 @@ These are simple plots that inherit from the BasePlot class.
    :template: class.rst
 
    PLOTLYLinePlot
-   PLOTLYLinePlot
+   PLOTLYVLinePlot
    PLOTLYScatterPlot
 
 Mass Spectrometry Plots
@@ -156,7 +156,7 @@ These are simple plots that inherit from the BasePlot class.
    :template: class.rst
 
    MATPLOTLIBLinePlot
-   MATPLOTLIBLinePlot
+   MATPLOTLIBVLinePlot
    MATPLOTLIBScatterPlot
 
 Mass Spectrometry Plots
