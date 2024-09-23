@@ -24,7 +24,7 @@ After installation the GUI can be launched in the Terminal/Anaconda Prompt using
 Building from Source
 --------------------
 
-The source code is freely open and accessible on Github at https://github.com/OpenMS/pyopenms_viz under the `BSD-3-Clause license <https://github.com/OpenMS/pyopenms_viz?tab=BSD-3-Clause-1-ov-file>`_ The package can be installed by cloning and installing from source using pip.
+The source code is freely open and accessible on Github at https://github.com/OpenMS/pyopenms_viz under the `BSD-3-Clause license <https://github.com/OpenMS/pyopenms_viz/blob/main/LICENSE>`_ The package can be installed by cloning and installing from source using pip.
 
 First clone the repository:
 
