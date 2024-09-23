@@ -10,10 +10,10 @@ First create a new environment:
 
 .. code-block:: bash
 
-   conda create --name=massdash python=3.11
+   conda create --name=pyopenms-viz python=3.11
    conda activate pyopenms-viz
 
-Then in the new environment install MassDash.
+Then in the new environment install pyOpenMS-viz.
 
 .. code-block:: bash
 
@@ -24,7 +24,7 @@ After installation the GUI can be launched in the Terminal/Anaconda Prompt using
 Building from Source
 --------------------
 
-The source code is freely open and accessible on Github at https://github.com/Roestlab/massdash under the `BSD-3-Clause license <https://github.com/Roestlab/massdash?tab=BSD-3-Clause-1-ov-file>`_. The package can be installed by cloning and installing from source using pip.
+The source code is freely open and accessible on Github at https://github.com/OpenMS/pyopenms_viz under the `BSD-3-Clause license <https://github.com/OpenMS/pyopenms_viz?tab=BSD-3-Clause-1-ov-file>` The package can be installed by cloning and installing from source using pip.
 
 First clone the repository:
 
@@ -32,7 +32,7 @@ First clone the repository:
 
         git clone git@github.com:OpenMS/pyopenms-viz.git
 
-Change into the massdash directory
+Change into the pyopenms-viz directory
 
 .. code-block:: bash
         
