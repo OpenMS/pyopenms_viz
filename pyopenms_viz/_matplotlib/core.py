@@ -15,6 +15,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
+    SequencePlot,
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
@@ -52,39 +53,69 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the self.fig object stores the matplotlib axes object
         """
-        if self.fig is None and self.width is not None and self.height is not None and not self.plot_3d:
+        if (
+            self.fig is None
+            and self.width is not None
+            and self.height is not None
+            and not self.plot_3d
+        ):
             self.superFig, self.fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
             self.fig.set_title(self.title)
             self.fig.set_xlabel(self.xlabel)
             self.fig.set_ylabel(self.ylabel)
-        elif self.fig is None and self.width is not None and self.height is not None and self.plot_3d:
+        elif (
+            self.fig is None
+            and self.width is not None
+            and self.height is not None
+            and self.plot_3d
+        ):
             self.superFig = plt.figure(
-                figsize=(self.width / 100, self.height / 100), 
-                layout="constrained"
+                figsize=(self.width / 100, self.height / 100), layout="constrained"
             )
             self.fig = self.superFig.add_subplot(111, projection="3d")
             self.fig.set_title(self.title)
-            self.fig.set_xlabel(self.xlabel,
-                                fontsize=9,
-                                labelpad=-2,
-                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
-                                style="italic")
-            self.fig.set_ylabel(self.ylabel,
-                                fontsize=9,
-                                labelpad=-2,
-                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
-            self.fig.set_zlabel(self.zlabel,
-                                fontsize=10,
-                                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
-                                labelpad=-2)
-            
+            self.fig.set_xlabel(
+                self.xlabel,
+                fontsize=9,
+                labelpad=-2,
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
+                style="italic",
+            )
+            self.fig.set_ylabel(
+                self.ylabel,
+                fontsize=9,
+                labelpad=-2,
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
+            )
+            self.fig.set_zlabel(
+                self.zlabel,
+                fontsize=10,
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
+                labelpad=-2,
+            )
+
             for axis in ("x", "y", "z"):
-                self.fig.tick_params(axis=axis, labelsize=8, pad=-2, colors=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY])
+                self.fig.tick_params(
+                    axis=axis,
+                    labelsize=8,
+                    pad=-2,
+                    colors=ColorGenerator.color_blind_friendly_map[
+                        ColorGenerator.Colors.DARKGRAY
+                    ],
+                )
 
             self.fig.set_box_aspect(aspect=None, zoom=0.88)
-            self.fig.ticklabel_format(axis="z", style="sci", useMathText=True, scilimits=(0,0))
+            self.fig.ticklabel_format(
+                axis="z", style="sci", useMathText=True, scilimits=(0, 0)
+            )
             self.fig.grid(color="#FF0000", linewidth=0.8)
             self.fig.xaxis.pane.fill = False
             self.fig.yaxis.pane.fill = False
@@ -214,12 +245,20 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_labels = []
 
         if by is None:
-            (line,) = ax.plot(data[x], data[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
+            (line,) = ax.plot(
+                data[x],
+                data[y],
+                color=color_gen if isinstance(color_gen, str) else next(color_gen),
+            )
 
             return ax, None
         else:
             for group, df in data.groupby(by):
-                (line,) = ax.plot(df[x], df[y], color=color_gen if isinstance(color_gen, str) else next(color_gen))
+                (line,) = ax.plot(
+                    df[x],
+                    df[y],
+                    color=color_gen if isinstance(color_gen, str) else next(color_gen),
+                )
                 legend_lines.append(line)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
@@ -241,13 +280,13 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         color_gen = kwargs.pop("line_color", None)
         if color_gen is None:
             color_gen = ColorGenerator()
-        
+
         if not plot_3d:
             direction = kwargs.pop("direction", "vertical")
             legend_lines = []
             legend_labels = []
-            
-            if by is None:                   
+
+            if by is None:
                 for _, row in data.iterrows():
                     if direction == "horizontal":
                         x_data = [0, row[x]]
@@ -267,16 +306,14 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                         else:
                             x_data = [row[x], row[x]]
                             y_data = [0, row[y]]
-                        (line,) = ax.plot(
-                            x_data, y_data, color=next(color_gen)
-                        )
+                        (line,) = ax.plot(x_data, y_data, color=next(color_gen))
                     legend_lines.append(line)
                     legend_labels.append(group)
-                    
+
                 return ax, (legend_lines, legend_labels)
         else:
-            if 'z' in kwargs:
-                z = kwargs.pop('z')
+            if "z" in kwargs:
+                z = kwargs.pop("z")
             if by is None:
                 for i in range(len(data)):
                     (line,) = ax.plot(
@@ -303,10 +340,9 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                         )
                     legend_lines.append(line)
                     legend_labels.append(group)
-                    
+
                 return ax, (legend_lines, legend_labels)
-        
-        
+
     def _add_annotations(
         self,
         fig,
@@ -350,7 +386,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             shape_gen = MarkerShapeGenerator(engine="MATPLOTLIB")
         # Heatmap data and default config values
         z = kwargs.pop("z", None)
-        
+
         if z is not None:
             for k, v in dict(
                 # marker="s",
@@ -396,12 +432,77 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                         **kwargs,
                     )
                 else:
-                    scatter = ax.scatter(
-                        df[x], df[y], c=use_color, **kwargs
-                    )
+                    scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
+
+
+class MATPLOTLIBSequencePlot(MATPLOTLIBPlot, SequencePlot):
+
+    def plot(self):
+        sequence = self.data[self.seq_col].iloc[0]
+        n_residues = len(sequence)
+
+        # Remap `x` position to be the left edge of the peptide.
+        self.x_pos = self.x_pos - n_residues * self.spacing / 2 + self.spacing / 2
+
+        # Plot the amino acids in the peptide.
+        for i, aa in enumerate(sequence):
+            self.fig.text(
+                *(self.x_pos + i * self.spacing, self.y_pos, aa),
+                fontsize=self.seq_fontsize,
+                ha="center",
+                transform=self.fig.transAxes,
+                va="center",
+            )
+        # Indicate matched fragments.
+        for annot, color in zip(
+            self.data[self.ion_annotation], self.data[self.color_annotation]
+        ):
+            ion_type = annot[0]
+            ion_i = int(i) if (i := annot[1:].rstrip("+")) else 1
+            x_i = self.x_pos + self.spacing / 2 + (ion_i - 1) * self.spacing
+
+            # Length of the fragment line.
+            if ion_type in "ax":
+                y_i = 2 * self.frag_len
+            elif ion_type in "by":
+                y_i = self.frag_len
+            elif ion_type in "cz":
+                y_i = 3 * self.frag_len
+            else:
+                # Ignore unknown ion types.
+                continue
+
+            # N-terminal fragmentation.
+            if ion_type in "abc":
+                xs = [x_i, x_i, x_i - self.spacing / 2]
+                ys = [self.y_pos, self.y_pos + y_i, self.y_pos + y_i]
+                nterm = True
+            # C-terminal fragmentation.
+            elif ion_type in "xyz":
+                xs = [x_i + self.spacing / 2, x_i, x_i]
+                ys = [self.y_pos - y_i, self.y_pos - y_i, self.y_pos]
+                nterm = False
+            else:
+                # Ignore unknown ion types.
+                continue
+
+            self.fig.plot(
+                xs, ys, clip_on=False, color=color, transform=self.fig.transAxes
+            )
+
+            self.fig.text(
+                x_i,
+                self.y_pos + (1.05 if nterm else -1.05) * y_i,
+                annot,
+                color=color,
+                fontsize=self.annotation_font_size,
+                ha="right" if nterm else "left",
+                transform=self.fig.transAxes,
+                va="top" if not nterm else "bottom",
+            )
 
 
 class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
@@ -582,13 +683,13 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
         color_gen = ColorGenerator()
 
-        if self.y_kind in ['chromatogram', 'mobilogram']:
+        if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
             y_fig = y_plot_obj.generate(line_color=color_gen)
-        elif self.y_kind == 'spectrum':
-            direction = 'horizontal'
+        elif self.y_kind == "spectrum":
+            direction = "horizontal"
             y_plot_obj = self.get_vline_renderer(
                 y_data, z, y, by=self.by, _config=y_config, **class_kwargs
             )
@@ -611,8 +712,16 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
         else:
-            vlinePlot = self.get_vline_renderer(self.data, x, y, fig=self.fig, **class_kwargs)
-            vlinePlot.generate(z=z, xlabel=self.xlabel, ylabel=self.ylabel, zlabel=self.zlabel, **other_kwargs)
+            vlinePlot = self.get_vline_renderer(
+                self.data, x, y, fig=self.fig, **class_kwargs
+            )
+            vlinePlot.generate(
+                z=z,
+                xlabel=self.xlabel,
+                ylabel=self.ylabel,
+                zlabel=self.zlabel,
+                **other_kwargs,
+            )
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(

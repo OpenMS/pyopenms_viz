@@ -26,6 +26,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
+    SequencePlot,
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
@@ -80,8 +81,6 @@ class BOKEHPlot(BasePlot, ABC):
         fig.yaxis.axis_label_text_font_size = f"{self.yaxis_label_font_size}pt"
         fig.xaxis.major_label_text_font_size = f"{self.xaxis_tick_font_size}pt"
         fig.yaxis.major_label_text_font_size = f"{self.yaxis_tick_font_size}pt"
-        
-        
 
     def _add_legend(self, fig, legend):
         """
@@ -224,13 +223,15 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         Plot a line plot
         """
         color_gen = kwargs.pop("line_color", None)
-        if 'line_width' not in kwargs:
-            kwargs['line_width'] = 2.5
+        if "line_width" not in kwargs:
+            kwargs["line_width"] = 2.5
 
         if by is None:
             source = ColumnDataSource(data)
             if color_gen is not None:
-                kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
+                kwargs["line_color"] = (
+                    color_gen if isinstance(color_gen, str) else next(color_gen)
+                )
             line = fig.line(x=x, y=y, source=source, **kwargs)
 
             return fig, None
@@ -240,7 +241,9 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
             for group, df in data.groupby(by):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
-                    kwargs["line_color"] = color_gen if isinstance(color_gen, str) else next(color_gen)
+                    kwargs["line_color"] = (
+                        color_gen if isinstance(color_gen, str) else next(color_gen)
+                    )
                 line = fig.line(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
 
@@ -301,7 +304,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                         x0_data_var = x1_data_var = x
                         y0_data_var = 0
                         y1_data_var = y
-                        
+
                     line = fig.segment(
                         x0=x0_data_var,
                         y0=y0_data_var,
@@ -315,7 +318,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     legend_items.append((group, [line]))
 
                 legend = Legend(items=legend_items)
-        
+
                 return fig, legend
         else:
             raise NotImplementedError("3D Vline plots are not supported in Bokeh")
@@ -362,7 +365,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
         if marker_gen is None:
             marker_gen = MarkerShapeGenerator(engine="BOKEH")
         marker_size = kwargs.pop("marker_size", 10)
-        
+
         if z is not None:
             mapper = linear_cmap(
                 field_name=z,
@@ -371,7 +374,11 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 high=max(data[z]),
             )
         # Set defaults if they have not been set in kwargs
-        defaults = {"size": marker_size, "line_width": 0, "fill_color": mapper if z is not None else next(color_gen)}
+        defaults = {
+            "size": marker_size,
+            "line_width": 0,
+            "fill_color": mapper if z is not None else next(color_gen),
+        }
         for k, v in defaults.items():
             if k not in kwargs.keys():
                 kwargs[k] = v
@@ -385,13 +392,18 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             for group, df in data.groupby(by):
                 kwargs["marker"] = next(marker_gen)
                 if z is None:
-                    kwargs['fill_color'] = next(color_gen)
+                    kwargs["fill_color"] = next(color_gen)
                 source = ColumnDataSource(df)
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
 
             return fig, legend
+
+
+class BOKEHSequencePlot(BOKEHPlot, SequencePlot):
+    def plot(self):
+        raise NotImplementedError("Sequence plot is not implemented for Plotly")
 
 
 class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
@@ -505,7 +517,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     """
 
     def create_main_plot(self, x, y, z, class_kwargs, other_kwargs):
-        
+
         if not self.plot_3d:
             scatterPlot = self.get_scatter_renderer(self.data, x, y, **class_kwargs)
 
@@ -514,7 +526,9 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
 
-            tooltips, _ = self._create_tooltips({self.xlabel: x, self.ylabel: y, "intensity": z})
+            tooltips, _ = self._create_tooltips(
+                {self.xlabel: x, self.ylabel: y, "intensity": z}
+            )
 
             self._add_tooltips(self.fig, tooltips)
         else:
