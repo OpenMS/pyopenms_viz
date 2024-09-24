@@ -1,5 +1,5 @@
 """
-massdash/testing/BokehSnapshotExtension
+pyopenms-viz/testing/BokehSnapshotExtension
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
@@ -132,7 +132,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
             with open(snapshot_location, "r") as f:
-                a = BytesIO(f.read())
+                a = f.read()
                 return a
         except OSError:
             return None
