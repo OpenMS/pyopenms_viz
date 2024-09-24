@@ -21,9 +21,8 @@ from ._misc import (
     freedman_diaconis_rule,
     mz_tolerance_binning,
 )
-
 from .constants import IS_SPHINX_BUILD
-import warnings
+
 
 _common_kinds = ("line", "vline", "scatter")
 _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
@@ -141,7 +140,6 @@ class BasePlot(ABC):
         line_width: float | None = None,
         min_border: int | None = None,
         show_plot: bool | None = None,
-        aggregate_duplicates: bool | None = None,
         legend: LegendConfig | Dict | None = None,
         feature_config: FeatureConfig | Dict | None = None,
         _config: _BasePlotConfig | None = None,
@@ -185,7 +183,6 @@ class BasePlot(ABC):
         self.feature_config = feature_config
 
         self._config = _config
-        self.aggregate_duplicates = aggregate_duplicates
 
         if _config is not None:
             self._update_from_config(_config)
@@ -218,36 +215,8 @@ class BasePlot(ABC):
             self.by = self._verify_column(by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
-        if self.data[known_columns_without_int].duplicated().any():
-        """
-        Check if duplicate data is present and aggregate if specified.
-        Modifies self.data
-        """
-        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
-        if self.kind in {"peakmap"}:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.z
-            ]
-        else:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.y
-            ]
-
-        if (
-            self.data[known_columns_without_int].drop_duplicates().shape[0]
-            < self.data.shape[0]
-        ):
-            if self.aggregate_duplicates:
-                self.data = (
-                    self.data[self.known_columns]
-                    .groupby(known_columns_without_int)
-                    .sum()
-                    .reset_index()
-                )
-            else:
-                warnings.warn(
-                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
-                )
+        self._load_extension()
+        self._create_figure()
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -296,15 +265,6 @@ class BasePlot(ABC):
         The kind of plot to assemble. Must be overridden by subclasses.
         """
         raise NotImplementedError
-
-    @property
-    def known_columns(self) -> List[str]:
-        """
-        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
-        """
-        known_columns = [self.x, self.y]
-        known_columns.extend([self.by] if self.by is not None else [])
-        return known_columns
 
     @property
     def _interactive(self) -> bool:
@@ -570,8 +530,6 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         if relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
-        self._check_and_aggregate_duplicates()
-
         # sort data by x so in order
         self.data.sort_values(by=x, inplace=True)
 
@@ -644,27 +602,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _kind(self):
         return "spectrum"
 
-    @property
-    def known_columns(self) -> List[str]:
-        """
-        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
-        """
-        known_columns = super().known_columns
-        known_columns.extend([self.peak_color] if self.peak_color is not None else [])
-        known_columns.extend(
-            [self.ion_annotation] if self.ion_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.sequence_annotation] if self.sequence_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.custom_annotation] if self.custom_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.annotation_color] if self.annotation_color is not None else []
-        )
-        return known_columns
-
     def __init__(
         self,
         data: DataFrame,
@@ -719,8 +656,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.sequence_annotation = sequence_annotation
         self.custom_annotation = custom_annotation
         self.annotation_color = annotation_color
-
-        self._check_and_aggregate_duplicates()
 
         self.plot(x, y, **kwargs)
 
@@ -826,13 +761,26 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
             # Apply the binning
             data[x] = data[x].apply(assign_bin)
-        data[x] = cut(data[x], bins=self.num_x_bins)
 
-        # Group by x bins and calculate the mean intensity within each bin
-        known_columns_without_y = [col for col in self.known_columns if col != y]
+        # TODO: Find a better way to retain other columns
+        cols = [x]
+        if self.by is not None:
+            cols.append(self.by)
+        if self.peak_color is not None:
+            cols.append(self.peak_color)
+        if self.ion_annotation is not None:
+            cols.append(self.ion_annotation)
+        if self.sequence_annotation is not None:
+            cols.append(self.sequence_annotation)
+        if self.custom_annotation is not None:
+            cols.append(self.custom_annotation)
+        if self.annotation_color is not None:
+            cols.append(self.annotation_color)
+
+        # Group by x bins and calculate the sum intensity within each bin
         data = (
-            data.groupby(known_columns_without_y, observed=True)
-            .agg({y: "mean"})
+            data.groupby(cols, observed=True)
+            .agg({y: self.aggregation_method})
             .reset_index()
         )
 
@@ -845,6 +793,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return value
 
         data[x] = data[x].apply(convert_to_numeric).astype(float)
+
         data = data.fillna(0)
         return data
 
@@ -981,15 +930,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
     def _kind(self):
         return "peakmap"
 
-    @property
-    def known_columns(self) -> List[str]:
-        """
-        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
-        """
-        known_columns = super().known_columns
-        known_columns.extend([self.z] if self.z is not None else [])
-        return known_columns
-
     def __init__(
         self,
         data,
@@ -1008,9 +948,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         z_log_scale: bool = False,
         fill_by_z: bool = True,
         **kwargs,
-        # Sort values by intensity in ascending order to plot highest intensity peaks last
-        data = data.sort_values(z)
-
+    ) -> None:
         # Copy data since it will be modified
         data = data.copy()
 
@@ -1026,10 +964,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.x_kind = x_kind
         self.fill_by_z = fill_by_z
 
-        super().__init__(data, x, y, z=z, **kwargs)
-
-        self._check_and_aggregate_duplicates()
-
         if annotation_data is not None:
             self.annotation_data = annotation_data.copy()
         else:
@@ -1044,8 +978,8 @@ class PeakMapPlot(BaseMSPlot, ABC):
         if bin_peaks == True or (
             data.shape[0] > num_x_bins * num_y_bins and bin_peaks == "auto"
         ):
-            self.data[x] = cut(self.data[x], bins=num_x_bins)
-            self.data[y] = cut(self.data[y], bins=num_y_bins)
+            data[x] = cut(data[x], bins=num_x_bins)
+            data[y] = cut(data[y], bins=num_y_bins)
             by = kwargs.pop("by", None)
             if by is not None:
                 # Group by x, y and by columns and calculate the sum intensity within each bin
@@ -1069,7 +1003,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         # Log intensity scale
         if z_log_scale:
-            self.data[z] = log1p(self.data[z])
+            data[z] = log1p(data[z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         data = data.sort_values(z)
