@@ -7,6 +7,8 @@ from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 from .._config import LegendConfig
 
@@ -222,6 +224,10 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         """
         Show the plot.
         """
+        if isinstance(self.fig, Axes):
+            self.fig.get_figure().tight_layout()
+        else:
+            self.superFig.tight_layout()
         plt.show()
 
 
@@ -356,16 +362,15 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
-                    text = r'${}$'.format(text)
+                    text = r"${}$".format(text)
                 fig.annotate(
-                text,
-                xy=(x, y),
-                xytext=(3, 0),
-                textcoords="offset points",
-                fontsize=self.annotation_font_size,
-                color=color
-            )
-
+                    text,
+                    xy=(x, y),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    fontsize=self.annotation_font_size,
+                    color=color,
+                )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
