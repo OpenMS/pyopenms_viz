@@ -572,6 +572,9 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
         self._check_and_aggregate_duplicates()
 
+        # sort data by x so in order
+        self.data.sort_values(by=x, inplace=True)
+
         self.plot(self.data, self.x, self.y, **kwargs)
 
     def plot(self, data, x, y, **kwargs):
