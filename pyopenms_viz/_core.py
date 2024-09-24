@@ -218,11 +218,15 @@ class BasePlot(ABC):
             self.by = self._verify_column(by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
-        if self.data[known_columns_without_int].duplicated().any():
+        self._load_extension()
+        self._create_figure()
+
+    def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
         Modifies self.data
         """
+
         # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
         if self.kind in {"peakmap"}:
             known_columns_without_int = [
@@ -233,10 +237,7 @@ class BasePlot(ABC):
                 col for col in self.known_columns if col != self.y
             ]
 
-        if (
-            self.data[known_columns_without_int].drop_duplicates().shape[0]
-            < self.data.shape[0]
-        ):
+        if self.data[known_columns_without_int].duplicated().any():
             if self.aggregate_duplicates:
                 self.data = (
                     self.data[self.known_columns]
@@ -665,6 +666,26 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
         return known_columns
 
+    def _check_and_aggregate_duplicates(self):
+        super()._check_and_aggregate_duplicates()
+
+        known_columns_without_int = [col for col in self.known_columns if col != self.y]
+
+        # also check for duplicates in reference spectrum if present
+        if self.reference_spectrum is not None:
+            if self.reference_spectrum[known_columns_without_int].duplicated().any():
+                if self.aggregate_duplicates:
+                    self.reference_spectrum = (
+                        self.reference_spectrum[self.known_columns]
+                        .groupby(known_columns_without_int)
+                        .sum()
+                        .reset_index()
+                    )
+                else:
+                    warnings.warn(
+                        "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                    )
+
     def __init__(
         self,
         data: DataFrame,
@@ -826,7 +847,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
             # Apply the binning
             data[x] = data[x].apply(assign_bin)
-        data[x] = cut(data[x], bins=self.num_x_bins)
+            data[x] = cut(data[x], bins=self.num_x_bins)
 
         # Group by x bins and calculate the mean intensity within each bin
         known_columns_without_y = [col for col in self.known_columns if col != y]
@@ -1008,11 +1029,9 @@ class PeakMapPlot(BaseMSPlot, ABC):
         z_log_scale: bool = False,
         fill_by_z: bool = True,
         **kwargs,
+    ) -> None:
         # Sort values by intensity in ascending order to plot highest intensity peaks last
-        data = data.sort_values(z)
-
-        # Copy data since it will be modified
-        data = data.copy()
+        super().__init__(data, x, y, z=z, **kwargs)
 
         # Set default config attributes if not passed as keyword arguments
         kwargs["_config"] = _BasePlotConfig(kind=self._kind)
@@ -1026,8 +1045,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.x_kind = x_kind
         self.fill_by_z = fill_by_z
 
-        super().__init__(data, x, y, z=z, **kwargs)
-
         self._check_and_aggregate_duplicates()
 
         if annotation_data is not None:
@@ -1038,7 +1055,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         # Convert intensity values to relative intensity if required
         relative_intensity = kwargs.pop("relative_intensity", False)
         if relative_intensity:
-            data[z] = data[z] / max(data[z]) * 100
+            self.data[z] = self.data[z] / max(self.data[z]) * 100
 
         # Bin peaks if required
         if bin_peaks == True or (
@@ -1049,8 +1066,8 @@ class PeakMapPlot(BaseMSPlot, ABC):
             by = kwargs.pop("by", None)
             if by is not None:
                 # Group by x, y and by columns and calculate the sum intensity within each bin
-                data = (
-                    data.groupby([x, y, by], observed=True)
+                self.data = (
+                    self.data.groupby([x, y, by], observed=True)
                     .agg({z: aggregation_method})
                     .reset_index()
                 )
@@ -1058,23 +1075,25 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 kwargs["by"] = by
             else:
                 # Group by x and y bins and calculate the sum intensity within each bin
-                data = (
-                    data.groupby([x, y], observed=True)
+                self.data = (
+                    self.data.groupby([x, y], observed=True)
                     .agg({z: aggregation_method})
                     .reset_index()
                 )
-            data[x] = data[x].apply(lambda interval: interval.mid).astype(float)
-            data[y] = data[y].apply(lambda interval: interval.mid).astype(float)
-            data = data.fillna(0)
+            self.data[x] = (
+                self.data[x].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data[y] = (
+                self.data[y].apply(lambda interval: interval.mid).astype(float)
+            )
+            self.data = self.data.fillna(0)
 
         # Log intensity scale
         if z_log_scale:
             self.data[z] = log1p(self.data[z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
-        data = data.sort_values(z)
-
-        super().__init__(data, x, y, z=z, **kwargs)
+        self.data.sort_values(z, inplace=True)
 
         # If we do not want to fill/color based on z value, set to none prior to plotting
         if not fill_by_z:
