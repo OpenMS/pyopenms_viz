@@ -5,6 +5,7 @@ from syrupy.types import SerializableData
 from PIL import Image, ImageChops
 from io import BytesIO
 import numpy as np
+from matplotlib.axes import Axes
 
 
 class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
@@ -53,15 +54,16 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
         """
-        Serialize the data to a png
+        Serialize the matplotlib axis object to a png
 
         Args:
-            data (SerializableData): plotly data to serialize
+            data (SerializableData): Matplotlib data to serialize, should be an axis object
 
         Returns:
             str: Image object
         """
+        assert isinstance(data, Axes)
         buf = BytesIO()
-        data.savefig(buf, format="png")
+        data.get_figure().savefig(buf, format="png")
         buf.seek(0)
         return Image.open(buf)
