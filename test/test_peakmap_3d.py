@@ -6,7 +6,7 @@ test/test_peakmap
 import pytest
 import pandas as pd
 from pyopenms_viz.testing import (
-    MatplotlibFigureSnapshotExtension,
+    MatplotlibSnapshotExtension,
     BokehSnapshotExtension,
     PlotlySnapshotExtension,
 )
@@ -16,7 +16,7 @@ from pyopenms_viz.testing import (
 def snapshot(snapshot):
     current_backend = pd.options.plotting.backend
     if current_backend == "ms_matplotlib":
-        return snapshot.use_extension(MatplotlibFigureSnapshotExtension)
+        return snapshot.use_extension(MatplotlibSnapshotExtension)
     elif current_backend == "ms_bokeh":
         return snapshot.use_extension(BokehSnapshotExtension)
     elif current_backend == "ms_plotly":
@@ -27,7 +27,7 @@ def snapshot(snapshot):
 
 @pytest.fixture
 def raw_data():
-    return pd.read_csv("test_data/ionMobilityTestFeatureDf.tsv", sep="\t")
+    return pd.read_csv("test_data/ionMobilityTestChromatogramDf.tsv", sep="\t")
 
 
 @pytest.fixture(
@@ -39,44 +39,24 @@ def load_backend(request):
     pd.set_option("plotting.backend", request.param)
 
 
-def test_peakmap_marginals(raw_data, snapshot):
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        dict(),
+        dict(by="Annotation"),
+        dict(by="Annotation", num_x_bins=20, num_y_bins=20),
+        dict(by="Annotation", z_log_scale=True),
+        dict(by="Annotation", fill_by_z=False),
+    ],
+)
+def test_peakmap_plot(raw_data, snapshot, kwargs):
     out = raw_data.plot(
-        x="mz",
-        y="rt",
-        z="int",
-        kind="peakmap",
-        add_marginals=True,
-        show_plot=False,
+        x="mz", y="rt", z="int", kind="peakmap", show_plot=False, **kwargs
     )
 
     # apply tight layout to matplotlib to ensure not cut off
     if pd.options.plotting.backend == "ms_matplotlib":
-        fig = out[1][1].figure
+        fig = out.get_figure()
         fig.tight_layout()
-    else:
-        fig = out
 
-    assert snapshot == fig
-
-
-def test_peakmap_mz_im(raw_data, snapshot):
-    out = raw_data.plot(
-        x="rt",
-        y="im",
-        z="int",
-        by="Annotation",
-        add_marginals=True,
-        x_kind="chromatogram",
-        y_kind="chromatogram",
-        kind="peakmap",
-        show_plot=False,
-    )
-
-    # apply tight layout to matplotlib to ensure not cut off
-    if pd.options.plotting.backend == "ms_matplotlib":
-        fig = out[1][1].figure
-        fig.tight_layout()
-    else:
-        fig = out
-
-    assert snapshot == fig
+    assert snapshot == out

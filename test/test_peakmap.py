@@ -60,3 +60,21 @@ def test_peakmap_plot(raw_data, snapshot, kwargs):
         fig.tight_layout()
 
     assert snapshot == out
+
+
+def test_peakmap_mz_im(raw_data, snapshot, kwargs):
+    out = raw_data.plot(
+        x="rt",
+        y="im",
+        z="int",
+        kind="peakmap",
+        show_plot=False,
+        **kwargs,
+    )
+
+    # apply tight layout to matplotlib to ensure not cut off
+    if pd.options.plotting.backend == "ms_matplotlib":
+        fig = out.get_figure()
+        fig.tight_layout()
+
+    assert snapshot == out
