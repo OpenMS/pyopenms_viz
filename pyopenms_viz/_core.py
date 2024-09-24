@@ -22,6 +22,7 @@ from ._misc import (
     mz_tolerance_binning,
 )
 from .constants import IS_SPHINX_BUILD
+import warnings
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -140,6 +141,7 @@ class BasePlot(ABC):
         line_width: float | None = None,
         min_border: int | None = None,
         show_plot: bool | None = None,
+        aggregate_duplicates: bool | None = None,
         legend: LegendConfig | Dict | None = None,
         feature_config: FeatureConfig | Dict | None = None,
         _config: _BasePlotConfig | None = None,
@@ -178,6 +180,7 @@ class BasePlot(ABC):
         self.line_width = line_width
         self.min_border = min_border
         self.show_plot = show_plot
+        self.aggregate_duplicates = aggregate_duplicates
 
         self.legend = legend
         self.feature_config = feature_config
@@ -217,6 +220,35 @@ class BasePlot(ABC):
 
         self._load_extension()
         self._create_figure()
+
+    def _check_and_aggregate_duplicates(self):
+        """
+        Check if duplicate data is present and aggregate if specified.
+        Modifies self.data
+        """
+
+        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
+        if self.kind in {"peakmap"}:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.z
+            ]
+        else:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.y
+            ]
+
+        if self.data[known_columns_without_int].duplicated().any():
+            if self.aggregate_duplicates:
+                self.data = (
+                    self.data[self.known_columns]
+                    .groupby(known_columns_without_int)
+                    .sum()
+                    .reset_index()
+                )
+            else:
+                warnings.warn(
+                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                )
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -265,6 +297,15 @@ class BasePlot(ABC):
         The kind of plot to assemble. Must be overridden by subclasses.
         """
         raise NotImplementedError
+
+    @property
+    def known_columns(self) -> List[str]:
+        """
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        """
+        known_columns = [self.x, self.y]
+        known_columns.extend([self.by] if self.by is not None else [])
+        return known_columns
 
     @property
     def _interactive(self) -> bool:
@@ -530,6 +571,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         if relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
+        self._check_and_aggregate_duplicates()
         # sort data by x so in order
         self.data.sort_values(by=x, inplace=True)
 
