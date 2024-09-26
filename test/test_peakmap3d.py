@@ -7,12 +7,7 @@ import pytest
 import pandas as pd
 
 
-@pytest.fixture
-def raw_data(test_path):
-    return pd.read_csv(test_path / "ionMobilityTestFeatureDf.tsv", sep="\t")
-
-
-# Overrid load_backend so only test with matplotlib and plotly
+# Override load_backend so only test with matplotlib and plotly
 @pytest.fixture(scope="session", autouse=True, params=["ms_matplotlib", "ms_plotly"])
 def load_backend(request):
     import pandas as pd
@@ -28,8 +23,8 @@ def load_backend(request):
         dict(scale_intensity=True),
     ],
 )
-def test_peakmap_plot(raw_data, snapshot, kwargs):
-    out = raw_data.plot(
+def test_peakmap_plot(featureMap_data, snapshot, kwargs):
+    out = featureMap_data.plot(
         x="mz", y="rt", z="int", kind="peakmap", show_plot=False, plot_3d=True, **kwargs
     )
 
