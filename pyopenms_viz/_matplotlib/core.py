@@ -7,6 +7,8 @@ from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from .._config import LegendConfig
 
@@ -222,9 +224,10 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         """
         Show the plot.
         """
-        #### apply tight layout
-        fig = self.fig.get_figure()
-        fig.tight_layout()
+        if isinstance(self.fig, Axes):
+            self.fig.get_figure().tight_layout()
+        else:
+            self.superFig.tight_layout()
         plt.show()
 
 

@@ -11,8 +11,8 @@ pd.options.plotting.backend = 'TEMPLATE'
 
 # # Download test file
 
-url = 'https://raw.githubusercontent.com/Roestlab/massdash/dev/test/test_data/featureMap/ionMobilityTestFeatureDf.tsv'
-file_name = 'ionMobilityTestFeatureDf.tsv'
+url = 'https://raw.githubusercontent.com/OpenMS/pyopenms_viz/main/test/test_data/ionMobilityTestChromatogramDf.tsv'
+file_name = 'chromatogramDf.tsv'
 
 # # Send a GET request to the URL
 # # Send a GET request to the URL and handle potential errors
@@ -29,6 +29,6 @@ except IOError as e:
     print(f"Error writing file: {e}")
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
-df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="chromatogram", x="rt", y="int", by="Annotation")
+df = pd.read_csv(file_name, sep="\t")
+df.plot(kind="chromatogram", x="rt", y="int", by="Annotation", legend=dict(bbox_to_anchor=(1, 0.7)))
 
