@@ -2,14 +2,17 @@ from __future__ import annotations
 
 from abc import ABC
 from typing import Tuple
-
+import re
+from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from .._config import LegendConfig
 
-from .._misc import ColorGenerator, MarkerShapeGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from .._core import (
     BasePlot,
     LinePlot,
@@ -52,7 +55,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the fig object stores the matplotlib axes object
         """
-        # TODO why is self.height and self.width checked if no alternatives
+        # TODO why is self.heigh and self.width checked if no alternatives
         if self.width is not None and self.height is not None and not self.plot_3d:
             superFig, fig = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
@@ -219,10 +222,14 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             "Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'"
         )
 
-    def show(self, fig):
+    def show_default(self, fig):
         """
         Show the plot.
         """
+        if isinstance(self.fig, Axes):
+            self.fig.get_figure().tight_layout()
+        else:
+            self.superFig.tight_layout()
         plt.show()
 
 
@@ -333,14 +340,19 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            fig.annotate(
-                text,
-                xy=(x, y),
-                xytext=(3, 0),
-                textcoords="offset points",
-                fontsize=self.annotation_font_size,
-                color=color,
-            )
+            if text is not nan and text != "" and text != "nan":
+                # Check if the text contains LaTeX-style expressions
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = r"${}$".format(text)
+                fig.annotate(
+                    text,
+                    xy=(x, y),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    fontsize=self.annotation_font_size,
+                    color=color,
+                )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):

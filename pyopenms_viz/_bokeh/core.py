@@ -20,6 +20,7 @@ from bokeh.models import (
 )
 
 from pandas.core.frame import DataFrame
+from numpy import nan
 
 # pyopenms_viz imports
 from .._core import (
@@ -34,7 +35,7 @@ from .._core import (
     SpectrumPlot,
     APPEND_PLOT_DOC,
 )
-from .._misc import ColorGenerator, MarkerShapeGenerator
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
@@ -210,13 +211,18 @@ class BOKEHPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         fig.y_range = Range1d(start=start, end=end)
 
-    def show(self, fig):
+    def show_default(self, fig):
         from bokeh.io import show
 
         def app(doc):
             doc.add_root(fig)
 
         show(app)
+
+    def show_sphinx(self):
+        from bokeh.io import show
+
+        show(self.fig)
 
 
 class BOKEHLinePlot(BOKEHPlot, LinePlot):
@@ -333,16 +339,22 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            label = Label(
-                x=x,
-                y=y,
-                text=text,
-                text_font_size="13pt",
-                text_color=color,
-                x_offset=1,
-                y_offset=0,
-            )
-            fig.add_layout(label)
+            if text is not nan and text != "" and text != "nan":
+                # Check if the text contains LaTeX-style expressions
+                if is_latex_formatted(text):
+                    # Wrap the text in '$$' to indicate LaTeX math mode
+                    # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
+                    text = r"$${}$$".format(text)
+                label = Label(
+                    x=x,
+                    y=y,
+                    text=text,
+                    text_font_size="13pt",
+                    text_color=color,
+                    x_offset=1,
+                    y_offset=0,
+                )
+                fig.add_layout(label)
 
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):

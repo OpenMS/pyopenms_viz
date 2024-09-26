@@ -6,14 +6,14 @@ import importlib
 import types
 from dataclasses import dataclass, asdict, field
 
-from pandas import cut, merge
+from pandas import cut, merge, Interval
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
 
-from numpy import ceil, log1p, log2
+from numpy import ceil, log1p, log2, nan, mean
 from ._config import (
     LegendConfig,
     BasePlotConfig,
@@ -24,7 +24,14 @@ from ._config import (
     VLineConfig,
     ScatterConfig,
 )
-from ._misc import ColorGenerator, freedman_diaconis_rule, sturges_rule
+from ._misc import (
+    ColorGenerator,
+    sturges_rule,
+    freedman_diaconis_rule,
+    mz_tolerance_binning,
+)
+from .constants import IS_SPHINX_BUILD
+import warnings
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -166,6 +173,38 @@ class BasePlot(BasePlotConfig, ABC):
             self.by = self._verify_column(self.by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
+        self._load_extension()
+        self._create_figure()
+
+    def _check_and_aggregate_duplicates(self):
+        """
+        Check if duplicate data is present and aggregate if specified.
+        Modifies self.data
+        """
+
+        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
+        if self.kind in {"peakmap"}:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.z
+            ]
+        else:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.y
+            ]
+
+        if self.data[known_columns_without_int].duplicated().any():
+            if self.aggregate_duplicates:
+                self.data = (
+                    self.data[self.known_columns]
+                    .groupby(known_columns_without_int)
+                    .sum()
+                    .reset_index()
+                )
+            else:
+                warnings.warn(
+                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                )
+
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
 
@@ -215,6 +254,15 @@ class BasePlot(BasePlotConfig, ABC):
         The kind of plot to assemble. Must be overridden by subclasses.
         """
         raise NotImplementedError
+
+    @property
+    def known_columns(self) -> List[str]:
+        """
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        """
+        known_columns = [self.x, self.y]
+        known_columns.extend([self.by] if self.by is not None else [])
+        return known_columns
 
     @property
     def _interactive(self) -> bool:
@@ -341,9 +389,19 @@ class BasePlot(BasePlotConfig, ABC):
 
         return plot_out
 
+    def show(self):
+        if IS_SPHINX_BUILD:
+            return self.show_sphinx()
+        else:
+            return self.show_default()
+
     @abstractmethod
-    def show(self, fig):
-        raise NotImplementedError
+    def show_default(self):
+        pass
+
+    # show method for running in sphinx build
+    def show_sphinx(self):
+        return self.show_default()
 
     # methods only for interactive plotting
     @abstractmethod
@@ -496,15 +554,16 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         if self.relative_intensity:
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
-        fig = self.plot()
-        if self.show_plot:
-            self.show(fig)
+        self._check_and_aggregate_duplicates()
+        # sort data by x so in order
+        self.data.sort_values(by=x, inplace=True)
+
+        self.plot()
 
     def plot(self):
         """
         Create the plot
         """
-        print("line 507 self.xlabel", self.xlabel)
         tooltip_entries = {"retention time": self.x, "intensity": self.y}
         if "Annotation" in self.data.columns:
             tooltip_entries["annotation"] = "Annotation"
@@ -554,6 +613,44 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         return "spectrum"
 
     @property
+    def known_columns(self) -> List[str]:
+        """
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        """
+        known_columns = super().known_columns
+        known_columns.extend([self.peak_color] if self.peak_color is not None else [])
+        known_columns.extend(
+            [self.ion_annotation] if self.ion_annotation is not None else []
+        )
+        known_columns.extend(
+            [self.sequence_annotation] if self.sequence_annotation is not None else []
+        )
+        known_columns.extend(
+            [self.custom_annotation] if self.custom_annotation is not None else []
+        )
+        known_columns.extend(
+            [self.annotation_color] if self.annotation_color is not None else []
+        )
+        return known_columns
+
+    def _check_and_aggregate_duplicates(self):
+        super()._check_and_aggregate_duplicates()
+
+        if self.reference_spectrum is not None:
+            if self.reference_spectrum[self.known_columns].duplicated().any():
+                if self.aggregate_duplicates:
+                    self.reference_spectrum = (
+                        self.reference_spectrum[self.known_columns]
+                        .groupby(self.known_columns)
+                        .sum()
+                        .reset_index()
+                    )
+                else:
+                    warnings.warn(
+                        "Duplicate data detected in reference spectrum, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                    )
+
+    @property
     def _computed_num_bins(self):
         """
         Compute the number of bins based on the number of peaks in the data.
@@ -566,6 +663,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
                 self.num_x_bins = sturges_rule(self.data, self.x)
             elif self.bin_method == "freedman-diaconis":
                 return freedman_diaconis_rule(self.data, self.x)
+            elif self.bin_method == "mz-tol-bin":
+                self.num_x_bins = mz_tolerance_binning(self.data, self.x, self.mz_tol)
             else:  # self.bin_method == 'none'
                 return self.num_x_bins
 
@@ -590,9 +689,6 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         )
 
         fig = self.plot()
-        # Show plot
-        if self.show_plot:
-            self.show(fig)
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -697,7 +793,21 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
+        if isinstance(self.num_x_bins, int):
+            df[self.x] = cut(df[self.x], bins=self.num_x_bins)
+        elif isinstance(self.num_x_bins, list) and all(
+            isinstance(item, tuple) for item in self.num_x_bins
+        ):
+            # Function to assign each value to a bin
+            def assign_bin(value):
+                for low, high in self.num_x_bins:
+                    if low <= value <= high:
+                        return f"{low:.4f}-{high:.4f}"
+                return nan  # For values that don't fall into any bin
+
+            # Apply the binning
+            df[self.x] = df[self.x].apply(assign_bin)
+
         # TODO: Find a better way to retain other columns
         cols = [self.x]
         if self.by is not None:
@@ -713,9 +823,23 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         if self.annotation_color is not None:
             cols.append(self.annotation_color)
 
-        # Group by x bins and calculate the mean intensity within each bin
-        df = df.groupby(cols, observed=True).agg({self.y: "mean"}).reset_index()
-        df[self.x] = df[self.x].apply(lambda interval: interval.mid).astype(float)
+        # Group by x bins and calculate the sum intensity within each bin
+        data = (
+            data.groupby(cols, observed=True)
+            .agg({self.y: self.aggregation_method})
+            .reset_index()
+        )
+
+        def convert_to_numeric(value):
+            if isinstance(value, Interval):
+                return value.mid
+            elif isinstance(value, str):
+                return mean([float(i) for i in value.split("-")])
+            else:
+                return value
+
+        df[self.x] = df[self.x].apply(convert_to_numeric).astype(float)
+
         df = df.fillna(0)
         return df
 
@@ -875,6 +999,15 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
     def _kind(self):
         return "peakmap"
 
+    @property
+    def known_columns(self) -> List[str]:
+        """
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        """
+        known_columns = super().known_columns
+        known_columns.extend([self.z] if self.z is not None else [])
+        return known_columns
+
     def __init__(
         self,
         data,
@@ -904,6 +1037,9 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         else:
             self.annotation_data = None
 
+        super().__init__(data, x, y, z=z, **kwargs)
+        self._check_and_aggregate_duplicates()
+
         self.prepare_data()
 
         # If we do not want to fill/color based on z value, set to none prior to plotting
@@ -921,9 +1057,8 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             self.data[self.z] = self.data[self.z] / max(self.data[self.z]) * 100
 
         # Bin peaks if required
-        if self.bin_peaks == True or (
-            self.data.shape[0] > self.num_x_bins * self.num_y_bins
-            and self.bin_peaks == "auto"
+        if bin_peaks == True or (
+            data.shape[0] > num_x_bins * num_y_bins and bin_peaks == "auto"
         ):
             self.data[self.x] = cut(self.data[self.x], bins=self.num_x_bins)
             self.data[self.y] = cut(self.data[self.y], bins=self.num_y_bins)
@@ -931,15 +1066,13 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 # Group by x, y and by columns and calculate the mean intensity within each bin
                 self.data = (
                     self.data.groupby([self.x, self.y, self.by], observed=True)
-                    .agg({self.z: "mean"})
+                    .agg({self.z: self.aggregation_method})
                     .reset_index()
                 )
             else:
                 # Group by x and y bins and calculate the mean intensity within each bin
-                self.data = (
-                    self.data.groupby([self.x, self.y], observed=True)
-                    .agg({self.z: "mean"})
-                    .reset_index()
+                data = (
+                    data.groupby([x, y], observed=True).agg({z: "mean"}).reset_index()
                 )
             self.data[self.x] = (
                 self.data[self.x].apply(lambda interval: interval.mid).astype(float)
@@ -954,12 +1087,23 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             self.data[self.z] = log1p(self.data[self.z])
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
-        self.data = self.data.sort_values(self.z)
+        data = data.sort_values(z)
 
-    def plot(self):
-        """
-        Create the plot
-        """
+        super().__init__(data, x, y, z=z, **kwargs)
+
+        # If we do not want to fill/color based on z value, set to none prior to plotting
+        if not fill_by_z:
+            z = None
+
+        self.plot(x, y, z, **kwargs)
+
+        if self.show_plot:
+            self.show()
+
+    def plot(self, x, y, z, **kwargs):
+
+        class_kwargs, other_kwargs = self._separate_class_kwargs(**kwargs)
+
         if self.add_marginals:
             main_plot = self.create_main_plot_marginals()
             x_fig = self.create_x_axis_plot(main_plot)
@@ -993,9 +1137,12 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
-    # for matplotlib, a figure object is passed
-    def create_main_plot_marginals(self):
-        return self.create_main_plot()
+    def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
+        self.create_main_plot(x, y, z, class_kwargs, other_kwargs)
+
+    # @abstractmethod
+    # def create_main_plot_3d(self, x, y, z, class_kwargs, other_kwargs):
+    #     pass
 
     @abstractmethod
     def create_x_axis_plot(self, main_fig=None, ax=None) -> "figure":
@@ -1030,7 +1177,7 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 f"x_kind {self.x_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
             )
 
-        x_fig = x_plot_obj.generate(None, None, fig=ax)
+        x_fig = x_plot_obj.generate(line_color=color_gen)
         self.plot_x_axis_line(x_fig)
 
         return x_fig
@@ -1051,8 +1198,9 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 by=self.by,
                 _config=self.y_plot_config,
             )
-            y_fig = y_plot_obj.generate(None, None, fig=ax)
+            y_fig = y_plot_obj.generate(line_color=color_gen)
         elif self.y_kind == "spectrum":
+            direction = "horizontal"
             y_plot_obj = self.get_vline_renderer(
                 data=y_data,
                 x=self.z,
@@ -1061,6 +1209,10 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
                 _config=self.y_plot_config,
             )
             y_fig = y_plot_obj.generate(None, None, fig=ax)
+        else:
+            raise ValueError(
+                f"y_kind {self.y_kind} not recognized, must be 'chromatogram', 'mobilogram' or 'spectrum'"
+            )
 
         self.plot_x_axis_line(y_fig)
 
@@ -1082,3 +1234,171 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
             None
         """
         pass
+
+
+class PlotAccessor:
+    """
+    Make plots of MassSpec data using dataframes
+
+    """
+
+    _common_kinds = ("line", "vline", "scatter")
+    _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
+    _all_kinds = _common_kinds + _msdata_kinds
+
+    def __init__(self, data: DataFrame) -> None:
+        self._parent = data
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        backend_name = kwargs.get("backend", None)
+        if backend_name is None:
+            backend_name = "matplotlib"
+
+        plot_backend = _get_plot_backend(backend_name)
+
+        x, y, kind, kwargs = self._get_call_args(
+            plot_backend.__name__, self._parent, args, kwargs
+        )
+
+        if kind not in self._all_kinds:
+            raise ValueError(
+                f"{kind} is not a valid plot kind "
+                f"Valid plot kinds: {self._all_kinds}"
+            )
+
+        # Call the plot method of the selected backend
+        if "backend" in kwargs:
+            kwargs.pop("backend")
+
+        return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
+
+    @staticmethod
+    def _get_call_args(backend_name: str, data: DataFrame, args, kwargs):
+        """
+        Get the arguments to pass to the plotting backend.
+
+        Parameters
+        ----------
+        backend_name : str
+            The name of the backend.
+        data : DataFrame
+            The data to plot.
+        args : tuple
+            The positional arguments passed to the plotting function.
+        kwargs : dict
+            The keyword arguments passed to the plotting function.
+
+        Returns
+        -------
+        dict
+            The arguments to pass to the plotting backend.
+        """
+        if isinstance(data, ABCDataFrame):
+            arg_def = [
+                ("x", None),
+                ("y", None),
+                ("kind", "line"),
+                ("by", None),
+                ("subplots", None),
+                ("sharex", None),
+                ("sharey", None),
+                ("height", None),
+                ("width", None),
+                ("grid", None),
+                ("toolbar_location", None),
+                ("fig", None),
+                ("title", None),
+                ("xlabel", None),
+                ("ylabel", None),
+                ("x_axis_location", None),
+                ("y_axis_location", None),
+                ("title_font_size", None),
+                ("xaxis_label_font_size", None),
+                ("yaxis_label_font_size", None),
+                ("xaxis_tick_font_size", None),
+                ("yaxis_tick_font_size", None),
+                ("annotation_font_size", None),
+                ("line_type", None),
+                ("line_width", None),
+                ("min_border", None),
+                ("show_plot", None),
+                ("legend", None),
+                ("feature_config", None),
+                ("_config", None),
+                ("backend", backend_name),
+            ]
+        else:
+            raise ValueError(
+                f"Unsupported data type: {type(data).__name__}, expected DataFrame."
+            )
+
+        pos_args = {name: value for (name, _), value in zip(arg_def, args)}
+
+        kwargs = dict(arg_def, **pos_args, **kwargs)
+
+        x = kwargs.pop("x", None)
+        y = kwargs.pop("y", None)
+        kind = kwargs.pop("kind", "line")
+        return x, y, kind, kwargs
+
+
+_backends: dict[str, types.ModuleType] = {}
+
+
+def _load_backend(backend: str) -> types.ModuleType:
+    """
+    Load a plotting backend.
+
+    Parameters
+    ----------
+    backend : str
+        The identifier for the backend. Either "bokeh", "matplotlib", "plotly",
+        or a module name.
+
+    Returns
+    -------
+    types.ModuleType
+        The imported backend.
+    """
+    if backend == "bokeh":
+        try:
+            module = importlib.import_module("pyopenms_viz.plotting._bokeh")
+        except ImportError:
+            raise ImportError(
+                "Bokeh is required for plotting when the 'bokeh' backend is selected."
+            ) from None
+        return module
+
+    elif backend == "matplotlib":
+        try:
+            module = importlib.import_module("pyopenms_viz.plotting._matplotlib")
+        except ImportError:
+            raise ImportError(
+                "Matplotlib is required for plotting when the 'matplotlib' backend is selected."
+            ) from None
+        return module
+
+    elif backend == "plotly":
+        try:
+            module = importlib.import_module("pyopenms_viz.plotting._plotly")
+        except ImportError:
+            raise ImportError(
+                "Plotly is required for plotting when the 'plotly' backend is selected."
+            ) from None
+        return module
+
+    raise ValueError(
+        f"Could not find plotting backend '{backend}'. Needs to be one of 'bokeh', 'matplotlib', or 'plotly'."
+    )
+
+
+def _get_plot_backend(backend: str | None = None):
+
+    backend_str: str = backend or "matplotlib"
+
+    if backend_str in _backends:
+        return _backends[backend_str]
+
+    module = _load_backend(backend_str)
+    _backends[backend_str] = module
+    return module
