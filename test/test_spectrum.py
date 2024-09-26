@@ -5,38 +5,6 @@ test/test_spectrum
 
 import pytest
 import pandas as pd
-from pyopenms_viz.testing import (
-    MatplotlibSnapshotExtension,
-    BokehSnapshotExtension,
-    PlotlySnapshotExtension,
-)
-
-
-@pytest.fixture
-def snapshot(snapshot):
-    current_backend = pd.options.plotting.backend
-    if current_backend == "ms_matplotlib":
-        return snapshot.use_extension(MatplotlibSnapshotExtension)
-    elif current_backend == "ms_bokeh":
-        return snapshot.use_extension(BokehSnapshotExtension)
-    elif current_backend == "ms_plotly":
-        return snapshot.use_extension(PlotlySnapshotExtension)
-    else:
-        raise ValueError(f"Backend {current_backend} not supported")
-
-
-@pytest.fixture
-def raw_data():
-    return pd.read_csv("test_data/TestSpectrumDf.tsv", sep="\t")
-
-
-@pytest.fixture(
-    scope="session", autouse=True, params=["ms_matplotlib", "ms_bokeh", "ms_plotly"]
-)
-def load_backend(request):
-    import pandas as pd
-
-    pd.set_option("plotting.backend", request.param)
 
 
 @pytest.mark.parametrize(
@@ -48,8 +16,8 @@ def load_backend(request):
         dict(xlabel="RETENTION", ylabel="INTENSITY"),
     ],
 )
-def test_spectrum_plot(raw_data, snapshot, kwargs):
-    out = raw_data.plot(
+def test_spectrum_plot(spectrum_data, snapshot, kwargs):
+    out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )
 
@@ -73,8 +41,8 @@ def test_spectrum_plot(raw_data, snapshot, kwargs):
         dict(bin_peaks="auto", bin_method="mz-tol-bin"),  # automatic binning mz-tol-bin
     ],
 )
-def test_spectrum_binning(raw_data, snapshot, kwargs):
-    out = raw_data.plot(
+def test_spectrum_binning(spectrum_data, snapshot, kwargs):
+    out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )
 
@@ -86,13 +54,13 @@ def test_spectrum_binning(raw_data, snapshot, kwargs):
     assert snapshot == out
 
 
-def test_mirror_spectrum(raw_data, snapshot, **kwargs):
-    out = raw_data.plot(
+def test_mirror_spectrum(spectrum_data, snapshot, **kwargs):
+    out = spectrum_data.plot(
         x="mz",
         y="intensity",
         kind="spectrum",
         mirror_spectrum=True,
-        reference_spectrum=raw_data,
+        reference_spectrum=spectrum_data,
         show_plot=False,
         **kwargs,
     )
@@ -112,8 +80,8 @@ def test_mirror_spectrum(raw_data, snapshot, **kwargs):
         dict(ion_annotation="ion_annotation", custom_annotation="custom_annotation"),
     ],
 )
-def test_spectrum_with_annotations(raw_data, snapshot, kwargs):
-    out = raw_data.plot(
+def test_spectrum_with_annotations(spectrum_data, snapshot, kwargs):
+    out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )
 

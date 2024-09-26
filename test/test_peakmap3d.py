@@ -1,33 +1,18 @@
 """
-test/test_peakmap
+test/test_peakmap3d
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import pytest
 import pandas as pd
-from pyopenms_viz.testing import (
-    MatplotlibSnapshotExtension,
-    BokehSnapshotExtension,
-    PlotlySnapshotExtension,
-)
 
 
 @pytest.fixture
-def snapshot(snapshot):
-    current_backend = pd.options.plotting.backend
-    if current_backend == "ms_matplotlib":
-        return snapshot.use_extension(MatplotlibSnapshotExtension)
-    elif current_backend == "ms_plotly":
-        return snapshot.use_extension(PlotlySnapshotExtension)
-    else:
-        raise ValueError(f"Backend {current_backend} not supported")
+def raw_data(test_path):
+    return pd.read_csv(test_path / "ionMobilityTestFeatureDf.tsv", sep="\t")
 
 
-@pytest.fixture
-def raw_data():
-    return pd.read_csv("test_data/ionMobilityTestChromatogramDf.tsv", sep="\t")
-
-
+# Overrid load_backend so only test with matplotlib and plotly
 @pytest.fixture(scope="session", autouse=True, params=["ms_matplotlib", "ms_plotly"])
 def load_backend(request):
     import pandas as pd
