@@ -35,6 +35,8 @@ class PLOTLYPlot(BasePlot, ABC):
     Base class for assembling a Ploty plot
     """
 
+    fig: Figure = None
+
     @property
     def _interactive(self) -> bool:
         return True
@@ -54,8 +56,8 @@ class PLOTLYPlot(BasePlot, ABC):
         """
         Create a new figure, if a figure is not supplied
         """
-        fig = go.Figure()
-        fig.update_layout(
+        self.fig = go.Figure()
+        self.fig.update_layout(
             title=self.title,
             xaxis_title=self.xlabel,
             yaxis_title=self.ylabel,
@@ -64,20 +66,19 @@ class PLOTLYPlot(BasePlot, ABC):
             template="simple_white",
             dragmode="select",
         )
-        return fig
 
-    def _update_plot_aes(self, fig, **kwargs) -> None:
+    def _update_plot_aes(self, **kwargs) -> None:
         """
         Update the plot aesthetics.
         """
-        fig.update_layout(
+        self.fig.update_layout(
             legend_title=self.legend_config.title,
             legend_font_size=self.legend_config.fontsize,
             showlegend=self.legend_config.show,
         )
         # Update to look similar to Bokeh theme
         # Customize the layout
-        fig.update_layout(
+        self.fig.update_layout(
             plot_bgcolor="#FFFFFF",  # Set the plot background color
             font_family="Helvetica",  # Set the font family
             # font_size=12,  # Set the font size
@@ -97,7 +98,7 @@ class PLOTLYPlot(BasePlot, ABC):
         )
 
         # Add x-axis grid lines and ticks
-        fig.update_xaxes(
+        self.fig.update_xaxes(
             showgrid=self.grid,  # Add x-axis grid lines
             showline=True,
             linewidth=1,
@@ -108,7 +109,7 @@ class PLOTLYPlot(BasePlot, ABC):
         )
 
         # Add y-axis grid lines and ticks
-        fig.update_yaxes(
+        self.fig.update_yaxes(
             showgrid=self.grid,  # Add y-axis grid lines
             showline=True,
             linewidth=1,
@@ -117,7 +118,7 @@ class PLOTLYPlot(BasePlot, ABC):
             tickcolor="black",  # Set the color of y-axis ticks
         )
 
-    def _add_legend(self, fig, legend):
+    def _add_legend(self, legend):
         pass
 
     def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
@@ -131,8 +132,8 @@ class PLOTLYPlot(BasePlot, ABC):
             return
         fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
-    def _add_bounding_box_drawer(self, fig, **kwargs):
-        fig.update_layout(
+    def _add_bounding_box_drawer(self, **kwargs):
+        self.fig.update_layout(
             modebar_add=["drawrect", "eraseshape"],
             newshape=dict(
                 showlegend=True,
@@ -149,12 +150,12 @@ class PLOTLYPlot(BasePlot, ABC):
             ),
         )
 
-    def _add_bounding_vertical_drawer(self, fig):
+    def _add_bounding_vertical_drawer(self):
         # Note: self.label_suffix must be defined
         self.label_suffix = self.x  ### NOTE: not sure if this is correct behavior
 
-        fig.add_trace(go.Scatter(x=[], y=[], mode="lines"))
-        fig.update_layout(
+        self.fig.add_trace(go.Scatter(x=[], y=[], mode="lines"))
+        self.fig.update_layout(
             modebar_add=["drawrect", "eraseshape"],
             newshape=dict(
                 showlegend=True,
@@ -177,7 +178,6 @@ class PLOTLYPlot(BasePlot, ABC):
 
     def _modify_x_range(
         self,
-        fig,
         x_range: Tuple[float, float] | None = None,
         padding: Tuple[float, float] | None = None,
     ):
@@ -185,11 +185,10 @@ class PLOTLYPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        fig.update_xaxes(range=[start, end])
+        self.fig.update_xaxes(range=[start, end])
 
     def _modify_y_range(
         self,
-        fig,
         y_range: Tuple[float, float] | None = None,
         padding: Tuple[float, float] | None = None,
     ):
@@ -197,10 +196,10 @@ class PLOTLYPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        fig.update_yaxes(range=[start, end])
+        self.fig.update_yaxes(range=[start, end])
 
-    def show_default(self, fig):
-        fig.show()
+    def show_default(self):
+        self.fig.show()
 
     def show_sphinx(self):
         return self.fig
@@ -214,7 +213,6 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     @APPEND_PLOT_DOC
     def plot(  # type: ignore[override]
         self,
-        fig,
     ) -> Tuple[Figure, "Legend"]:  # note legend is always none for consistency
 
         traces = []
@@ -237,14 +235,14 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
                 )
                 traces.append(trace)
 
-        fig.add_traces(data=traces)
-        return fig, None
+        self.fig.add_traces(data=traces)
+        return self.fig, None
 
 
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
     @APPEND_PLOT_DOC
-    def plot(self, fig) -> Tuple[Figure, "Legend"]:
+    def plot(self) -> Tuple[Figure, "Legend"]:
 
         if not self.plot_3d:
             traces = []
@@ -289,7 +287,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                         show_legend = False  # only show the legend for one trace
                         traces.append(trace)
 
-            fig.add_traces(data=traces)
+            self.fig.add_traces(data=traces)
         else:
             if self.by is None:
                 x_vert = []
@@ -311,7 +309,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     y_vert.append(None)
                     z_vert.append(None)
 
-                fig.add_trace(
+                self.fig.add_trace(
                     go.Scatter3d(
                         x=x_vert,
                         y=y_vert,
@@ -350,7 +348,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                         y_vert.append(None)
                         z_vert.append(None)
 
-                    fig.add_trace(
+                    self.fig.add_trace(
                         go.Scatter3d(
                             x=x_vert,
                             y=y_vert,
@@ -363,7 +361,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     )
 
             # Add gridlines
-            fig.update_layout(
+            self.fig.update_layout(
                 scene=dict(
                     xaxis=dict(
                         title=self.xlabel,
@@ -391,13 +389,12 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 center=dict(x=0, y=0, z=0),
                 eye=dict(x=1.25, y=1.8, z=1.25),
             )
-            fig.update_layout(scene_camera=camera)
+            self.fig.update_layout(scene_camera=camera)
 
-        return fig, None
+        return self.fig, None
 
     def _add_annotations(
         self,
-        fig,
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -425,8 +422,8 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 annotations.append(annotation)
 
         for annotation in annotations:
-            fig.add_annotation(annotation)
-        return fig
+            self.fig.add_annotation(annotation)
+        return self.fig
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
@@ -437,7 +434,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
             self.marker = MarkerShapeGenerator(engine="PLOTLY")
 
     @APPEND_PLOT_DOC
-    def plot(self, fig) -> Tuple[Figure, "Legend"]:
+    def plot(self) -> Tuple[Figure, "Legend"]:
 
         marker_dict = dict()
         # Check for z-dimension and plot heatmap
@@ -489,8 +486,8 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 )
                 traces.append(trace)
 
-        fig.add_traces(data=traces)
-        return fig, None
+        self.fig.add_traces(data=traces)
+        return self.fig, None
 
 
 class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
@@ -533,7 +530,7 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
 class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
 
-    def _add_peak_boundaries(self, fig, annotation_data):
+    def _add_peak_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
             colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
@@ -542,7 +539,7 @@ class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
                 legend_label = f"Feature {idx} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"Feature {idx}"
-            fig.add_trace(
+            self.fig.add_trace(
                 go.Scatter(
                     mode="lines",
                     x=[
@@ -735,10 +732,11 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             lambda axis: axis.tickfont.update(size=self.yaxis_tick_font_size)
         )
 
-        self._update_plot_aes(fig_m)
+        self.fig = fig_m
+        self._update_plot_aes()
         return fig_m
 
-    def _add_box_boundaries(self, fig, annotation_data):
+    def _add_box_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
@@ -758,7 +756,7 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"{use_name}"
-            fig.add_trace(
+            self.fig.add_trace(
                 go.Scatter(
                     x=[
                         x0,

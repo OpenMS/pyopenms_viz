@@ -35,6 +35,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         data (DataFrame): The input data frame.
     """
 
+    ax: Axes = None
+    fig: Figure = None
+
     @property
     def _interactive(self):
         return False
@@ -57,19 +60,19 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         """
         # TODO why is self.heigh and self.width checked if no alternatives
         if self.width is not None and self.height is not None and not self.plot_3d:
-            superFig, fig = plt.subplots(
+            self.fig, self.ax = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
             )
-            fig.set_title(self.title)
-            fig.set_xlabel(self.xlabel)
-            fig.set_ylabel(self.ylabel)
+            self.ax.set_title(self.title)
+            self.ax.set_xlabel(self.xlabel)
+            self.ax.set_ylabel(self.ylabel)
         elif self.width is not None and self.height is not None and self.plot_3d:
-            superFig = plt.figure(
+            self.fig = plt.figure(
                 figsize=(self.width / 100, self.height / 100), layout="constrained"
             )
-            fig = superFig.add_subplot(111, projection="3d")
-            fig.set_title(self.title)
-            fig.set_xlabel(
+            self.ax = self.fig.add_subplot(111, projection="3d")
+            self.ax.set_title(self.title)
+            self.ax.set_xlabel(
                 self.xlabel,
                 fontsize=9,
                 labelpad=-2,
@@ -78,7 +81,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                 ],
                 style="italic",
             )
-            fig.set_ylabel(
+            self.ax.set_ylabel(
                 self.ylabel,
                 fontsize=9,
                 labelpad=-2,
@@ -86,7 +89,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                     ColorGenerator.Colors.DARKGRAY
                 ],
             )
-            fig.set_zlabel(
+            self.ax.set_zlabel(
                 self.zlabel,
                 fontsize=10,
                 color=ColorGenerator.color_blind_friendly_map[
@@ -96,7 +99,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             )
 
             for axis in ("x", "y", "z"):
-                fig.tick_params(
+                self.ax.tick_params(
                     axis=axis,
                     labelsize=8,
                     pad=-2,
@@ -105,39 +108,38 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                     ],
                 )
 
-            fig.set_box_aspect(aspect=None, zoom=0.88)
-            fig.ticklabel_format(
+            self.ax.set_box_aspect(aspect=None, zoom=0.88)
+            self.ax.ticklabel_format(
                 axis="z", style="sci", useMathText=True, scilimits=(0, 0)
             )
-            fig.grid(color="#FF0000", linewidth=0.8)
-            fig.xaxis.pane.fill = False
-            fig.yaxis.pane.fill = False
-            fig.zaxis.pane.fill = False
-            fig.view_init(elev=25, azim=-45, roll=0)
-        return fig
+            self.ax.grid(color="#FF0000", linewidth=0.8)
+            self.ax.xaxis.pane.fill = False
+            self.ax.yaxis.pane.fill = False
+            self.ax.zaxis.pane.fill = False
+            self.ax.view_init(elev=25, azim=-45, roll=0)
+        return self.ax
 
-    def _update_plot_aes(self, ax):
+    def _update_plot_aes(self):
         """
         Update the plot aesthetics.
 
         Args:
-            ax: The axes object.
             **kwargs: Additional keyword arguments.
         """
-        ax.grid(self.grid)
+        self.ax.grid(self.grid)
         # Update the title, xlabel, and ylabel
-        ax.set_title(self.title, fontsize=self.title_font_size)
-        ax.set_xlabel(self.xlabel, fontsize=self.xaxis_label_font_size)
-        ax.set_ylabel(self.ylabel, fontsize=self.yaxis_label_font_size)
+        self.ax.set_title(self.title, fontsize=self.title_font_size)
+        self.ax.set_xlabel(self.xlabel, fontsize=self.xaxis_label_font_size)
+        self.ax.set_ylabel(self.ylabel, fontsize=self.yaxis_label_font_size)
         # Update axis tick labels
-        ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
-        ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
+        self.ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
+        self.ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
         if self.plot_3d:
-            ax.set_zlabel(self.zlabel, fontsize=self.yaxis_label_font_size)
-            ax.tick_params(axis="z", labelsize=self.yaxis_tick_font_size)
-        return ax
+            self.ax.set_zlabel(self.zlabel, fontsize=self.yaxis_label_font_size)
+            self.ax.tick_params(axis="z", labelsize=self.yaxis_tick_font_size)
+        return self.ax
 
-    def _add_legend(self, ax, legend):
+    def _add_legend(self, legend):
         """
         Add a legend to the plot.
 
@@ -154,7 +156,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             else:
                 ncol = 1
 
-            legend = ax.legend(
+            legend = self.ax.legend(
                 *legend,
                 loc=matplotlibLegendLoc,
                 title=self.legend_config.title,
@@ -164,11 +166,10 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             )
 
             legend.get_title().set_fontsize(str(self.legend_config.fontsize))
-        return ax
+        return self.ax
 
     def _modify_x_range(
         self,
-        ax,
         x_range: Tuple[float, float],
         padding: Tuple[float, float] | None = None,
     ):
@@ -183,12 +184,11 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        ax.set_xlim(start, end)
-        return ax
+        self.ax.set_xlim(start, end)
+        return
 
     def _modify_y_range(
         self,
-        ax,
         y_range: Tuple[float, float],
         padding: Tuple[float, float] | None = None,
     ):
@@ -203,33 +203,44 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         if padding is not None:
             start = start - (start * padding[0])
             end = end + (end * padding[1])
-        ax.set_ylim(start, end)
-        return ax
+        self.ax.set_ylim(start, end)
 
     # since matplotlib creates static plots, we don't need to implement the following methods
-    def _add_tooltips(self, fig, tooltips):
+    def _add_tooltips(self, tooltips):
         raise NotImplementedError(
             "Matplotlib does not support interactive plots and cannot use method '_add_tooltips'"
         )
 
-    def _add_bounding_box_drawer(self, fig):
+    def _add_bounding_box_drawer(self):
         raise NotImplementedError(
             "Matplotlib does not support interactive plots and cannot use method '_add_bounding_box_drawer'"
         )
 
-    def _add_bounding_vertical_drawer(self, fig):
+    def _add_bounding_vertical_drawer(self):
         raise NotImplementedError(
             "Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'"
         )
 
-    def show_default(self, fig):
+    def generate(self, tooltips, custom_hover_data):
+        """
+        Generate the plot
+        """
+        self._load_extension()
+        if self.fig is None and self.ax is None:
+            self._create_figure()
+        elif self.fig is not None and self.ax is not None:
+            pass  # this is fine both are set
+        else:
+            raise ValueError("Both fig and ax must be set or both must be None")
+
+        self.plot()
+        self._update_plot_aes()
+
+    def show_default(self):
         """
         Show the plot.
         """
-        if isinstance(self.fig, Axes):
-            self.fig.get_figure().tight_layout()
-        else:
-            self.superFig.tight_layout()
+        self.fig.tight_layout()
         plt.show()
 
 
@@ -239,7 +250,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(self, ax) -> Tuple[Axes, "Legend"]:
+    def plot(self) -> Tuple[Axes, "Legend"]:
         """
         Plot a line plot
         """
@@ -248,17 +259,16 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_labels = []
 
         if self.by is None:
-            (line,) = ax.plot(
+            (line,) = self.ax.plot(
                 self.data[self.x], self.data[self.y], color=self.current_color
             )
 
-            return ax, None
         else:
             for group, df in self.data.groupby(self.by):
-                (line,) = ax.plot(df[self.x], df[self.y], color=self.current_color)
+                (line,) = self.ax.plot(df[self.x], df[self.y], color=self.current_color)
                 legend_lines.append(line)
                 legend_labels.append(group)
-            return ax, (legend_lines, legend_labels)
+            self._add_legend((legend_lines, legend_labels))
 
 
 class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
@@ -267,7 +277,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(self, ax) -> Tuple[Axes, "Legend"]:
+    def plot(self):
         """
         Plot a vertical line
         """
@@ -283,9 +293,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     else:
                         x_data = [row[self.x], row[self.x]]
                         y_data = [0, row[self.y]]
-                    (line,) = ax.plot(x_data, y_data, color=self.current_color)
-
-                return ax, None
+                    (line,) = self.ax.plot(x_data, y_data, color=self.current_color)
             else:
                 for group, df in self.data.groupby(self.by):
                     for _, row in df.iterrows():
@@ -295,15 +303,15 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                         else:
                             x_data = [row[self.x], row[self.x]]
                             y_data = [0, row[self.y]]
-                        (line,) = ax.plot(x_data, y_data, color=self.current_color)
+                        (line,) = self.ax.plot(x_data, y_data, color=self.current_color)
                     legend_lines.append(line)
                     legend_labels.append(group)
 
-                return ax, (legend_lines, legend_labels)
+                self._add_legend((legend_lines, legend_labels))
         else:
             if self.by is None:
                 for i in range(len(self.data)):
-                    (line,) = ax.plot(
+                    (line,) = self.ax.plot(
                         [self.data[self.y].iloc[i], self.data[self.y].iloc[i]],
                         [self.data[self.z].iloc[i], 0],
                         [self.data[self.x].iloc[i], self.data[self.x].iloc[i]],
@@ -312,14 +320,13 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                             (self.data[self.z].iloc[i] / self.data[self.z].max())
                         ),
                     )
-                return ax, None
             else:
                 legend_lines = []
                 legend_labels = []
 
                 for group, df in self.data.groupby(self.by):
                     for i in range(len(df)):
-                        (line,) = ax.plot(
+                        (line,) = self.ax.plot(
                             [df[self.y].iloc[i], df[self.y].iloc[i]],
                             [df[self.z].iloc[i], 0],
                             [df[self.x].iloc[i], df[self.x].iloc[i]],
@@ -329,11 +336,10 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     legend_lines.append(line)
                     legend_labels.append(group)
 
-                return ax, (legend_lines, legend_labels)
+                self._add_legend((legend_lines, legend_labels))
 
     def _add_annotations(
         self,
-        fig,
         ann_texts: list[list[str]],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -345,7 +351,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
                     text = r"${}$".format(text)
-                fig.annotate(
+                self.fig.annotate(
                     text,
                     xy=(x, y),
                     xytext=(3, 0),
@@ -366,7 +372,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             self.marker = MarkerShapeGenerator(engine="MATPLOTLIB")
 
     @APPEND_PLOT_DOC
-    def plot(self, ax) -> Tuple[Axes, "Legend"]:
+    def plot(self):
         """
         Plot a scatter plot
         """
@@ -378,10 +384,9 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
 
         if self.by is None:
             use_color = self.current_color if self.z is None else self.data[self.z]
-            scatter = ax.scatter(
+            scatter = self.ax.scatter(
                 self.data[self.x], self.data[self.y], c=use_color, **kwargs
             )
-            return ax, None
         else:
             if self.z is not None:
                 vmin, vmax = self.data[self.z].min(), self.data[self.z].max()
@@ -390,7 +395,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 # Normalize colors if z is specified
                 if self.z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)
-                    scatter = ax.scatter(
+                    scatter = self.ax.scatter(
                         df[self.x],
                         df[self.y],
                         c=use_color,
@@ -399,10 +404,12 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                         **kwargs,
                     )
                 else:
-                    scatter = ax.scatter(df[self.x], df[self.y], c=use_color, **kwargs)
+                    scatter = self.ax.scatter(
+                        df[self.x], df[self.y], c=use_color, **kwargs
+                    )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
-            return ax, (legend_lines, legend_labels)
+            self._add_legend((legend_lines, legend_labels))
 
 
 class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
@@ -430,7 +437,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
     Class for assembling a matplotlib extracted ion chromatogram plot
     """
 
-    def _add_peak_boundaries(self, fig, annotation_data):
+    def _add_peak_boundaries(self, annotation_data):
         """
         Add peak boundaries to the plot.
 
@@ -441,8 +448,8 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
             None
         """
         if self.by is not None and self.legend.show:
-            legend = fig.get_legend()
-            fig.add_artist(legend)
+            legend = self.ax.get_legend()
+            self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
@@ -452,7 +459,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
         legend_labels = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             use_color = next(color_gen)
-            left_vlne = fig.vlines(
+            left_vlne = self.ax.vlines(
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
@@ -460,7 +467,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
                 color=use_color,
                 ls=self.feature_config.line_type,
             )
-            fig.vlines(
+            self.ax.vlines(
                 x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
@@ -484,7 +491,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.annotation_legend_config.loc
             )
-            fig.legend(
+            self.ax.legend(
                 legend_items,
                 legend_labels,
                 loc=matplotlibLegendLoc,
@@ -524,10 +531,12 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     def _create_figure(self):
         # Create a 2 by 2 figure and axis for marginal plots
         if self.add_marginals:
-            superFig, ax_grid = plt.subplots(
+            if self.fig is not None and self.ax is not None:
+                raise ValueError("Both fig and ax must None if add_marginals is True")
+            self.fig, self.ax_grid = plt.subplots(
                 2, 2, figsize=(self.width / 100, self.height / 100), dpi=200
             )
-            return superFig, ax_grid
+            self.ax = self.ax_grid[1, 1]
         else:
             super()._create_figure()
 
@@ -537,16 +546,15 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         """
 
         if self.add_marginals:
-            superFig, ax_grid = self._create_figure()
-            ax_grid[0, 0].remove()
-            ax_grid[0, 0].axis("off")
-            superFig.set_size_inches(self.width / 100, self.height / 100)
-            superFig.subplots_adjust(wspace=0, hspace=0)
+            self._create_figure()
+            self.ax[0, 0].remove()
+            self.ax[0, 0].axis("off")
+            self.fig.set_size_inches(self.width / 100, self.height / 100)
+            self.fig.subplots_adjust(wspace=0, hspace=0)
 
-            self.create_main_plot_marginals(ax=ax_grid[1, 1])
-            self.create_x_axis_plot(ax=ax_grid[0, 1])
-            self.create_y_axis_plot(ax=ax_grid[1, 0])
-            return ax_grid
+            self.create_main_plot_marginals(ax=self.ax_grid[1, 1])
+            self.create_x_axis_plot(ax=self.ax_grid[0, 1])
+            self.create_y_axis_plot(ax=self.ax_grid[1, 0])
 
         else:
             return super().plot()
@@ -556,7 +564,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     ):  # plots all plotted on same figure do not need to combine
         pass
 
-    def create_x_axis_plot(self, main_plot=None, ax=None) -> "figure":
+    def create_x_axis_plot(self, main_plot=None, ax=None):
         super().create_x_axis_plot(ax=ax)
 
         ax.set_title(None)
@@ -569,9 +577,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.yaxis.tick_right()
         ax.legend_ = None
 
-        return ax
-
-    def create_y_axis_plot(self, ax=None) -> "figure":
+    def create_y_axis_plot(self, ax=None):
         # Note y_config is different so we cannot use the base class methods
         group_cols = [self.y]
         if self.by is not None:
@@ -589,7 +595,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             )
         else:
             raise ValueError(f"Invalid y_kind: {self.y_kind}")
-        y_fig = y_plot_obj.generate(None, None, fig=ax)
+        y_fig = y_plot_obj.generate(None, None, fig=self.fig, ax=ax)
 
         self.plot_x_axis_line(y_fig)
 
@@ -600,8 +606,6 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.set_ylabel(self.y_plot_config.ylabel)
         ax.set_ylim(ax.get_ylim())
 
-        return ax
-
     def create_main_plot(self):
         if not self.plot_3d:
             scatterPlot = self.get_scatter_renderer(
@@ -611,23 +615,28 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 z=self.z,
                 _config=self._config,
             )
-            fig = scatterPlot.generate(None, None)
+            scatterPlot.generate(None, None)
 
             if self.annotation_data is not None:
-                self._add_box_boundaries(fig, self.annotation_data)
+                self._add_box_boundaries(self.annotation_data)
 
-            return fig
         else:
             vlinePlot = self.get_vline_renderer(
                 data=self.data, x=self.x, y=self.y, _config=self._config
             )
-            return vlinePlot.generate(None, None)
+            vlinePlot.generate(None, None)
 
     def create_main_plot_marginals(self, ax=None):
         scatterPlot = self.get_scatter_renderer(
-            data=self.data, x=self.x, y=self.y, z=self.z, _config=self._config
+            data=self.data,
+            x=self.x,
+            y=self.y,
+            z=self.z,
+            _config=self._config,
+            fig=self.fig,
+            ax=ax,
         )
-        scatterPlot.generate(None, None, fig=ax)
+        scatterPlot.generate(None, None)
 
         ax.set_title(None)
         ax.set_xlabel(self.xlabel)
@@ -636,10 +645,10 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.set_yticks([])
         ax.legend_ = None
 
-    def _add_box_boundaries(self, fig, annotation_data):
+    def _add_box_boundaries(self, annotation_data):
         if self.by is not None:
-            legend = fig.get_legend()
-            fig.add_artist(legend)
+            legend = self.ax.get_legend()
+            self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
@@ -666,7 +675,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 linestyle=self.feature_config.line_type,
                 linewidth=self.feature_config.line_width,
             )
-            fig.add_patch(custom_lines)
+            self.ax.add_patch(custom_lines)
 
             if "name" in annotation_data.columns:
                 use_name = feature["name"]
@@ -682,7 +691,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.feature_config.legend.loc
             )
-            fig.legend(
+            self.ax.legend(
                 [custom_lines],
                 [legend_labels],
                 loc=matplotlibLegendLoc,

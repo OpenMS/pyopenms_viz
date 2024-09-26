@@ -173,9 +173,6 @@ class BasePlot(BasePlotConfig, ABC):
             self.by = self._verify_column(self.by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
-        self._load_extension()
-        self._create_figure()
-
     def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
@@ -325,24 +322,23 @@ class BasePlot(BasePlotConfig, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def plot(self, fig) -> None:
+    def plot(self) -> None:
         """
         Create the plot
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _update_plot_aes(self, fig):
+    def _update_plot_aes(self):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_legend(self, fig, legend):
+    def _add_legend(self, legend):
         raise NotImplementedError
 
     @abstractmethod
     def _modify_x_range(
         self,
-        fig,
         x_range: Tuple[float, float],
         padding: Tuple[float, float] | None = None,
     ):
@@ -358,7 +354,6 @@ class BasePlot(BasePlotConfig, ABC):
     @abstractmethod
     def _modify_y_range(
         self,
-        fig,
         y_range: Tuple[float, float],
         padding: Tuple[float, float] | None = None,
     ):
@@ -371,23 +366,19 @@ class BasePlot(BasePlotConfig, ABC):
         """
         pass
 
-    def generate(self, tooltips, custom_hover_data, fig=None):
+    def generate(self, tooltips, custom_hover_data):
         """
         Generate the plot
         """
         self._load_extension()
-        if fig is None:
+        if self.fig is None:
             fig = self._create_figure()
-        plot_out, legend = self.plot(fig)
+        self.plot()
 
-        if legend is not None:
-            self._add_legend(plot_out, legend)
-        self._update_plot_aes(plot_out)
+        self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(plot_out, tooltips, custom_hover_data)
-
-        return plot_out
+            self._add_tooltips(tooltips, custom_hover_data)
 
     def show(self):
         if IS_SPHINX_BUILD:
