@@ -10,11 +10,9 @@ from .NumpySnapshotExtension import NumpySnapshotExtension
 from .PandasSnapshotExtension import PandasSnapshotExtension
 from .PlotlySnapshotExtension import PlotlySnapshotExtension
 from .MatplotlibSnapshotExtension import MatplotlibSnapshotExtension
-from .MatplotlibFigureSnapshotExtension import MatplotlibFigureSnapshotExtension
 
 __all__ = [
     "MatplotlibSnapshotExtension",
-    "MatplotlibFigureSnapshotExtension",
     "BokehSnapshotExtension",
     "NumpySnapshotExtension",
     "PandasSnapshotExtension",
