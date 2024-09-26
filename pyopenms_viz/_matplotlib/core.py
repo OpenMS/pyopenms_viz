@@ -711,6 +711,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 edgecolor=color,
                 linestyle=self.feature_config.line_type,
                 linewidth=self.feature_config.line_width,
+                zorder=5
             )
             self.fig.add_patch(custom_lines)
 
@@ -734,7 +735,6 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 loc=matplotlibLegendLoc,
                 title=self.feature_config.legend.title,
                 prop={"size": self.feature_config.legend.fontsize},
-                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
             )
 
     # since matplotlib is not interactive cannot implement the following methods
