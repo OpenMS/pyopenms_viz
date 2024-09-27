@@ -351,10 +351,10 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             if text is not nan and text != "" and text != "nan":
-                # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
-                    # Wrap the text in '$' to indicate LaTeX math mode
-                    text = r"${}$".format(text)
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
                 self.ax.annotate(
                     text,
                     xy=(x, y),
