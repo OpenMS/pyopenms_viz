@@ -35,7 +35,15 @@ class PLOTLYPlot(BasePlot, ABC):
     Base class for assembling a Ploty plot
     """
 
-    fig: Figure = None
+    # In plotly the canvas is referred to as a figure
+    @property
+    def fig(self):
+        return self.canvas
+
+    @fig.setter
+    def fig(self, value):
+        self.canvas = value
+        self._config.canvas = value
 
     @property
     def _interactive(self) -> bool:
@@ -118,19 +126,36 @@ class PLOTLYPlot(BasePlot, ABC):
             tickcolor="black",  # Set the color of y-axis ticks
         )
 
+    def generate(self, tooltips, custom_hover_data) -> Figure:
+        """
+        Generate the plot
+        """
+        self._load_extension()
+        if self.canvas is None:
+            self._create_figure()
+
+        self.plot()
+        self._update_plot_aes()
+
+        if tooltips is not None and self._interactive:
+            self._add_tooltips(tooltips, custom_hover_data)
+        return self.canvas
+
     def _add_legend(self, legend):
         pass
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+    def _add_tooltips(self, tooltips, custom_hover_data=None):
+        return
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
-        if len(fig.data) > 1:
-            for i in range(len(fig.data)):
-                fig.data[i].update(
+        if len(self.fig.data) > 1:
+            print("len(self.fig.data)", len(self.fig.data))
+            for i in range(len(self.fig.data)):
+                self.fig.data[i].update(
                     hovertemplate=tooltips,
-                    customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
+                    customdata=[custom_hover_data[i, :]] * len(self.fig.data[i].x),
                 )
             return
-        fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
+        self.fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, **kwargs):
         self.fig.update_layout(
@@ -211,9 +236,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(  # type: ignore[override]
-        self,
-    ) -> Tuple[Figure, "Legend"]:  # note legend is always none for consistency
+    def plot(self):
 
         traces = []
         if self.by is None:
@@ -236,13 +259,12 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
                 traces.append(trace)
 
         self.fig.add_traces(data=traces)
-        return self.fig, None
 
 
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
     @APPEND_PLOT_DOC
-    def plot(self) -> Tuple[Figure, "Legend"]:
+    def plot(self):
 
         if not self.plot_3d:
             traces = []
@@ -391,8 +413,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             )
             self.fig.update_layout(scene_camera=camera)
 
-        return self.fig, None
-
     def _add_annotations(
         self,
         ann_texts: list[str],
@@ -423,18 +443,17 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
         for annotation in annotations:
             self.fig.add_annotation(annotation)
-        return self.fig
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __init__(self, data, **kwargs):
+        super().__init__(data, **kwargs)
         if self.marker is None:
             self.marker = MarkerShapeGenerator(engine="PLOTLY")
 
     @APPEND_PLOT_DOC
-    def plot(self) -> Tuple[Figure, "Legend"]:
+    def plot(self):
 
         marker_dict = dict()
         # Check for z-dimension and plot heatmap
@@ -487,7 +506,6 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 traces.append(trace)
 
         self.fig.add_traces(data=traces)
-        return self.fig, None
 
 
 class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
@@ -571,29 +589,23 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
 
 
 class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
-    def _prepare_data(
-        self, spectrum: DataFrame, x: str, y: str, reference_spectrum: DataFrame | None
-    ) -> Tuple[List]:
-        spectrum, reference_spectrum = super()._prepare_data(
-            spectrum, x, y, reference_spectrum
-        )
-
-        if reference_spectrum is not None:
-            # add a "ref" label to legend elements, useful when for plotly because reference elements and base elements are in the same legend
-            if self.by is not None:
-                reference_spectrum[self.by] = reference_spectrum[self.by] + " (ref)"
-
-        return spectrum, reference_spectrum
+    def _prepare_data(self, df, label_suffix=" (ref)"):
+        df = super()._prepare_data(df, label_suffix)
+        if self.by is not None:
+            self.reference_spectrum[self.by] = (
+                self.reference_spectrum[self.by] + label_suffix
+            )
+        return df
 
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
-    def create_main_plot(self):
+    def create_main_plot(self) -> Figure:
         if not self.plot_3d:
             scatterPlot = self.get_scatter_renderer(
                 data=self.data, x=self.x, y=self.y, z=self.z
             )
-            fig = scatterPlot.generate(None, None)
+            self.fig = scatterPlot.generate(None, None)
 
             if self.z is not None:
                 tooltips, custom_hover_data = self._create_tooltips(
@@ -604,27 +616,28 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                     {self.xlabel: self.x, self.ylabel: self.y}
                 )
 
-            self._add_tooltips(fig, tooltips, custom_hover_data=custom_hover_data)
+            self._add_tooltips(tooltips, custom_hover_data=custom_hover_data)
 
             if self.annotation_data is not None:
-                self._add_box_boundaries(fig, self.annotation_data)
-            return fig
+                self._add_box_boundaries(self.annotation_data)
+            return self.fig
         else:
             vlinePlot = self.get_vline_renderer(data=self.data, x=self.x, y=self.y)
-            return vlinePlot.generate(None, None)
+            self.fig = vlinePlot.generate(None, None)
+            return self.fig
 
             # TODO: Custom tooltips currently not working as expected for 3D plot, it has it's own tooltip that works out of the box, but with set x, y, z name to value
             # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
             # self._add_tooltips(fig, tooltips, custom_hover_data=custom_hover_data
 
-    def create_x_axis_plot(self) -> "figure":
+    def create_x_axis_plot(self) -> Figure:
         x_fig = super().create_x_axis_plot()
         x_fig.update_xaxes(visible=False)
 
         return x_fig
 
-    def create_y_axis_plot(self, main_fig) -> "figure":
-        y_fig = super().create_y_axis_plot(main_fig)
+    def create_y_axis_plot(self) -> Figure:
+        y_fig = super().create_y_axis_plot()
         y_fig.update_xaxes(range=[0, self.data[self.z].max()])
         y_fig.update_yaxes(range=[self.data[self.y].min(), self.data[self.y].max()])
         y_fig.update_layout(
