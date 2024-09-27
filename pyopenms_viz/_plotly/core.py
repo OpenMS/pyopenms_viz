@@ -442,7 +442,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         annotations = []
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             if text is not nan and text != "" and text != "nan":
-                # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
                     # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
                     text = text.replace("\n", r" \\\ ")
