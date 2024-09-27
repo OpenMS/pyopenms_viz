@@ -4,6 +4,8 @@ from typing import Tuple, Literal, Dict, Any, Union, Iterator
 from enum import Enum
 from copy import deepcopy
 from ._misc import ColorGenerator
+import pandas as pd
+from pandas.core.dtypes.common import is_integer
 
 
 @dataclass(kw_only=True)
@@ -40,6 +42,16 @@ class BaseConfig(ABC):
             field_name = field.name
             if getattr(self, field_name) is None:
                 setattr(self, field_name, getattr(other, field_name))
+
+    def update(self, **kwargs):
+        """Update the dataclass fields with kwargs."""
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(
+                    f"{key} is not a valid attribute for {self.__class__.__name__}"
+                )
 
 
 @dataclass(kw_only=True)
@@ -92,7 +104,7 @@ class LegendConfig(BaseConfig):
 
 
 @dataclass(kw_only=True)
-class BasePlotConfig(ABC):
+class BasePlotConfig(BaseConfig):
 
     def default_legend_factory():
         return LegendConfig(title="Trace")
@@ -113,6 +125,12 @@ class BasePlotConfig(ABC):
     ) = None
 
     # Plotting Attributes
+    x: str | None = None
+    y: str | None = None
+    z: str | None = None
+    by: str | None = None
+    fig: Any = None
+    ax: Any = None
     height: int = 500
     width: int = 500
     grid: bool = True
@@ -136,6 +154,7 @@ class BasePlotConfig(ABC):
     min_border: int = 0
     show_plot: bool = True
     relative_intensity: bool = False
+    aggregate_duplicates: bool = False
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
 
     def __post_init__(self):
@@ -178,6 +197,7 @@ class ChromatogramConfig(LineConfig):
     def default_legend_factory():
         return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
 
+    annotation_data: pd.DataFrame | None = None
     annotation_colormap: str = "viridis"
     annotation_line_width: float = 1
     annotation_line_type: str = "solid"
@@ -215,6 +235,11 @@ class ChromatogramConfig(LineConfig):
         config = super().from_dict(chromatogram_config_dict)
         config.annotation_legend_config = legend_config
         return config
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self.annotation_data is not None:
+            self.annotation_data = self.annotation_data.copy()
 
 
 @dataclass(kw_only=True)

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Tuple, Literal, Union, List, Dict, Optional, Iterator
 import importlib
 import types
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, fields
 
 from pandas import cut, merge, Interval
 from pandas.core.frame import DataFrame
@@ -117,52 +117,17 @@ class BasePlot(BasePlotConfig, ABC):
     This class shows functions which must be implemented by all backends
     """
 
-    data: DataFrame = None
-    x: str = None
-    y: str = None
-    z: str = None
-    by: str = None
-    _config: BasePlotConfig = None
-
-    # Note priority is keyword arguments > config > default values
-    # This allows for plots to have their own default configurations which can be overridden by the user
-    def load_config(self, **kwargs):
-        """
-        Load the configuration settings for the plot.
-        """
-        if self._config is None:
-            config_mapper = {
-                ChromatogramPlot: ChromatogramConfig,
-                MobilogramPlot: ChromatogramConfig,
-                SpectrumPlot: SpectrumConfig,
-                PeakMapPlot: PeakMapConfig,
-                LinePlot: LineConfig,
-                ScatterPlot: ScatterConfig,
-                VLinePlot: VLineConfig,
-            }
-            for plotClass, configClass in config_mapper.items():
-                if issubclass(self.__class__, plotClass):
-                    self._config = configClass(**kwargs)
-                    self._update_from_config(self._config)
-                    self.update_config()
-                    break
-            else:
-                raise ValueError(
-                    f"No matching plot class found for {self.__class__.__name__}"
-                )
+    def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
+        self.data = data.copy()
+        if config is None:
+            self._config = self._configClass(**kwargs)
         else:
-            assert (
-                kwargs == {}
-            )  # if kwargs is preset then setting via config is not supported.
-            self._update_from_config(self._config)
+            # _config classes take lower priority and kwargs take higher priority
+            self._config = config
+            self._config.update(**kwargs)
 
-    def __post_init__(self):
-        # data verification
-        self.data = self.data.copy()
-
-        ### NOTE: if config is set assume there are no **kwargs
-        if self._config is not None:
-            self._update_from_config(self._config)
+        # copy config attributes to plot object
+        self._copy_config_attributes()
 
         # all plots have x and y columns
         self.x = self._verify_column(self.x, "x")
@@ -173,34 +138,12 @@ class BasePlot(BasePlotConfig, ABC):
             self.by = self._verify_column(self.by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
-    def _check_and_aggregate_duplicates(self):
+    def _copy_config_attributes(self):
         """
-        Check if duplicate data is present and aggregate if specified.
-        Modifies self.data
+        Copy attributes from config to plot object
         """
-
-        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
-        if self.kind in {"peakmap"}:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.z
-            ]
-        else:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.y
-            ]
-
-        if self.data[known_columns_without_int].duplicated().any():
-            if self.aggregate_duplicates:
-                self.data = (
-                    self.data[self.known_columns]
-                    .groupby(known_columns_without_int)
-                    .sum()
-                    .reset_index()
-                )
-            else:
-                warnings.warn(
-                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
-                )
+        for field in fields(self._config):
+            setattr(self, field.name, getattr(self._config, field.name))
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -240,6 +183,54 @@ class BasePlot(BasePlotConfig, ABC):
 
         # checks passed return column name
         return colname
+
+    @property
+    def _configClass(self):
+        return BasePlotConfig
+
+    # Note priority is keyword arguments > config > default values
+    # This allows for plots to have their own default configurations which can be overridden by the user
+    def load_config(self, **kwargs):
+        """
+        Load the configuration settings for the plot.
+        """
+        if self._config is None:
+            self._config = self._configClass(**kwargs)
+            self._update_from_config(self._config)
+        else:
+            assert (
+                kwargs == {}
+            )  # if kwargs is preset then setting via config is not supported.
+            self._update_from_config(self._config)
+
+    def _check_and_aggregate_duplicates(self):
+        """
+        Check if duplicate data is present and aggregate if specified.
+        Modifies self.data
+        """
+
+        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
+        if self._kind in {"peakmap"}:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.z
+            ]
+        else:
+            known_columns_without_int = [
+                col for col in self.known_columns if col != self.y
+            ]
+
+        if self.data[known_columns_without_int].duplicated().any():
+            if self.aggregate_duplicates:
+                self.data = (
+                    self.data[self.known_columns]
+                    .groupby(known_columns_without_int)
+                    .sum()
+                    .reset_index()
+                )
+            else:
+                warnings.warn(
+                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(kind={self._kind}, data=DataFrame({self.data.shape[0]} rows {self.data.shape[1]} columns), x={self.x}, y={self.y}, by={self.by})"
@@ -366,19 +357,12 @@ class BasePlot(BasePlotConfig, ABC):
         """
         pass
 
+    @abstractmethod
     def generate(self, tooltips, custom_hover_data):
         """
         Generate the plot
         """
-        self._load_extension()
-        if self.fig is None:
-            fig = self._create_figure()
-        self.plot()
-
-        self._update_plot_aes()
-
-        if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+        raise NotImplementedError
 
     def show(self):
         if IS_SPHINX_BUILD:
@@ -396,29 +380,37 @@ class BasePlot(BasePlotConfig, ABC):
 
     # methods only for interactive plotting
     @abstractmethod
-    def _add_tooltips(self, fig, tooltips, custom_hover_data):
+    def _add_tooltips(self, tooltips, custom_hover_data):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_bounding_box_drawer(self, fig):
+    def _add_bounding_box_drawer(self):
         raise NotImplementedError
 
     @abstractmethod
-    def _add_bounding_vertical_drawer(self, fig):
+    def _add_bounding_vertical_drawer(self):
         raise NotImplementedError
 
 
-class LinePlot(BasePlot, LineConfig, ABC):
+class LinePlot(BasePlot, ABC):
 
     @property
     def _kind(self):
         return "line"
+
+    @property
+    def _configClass(self):
+        return LineConfig
 
 
 class VLinePlot(BasePlot, VLineConfig, ABC):
     @property
     def _kind(self):
         return "vline"
+
+    @property
+    def _configClass(self):
+        return VLineConfig
 
     @abstractmethod
     def _add_annotations(
@@ -446,6 +438,10 @@ class ScatterPlot(BasePlot, ScatterConfig, ABC):
     @property
     def _kind(self):
         return "scatter"
+
+    @property
+    def _configClass(self):
+        return ScatterConfig
 
     @property
     def current_marker(self) -> str:
@@ -512,42 +508,34 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
 
-class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
+class ChromatogramPlot(BaseMSPlot, ABC):
+
+    _config: ChromatogramConfig = None
 
     @property
     def _kind(self):
         return "chromatogram"
 
-    def __init__(
-        self,
-        data,
-        x,
-        y,
-        z=None,
-        by=None,
-        annotation_data: DataFrame | None = None,
-        **kwargs,
-    ) -> None:
+    @property
+    def _configClass(self):
+        return ChromatogramConfig
 
-        super().__init__(data, x, y, z, by)
-        ChromatogramConfig.__init__(self)
-        self.load_config(**kwargs)
-
-        print("self.xlabel", self.xlabel)
-
-        if annotation_data is not None:
-            self.annotation_data = annotation_data.copy()
+    def load_config(self, **kwargs):
+        if self._config is None:
+            self._config = ChromatogramConfig(**kwargs)
+            self._update_from_config(self._config)
+            self.update_config()
         else:
-            self.annotation_data = None
-        self.label_suffix = self.x  # set label suffix for bounding box
+            return super().load_config(**kwargs)
 
-        # Convert to relative intensity if required
-        if self.relative_intensity:
-            self.data[y] = self.data[y] / self.data[y].max() * 100
+    def __init__(self, data, config: ChromatogramConfig = None, **kwargs) -> None:
+        super().__init__(data, config, **kwargs)
+
+        self.label_suffix = self.x  # set label suffix for bounding box
 
         self._check_and_aggregate_duplicates()
         # sort data by x so in order
-        self.data.sort_values(by=x, inplace=True)
+        self.data.sort_values(by=self.x, inplace=True)
 
         self.plot()
 
@@ -561,20 +549,19 @@ class ChromatogramPlot(BaseMSPlot, ChromatogramConfig, ABC):
         if "product_mz" in self.data.columns:
             tooltip_entries["product m/z"] = "product_mz"
         tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
-        linePlot = self.get_line_renderer(
-            data=self.data, x=self.x, y=self.y, by=self.by, _config=self._config
-        )
 
-        fig = linePlot.generate(tooltips, custom_hover_data)
+        linePlot = self.get_line_renderer(data=self.data, config=self._config)
+        print("self._config is:", self._config)
+        print("lineplot fig is:", linePlot.fig)
 
-        self._modify_y_range(fig, (0, self.data[self.y].max()), (0, 0.1))
+        self.fig = linePlot.generate(tooltips, custom_hover_data)
+        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
         if self._interactive:
-            self.manual_boundary_renderer = self._add_bounding_box_drawer(fig)
+            self.manual_boundary_renderer = self._add_bounding_box_drawer()
 
         if self.annotation_data is not None:
-            self._add_peak_boundaries(fig, self.annotation_data)
-        return fig
+            self._add_peak_boundaries(self.annotation_data)
 
     @abstractmethod
     def _add_peak_boundaries(self, annotation_data):
@@ -594,11 +581,11 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
     def plot(self):
         fig = super().plot()
-        self._modify_y_range(fig, (0, self.data[self.y].max()), (0, 0.1))
-        return fig
+        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
 
 class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
+
     @property
     def _kind(self):
         return "spectrum"
@@ -623,6 +610,18 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             [self.annotation_color] if self.annotation_color is not None else []
         )
         return known_columns
+
+    @property
+    def _configClass(self):
+        return SpectrumConfig
+
+    def load_config(self, **kwargs):
+        if self._config is None:
+            self._config = SpectrumConfig(**kwargs)
+            self._update_from_config(self._config)
+            self.update_config()
+        else:
+            return super().load_config(**kwargs)
 
     def _check_and_aggregate_duplicates(self):
         super()._check_and_aggregate_duplicates()
@@ -679,7 +678,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             None if reference_spectrum is None else reference_spectrum.copy()
         )
 
-        fig = self.plot()
+        self.plot()
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -714,13 +713,13 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
         # color_gen = self._get_colors(spectrum, "peak")
 
-        spectrum_fig = vlinePlot.generate(tooltips, custom_hover_data)
+        vlinePlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
             spectrum, self.x, self.y
         )
-        vlinePlot._add_annotations(spectrum_fig, ann_texts, ann_xs, ann_ys, ann_colors)
+        vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
@@ -736,16 +735,14 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
                 _config=self._config,
             )
 
-            mirror_spectrum.generate(None, None, fig=spectrum_fig)
-            self.plot_x_axis_line(spectrum_fig)
+            mirror_spectrum.generate(None, None)
+            self.plot_x_axis_line()
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
                 reference_spectrum, self.x, self.y
             )
-            vlinePlot._add_annotations(
-                spectrum_fig, ann_texts, ann_xs, ann_ys, ann_colors
-            )
+            vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
@@ -753,10 +750,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         if reference_spectrum is not None:
             min_values.append(reference_spectrum[self.x].min())
             max_values.append(reference_spectrum[self.x].max())
-        self._modify_x_range(
-            spectrum_fig, (min(min_values), max(max_values)), padding=(0.20, 0.20)
-        )
-
+        self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
         # Adjust y axis padding (annotations should stay inside plot)
         max_value = spectrum[self.y].max()
         min_value = 0
@@ -767,10 +761,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             min_padding = -0.2
             max_padding = 0.4
 
-        self._modify_y_range(
-            spectrum_fig, (min_value, max_value), padding=(min_padding, max_padding)
-        )
-        return spectrum_fig
+        self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
 
     def _bin_peaks(self, df: DataFrame) -> DataFrame:
         """
@@ -998,6 +989,10 @@ class PeakMapPlot(BaseMSPlot, PeakMapConfig, ABC):
         known_columns = super().known_columns
         known_columns.extend([self.z] if self.z is not None else [])
         return known_columns
+
+    @property
+    def _configClass(self):
+        return SpectrumConfig
 
     def __init__(
         self,

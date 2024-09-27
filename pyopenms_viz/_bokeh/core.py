@@ -5,7 +5,7 @@ from abc import ABC
 from typing import Tuple, Iterator
 from dataclasses import dataclass
 
-from bokeh.plotting import figure, Figure
+from bokeh.plotting import figure
 from bokeh.palettes import Plasma256
 from bokeh.transform import linear_cmap
 from bokeh.models import (
@@ -44,8 +44,6 @@ class BOKEHPlot(BasePlot, ABC):
     Base class for assembling a Bokeh plot
     """
 
-    fig: Figure = None
-
     @property
     def _interactive(self):
         return True
@@ -59,9 +57,9 @@ class BOKEHPlot(BasePlot, ABC):
                 f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
             )
 
-    def _create_figure(self) -> Figure:
+    def _create_figure(self):
         """Creates a figure from scratch"""
-        return figure(
+        self.fig = figure(
             title=self.title,
             x_axis_label=self.xlabel,
             y_axis_label=self.ylabel,
@@ -71,6 +69,8 @@ class BOKEHPlot(BasePlot, ABC):
             height=self.height,
             min_border=self.min_border,
         )
+        # update config to have this figure
+        self._config.fig = self.fig
 
     def _update_plot_aes(self):
         """
@@ -212,7 +212,7 @@ class BOKEHPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         self.fig.y_range = Range1d(start=start, end=end)
 
-    def generate(self, tooltips, custom_hover_data):
+    def generate(self, tooltips, custom_hover_data) -> figure:
         """
         Generate the plot
         """
@@ -220,15 +220,12 @@ class BOKEHPlot(BasePlot, ABC):
         if self.fig is None:
             self._create_figure()
 
-        _, legend = self.plot()
-
-        if legend is not None:
-            self._add_legend(legend)
-
+        self.plot()
         self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
             self._add_tooltips(tooltips, custom_hover_data)
+        return self.fig
 
     def show_default(self):
         from bokeh.io import show
