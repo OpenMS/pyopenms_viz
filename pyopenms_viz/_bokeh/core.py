@@ -380,8 +380,8 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     Class for assembling a Bokeh scatter plot
     """
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __init__(self, data, **kwargs):
+        super().__init__(data, **kwargs)
         if self.marker is None:
             self.marker = MarkerShapeGenerator(engine="BOKEH")
 
@@ -398,8 +398,6 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 low=min(self.data[self.z]),
                 high=max(self.data[self.z]),
             )
-        # Set defaults if they have not been set in kwargs
-        # unknown line width?
 
         kwargs = dict(
             size=self.marker_size,
@@ -541,20 +539,14 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
 
         if not self.plot_3d:
 
-            scatterPlot = self.get_scatter_renderer(
-                data=self.data,
-                x=self.x,
-                y=self.y,
-                by=self.by,
-                z=self.z,
-                _config=self._config,
-            )
+            scatterPlot = self.get_scatter_renderer(data=self.data, config=self._config)
 
             tooltips, custom_hover_data = self._create_tooltips(
                 {self.xlabel: self.x, self.ylabel: self.y, "intensity": self.z}
             )
 
-            scatterPlot.generate(tooltips, custom_hover_data)
+            fig = scatterPlot.generate(tooltips, custom_hover_data)
+            self.main_fig = fig  # Save the main figure for later use
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
@@ -562,21 +554,23 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         else:
             raise NotImplementedError("3D PeakMap plots are not supported in Bokeh")
 
-    def create_x_axis_plot(self, main_fig=None, ax=None):
-        x_fig = super().create_x_axis_plot(main_fig=main_fig, ax=ax)
+        return fig
+
+    def create_x_axis_plot(self):
+        x_fig = super().create_x_axis_plot()
 
         # Modify plot
-        x_fig.x_range = main_fig.x_range
+        x_fig.x_range = self.main_fig.x_range
         x_fig.width = self.x_plot_config.width
         x_fig.xaxis.visible = False
 
         return x_fig
 
-    def create_y_axis_plot(self, main_fig=None, ax=None):
-        y_fig = super().create_y_axis_plot(main_fig=main_fig, ax=ax)
+    def create_y_axis_plot(self):
+        y_fig = super().create_y_axis_plot()
 
         # Modify plot
-        y_fig.y_range = main_fig.y_range
+        y_fig.y_range = self.main_fig.y_range
         y_fig.height = self.y_plot_config.height
         y_fig.legend.orientation = self.y_plot_config.legend_config.orientation
         y_fig.x_range.flipped = True
@@ -596,7 +590,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
 
         from bokeh.layouts import gridplot
 
-        return gridplot([[None, x_fig], [y_fig, main_fig]])
+        self.fig = gridplot([[None, x_fig], [y_fig, main_fig]])
 
     def get_manual_bounding_box_coords(self):
         # Get the original data source

@@ -291,6 +291,9 @@ class PeakMapConfig(ScatterConfig):
     y_kind: str = "spectrum"
     x_kind: str = "chromatogram"
 
+    aggregation_method: Literal["mean", "sum", "max"] = "mean"
+    annotation_data: pd.DataFrame | None = None
+
     ### override axes and title labels
     xlabel: str = "Retention Time"
     ylabel: str = "m/z"
@@ -324,6 +327,21 @@ class PeakMapConfig(ScatterConfig):
         self.x_plot_config.legend_config.loc = "right"
         self.x_plot_config.width = self.width
         self.x_plot_config.min_border = 0
+
+        # remove titles if marginal plot
+        if self.add_marginals:
+            self.title = ""
+            self.x_plot_config.title = ""
+            self.y_plot_config.title = ""
+
+        # If we do not want to fill/color based on z value, set to none prior to plotting
+        if not self.fill_by_z:
+            self.z = None
+
+        # create copy of annotation data
+        self.annotation_data = (
+            None if self.annotation_data is None else self.annotation_data.copy()
+        )
 
 
 def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):
