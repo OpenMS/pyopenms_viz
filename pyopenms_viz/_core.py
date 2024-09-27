@@ -111,11 +111,18 @@ _baseplot_doc = f"""
 APPEND_PLOT_DOC = Appender(_baseplot_doc)
 
 
-@dataclass
-class BasePlot(BasePlotConfig, ABC):
+class BasePlot(ABC):
     """
     This class shows functions which must be implemented by all backends
     """
+
+    @property
+    def canvas(self):
+        return self._config.canvas
+
+    @canvas.setter
+    def canvas(self, value):
+        self._config.canvas = value
 
     def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
         self.data = data.copy()
@@ -138,6 +145,7 @@ class BasePlot(BasePlotConfig, ABC):
             self.by = self._verify_column(self.by, "by")
             self.data[self.by] = self.data[self.by].astype(str)
 
+    # only value that needs to be dynamically set
     def _copy_config_attributes(self):
         """
         Copy attributes from config to plot object
@@ -582,7 +590,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
 
-class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
+class SpectrumPlot(BaseMSPlot, ABC):
 
     @property
     def _kind(self):
@@ -660,21 +668,10 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
     def __init__(
         self,
-        data: DataFrame,
-        x: str,
-        y: str,
-        by: str | None = None,
-        reference_spectrum: DataFrame | None = None,
+        data,
         **kwargs,
     ) -> None:
-
-        super().__init__(data, x, y, z=None, by=by)
-        SpectrumConfig.__init__(self)
-        self.load_config(**kwargs)
-
-        self.reference_spectrum = (
-            None if reference_spectrum is None else reference_spectrum.copy()
-        )
+        super().__init__(data, **kwargs)
 
         self.plot()
 
@@ -703,15 +700,12 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
 
         vlinePlot = self.get_vline_renderer(
             data=spectrum,
-            x=self.x,
-            y=self.y,
-            by=self.by,
-            _config=self._config,
+            config=self._config,
         )
 
         # color_gen = self._get_colors(spectrum, "peak")
 
-        vlinePlot.generate(tooltips, custom_hover_data)
+        self.canvas = vlinePlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
@@ -720,17 +714,13 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
         vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
-        if self.mirror_spectrum and reference_spectrum is not None:
+        if self.mirror_spectrum and self.reference_spectrum is not None:
             ## create a mirror spectrum
             # Set intensity to negative values
             reference_spectrum[self.y] = reference_spectrum[self.y] * -1
 
             mirror_spectrum = self.get_vline_renderer(
-                data=self.reference_spectrum,
-                x=self.x,
-                y=self.y,
-                by=self.by,
-                _config=self._config,
+                data=self.reference_spectrum, config=self._config
             )
 
             mirror_spectrum.generate(None, None)
@@ -740,7 +730,7 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
                 reference_spectrum, self.x, self.y
             )
-            vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
+            mirror_spectrum._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
@@ -804,8 +794,8 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             cols.append(self.annotation_color)
 
         # Group by x bins and calculate the sum intensity within each bin
-        data = (
-            data.groupby(cols, observed=True)
+        self.data = (
+            self.data.groupby(cols, observed=True)
             .agg({self.y: self.aggregation_method})
             .reset_index()
         )
@@ -843,39 +833,6 @@ class SpectrumPlot(BaseMSPlot, SpectrumConfig, ABC):
             df = self._bin_peaks(df)
 
         return df
-
-    '''
-    def _prepare_data(
-        self,
-        spectrum: DataFrame,
-        x: str,
-        y: str,
-        reference_spectrum: Union[DataFrame, None],
-    ) -> tuple[list, list]:
-        """Prepares data for plotting based on configuration (copy, relative intensity)."""
-
-        # copy spectrum data to not modify the original
-        spectrum = spectrum.copy() # TODO is this needed could already be copied
-        reference_spectrum = (
-            self.reference_spectrum.copy() if reference_spectrum is not None else None
-        )
-
-        # Convert to relative intensity if required
-        if self.relative_intensity or self.mirror_spectrum:
-            spectrum[y] = spectrum[y] / spectrum[y].max() * 100
-            if reference_spectrum is not None:
-                reference_spectrum[y] = (
-                    reference_spectrum[y] / reference_spectrum[y].max() * 100
-                )
-
-        # Bin peaks if required
-        if self.bin_peaks == True or (self.bin_peaks == "auto"):
-            spectrum = self._bin_peaks(spectrum)
-            if reference_spectrum is not None:
-                reference_spectrum = self._bin_peaks(reference_spectrum)
-
-        return spectrum, reference_spectrum
-    '''
 
     def _get_colors(
         self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None

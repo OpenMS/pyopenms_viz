@@ -243,6 +243,8 @@ class ChromatogramConfig(LineConfig):
 
 @dataclass(kw_only=True)
 class SpectrumConfig(VLineConfig):
+
+    reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
 
@@ -261,10 +263,18 @@ class SpectrumConfig(VLineConfig):
     custom_annotation: str | None = None
     annotation_color: str | None = None
 
+    aggregation_method: Literal["mean", "sum", "max"] = "mean"
+
     ### override axes and title labels
     xlabel: str = "m/z"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.reference_spectrum = (
+            None if self.reference_spectrum is None else self.reference_spectrum.copy()
+        )
 
 
 @dataclass(kw_only=True)
