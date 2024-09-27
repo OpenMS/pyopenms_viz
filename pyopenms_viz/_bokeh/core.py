@@ -338,11 +338,12 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             if text is not nan and text != "" and text != "nan":
-                # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
-                    # Wrap the text in '$$' to indicate LaTeX math mode
                     # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
-                    text = r'$${}$$'.format(text)
+                    # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
+                    # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
+                    text = text.replace("\n", r" \\\ ")
+                    text = r'$$\displaylines{{{}}}$$'.format(text)
                 label = Label(
                     x=x,
                     y=y,
