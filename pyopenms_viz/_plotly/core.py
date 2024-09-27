@@ -444,10 +444,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             if text is not nan and text != "" and text != "nan":
                 # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
-                    # Wrap the text in '$' to indicate LaTeX math mode
+                    # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
+                    text = text.replace("\n", r" \\\ ")
                     text = r'${}$'.format(text)
+                else:
+                    text = text.replace("\n", "<br>")
                 annotation = go.layout.Annotation(
-                    text=text.replace("\n", "<br>"),
+                    text=text,
                     x=x,
                     y=y,
                     showarrow=False,
