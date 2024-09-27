@@ -35,8 +35,15 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         data (DataFrame): The input data frame.
     """
 
-    ax: Axes = None
-    fig: Figure = None
+    # In matplotlib the canvas is referred to as a Axes, the figure object is the encompassing object
+    @property
+    def ax(self):
+        return self.canvas
+
+    @ax.setter
+    def ax(self, value):
+        self.canvas = value
+        self._config.canvas = value
 
     @property
     def _interactive(self):
@@ -221,26 +228,23 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             "Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'"
         )
 
-    def generate(self, tooltips, custom_hover_data):
+    def generate(self, tooltips, custom_hover_data) -> Axes:
         """
         Generate the plot
         """
         self._load_extension()
-        if self.fig is None and self.ax is None:
+        if self.ax is None:
             self._create_figure()
-        elif self.fig is not None and self.ax is not None:
-            pass  # this is fine both are set
-        else:
-            raise ValueError("Both fig and ax must be set or both must be None")
 
         self.plot()
         self._update_plot_aes()
+        return self.ax
 
     def show_default(self):
         """
         Show the plot.
         """
-        self.fig.tight_layout()
+        self.ax.get_figure().tight_layout()
         plt.show()
 
 
@@ -250,7 +254,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
 
     @APPEND_PLOT_DOC
-    def plot(self) -> Tuple[Axes, "Legend"]:
+    def plot(self):
         """
         Plot a line plot
         """
@@ -351,7 +355,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
                     text = r"${}$".format(text)
-                self.fig.annotate(
+                self.ax.annotate(
                     text,
                     xy=(x, y),
                     xytext=(3, 0),
@@ -366,8 +370,8 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     Class for assembling a matplotlib scatter plot
     """
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __init__(self, data, **kwargs):
+        super().__init__(data, **kwargs)
         if self.marker is None:
             self.marker = MarkerShapeGenerator(engine="MATPLOTLIB")
 
@@ -531,12 +535,11 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     def _create_figure(self):
         # Create a 2 by 2 figure and axis for marginal plots
         if self.add_marginals:
-            if self.fig is not None and self.ax is not None:
+            if self.ax is not None:
                 raise ValueError("Both fig and ax must None if add_marginals is True")
             self.fig, self.ax_grid = plt.subplots(
                 2, 2, figsize=(self.width / 100, self.height / 100), dpi=200
             )
-            self.ax = self.ax_grid[1, 1]
         else:
             super()._create_figure()
 
@@ -547,14 +550,14 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
         if self.add_marginals:
             self._create_figure()
-            self.ax[0, 0].remove()
-            self.ax[0, 0].axis("off")
+            self.ax_grid[0, 0].remove()
+            self.ax_grid[0, 0].axis("off")
             self.fig.set_size_inches(self.width / 100, self.height / 100)
             self.fig.subplots_adjust(wspace=0, hspace=0)
 
-            self.create_main_plot_marginals(ax=self.ax_grid[1, 1])
-            self.create_x_axis_plot(ax=self.ax_grid[0, 1])
-            self.create_y_axis_plot(ax=self.ax_grid[1, 0])
+            self.create_main_plot_marginals(canvas=self.ax_grid[1, 1])
+            self.create_x_axis_plot(canvas=self.ax_grid[0, 1])
+            self.create_y_axis_plot(canvas=self.ax_grid[1, 0])
 
         else:
             return super().plot()
@@ -564,8 +567,8 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     ):  # plots all plotted on same figure do not need to combine
         pass
 
-    def create_x_axis_plot(self, main_plot=None, ax=None):
-        super().create_x_axis_plot(ax=ax)
+    def create_x_axis_plot(self, canvas=None):
+        ax = super().create_x_axis_plot(canvas=canvas)
 
         ax.set_title(None)
         ax.set_xlabel(None)
@@ -577,7 +580,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.yaxis.tick_right()
         ax.legend_ = None
 
-    def create_y_axis_plot(self, ax=None):
+    def create_y_axis_plot(self, canvas=None):
         # Note y_config is different so we cannot use the base class methods
         group_cols = [self.y]
         if self.by is not None:
@@ -587,17 +590,27 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
         if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=self.y_plot_config
+                data=y_data,
+                x=self.z,
+                y=self.y,
+                by=self.by,
+                canvas=canvas,
+                config=self.y_plot_config,
             )
         elif self.y_kind == "spectrum":
             y_plot_obj = self.get_vline_renderer(
-                data=y_data, x=self.z, y=self.y, by=self.by, _config=self.y_plot_config
+                data=y_data,
+                x=self.z,
+                y=self.y,
+                by=self.by,
+                canvas=canvas,
+                config=self.y_plot_config,
             )
         else:
             raise ValueError(f"Invalid y_kind: {self.y_kind}")
-        y_fig = y_plot_obj.generate(None, None, fig=self.fig, ax=ax)
+        ax = y_plot_obj.generate(None, None)
 
-        self.plot_x_axis_line(y_fig)
+        # self.plot_x_axis_line()
 
         ax.set_xlim((0, y_data[self.z].max() + y_data[self.z].max() * 0.1))
         ax.invert_xaxis()
@@ -605,6 +618,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.set_xlabel(self.y_plot_config.xlabel)
         ax.set_ylabel(self.y_plot_config.ylabel)
         ax.set_ylim(ax.get_ylim())
+        return ax
 
     def create_main_plot(self):
         if not self.plot_3d:
@@ -613,30 +627,32 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 x=self.x,
                 y=self.y,
                 z=self.z,
-                _config=self._config,
+                config=self._config,
             )
-            scatterPlot.generate(None, None)
+            self.ax = scatterPlot.generate(None, None)
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
 
         else:
             vlinePlot = self.get_vline_renderer(
-                data=self.data, x=self.x, y=self.y, _config=self._config
+                data=self.data, x=self.x, y=self.y, config=self._config
             )
-            vlinePlot.generate(None, None)
+            self.ax = vlinePlot.generate(None, None)
 
-    def create_main_plot_marginals(self, ax=None):
+        return self.ax
+
+    def create_main_plot_marginals(self, canvas=None):
         scatterPlot = self.get_scatter_renderer(
             data=self.data,
             x=self.x,
             y=self.y,
             z=self.z,
-            _config=self._config,
-            fig=self.fig,
-            ax=ax,
+            by=self.by,
+            canvas=canvas,
+            config=self._config,
         )
-        scatterPlot.generate(None, None)
+        ax = scatterPlot.generate(None, None)
 
         ax.set_title(None)
         ax.set_xlabel(self.xlabel)

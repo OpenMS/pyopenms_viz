@@ -711,6 +711,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
             spectrum, self.x, self.y
         )
+        print(self.canvas)
         vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
@@ -813,12 +814,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
         df = df.fillna(0)
         return df
 
-    def _prepare_data(self, df):
+    def _prepare_data(self, df, label_suffix=""):
         """
         Prepare data for plotting based on configuration
 
         Args:
             df (DataFrame): The data to prepare.
+            label_suffix (str, optional): The suffix to add to the label. Defaults to "", Only for plotly backend
 
         Returns:
             DataFrame: The prepared data.
@@ -1028,12 +1030,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
         return grouped
 
     @abstractmethod
-    def create_main_plot(self):
+    def create_main_plot(self, canvas=None):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
-    def create_main_plot_marginals(self):
-        return self.create_main_plot()
+    def create_main_plot_marginals(self, canvas=None):
+        return self.create_main_plot(canvas)
 
     @abstractmethod
     def create_x_axis_plot(self, canvas=None) -> "figure":
@@ -1087,6 +1089,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 data=y_data,
                 x=self.z,
                 y=self.y,
+                by=self.by,
                 canvas=canvas,
                 config=self.y_plot_config,
             )
@@ -1096,6 +1099,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 data=y_data,
                 x=self.z,
                 y=self.y,
+                by=self.by,
                 canvas=canvas,
                 config=self.y_plot_config,
             )
