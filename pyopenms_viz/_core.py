@@ -551,10 +551,8 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
 
         linePlot = self.get_line_renderer(data=self.data, config=self._config)
-        print("self._config is:", self._config)
-        print("lineplot fig is:", linePlot.fig)
 
-        self.fig = linePlot.generate(tooltips, custom_hover_data)
+        self.canvas = linePlot.generate(tooltips, custom_hover_data)
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
         if self._interactive:

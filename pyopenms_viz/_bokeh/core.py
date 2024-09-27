@@ -48,6 +48,16 @@ class BOKEHPlot(BasePlot, ABC):
     def _interactive(self):
         return True
 
+    # In bokeh the canvas is referred to as a figure
+    @property
+    def fig(self):
+        return self.canvas
+
+    @fig.setter
+    def fig(self, value):
+        self.canvas = value
+        self._config.canvas = value
+
     def _load_extension(self) -> None:
         try:
             from bokeh.plotting import figure, show
@@ -69,8 +79,6 @@ class BOKEHPlot(BasePlot, ABC):
             height=self.height,
             min_border=self.min_border,
         )
-        # update config to have this figure
-        self._config.fig = self.fig
 
     def _update_plot_aes(self):
         """
@@ -217,7 +225,7 @@ class BOKEHPlot(BasePlot, ABC):
         Generate the plot
         """
         self._load_extension()
-        if self.fig is None:
+        if self.canvas is None:
             self._create_figure()
 
         self.plot()
@@ -225,7 +233,7 @@ class BOKEHPlot(BasePlot, ABC):
 
         if tooltips is not None and self._interactive:
             self._add_tooltips(tooltips, custom_hover_data)
-        return self.fig
+        return self.canvas
 
     def show_default(self):
         from bokeh.io import show

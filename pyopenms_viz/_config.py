@@ -129,8 +129,7 @@ class BasePlotConfig(BaseConfig):
     y: str | None = None
     z: str | None = None
     by: str | None = None
-    fig: Any = None
-    ax: Any = None
+    canvas: Any = None
     height: int = 500
     width: int = 500
     grid: bool = True
