@@ -1177,7 +1177,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
             x1 = feature["rightWidth"]
             y0 = feature["IM_leftWidth"]
             y1 = feature["IM_rightWidth"]
-            t = feature["text"]
+            t = feature["name"]
             c = feature["color"]
             selected_data = self.data[
                 (self.data[x] > x0) & (self.data[x] < x1) 

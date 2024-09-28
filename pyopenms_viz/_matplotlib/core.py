@@ -724,7 +724,10 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             width = abs(x1 - x0)
             height = abs(y1 - y0)
 
-            color = next(color_gen)
+            if 'color' in feature:
+                color = feature['color']
+            else:
+                color = next(color_gen)
             custom_lines = Rectangle(
                 (x0, y0),
                 width,
