@@ -438,9 +438,10 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         ann_xs: list[float],
         ann_ys: list[float],
         ann_colors: list[str],
+        ann_zs: list[float] = None,
     ):
         annotations = []
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
                     # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
@@ -448,22 +449,41 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     text = r'${}$'.format(text)
                 else:
                     text = text.replace("\n", "<br>")
-                annotation = go.layout.Annotation(
-                    text=text,
-                    x=x,
-                    y=y,
-                    showarrow=False,
-                    xanchor="left",
-                    font=dict(
-                        family="Open Sans Mono, monospace",
-                        size=self.annotation_font_size,
-                        color=color,
-                    ),
-                )
-                annotations.append(annotation)
+                if not self.plot_3d:
+                    annotation = go.layout.Annotation(
+                        text=text,
+                        x=x,
+                        y=y,
+                        showarrow=False,
+                        xanchor="left",
+                        font=dict(
+                            family="Open Sans Mono, monospace",
+                            size=self.annotation_font_size,
+                            color=color,
+                        ),
+                    )
+                else:
+                    annotation = go.layout.scene.Annotation(
+                        text=text,
+                        x=x,
+                        y=y,
+                        z=ann_zs[i],
+                        showarrow=False,
+                        xanchor="left",
+                        font=dict(
+                            family="Open Sans Mono, monospace",
+                            size=self.annotation_font_size,
+                            color=color,
+                        ),
+                    )
 
-        for annotation in annotations:
-            fig.add_annotation(annotation)
+                annotations.append(annotation)
+        if not self.plot_3d:
+            for annotation in annotations:
+                fig.add_annotation(annotation)
+        else:
+            for annotation in annotations:
+                fig.layout.scene.annotations += (annotation,)
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
@@ -649,6 +669,14 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 zlabel=self.zlabel,
                 **other_kwargs,
             )
+            if self.annotation_data is not None:
+                print('he')
+                a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
+                    self.annotation_data, x, y, z
+                )
+                vlinePlot._add_annotations(
+                    self.fig, a_t, a_x, a_y, a_c, a_z
+                )
 
             # TODO: Custom tooltips currently not working as expected for 3D plot, it has it's own tooltip that works out of the box, but with set x, y, z name to value
             # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
