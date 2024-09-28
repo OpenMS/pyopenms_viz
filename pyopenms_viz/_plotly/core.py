@@ -793,6 +793,7 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"{use_name}"
+            # Plot rectangle
             self.fig.add_shape(
                 type="rect",
                 x0=x0,
@@ -807,4 +808,19 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 fillcolor="rgba(0,0,0,0)",
                 opacity=0.5,
                 layer="above",
+            )
+            # Add a dummy trace for the legend
+            self.fig.add_trace(
+                go.Scatter(
+                    x=[None],
+                    y=[None],
+                    mode="lines",
+                    line=dict(
+                        color=color,
+                        width=self.feature_config.line_width,
+                        dash=bokeh_line_dash_mapper(self.feature_config.line_type, "plotly"),
+                    ),
+                    showlegend=True,
+                    name=legend_label,
+                )
             )
