@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Tuple, Literal, Union, List, Dict
+import numpy as np
 import importlib
 import types
 import re
@@ -1164,6 +1165,35 @@ class PeakMapPlot(BaseMSPlot, ABC):
             None
         """
         pass
+    
+    def _compute_3D_annotations(self, annotation_data, x, y, z):
+        def center_of_gravity(x, m):
+            return np.sum(x*m) / np.sum(m)
+        
+        # Contains tuple of coordinates + text + color (x, y, z, t, c)
+        annotations_3d = []
+        for _, feature in annotation_data.iterrows():
+            x0 = feature["leftWidth"]
+            x1 = feature["rightWidth"]
+            y0 = feature["IM_leftWidth"]
+            y1 = feature["IM_rightWidth"]
+            t = feature["text"]
+            c = feature["color"]
+            selected_data = self.data[
+                (self.data[x] > x0) & (self.data[x] < x1) 
+                & (self.data[y] > y0) & (self.data[y] < y1)
+            ]
+            if len(selected_data) == 0:
+                annotations_3d.append((
+                    np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c
+                ))
+            else:
+                annotations_3d.append((
+                    center_of_gravity(selected_data[x], selected_data[z]),
+                    center_of_gravity(selected_data[y], selected_data[z]),
+                    np.max(selected_data[z])*1.05, t, c
+                ))
+        return map(list, zip(*annotations_3d))
 
 
 class PlotAccessor:
