@@ -378,12 +378,11 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     )
                 else:
                     fig.text(
-                        text,
-                        xy=(x, y),
-                        xytext=(3, 0),
-                        textcoords="offset points",
-                        fontsize=self.annotation_font_size,
-                        color=color,
+                        x=x, 
+                        y=y, 
+                        z=ann_zs[i], 
+                        s=text, 
+                        color=color
                     )
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
