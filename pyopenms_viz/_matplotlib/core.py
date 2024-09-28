@@ -364,10 +364,9 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     ):
         for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
             if text is not nan and text != "" and text != "nan":
-                # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
-                    text = r"${}$".format(text)
+                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
                 if not self.plot_3d:
                     fig.annotate(
                         text,
@@ -379,14 +378,13 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     )
                 else:
                     fig.text(
-                        x=x, 
-                        y=y, 
-                        z=ann_zs[i], 
-                        s=text, 
-                        color=color
+                        text,
+                        xy=(x, y),
+                        xytext=(3, 0),
+                        textcoords="offset points",
+                        fontsize=self.annotation_font_size,
+                        color=color,
                     )
-
-
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """

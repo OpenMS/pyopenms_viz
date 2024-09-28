@@ -31,5 +31,4 @@ except IOError as e:
 # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
 
-df.plot(kind="mobilogram", x="im", y="int", by="Annotation")
-
+df.plot(kind="mobilogram", x="im", y="int", by="Annotation", aggregate_duplicates=True, legend=dict(bbox_to_anchor=(1, 0.7)))

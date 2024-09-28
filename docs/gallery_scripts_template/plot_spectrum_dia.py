@@ -33,6 +33,6 @@ except IOError as e:
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
 
-df.plot(kind="spectrum", x="mz", y="int", custom_annotation='Annotation', annotate_mz=True, bin_method='none', annotate_top_n_peaks=5)
+df.plot(kind="spectrum", x="mz", y="int", custom_annotation='Annotation', annotate_mz=True, bin_method='none', annotate_top_n_peaks=5, aggregate_duplicates=True)
 
 

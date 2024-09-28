@@ -31,5 +31,5 @@ except IOError as e:
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv("./ionMobilityTestFeatureDf.tsv", sep="\t")
-df.plot(kind="peakmap", x="rt", y="mz", z="int")
+df.plot(kind="peakmap", x="rt", y="mz", z="int", aggregate_duplicates=True)
 
