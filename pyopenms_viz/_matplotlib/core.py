@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Tuple
 import re
+import numpy as np
 from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -349,6 +350,10 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
 
                 return ax, (legend_lines, legend_labels)
 
+    def _get_annotations():
+        pass
+
+
     def _add_annotations(
         self,
         fig,
@@ -356,21 +361,32 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_xs: list[float],
         ann_ys: list[float],
         ann_colors: list[str],
+        ann_zs: list[float] = None,
     ):
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
             if text is not nan and text != "" and text != "nan":
                 # Check if the text contains LaTeX-style expressions
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
                     text = r"${}$".format(text)
-                fig.annotate(
-                    text,
-                    xy=(x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    fontsize=self.annotation_font_size,
-                    color=color,
-                )
+                if not self.plot_3d:
+                    fig.annotate(
+                        text,
+                        xy=(x, y),
+                        xytext=(3, 0),
+                        textcoords="offset points",
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
+                else:
+                    fig.text(
+                        x=x, 
+                        y=y, 
+                        z=ann_zs[i], 
+                        s=text, 
+                        color=color
+                    )
+
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
@@ -666,6 +682,13 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 zlabel=self.zlabel,
                 **other_kwargs,
             )
+            if self.annotation_data is not None:
+                a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
+                    self.annotation_data, x, y, z
+                )
+                vlinePlot._add_annotations(
+                    self.fig, a_t, a_x, a_y, a_c, a_z
+                )
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
@@ -681,6 +704,35 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         self.ax_grid[1, 1].set_yticklabels([])
         self.ax_grid[1, 1].set_yticks([])
         self.ax_grid[1, 1].legend_ = None
+
+    def _compute_3D_annotations(self, annotation_data, x, y, z):
+        def center_of_gravity(x, m):
+            return np.sum(x*m) / np.sum(m)
+        
+        # Contains tuple of coordinates + text + color (x, y, z, t, c)
+        annotations_3d = []
+        for _, feature in annotation_data.iterrows():
+            x0 = feature["leftWidth"]
+            x1 = feature["rightWidth"]
+            y0 = feature["IM_leftWidth"]
+            y1 = feature["IM_rightWidth"]
+            t = feature["text"]
+            c = feature["color"]
+            selected_data = self.data[
+                (self.data[x] > x0) & (self.data[x] < x1) 
+                & (self.data[y] > y0) & (self.data[y] < y1)
+            ]
+            if len(selected_data) == 0:
+                annotations_3d.append((
+                    np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c
+                ))
+            else:
+                annotations_3d.append((
+                    center_of_gravity(selected_data[x], selected_data[z]),
+                    center_of_gravity(selected_data[y], selected_data[z]),
+                    np.max(selected_data[z])*1.05, t, c
+                ))
+        return map(list, zip(*annotations_3d))
 
     def _add_box_boundaries(self, annotation_data):
         if self.by is not None:
