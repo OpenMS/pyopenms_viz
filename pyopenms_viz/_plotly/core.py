@@ -783,7 +783,10 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             y0 = feature["IM_leftWidth"]
             y1 = feature["IM_rightWidth"]
 
-            color = next(color_gen)
+            if 'color' in feature:
+                color = feature['color']
+            else:
+                color = next(color_gen)
 
             if "name" in annotation_data.columns:
                 use_name = feature["name"]
