@@ -1033,6 +1033,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
         y_kind="spectrum",
         x_kind="chromatogram",
         annotation_data: DataFrame | None = None,
+        annotation_x_lb : str = 'leftWidth',
+        annotation_x_ub : str = 'rightWidth',
+        annotation_y_lb : str = 'IM_leftWidth',
+        annotation_y_ub : str = 'IM_rightWidth',
+        annotation_colors : str = 'color',
+        annotation_names : str = 'name',
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         aggregation_method: Literal["mean", "sum", "max"] = "mean",
         num_x_bins: int = 50,
@@ -1058,7 +1064,13 @@ class PeakMapPlot(BaseMSPlot, ABC):
             self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
-
+        self.annotation_x_lb = annotation_x_lb
+        self.annotation_x_ub = annotation_x_ub
+        self.annotation_y_lb = annotation_y_lb
+        self.annotation_y_ub = annotation_y_ub
+        self.annotation_colors = annotation_colors
+        self.annotation_names = annotation_names
+        
         super().__init__(data, x, y, z=z, **kwargs)
         self._check_and_aggregate_duplicates()
 
@@ -1267,12 +1279,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
         # Contains tuple of coordinates + text + color (x, y, z, t, c)
         annotations_3d = []
         for _, feature in annotation_data.iterrows():
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
-            t = feature["name"]
-            c = feature["color"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
+            t = feature[self.annotation_names]
+            c = feature[self.annotation_colors]
             selected_data = self.data[
                 (self.data[x] > x0) & (self.data[x] < x1) 
                 & (self.data[y] > y0) & (self.data[y] < y1)

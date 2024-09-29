@@ -805,18 +805,18 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
 
-            if 'color' in feature:
-                color = feature['color']
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
             else:
                 color = next(color_gen)
 
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in annotation_data.columns:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
