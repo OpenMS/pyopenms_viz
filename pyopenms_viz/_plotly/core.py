@@ -670,7 +670,6 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 **other_kwargs,
             )
             if self.annotation_data is not None:
-                print('he')
                 a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
                     self.annotation_data, x, y, z
                 )
