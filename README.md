@@ -53,8 +53,7 @@ Documentation can be found [here](https://pyopenms-viz.readthedocs.io/en/latest/
 
 ## References
 
-- Sing, .J., Charkow, J., Walter, A. et al. pyOpenMS-viz: Streamlining Mass Spectrometry Data Visualization with pandas, 03 October 2024, PREPRINT (Version 1) available at Research Square [https://www.researchsquare.com/article/rs-5166557/v1]
-- 
+- Sing, .J., Charkow, J., Walter, A. et al. pyOpenMS-viz: Streamlining Mass Spectrometry Data Visualization with pandas. Research Square, (2024) [https:/doi.org/10.21203/rs.3.rs-5166557/v1](https://www.researchsquare.com/article/rs-5166557/v1)
 - Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods 21, 365–367 (2024). [https://doi.org/10.1038/s41592-024-02197-7](https://doi.org/10.1038/s41592-024-02197-7)
 
 - Röst HL, Schmitt U, Aebersold R, Malmström L. pyOpenMS: a Python-based interface to the OpenMS mass-spectrometry algorithm library. Proteomics. 2014 Jan;14(1):74-7. [https://doi.org/10.1002/pmic.201300246](https://doi.org/10.1002/pmic.201300246). PMID: [24420968](https://pubmed.ncbi.nlm.nih.gov/24420968/).
