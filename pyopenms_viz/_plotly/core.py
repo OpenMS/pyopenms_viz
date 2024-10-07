@@ -202,6 +202,39 @@ class PLOTLYPlot(BasePlot, ABC):
     def show_sphinx(self):
         return self.fig
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        annotations = []
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
+                    text = text.replace("\n", r" \\\ ")
+                    text = r'${}$'.format(text)
+                else:
+                    text = text.replace("\n", "<br>")
+                annotation = go.layout.Annotation(
+                    text=text,
+                    x=x,
+                    y=y,
+                    showarrow=False,
+                    xanchor="left",
+                    font=dict(
+                        family="Open Sans Mono, monospace",
+                        size=self.annotation_font_size,
+                        color=color,
+                    ),
+                )
+                annotations.append(annotation)
+
+        for annotation in annotations:
+            fig.add_annotation(annotation)
 
 class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
@@ -234,7 +267,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
             )
             traces.append(trace)
         else:
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 trace = go.Scatter(
                     x=df[x],
                     y=df[y],
@@ -430,40 +463,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             fig.update_layout(scene_camera=camera)
 
         return fig, None
-
-    def _add_annotations(
-        self,
-        fig,
-        ann_texts: list[str],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-    ):
-        annotations = []
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            if text is not nan and text != "" and text != "nan":
-                if is_latex_formatted(text):
-                    # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
-                    text = text.replace("\n", r" \\\ ")
-                    text = r'${}$'.format(text)
-                else:
-                    text = text.replace("\n", "<br>")
-                annotation = go.layout.Annotation(
-                    text=text,
-                    x=x,
-                    y=y,
-                    showarrow=False,
-                    xanchor="left",
-                    font=dict(
-                        family="Open Sans Mono, monospace",
-                        size=self.annotation_font_size,
-                        color=color,
-                    ),
-                )
-                annotations.append(annotation)
-
-        for annotation in annotations:
-            fig.add_annotation(annotation)
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):

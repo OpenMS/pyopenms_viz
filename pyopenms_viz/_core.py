@@ -6,13 +6,13 @@ import importlib
 import types
 import re
 
-from pandas import cut, merge, Interval
+from pandas import cut, merge, Interval, concat
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import ceil, log1p, log2, nan, mean
+from numpy import ceil, log1p, log2, nan, mean, repeat
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import (
@@ -690,7 +690,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         reference_spectrum: DataFrame | None = None,
         mirror_spectrum: bool = False,
         relative_intensity: bool = False,
-        bin_peaks: Union[Literal["auto"], bool] = "auto",
+        bin_peaks: Union[Literal["auto"], bool] = False,
         bin_method: Literal[
             "none", "sturges", "freedman-diaconis", "mz-tol-bin"
         ] = "mz-tol-bin",
@@ -759,20 +759,38 @@ class SpectrumPlot(BaseMSPlot, ABC):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
 
+
+
+        if self.ion_annotation is not None and self.ion_annotation in self.data.columns:
+            self.by = self.ion_annotation
+            kwargs["by"] = self.ion_annotation
+        if self.peak_color is not None and self.peak_color in self.data.columns:
+            self.by = self.peak_color
+            kwargs["by"] = self.peak_color
+
+        color_gen = self._get_colors(spectrum, "peak")
+
+        if self.by is None:
+            x_data, y_data = self.convert_to_line(spectrum[x], spectrum[y])
+            df = DataFrame({x: x_data, y: y_data})
+        else:
+            dfs = []
+            for name, df in spectrum.groupby(self.by, sort=False):
+                x_data, y_data = self.convert_to_line(df[x], df[y])
+                dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
+            df = concat(dfs)
+
         tooltips, custom_hover_data = self._create_tooltips(
             entries=entries, index=False
         )
 
-        spectrumPlot = self.get_vline_renderer(spectrum, x, y, fig=self.fig, **kwargs)
-
-        color_gen = self._get_colors(spectrum, "peak")
-
-        self.fig = spectrumPlot.generate(
+        spectrumPlot = self.get_line_renderer(df, x, y, fig=self.fig, **kwargs)
+        spectrumPlot.generate(
             line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
         )
 
         # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(df, x, y)
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
@@ -780,23 +798,33 @@ class SpectrumPlot(BaseMSPlot, ABC):
             # Set intensity to negative values
             reference_spectrum[y] = reference_spectrum[y] * -1
 
-            mirror_spectrum = self.get_vline_renderer(
-                reference_spectrum, x, y, fig=self.fig, **kwargs
-            )
-
             color_gen = self._get_colors(reference_spectrum, "peak")
 
-            mirror_spectrum.generate(line_color=color_gen)
-            self.plot_x_axis_line(self.fig)
+            if self.by is None:
+                x_data, y_data = self.convert_to_line(reference_spectrum[x], reference_spectrum[y])
+                df = DataFrame({x: x_data, y: y_data})
+            else:
+                dfs = []
+                for name, df in reference_spectrum.groupby(self.by, sort=False):
+                    x_data, y_data = self.convert_to_line(df[x], df[y])
+                    dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
+                df = concat(dfs)
+
+            spectrumPlot = self.get_line_renderer(df, x, y, fig=self.fig, **kwargs)
+
+            spectrumPlot.generate(
+                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
+            )
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-                reference_spectrum, x, y
+                df, x, y
             )
             spectrumPlot._add_annotations(
                 self.fig, ann_texts, ann_xs, ann_ys, ann_colors
             )
 
+        self.plot_x_axis_line(self.fig)
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[x].min()]
         max_values = [spectrum[x].max()]
@@ -914,26 +942,38 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None
     ):
         """Get color generators for peaks or annotations based on config."""
-        # Top priority: custom color
-        if kind is not None:
-            if kind == "peak" and self.peak_color in data.columns:
-                return ColorGenerator(data[self.peak_color])
-            elif kind == "annotation" and self.annotation_color in data.columns:
-                return ColorGenerator(data[self.annotation_color])
-        # Colors based on ion annotation for peaks and annotation text
-        if self.ion_annotation is not None and self.ion_annotation in data.columns:
-            return self._get_ion_color_annotation(data)
-        # Color peaks of a group with the same color (from default colors)
-        if self.by:
-            if self.by in data.columns:
+        if kind == "annotation":
+            # Custom annotating colors with top priority
+            if self.annotation_color is not None and self.annotation_color in data.columns:
+                return ColorGenerator(data[self.annotation_color]) 
+            # Ion annotation colors
+            elif self.ion_annotation is not None and self.ion_annotation in data.columns:
+                # Generate colors based on ion annotations
+                return ColorGenerator(self._get_ion_color_annotation(data[self.ion_annotation]))  
+            # Grouped by colors (from default color map)
+            elif self.by is not None:
+                # Get unique values to determine number of distinct colors
                 uniques = data[self.by].unique()
                 color_gen = ColorGenerator()
+                # Generate a list of colors equal to the number of unique values
                 colors = [next(color_gen) for _ in range(len(uniques))]
+                # Create a mapping of unique values to their corresponding colors
                 color_map = {uniques[i]: colors[i] for i in range(len(colors))}
-                all_colors = data[self.by].apply(lambda x: color_map[x])
-                return ColorGenerator(all_colors)
-        # Lowest priority: return the first default color
-        return ColorGenerator(None, 1)
+                # Apply the color mapping to the specified column in the data and turn it into a ColorGenerator
+                return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
+            # Fallback ColorGenerator with one color
+            return ColorGenerator(n=1)
+        else: # Peaks
+            if self.by:
+                uniques = data[self.by].unique().tolist()
+                # Custom colors with top priority
+                if self.peak_color is not None:
+                    return ColorGenerator(uniques)
+                # Colors based on ion annotation for peaks and annotation text
+                if self.ion_annotation is not None and self.peak_color is None:
+                    return ColorGenerator(self._get_ion_color_annotation(uniques))
+            # Else just use default colors
+            return ColorGenerator()
 
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
@@ -969,7 +1009,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             ann_texts.append("\n".join(texts))
         return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
 
-    def _get_ion_color_annotation(self, data: DataFrame) -> str:
+    def _get_ion_color_annotation(self, ion_annotations: str) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
         colormap = {
             "a": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.PURPLE],
@@ -1002,9 +1042,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 ColorGenerator.Colors.DARKGRAY
             ]
 
-        colors = data[self.ion_annotation].apply(get_ion_color)
-        return ColorGenerator(colors)
+        return [get_ion_color(ion) for ion in ion_annotations]
 
+    def convert_to_line(self, x, y):
+        x = repeat(x, 3)
+        y = repeat(y, 3)
+        y[::3] = y[2::3] = 0
+        return x, y
 
 class PeakMapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively

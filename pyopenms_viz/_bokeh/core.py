@@ -215,6 +215,32 @@ class BOKEHPlot(BasePlot, ABC):
 
         show(self.fig)
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
+                    # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
+                    # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
+                    text = text.replace("\n", r" \\\ ")
+                    text = r'$$\displaylines{{{}}}$$'.format(text)
+                label = Label(
+                    x=x,
+                    y=y,
+                    text=text,
+                    text_font_size="13pt",
+                    text_color=color,
+                    x_offset=1,
+                    y_offset=0,
+                )
+                fig.add_layout(label)
 
 class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
@@ -243,7 +269,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         else:
 
             legend_items = []
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
                     kwargs["line_color"] = (
@@ -327,33 +353,6 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                 return fig, legend
         else:
             raise NotImplementedError("3D Vline plots are not supported in Bokeh")
-
-    def _add_annotations(
-        self,
-        fig,
-        ann_texts: list[str],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-    ):
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            if text is not nan and text != "" and text != "nan":
-                if is_latex_formatted(text):
-                    # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
-                    # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
-                    # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
-                    text = text.replace("\n", r" \\\ ")
-                    text = r'$$\displaylines{{{}}}$$'.format(text)
-                label = Label(
-                    x=x,
-                    y=y,
-                    text=text,
-                    text_font_size="13pt",
-                    text_color=color,
-                    x_offset=1,
-                    y_offset=0,
-                )
-                fig.add_layout(label)
 
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):

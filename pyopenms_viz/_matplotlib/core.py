@@ -230,6 +230,24 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.superFig.tight_layout()
         plt.show()
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            fig.annotate(
+                text,
+                xy=(x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                fontsize=8,
+                color=color,
+            )
+
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
@@ -259,7 +277,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
 
             return ax, None
         else:
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 (line,) = ax.plot(
                     df[x],
                     df[y],
@@ -348,27 +366,6 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     legend_labels.append(group)
 
                 return ax, (legend_lines, legend_labels)
-
-    def _add_annotations(
-        self,
-        fig,
-        ann_texts: list[list[str]],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-    ):
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            if text is not nan and text != "" and text != "nan":
-                if is_latex_formatted(text):
-                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
-                fig.annotate(
-                    text,
-                    xy=(x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    fontsize=self.annotation_font_size,
-                    color=color,
-                )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
