@@ -25,7 +25,7 @@ from .constants import IS_SPHINX_BUILD
 import warnings
 
 
-_common_kinds = ("line", "vline", "scatter")
+_common_kinds = ("line", "vline", "scatter", "sequence")
 _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
 _all_kinds = _common_kinds + _msdata_kinds
 _entrypoint_backends = ("ms_matplotlib", "ms_bokeh", "ms_plotly")
@@ -485,6 +485,65 @@ class ScatterPlot(BasePlot, ABC):
     @property
     def _kind(self):
         return "scatter"
+
+
+class SequencePlot(BasePlot, ABC):
+    """
+    Plot peptide sequence with matched fragments indicated.
+
+    Plot Specific Parameters
+    ------------------------
+    seq_col : string, optional
+        The name for sequence column
+    ion_annotation : string, optional
+        The name for the ion annotation column
+    color_annotation : string, optional
+        The name for the color annotation column
+    x_pos : float, optional
+        The center horizontal position of the peptide sequence.
+    y_pos : float, optional
+        The center vertical position of the peptide sequence.
+    spacing : float, optional
+        The horizontal spacing between amino acids.
+    seq_fontsize : str, optional
+        The font size of the amino acids.
+    frag_len : float, optional
+        The length of the fragment lines.
+    """
+
+    @property
+    def _kind(self):
+        return "sequence"
+
+    def __init__(
+        self,
+        data: DataFrame,
+        x,
+        y,
+        seq_col="sequence",
+        ion_annotation: str = "ion_annotation",
+        color_annotation: str = "color_annotation",
+        x_pos: float = 0.5,
+        y_pos: float = 0.5,
+        spacing: float = 0.06,
+        seq_fontsize: str | float = "xx-large",
+        frag_len: float = 0.06,
+        **kwargs,
+    ):
+        self.seq_col = seq_col
+        self.ion_annotation = ion_annotation
+        self.color_annotation = color_annotation
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.spacing = spacing
+        self.frag_len = frag_len
+        self.seq_fontsize = seq_fontsize
+
+        # Set default config attributes if not passed as keyword arguments
+        kwargs["_config"] = _BasePlotConfig(kind=self._kind)
+
+        super().__init__(data, x, y, **kwargs)
+        self.plot()
 
 
 class BaseMSPlot(BasePlot, ABC):
