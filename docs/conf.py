@@ -201,12 +201,13 @@ def setup(app):
             with open(gallery_scripts / backend / f'{file_name.stem}_{backend.name}.py', 'w') as new_file:
                 new_file.write(new_contents)
 
-        # copy files that are specific to a backend
-        files = [ f for f in gallery_scripts_template.iterdir() if (f.suffix == ".py") and f.is_file() and not (f.name.startswith('.')) and ('_ms_' in f.name)  ]
-        for file_name in files:
-            for backend in [ Path(i) for i in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]]:
-                if backend.name in file_name.name:
-                    shutil.copy(file_name, gallery_scripts / backend / file_name.name)
+    # copy files that are specific to a backend
+    files = [ f for f in gallery_scripts_template.iterdir() if (f.suffix == ".py") and f.is_file() and not (f.name.startswith('.')) and ('_ms_' in f.name)  ]
+    print(files)
+    for file_name in files:
+        for backend in [ Path(i) for i in ['ms_matplotlib', 'ms_bokeh', 'ms_plotly' ]]:
+            if backend.name in file_name.name:
+                shutil.copy(file_name, gallery_scripts / backend / file_name.name)
 
 
 
