@@ -748,7 +748,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrum, reference_spectrum = self._prepare_data(
             self.data, x, y, self.reference_spectrum
         )
-        kwargs.pop("fig", None)  # remove figure from **kwargs if exists
+
+        # kwargs.pop("fig", None)  # remove figure from **kwargs if exists
+        # legend = kwargs.pop("legend", None)
+        # if legend is None:
+        #     legend = LegendConfig(show=False)
+        # kwargs["legend"] = legend
+
+        if self.by is None:
+            self.legend.show = False
 
         # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
