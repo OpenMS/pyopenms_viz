@@ -12,7 +12,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 
-from numpy import ceil, log1p, log2, nan, mean, repeat
+from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import (
@@ -370,7 +370,7 @@ class BasePlot(ABC):
         self._update_plot_aes(newlines, **kwargs)
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(newlines, tooltips, custom_hover_data)
+            self._add_tooltips(newlines, tooltips, custom_hover_data=custom_hover_data, **kwargs)
 
     @abstractmethod
     def plot(
@@ -438,7 +438,7 @@ class BasePlot(ABC):
 
     # methods only for interactive plotting
     @abstractmethod
-    def _add_tooltips(self, fig, tooltips):
+    def _add_tooltips(self, fig, tooltips, **kwargs):
         pass
 
     @abstractmethod
@@ -757,24 +757,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
             self.by = self.ion_annotation
             kwargs["by"] = self.ion_annotation
-        
-        # Hover tooltips with m/z, intensity and optional information
-        entries = {"m/z": x, "intensity": y}
-        for optional in (
-            "native_id",
-            self.ion_annotation,
-            self.sequence_annotation,
-        ):
-            if optional in self.data.columns:
-                entries[optional.replace("_", " ")] = optional
-        tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
-        )
+
+        # Prepare tooltip data
+        tooltips, custom_hover_data = self.get_spectrum_tooltip_data(spectrum, x, y)
 
         # Get color generator for peaks
         color_gen = self._get_colors(spectrum, "peak")
 
-        # Annotations for spectrum
+        # Annotations
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
 
         # Convert to line plot format
@@ -782,7 +772,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         spectrumPlot = self.get_line_renderer(spectrum, x, y, fig=self.fig, **kwargs)
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
+            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data,
+            fixed_tooltip_for_trace=False
         )
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
@@ -798,12 +789,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 reference_spectrum, x, y
             )
 
+            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(reference_spectrum, x, y)
+
+            custom_hover_data = concatenate((custom_hover_data, reference_custom_hover_data), axis=0)
+
             reference_spectrum = self.convert_for_line_plots(reference_spectrum, x, y)
 
             spectrumPlot = self.get_line_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
 
             spectrumPlot.generate(
-                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
+                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data,
+                fixed_tooltip_for_trace=False
             )
 
             spectrumPlot._add_annotations(
@@ -1049,6 +1045,31 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
             return concat(dfs)
 
+    def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
+        """ Get tooltip data for a spectrum plot. """
+
+        # Need to group data in correct order for tooltips
+        if self.by is not None:
+            grouped = spectrum.groupby(self.by, sort=False)
+            self.data = concat([group for _, group in grouped], ignore_index=True)
+
+        # Hover tooltips with m/z, intensity and optional information
+        entries = {"m/z": x, "intensity": y}
+        for optional in (
+            "native_id",
+            self.ion_annotation,
+            self.sequence_annotation,
+        ):
+            if optional in self.data.columns:
+                entries[optional.replace("_", " ")] = optional
+        # Create tooltips and custom hover data with backend specific formatting
+        tooltips, custom_hover_data = self._create_tooltips(
+            entries=entries, index=False
+        )
+        # Repeat data each time (since each peak is represented by three points in line plot)
+        custom_hover_data = repeat(custom_hover_data, 3, axis=0)
+
+        return tooltips, custom_hover_data
 class PeakMapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property

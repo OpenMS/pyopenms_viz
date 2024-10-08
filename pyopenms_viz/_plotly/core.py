@@ -120,15 +120,27 @@ class PLOTLYPlot(BasePlot, ABC):
     def _add_legend(self, fig, legend):
         pass
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, **kwargs):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(fig.data) > 1:
-            for i in range(len(fig.data)):
-                fig.data[i].update(
+            fixed_tooltip_for_trace = kwargs.pop("fixed_tooltip_for_trace", True)
+            if fixed_tooltip_for_trace:
+                for i in range(len(fig.data)):
+                    fig.data[i].update(
+                        hovertemplate=tooltips,
+                        customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
+                    )
+                return
+            else:
+                counter = 0
+                for i in range(len(fig.data)):
+                    l = len(fig.data[i].x)
+                    fig.data[i].update(
                     hovertemplate=tooltips,
-                    customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
-                )
-            return
+                    customdata = custom_hover_data[counter:counter+l, :]
+                    )
+                    counter += l
+                return
         fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, fig, **kwargs):

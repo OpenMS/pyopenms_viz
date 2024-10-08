@@ -93,7 +93,7 @@ class BOKEHPlot(BasePlot, ABC):
             fig.legend.title = self.legend.title
             fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, **kwargs):
         """
         Add tooltips to the plot
         """

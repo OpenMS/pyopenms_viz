@@ -205,7 +205,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         self.fig.set_ylim(start, end)
 
     # since matplotlib creates static plots, we don't need to implement the following methods
-    def _add_tooltips(self, fig, tooltips):
+    def _add_tooltips(self, fig, tooltips, **kwargs):
         raise NotImplementedError(
             "Matplotlib does not support interactive plots and cannot use method '_add_tooltips'"
         )
