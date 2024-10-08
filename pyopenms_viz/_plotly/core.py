@@ -546,8 +546,8 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return PLOTLYScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
-        fig.add_hline(y=0, line_color="black", line=dict(width=1))
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5):
+        fig.add_hline(y=0, line_color=line_color, line=dict(width=line_width), opacity=1)
 
     def _create_tooltips(self, entries, index=True):
         custom_hover_data = []

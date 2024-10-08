@@ -455,8 +455,8 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
-        fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5):
+        fig.plot(fig.get_xlim(), [0, 0], color=line_color, linewidth=line_width)
 
     def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive

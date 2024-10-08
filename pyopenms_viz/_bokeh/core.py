@@ -423,7 +423,7 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5):
         zero_line = Span(
             location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
         )

@@ -757,7 +757,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
             self.by = self.ion_annotation
             kwargs["by"] = self.ion_annotation
-
+        
+        # Hover tooltips with m/z, intensity and optional information
         entries = {"m/z": x, "intensity": y}
         for optional in (
             "native_id",
@@ -766,12 +767,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
-
-        color_gen = self._get_colors(spectrum, "peak")
-
         tooltips, custom_hover_data = self._create_tooltips(
             entries=entries, index=False
         )
+
+        # Get color generator for peaks
+        color_gen = self._get_colors(spectrum, "peak")
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
@@ -780,7 +781,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrum = self.convert_for_line_plots(spectrum, x, y)
 
         spectrumPlot = self.get_line_renderer(spectrum, x, y, fig=self.fig, **kwargs)
-        spectrumPlot.generate(
+        self.fig = spectrumPlot.generate(
             line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
         )
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
@@ -809,8 +810,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.fig, ann_texts, ann_xs, ann_ys, ann_colors
             )
 
-
+        # Plot horizontal line to hide connection between peaks
         self.plot_x_axis_line(self.fig)
+
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[x].min()]
         max_values = [spectrum[x].max()]
