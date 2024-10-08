@@ -360,7 +360,9 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
-                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
                 fig.annotate(
                     text,
                     xy=(x, y),
@@ -482,6 +484,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         if self.by is not None and self.legend.show:
             legend = self.fig.get_legend()
             self.fig.add_artist(legend)

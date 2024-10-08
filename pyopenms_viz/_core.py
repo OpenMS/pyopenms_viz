@@ -609,10 +609,10 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         if self.annotation_data is not None:
             self._add_peak_boundaries(self.annotation_data)
 
-    @abstractmethod
     def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
+        This is not a complete method should be overridden by subclasses.
 
         Args:
             annotation_data (DataFrame): The feature data containing the peak boundaries.
@@ -620,7 +620,18 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         Returns:
             None
         """
-        pass
+        # compute the apex intensity
+        self.compute_apex_intensity(annotation_data)
+
+    def compute_apex_intensity(self, annotation_data):
+        """
+        Compute the apex intensity of the peak group based on the peak boundaries
+        """
+        for idx, feature in annotation_data.iterrows():
+            annotation_data.loc[idx, "apexIntensity"] = self.data.loc[
+                self.data[self.x].between(feature["leftWidth"], feature["rightWidth"]),
+                self.y,
+            ].max()
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
