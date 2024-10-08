@@ -750,6 +750,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
         kwargs.pop("fig", None)  # remove figure from **kwargs if exists
 
+        # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
+        if self.peak_color is not None and self.peak_color in self.data.columns:
+            self.by = self.peak_color
+            kwargs["by"] = self.peak_color
+        elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
+            self.by = self.ion_annotation
+            kwargs["by"] = self.ion_annotation
+
         entries = {"m/z": x, "intensity": y}
         for optional in (
             "native_id",
@@ -758,13 +766,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
-
-        if self.ion_annotation is not None and self.ion_annotation in self.data.columns:
-            self.by = self.ion_annotation
-            kwargs["by"] = self.ion_annotation
-        if self.peak_color is not None and self.peak_color in self.data.columns:
-            self.by = self.peak_color
-            kwargs["by"] = self.peak_color
 
         color_gen = self._get_colors(spectrum, "peak")
 
