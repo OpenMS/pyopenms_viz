@@ -128,8 +128,8 @@ class FeatureConfig:
     def default_legend_factory():
         return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
 
-    colormap: str = "viridis"
-    line_width: float = 1
+    colormap: str = "Dark2"
+    line_width: float = 3
     line_type: str = "solid"
     legend: LegendConfig = field(default_factory=default_legend_factory)
 
