@@ -360,6 +360,7 @@ class BasePlot(ABC):
         # Check for tooltips in kwargs and pop
         tooltips = kwargs.pop("tooltips", None)
         custom_hover_data = kwargs.pop("custom_hover_data", None)
+        fixed_tooltip_for_trace = kwargs.pop("fixed_tooltip_for_trace", None)
 
         newlines, legend = self.plot(
             fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs
@@ -370,7 +371,7 @@ class BasePlot(ABC):
         self._update_plot_aes(newlines, **kwargs)
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(newlines, tooltips, custom_hover_data=custom_hover_data, **kwargs)
+            self._add_tooltips(newlines, tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=fixed_tooltip_for_trace)
 
     @abstractmethod
     def plot(
@@ -438,7 +439,7 @@ class BasePlot(ABC):
 
     # methods only for interactive plotting
     @abstractmethod
-    def _add_tooltips(self, fig, tooltips, **kwargs):
+    def _add_tooltips(self, fig, tooltips):
         pass
 
     @abstractmethod
@@ -744,16 +745,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
+        kwargs.pop("fig", None) # remove figure from **kwargs if exists
+
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
             self.data, x, y, self.reference_spectrum
         )
-
-        # kwargs.pop("fig", None)  # remove figure from **kwargs if exists
-        # legend = kwargs.pop("legend", None)
-        # if legend is None:
-        #     legend = LegendConfig(show=False)
-        # kwargs["legend"] = legend
 
         if self.by is None:
             self.legend.show = False
@@ -780,8 +777,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         spectrumPlot = self.get_line_renderer(spectrum, x, y, fig=self.fig, **kwargs)
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data,
-            fixed_tooltip_for_trace=False
+            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=False
         )
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
@@ -806,8 +802,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             spectrumPlot = self.get_line_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
 
             spectrumPlot.generate(
-                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data,
-                fixed_tooltip_for_trace=False
+                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=False
             )
 
             spectrumPlot._add_annotations(

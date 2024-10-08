@@ -120,10 +120,9 @@ class PLOTLYPlot(BasePlot, ABC):
     def _add_legend(self, fig, legend):
         pass
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, **kwargs):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(fig.data) > 1:
-            fixed_tooltip_for_trace = kwargs.pop("fixed_tooltip_for_trace", True)
             if fixed_tooltip_for_trace:
                 for i in range(len(fig.data)):
                     fig.data[i].update(
