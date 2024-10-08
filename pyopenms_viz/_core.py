@@ -759,8 +759,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
 
-
-
         if self.ion_annotation is not None and self.ion_annotation in self.data.columns:
             self.by = self.ion_annotation
             kwargs["by"] = self.ion_annotation
@@ -770,27 +768,20 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         color_gen = self._get_colors(spectrum, "peak")
 
-        if self.by is None:
-            x_data, y_data = self.convert_to_line(spectrum[x], spectrum[y])
-            df = DataFrame({x: x_data, y: y_data})
-        else:
-            dfs = []
-            for name, df in spectrum.groupby(self.by, sort=False):
-                x_data, y_data = self.convert_to_line(df[x], df[y])
-                dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
-            df = concat(dfs)
-
         tooltips, custom_hover_data = self._create_tooltips(
             entries=entries, index=False
         )
 
-        spectrumPlot = self.get_line_renderer(df, x, y, fig=self.fig, **kwargs)
+        # Convert to line plot format
+        spectrum = self.convert_for_line_plots(spectrum, x, y)
+
+        spectrumPlot = self.get_line_renderer(spectrum, x, y, fig=self.fig, **kwargs)
         spectrumPlot.generate(
             line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
         )
 
         # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(df, x, y)
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
@@ -800,17 +791,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
             color_gen = self._get_colors(reference_spectrum, "peak")
 
-            if self.by is None:
-                x_data, y_data = self.convert_to_line(reference_spectrum[x], reference_spectrum[y])
-                df = DataFrame({x: x_data, y: y_data})
-            else:
-                dfs = []
-                for name, df in reference_spectrum.groupby(self.by, sort=False):
-                    x_data, y_data = self.convert_to_line(df[x], df[y])
-                    dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
-                df = concat(dfs)
+            reference_spectrum = self.convert_for_line_plots(reference_spectrum, x, y)
 
-            spectrumPlot = self.get_line_renderer(df, x, y, fig=self.fig, **kwargs)
+            spectrumPlot = self.get_line_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
 
             spectrumPlot.generate(
                 line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
@@ -818,7 +801,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-                df, x, y
+                spectrum, x, y
             )
             spectrumPlot._add_annotations(
                 self.fig, ann_texts, ann_xs, ann_ys, ann_colors
@@ -914,7 +897,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y: str,
         reference_spectrum: Union[DataFrame, None],
     ) -> tuple[list, list]:
-        """Prepares data for plotting based on configuration (copy, relative intensity)."""
+        """Prepares data for plotting based on configuration (copy, relative intensity, bin peaks)."""
 
         # copy spectrum data to not modify the original
         spectrum = spectrum.copy()
@@ -1044,11 +1027,22 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         return [get_ion_color(ion) for ion in ion_annotations]
 
-    def convert_to_line(self, x, y):
+    def to_line(self, x, y):
         x = repeat(x, 3)
         y = repeat(y, 3)
         y[::3] = y[2::3] = 0
         return x, y
+    
+    def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
+        if self.by is None:
+            x_data, y_data = self.to_line(data[x], data[y])
+            return DataFrame({x: x_data, y: y_data})
+        else:
+            dfs = []
+            for name, df in data.groupby(self.by, sort=False):
+                x_data, y_data = self.to_line(df[x], df[y])
+                dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
+            return concat(dfs)
 
 class PeakMapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
