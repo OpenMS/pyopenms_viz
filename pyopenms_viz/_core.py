@@ -772,6 +772,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
             entries=entries, index=False
         )
 
+        # Annotations for spectrum
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
+
         # Convert to line plot format
         spectrum = self.convert_for_line_plots(spectrum, x, y)
 
@@ -779,10 +782,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrumPlot.generate(
             line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
         )
-
-        # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, x, y)
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
+
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
@@ -790,6 +791,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
             reference_spectrum[y] = reference_spectrum[y] * -1
 
             color_gen = self._get_colors(reference_spectrum, "peak")
+
+            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+                reference_spectrum, x, y
+            )
 
             reference_spectrum = self.convert_for_line_plots(reference_spectrum, x, y)
 
@@ -799,13 +804,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data
             )
 
-            # Annotations for reference spectrum
-            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-                spectrum, x, y
-            )
             spectrumPlot._add_annotations(
                 self.fig, ann_texts, ann_xs, ann_ys, ann_colors
             )
+
 
         self.plot_x_axis_line(self.fig)
         # Adjust x axis padding (Plotly cuts outermost peaks)
@@ -928,7 +930,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         if kind == "annotation":
             # Custom annotating colors with top priority
             if self.annotation_color is not None and self.annotation_color in data.columns:
-                return ColorGenerator(data[self.annotation_color]) 
+                return ColorGenerator(data[self.annotation_color])
             # Ion annotation colors
             elif self.ion_annotation is not None and self.ion_annotation in data.columns:
                 # Generate colors based on ion annotations
