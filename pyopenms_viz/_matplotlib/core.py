@@ -382,6 +382,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                         y=y, 
                         z=ann_zs[i], 
                         s=text, 
+                        fontsize=self.annotation_font_size,
                         color=color
                     )
 
