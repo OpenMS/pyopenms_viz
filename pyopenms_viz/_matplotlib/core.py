@@ -225,9 +225,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Show the plot.
         """
         if isinstance(self.fig, Axes):
-            self.fig.get_figure().tight_layout()
+            self.fig.get_figure()
         else:
-            self.superFig.tight_layout()
+            self.superFig
         plt.show()
 
 
@@ -757,6 +757,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 loc=matplotlibLegendLoc,
                 title=self.feature_config.legend.title,
                 prop={"size": self.feature_config.legend.fontsize},
+                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
             )
 
     # since matplotlib is not interactive cannot implement the following methods
