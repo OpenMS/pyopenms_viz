@@ -810,7 +810,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             )
 
         # Plot horizontal line to hide connection between peaks
-        self.plot_x_axis_line(self.fig)
+        self.plot_x_axis_line(self.fig, line_width=2)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[x].min()]
