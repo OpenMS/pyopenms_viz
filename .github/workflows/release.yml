@@ -20,11 +20,17 @@ jobs:
           pwd 
           python .github/workflows/scripts/update_init_version.py --file-path pyopenms_viz/__init__.py
           python .github/workflows/scripts/version_update_script.py --file-path pyproject.toml --init_file_path pyopenms_viz/__init__.py
-      - name: Commit version update
+      - name: Commit version update for __init__.py
         uses: test-room-7/action-update-file@v1
         with:
           file-path: pyopenms_viz/__init__.py
-          commit-msg: Bump patch version 
+          commit-msg: Bump patch version in __init__.py
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Commit version update for pyproject.toml
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: pyproject.toml
+          commit-msg: Bump patch version in pyproject.toml
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Create new patch release
         run: python .github/workflows/scripts/release.py
