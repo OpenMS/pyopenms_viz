@@ -612,10 +612,15 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         )
         legend_items = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
+
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
+            else:
+                color = next(color_gen)
 
             # Calculate center points and dimensions
             center_x = (x0 + x1) / 2
@@ -628,13 +633,13 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 y=center_y,
                 width=width,
                 height=height,
-                color=next(color_gen),
+                color=color,
                 line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
                 fill_alpha=0,
             )
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in feature:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:

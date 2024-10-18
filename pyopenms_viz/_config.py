@@ -126,7 +126,7 @@ class LegendConfig:
 @dataclass(kw_only=True)
 class FeatureConfig:
     def default_legend_factory():
-        return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
+        return LegendConfig(title="Features", loc="left", bbox_to_anchor=(1, 0.5))
 
     colormap: str = "Dark2"
     line_width: float = 3

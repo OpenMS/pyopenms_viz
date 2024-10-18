@@ -438,9 +438,10 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
         ann_xs: list[float],
         ann_ys: list[float],
         ann_colors: list[str],
+        ann_zs: list[float] = None,
     ):
         annotations = []
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
                     # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
@@ -448,22 +449,41 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                     text = r"${}$".format(text)
                 else:
                     text = text.replace("\n", "<br>")
-                annotation = go.layout.Annotation(
-                    text=text,
-                    x=x,
-                    y=y,
-                    showarrow=False,
-                    xanchor="left",
-                    font=dict(
-                        family="Open Sans Mono, monospace",
-                        size=self.annotation_font_size,
-                        color=color,
-                    ),
-                )
-                annotations.append(annotation)
+                if not self.plot_3d:
+                    annotation = go.layout.Annotation(
+                        text=text,
+                        x=x,
+                        y=y,
+                        showarrow=False,
+                        xanchor="left",
+                        font=dict(
+                            family="Open Sans Mono, monospace",
+                            size=self.annotation_font_size,
+                            color=color,
+                        ),
+                    )
+                else:
+                    annotation = go.layout.scene.Annotation(
+                        text=text,
+                        x=x,
+                        y=y,
+                        z=ann_zs[i],
+                        showarrow=False,
+                        xanchor="left",
+                        font=dict(
+                            family="Open Sans Mono, monospace",
+                            size=self.annotation_font_size,
+                            color=color,
+                        ),
+                    )
 
-        for annotation in annotations:
-            fig.add_annotation(annotation)
+                annotations.append(annotation)
+        if not self.plot_3d:
+            for annotation in annotations:
+                fig.add_annotation(annotation)
+        else:
+            for annotation in annotations:
+                fig.layout.scene.annotations += (annotation,)
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
@@ -650,6 +670,13 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 zlabel=self.zlabel,
                 **other_kwargs,
             )
+            if self.annotation_data is not None:
+                a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
+                    self.annotation_data, x, y, z
+                )
+                vlinePlot._add_annotations(
+                    self.fig, a_t, a_x, a_y, a_c, a_z
+                )
 
             # TODO: Custom tooltips currently not working as expected for 3D plot, it has it's own tooltip that works out of the box, but with set x, y, z name to value
             # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
@@ -779,41 +806,52 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
 
-            color = next(color_gen)
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
+            else:
+                color = next(color_gen)
 
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in annotation_data.columns:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
                 legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
                 legend_label = f"{use_name}"
+            # Plot rectangle
+            self.fig.add_shape(
+                type="rect",
+                x0=x0,
+                y0=y0,
+                x1=x1,
+                y1=y1,
+                line=dict(
+                    color=color,
+                    width=self.feature_config.line_width,
+                    dash=bokeh_line_dash_mapper(self.feature_config.line_type, "plotly"),
+                ),
+                fillcolor="rgba(0,0,0,0)",
+                opacity=0.5,
+                layer="above",
+            )
+            # Add a dummy trace for the legend
             self.fig.add_trace(
                 go.Scatter(
-                    x=[
-                        x0,
-                        x1,
-                        x1,
-                        x0,
-                        x0,
-                    ],  # Start and end at the same point to close the shape
-                    y=[y0, y0, y1, y1, y0],
+                    x=[None],
+                    y=[None],
                     mode="lines",
-                    fill="none",
-                    opacity=0.5,
                     line=dict(
                         color=color,
                         width=self.feature_config.line_width,
-                        dash=bokeh_line_dash_mapper(
-                            self.feature_config.line_type, "plotly"
-                        ),
+                        dash=bokeh_line_dash_mapper(self.feature_config.line_type, "plotly"),
                     ),
+                    showlegend=True,
                     name=legend_label,
                 )
             )
