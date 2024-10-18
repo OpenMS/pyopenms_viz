@@ -497,6 +497,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         if self.by is not None and self.legend.show:
             legend = self.fig.get_legend()
             self.fig.add_artist(legend)

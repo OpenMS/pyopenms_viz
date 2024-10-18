@@ -446,7 +446,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                 if is_latex_formatted(text):
                     # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
                     text = text.replace("\n", r" \\\ ")
-                    text = r'${}$'.format(text)
+                    text = r"${}$".format(text)
                 else:
                     text = text.replace("\n", "<br>")
                 if not self.plot_3d:
@@ -597,6 +597,7 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
 
     def _add_peak_boundaries(self, annotation_data, **kwargs):
+        super()._add_peak_boundaries(annotation_data)
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )

@@ -343,7 +343,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
                     # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
                     # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
                     text = text.replace("\n", r" \\\ ")
-                    text = r'$$\displaylines{{{}}}$$'.format(text)
+                    text = r"$$\displaylines{{{}}}$$".format(text)
                 label = Label(
                     x=x,
                     y=y,
@@ -455,6 +455,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
