@@ -6,6 +6,7 @@ Here we show how we can plot multiple chromatograms across runs together
 """
 import pandas as pd
 import requests
+import zipfile
 import numpy as np
 from bokeh.layouts import column
 from bokeh.io import show
@@ -17,25 +18,37 @@ from bokeh.layouts import column
 from bokeh.io import show
 
 ###### Load Data #######
-url = 'https://raw.githubusercontent.com/OpenMS/pyopenms_viz/add_multiplot/assets/spyogenes/{}'
-files = ['AADGQTVSGGSILYR3_manual_annotations.tsv', 'chroms_AADGQTVSGGSILYR3.tsv']
 
-# # Send a GET request to the URL and handle potential errors
-for f in files:
-    try:
-        response = requests.get(url.format(f))
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+# URL of the zip file
+url = 'https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip'
+zip_filename = 'spyogenes.zip'
 
-        # # Save the content of the response to a file
-        with open(f, 'wb') as out:
-            out.write(response.content)
-    except requests.RequestException as e:
-        print(f"Error downloading file: {e}")
-    except IOError as e:
-        print(f"Error writing file: {e}")
+# Download the zip file
+try:
+    print(f"Downloading {zip_filename}...")
+    response = requests.get(url)
+    response.raise_for_status()  # Check for any HTTP errors
 
-annotation_bounds = pd.read_csv('AADGQTVSGGSILYR3_manual_annotations.tsv', sep='\t') # contain annotations across all runs
-chrom_df = pd.read_csv('chroms_AADGQTVSGGSILYR3.tsv', sep='\t') # contains chromatogram for precursor across all runs
+    # Save the zip file to the current directory
+    with open(zip_filename, 'wb') as out:
+        out.write(response.content)
+    print(f"Downloaded {zip_filename} successfully.")
+except requests.RequestException as e:
+    print(f"Error downloading zip file: {e}")
+except IOError as e:
+    print(f"Error writing zip file: {e}")
+
+# Unzipping the file
+try:
+    with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+        # Extract all files to the current directory
+        zip_ref.extractall()
+        print("Unzipped files successfully.")
+except zipfile.BadZipFile as e:
+    print(f"Error unzipping file: {e}")
+
+annotation_bounds = pd.read_csv('spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv', sep='\t') # contain annotations across all runs
+chrom_df = pd.read_csv('spyogenes/chroms_AADGQTVSGGSILYR3.tsv', sep='\t') # contains chromatogram for precursor across all runs
 
 ##### Set Plotting Variables #####
 pd.options.plotting.backend = 'ms_bokeh'
