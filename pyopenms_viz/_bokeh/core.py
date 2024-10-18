@@ -354,6 +354,33 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         else:
             raise NotImplementedError("3D Vline plots are not supported in Bokeh")
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
+                    # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
+                    # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
+                    text = text.replace("\n", r" \\\ ")
+                    text = r"$$\displaylines{{{}}}$$".format(text)
+                label = Label(
+                    x=x,
+                    y=y,
+                    text=text,
+                    text_font_size="13pt",
+                    text_color=color,
+                    x_offset=1,
+                    y_offset=0,
+                )
+                fig.add_layout(label)
+
 
 class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
     """
@@ -454,6 +481,7 @@ class BOKEHChromatogramPlot(BOKEH_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         color_gen = ColorGenerator(
             colormap=self.feature_config.colormap, n=annotation_data.shape[0]
         )
@@ -610,10 +638,15 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
         )
         legend_items = []
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
+
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
+            else:
+                color = next(color_gen)
 
             # Calculate center points and dimensions
             center_x = (x0 + x1) / 2
@@ -626,13 +659,13 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 y=center_y,
                 width=width,
                 height=height,
-                color=next(color_gen),
+                color=color,
                 line_dash=self.feature_config.line_type,
                 line_width=self.feature_config.line_width,
                 fill_alpha=0,
             )
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in feature:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:

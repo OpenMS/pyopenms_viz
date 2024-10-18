@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Tuple, Literal, Union, List, Dict
+import numpy as np
 import importlib
 import types
 import re
@@ -610,10 +611,10 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         if self.annotation_data is not None:
             self._add_peak_boundaries(self.annotation_data)
 
-    @abstractmethod
     def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
+        This is not a complete method should be overridden by subclasses.
 
         Args:
             annotation_data (DataFrame): The feature data containing the peak boundaries.
@@ -621,7 +622,18 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         Returns:
             None
         """
-        pass
+        # compute the apex intensity
+        self.compute_apex_intensity(annotation_data)
+
+    def compute_apex_intensity(self, annotation_data):
+        """
+        Compute the apex intensity of the peak group based on the peak boundaries
+        """
+        for idx, feature in annotation_data.iterrows():
+            annotation_data.loc[idx, "apexIntensity"] = self.data.loc[
+                self.data[self.x].between(feature["leftWidth"], feature["rightWidth"]),
+                self.y,
+            ].max()
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
@@ -1099,6 +1111,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
         y_kind="spectrum",
         x_kind="chromatogram",
         annotation_data: DataFrame | None = None,
+        annotation_x_lb : str = 'leftWidth',
+        annotation_x_ub : str = 'rightWidth',
+        annotation_y_lb : str = 'IM_leftWidth',
+        annotation_y_ub : str = 'IM_rightWidth',
+        annotation_colors : str = 'color',
+        annotation_names : str = 'name',
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         aggregation_method: Literal["mean", "sum", "max"] = "mean",
         num_x_bins: int = 50,
@@ -1124,7 +1142,13 @@ class PeakMapPlot(BaseMSPlot, ABC):
             self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
-
+        self.annotation_x_lb = annotation_x_lb
+        self.annotation_x_ub = annotation_x_ub
+        self.annotation_y_lb = annotation_y_lb
+        self.annotation_y_ub = annotation_y_ub
+        self.annotation_colors = annotation_colors
+        self.annotation_names = annotation_names
+        
         super().__init__(data, x, y, z=z, **kwargs)
         self._check_and_aggregate_duplicates()
 
@@ -1325,6 +1349,35 @@ class PeakMapPlot(BaseMSPlot, ABC):
             None
         """
         pass
+    
+    def _compute_3D_annotations(self, annotation_data, x, y, z):
+        def center_of_gravity(x, m):
+            return np.sum(x*m) / np.sum(m)
+        
+        # Contains tuple of coordinates + text + color (x, y, z, t, c)
+        annotations_3d = []
+        for _, feature in annotation_data.iterrows():
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
+            t = feature[self.annotation_names]
+            c = feature[self.annotation_colors]
+            selected_data = self.data[
+                (self.data[x] > x0) & (self.data[x] < x1) 
+                & (self.data[y] > y0) & (self.data[y] < y1)
+            ]
+            if len(selected_data) == 0:
+                annotations_3d.append((
+                    np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c
+                ))
+            else:
+                annotations_3d.append((
+                    center_of_gravity(selected_data[x], selected_data[z]),
+                    center_of_gravity(selected_data[y], selected_data[z]),
+                    np.max(selected_data[z])*1.05, t, c
+                ))
+        return map(list, zip(*annotations_3d))
 
 
 class PlotAccessor:

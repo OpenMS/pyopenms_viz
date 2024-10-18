@@ -225,9 +225,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Show the plot.
         """
         if isinstance(self.fig, Axes):
-            self.fig.get_figure().tight_layout()
+            self.fig.get_figure()
         else:
-            self.superFig.tight_layout()
+            self.superFig
         plt.show()
 
     def _add_annotations(
@@ -367,6 +367,42 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
 
                 return ax, (legend_lines, legend_labels)
 
+    def _get_annotations():
+        pass
+
+
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+        ann_zs: list[float] = None,
+    ):
+        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                if not self.plot_3d:
+                    fig.annotate(
+                        text,
+                        xy=(x, y),
+                        xytext=(3, 0),
+                        textcoords="offset points",
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
+                else:
+                    fig.text(
+                        x=x, 
+                        y=y, 
+                        z=ann_zs[i], 
+                        s=text, 
+                        fontsize=self.annotation_font_size,
+                        color=color
+                    )
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
@@ -479,6 +515,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         if self.by is not None and self.legend.show:
             legend = self.fig.get_legend()
             self.fig.add_artist(legend)
@@ -661,6 +698,13 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 zlabel=self.zlabel,
                 **other_kwargs,
             )
+            if self.annotation_data is not None:
+                a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
+                    self.annotation_data, x, y, z
+                )
+                vlinePlot._add_annotations(
+                    self.fig, a_t, a_x, a_y, a_c, a_z
+                )
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
@@ -688,16 +732,19 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         legend_items = []
 
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
 
             # Calculate center points and dimensions
             width = abs(x1 - x0)
             height = abs(y1 - y0)
 
-            color = next(color_gen)
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
+            else:
+                color = next(color_gen)
             custom_lines = Rectangle(
                 (x0, y0),
                 width,
@@ -706,11 +753,12 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 edgecolor=color,
                 linestyle=self.feature_config.line_type,
                 linewidth=self.feature_config.line_width,
+                zorder=5
             )
             self.fig.add_patch(custom_lines)
 
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in feature:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
