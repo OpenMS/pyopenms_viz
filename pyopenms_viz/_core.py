@@ -739,6 +739,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.num_x_bins = mz_tolerance_binning(data, x, mz_tol)
             elif self.bin_method == "none":
                 self.num_x_bins = num_x_bins
+            else:  # throw error if bin_method is not recognized
+                raise ValueError(f"bin_method {self.bin_method} not recognized")
         else:
             self.num_x_bins = num_x_bins
         self.aggregation_method = aggregation_method
