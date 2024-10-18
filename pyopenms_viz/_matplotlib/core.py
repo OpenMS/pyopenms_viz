@@ -230,6 +230,24 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.superFig
         plt.show()
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            fig.annotate(
+                text,
+                xy=(x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                fontsize=8,
+                color=color,
+            )
+
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
@@ -259,7 +277,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
 
             return ax, None
         else:
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 (line,) = ax.plot(
                     df[x],
                     df[y],
@@ -473,8 +491,8 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return MATPLOTLIBScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
-        fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
+        fig.plot(fig.get_xlim(), [0, 0], color=line_color, linewidth=line_width, alpha=opacity)
 
     def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive

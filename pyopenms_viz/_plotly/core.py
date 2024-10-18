@@ -120,15 +120,26 @@ class PLOTLYPlot(BasePlot, ABC):
     def _add_legend(self, fig, legend):
         pass
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(fig.data) > 1:
-            for i in range(len(fig.data)):
-                fig.data[i].update(
+            if fixed_tooltip_for_trace:
+                for i in range(len(fig.data)):
+                    fig.data[i].update(
+                        hovertemplate=tooltips,
+                        customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
+                    )
+                return
+            else:
+                counter = 0
+                for i in range(len(fig.data)):
+                    l = len(fig.data[i].x)
+                    fig.data[i].update(
                     hovertemplate=tooltips,
-                    customdata=[custom_hover_data[i, :]] * len(fig.data[i].x),
-                )
-            return
+                    customdata = custom_hover_data[counter:counter+l, :]
+                    )
+                    counter += l
+                return
         fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, fig, **kwargs):
@@ -202,6 +213,39 @@ class PLOTLYPlot(BasePlot, ABC):
     def show_sphinx(self):
         return self.fig
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        annotations = []
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
+                    text = text.replace("\n", r" \\\ ")
+                    text = r'${}$'.format(text)
+                else:
+                    text = text.replace("\n", "<br>")
+                annotation = go.layout.Annotation(
+                    text=text,
+                    x=x,
+                    y=y,
+                    showarrow=False,
+                    xanchor="left",
+                    font=dict(
+                        family="Open Sans Mono, monospace",
+                        size=self.annotation_font_size,
+                        color=color,
+                    ),
+                )
+                annotations.append(annotation)
+
+        for annotation in annotations:
+            fig.add_annotation(annotation)
 
 class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
     """
@@ -234,7 +278,7 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
             )
             traces.append(trace)
         else:
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 trace = go.Scatter(
                     x=df[x],
                     y=df[y],
@@ -567,8 +611,8 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return PLOTLYScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
-        fig.add_hline(y=0, line_color="black", line=dict(width=1))
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
+        fig.add_hline(y=0, line_color=line_color, line=dict(width=line_width), opacity=opacity)
 
     def _create_tooltips(self, entries, index=True):
         custom_hover_data = []
@@ -849,7 +893,9 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                     line=dict(
                         color=color,
                         width=self.feature_config.line_width,
-                        dash=bokeh_line_dash_mapper(self.feature_config.line_type, "plotly"),
+                        dash=bokeh_line_dash_mapper(
+                            self.feature_config.line_type, "plotly"
+                        ),
                     ),
                     showlegend=True,
                     name=legend_label,

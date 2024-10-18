@@ -93,7 +93,7 @@ class BOKEHPlot(BasePlot, ABC):
             fig.legend.title = self.legend.title
             fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None):
+    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True):
         """
         Add tooltips to the plot
         """
@@ -215,6 +215,32 @@ class BOKEHPlot(BasePlot, ABC):
 
         show(self.fig)
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[str],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # NOTE: Bokeh uses MathJax for rendering LaTeX expressions with $$ delimiters
+                    # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
+                    # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
+                    text = text.replace("\n", r" \\\ ")
+                    text = r'$$\displaylines{{{}}}$$'.format(text)
+                label = Label(
+                    x=x,
+                    y=y,
+                    text=text,
+                    text_font_size="13pt",
+                    text_color=color,
+                    x_offset=1,
+                    y_offset=0,
+                )
+                fig.add_layout(label)
 
 class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
@@ -243,7 +269,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         else:
 
             legend_items = []
-            for group, df in data.groupby(by):
+            for group, df in data.groupby(by, sort=False):
                 source = ColumnDataSource(df)
                 if color_gen is not None:
                     kwargs["line_color"] = (
@@ -424,9 +450,9 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
     def get_scatter_renderer(self, data, x, y, **kwargs) -> None:
         return BOKEHScatterPlot(data, x, y, **kwargs)
 
-    def plot_x_axis_line(self, fig):
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
         zero_line = Span(
-            location=0, dimension="width", line_color="#EEEEEE", line_width=1.5
+            location=0, dimension="width", line_color=line_color, line_width=line_width, line_alpha=opacity
         )
         fig.add_layout(zero_line)
 
