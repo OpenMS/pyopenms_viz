@@ -149,7 +149,6 @@ class PLOTLYPlot(BasePlot, ABC):
     ):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(self.fig.data) > 1:
-            print("len(self.fig.data)", len(self.fig.data))
             if fixed_tooltip_for_trace:
                 for i in range(len(self.fig.data)):
                     self.fig.data[i].update(
@@ -591,7 +590,11 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
     def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
         fig.add_hline(
-            y=0, line_color=line_color, line=dict(width=line_width), opacity=opacity
+            fig.get_xlim(),
+            [0, 0],
+            color=line_color,
+            line=dict(width=line_width),
+            opacity=opacity,
         )
 
     def _create_tooltips(self, entries, index=True):

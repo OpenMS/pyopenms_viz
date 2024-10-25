@@ -155,6 +155,7 @@ class BasePlotConfig(BaseConfig):
     relative_intensity: bool = False
     aggregate_duplicates: bool = False
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
+    opacity: float = 1.0
 
     def __post_init__(self):
         # if legend_config is a dictionary, update it to LegendConfig object
@@ -269,6 +270,7 @@ class SpectrumConfig(VLineConfig):
     xlabel: str = "m/z"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
+    color: str | Iterator[str] = "#4575B4"
 
     def __post_init__(self):
         super().__post_init__()

@@ -502,7 +502,7 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
     @abstractmethod
-    def plot_x_axis_line(self):
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
         """
         plot line across x axis
         """
@@ -728,7 +728,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         if self.by is None:
-            self.legend.show = False
+            self.legend_config.show = False
 
         # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
@@ -746,7 +746,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # color_gen = self._get_colors(spectrum, "peak")
 
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-        self.canvas = spectrum.generate(tooltips, custom_hover_data)
+        # print(spectrum[spectrum["Annotation"] == "prec"])
+        spectrumPlot = self.get_line_renderer(data=spectrum, config=self._config)
+        self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
@@ -774,7 +776,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
             spectrum._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Plot horizontal line to hide connection between peaks
-        self.plot_x_axis_line(self.fig, line_width=2)
+        self.plot_x_axis_line(
+            self.canvas, line_color="white", line_width=self.line_width * 6
+        )
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
