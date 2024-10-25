@@ -148,7 +148,7 @@ class BasePlotConfig(BaseConfig):
     y_axis_location: Literal["left", "right"] = "left"
     x_axis_location: Literal["above", "below"] = "below"
     annotation_font_size: int = 12
-    color: str | Iterator[str] = ColorGenerator()
+    color: str | Iterator[str] = field(default_factory=ColorGenerator)
     plot_3d: bool = False
     min_border: int = 0
     show_plot: bool = True
