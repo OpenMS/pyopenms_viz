@@ -568,7 +568,8 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
     Class for assembling a Bokeh feature heatmap plot
     """
 
-    def create_main_plot(self):
+    # NOTE: canvas is only used in matplotlib backend
+    def create_main_plot(self, canvas=None):
 
         if not self.plot_3d:
 

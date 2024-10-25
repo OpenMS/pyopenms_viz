@@ -159,7 +159,6 @@ class BasePlotConfig(BaseConfig):
 
     def __post_init__(self):
         # if legend_config is a dictionary, update it to LegendConfig object
-        print("xlabel is ", self.xlabel)
         if isinstance(self.legend_config, dict):
             self.legend_config = LegendConfig.from_dict(self.legend_config)
 

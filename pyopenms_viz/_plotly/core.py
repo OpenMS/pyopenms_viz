@@ -534,7 +534,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 colorscale="Inferno_r",
                 showscale=False,
                 size=self.marker_size,
-                opacity=0.8,
+                opacity=self.opacity,
                 cmin=self.data[self.z].min(),
                 cmax=self.data[self.z].max(),
             )
@@ -547,11 +547,8 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                     if k not in marker_dict.keys():
                         marker_dict[k] = v
 
-        marker_dict = {}
-        marker_dict["color"] = self.data[self.z] if self.z else self.current_color
         traces = []
         if self.by is None:
-            print(self.marker)
             marker_dict["symbol"] = self.current_marker
             trace = go.Scattergl(
                 x=self.data[self.x],
@@ -672,14 +669,14 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
-    def create_main_plot(self) -> Figure:
+    # NOTE: canvas is only used in matplotlib backend
+    def create_main_plot(self, canvas=None) -> Figure:
         if not self.plot_3d:
-            scatterPlot = self.get_scatter_renderer(
-                data=self.data, x=self.x, y=self.y, z=self.z
-            )
+            scatterPlot = self.get_scatter_renderer(data=self.data, config=self._config)
             self.fig = scatterPlot.generate(None, None)
 
             if self.z is not None:
+
                 tooltips, custom_hover_data = self._create_tooltips(
                     {self.xlabel: self.x, self.ylabel: self.y, self.zlabel: self.z}
                 )
@@ -694,7 +691,9 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 self._add_box_boundaries(self.annotation_data)
             return self.fig
         else:
-            vlinePlot = self.get_vline_renderer(self.data, self.x, self.y)
+            vlinePlot = self.get_vline_renderer(
+                self.data, x=self.x, y=self.y, _config=self._config
+            )
             self.fig = vlinePlot.generate(data=self.data, x=self.x, y=self.y)
             if self.annotation_data is not None:
                 a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
