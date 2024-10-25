@@ -590,11 +590,7 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
     def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
         fig.add_hline(
-            fig.get_xlim(),
-            [0, 0],
-            color=line_color,
-            line=dict(width=line_width),
-            opacity=opacity,
+            y=0, line_color=line_color, line=dict(width=line_width), opacity=opacity
         )
 
     def _create_tooltips(self, entries, index=True):
