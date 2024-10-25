@@ -247,6 +247,24 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         self.ax.get_figure().tight_layout()
         plt.show()
 
+    def _add_annotations(
+        self,
+        fig,
+        ann_texts: list[list[str]],
+        ann_xs: list[float],
+        ann_ys: list[float],
+        ann_colors: list[str],
+    ):
+        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+            fig.annotate(
+                text,
+                xy=(x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                fontsize=8,
+                color=color,
+            )
+
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
@@ -268,7 +286,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
             )
 
         else:
-            for group, df in self.data.groupby(self.by):
+            for group, df in self.data.groupby(self.by, sort=False):
                 (line,) = self.ax.plot(df[self.x], df[self.y], color=self.current_color)
                 legend_lines.append(line)
                 legend_labels.append(group)
@@ -342,27 +360,44 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
 
                 self._add_legend((legend_lines, legend_labels))
 
+    def _get_annotations():
+        pass
+
     def _add_annotations(
         self,
         ann_texts: list[list[str]],
         ann_xs: list[float],
         ann_ys: list[float],
         ann_colors: list[str],
+        ann_zs: list[float] = None,
     ):
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
+        for i, (text, x, y, color) in enumerate(
+            zip(ann_texts, ann_xs, ann_ys, ann_colors)
+        ):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
                     text = "\n".join(
                         [r"${}$".format(line) for line in text.split("\n")]
                     )
-                self.ax.annotate(
-                    text,
-                    xy=(x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    fontsize=self.annotation_font_size,
-                    color=color,
-                )
+                if not self.plot_3d:
+                    self.ax.annotate(
+                        text,
+                        xy=(x, y),
+                        xytext=(3, 0),
+                        textcoords="offset points",
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
+                else:
+                    self.ax.text(
+                        x=x,
+                        y=y,
+                        z=ann_zs[i],
+                        s=text,
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
 
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
@@ -427,8 +462,14 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
     def get_scatter_renderer(self, **kwargs) -> None:
         return MATPLOTLIBScatterPlot(**kwargs)
 
-    def plot_x_axis_line(self, fig):
-        fig.plot(fig.get_xlim(), [0, 0], color="#EEEEEE", linewidth=1.5)
+    def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
+        fig.plot(
+            fig.get_xlim(),
+            [0, 0],
+            color=line_color,
+            linewidth=line_width,
+            alpha=opacity,
+        )
 
     def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive
@@ -451,6 +492,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
         Returns:
             None
         """
+        super()._add_peak_boundaries(annotation_data)
         if self.by is not None and self.legend.show:
             legend = self.ax.get_legend()
             self.ax.add_artist(legend)
@@ -672,16 +714,19 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         legend_items = []
 
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
-            x0 = feature["leftWidth"]
-            x1 = feature["rightWidth"]
-            y0 = feature["IM_leftWidth"]
-            y1 = feature["IM_rightWidth"]
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
 
             # Calculate center points and dimensions
             width = abs(x1 - x0)
             height = abs(y1 - y0)
 
-            color = next(color_gen)
+            if self.annotation_colors in feature:
+                color = feature[self.annotation_colors]
+            else:
+                color = next(color_gen)
             custom_lines = Rectangle(
                 (x0, y0),
                 width,
@@ -690,11 +735,12 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 edgecolor=color,
                 linestyle=self.feature_config.line_type,
                 linewidth=self.feature_config.line_width,
+                zorder=5,
             )
             self.ax.add_patch(custom_lines)
 
-            if "name" in annotation_data.columns:
-                use_name = feature["name"]
+            if self.annotation_names in feature:
+                use_name = feature[self.annotation_names]
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:

@@ -32,18 +32,25 @@ def update_version(file_path, init_file_path):
     """
     try:
         current_version = get_current_version(init_file_path)
-        print(f"Current version: {current_version}")
 
         with open(file_path, 'r') as file:
             content = file.read()
 
+        # Get current version in file_path
+        version_match = re.search(r'version = "(\d+\.\d+\.\d+)"', content)
+        if version_match:
+            current_file_version = version_match.group(1)
+            print(f"Updating version ({current_file_version}) in {file_path} to version {current_version} from {init_file_path}.")
+        else:
+            raise ValueError("Could not find the version number in the input file.")       
+            
         # Use regular expression to update version numbers in the input file
-        updated_content = re.sub(r'version = "(\d+\.\d+\.\d+)"', rf"version = {current_version}", content)
+        updated_content = re.sub(r'version = "(\d+\.\d+\.\d+)"', rf'version = "{current_version}"', content)
 
         with open(file_path, 'w') as file:
             file.write(updated_content)
 
-        print(f"Version updated to {current_version} successfully.")
+        print(f"Version updated to {current_version} successfully for {init_file_path}.")
 
     except Exception as e:
         print(f"Failed to update version: {e}")

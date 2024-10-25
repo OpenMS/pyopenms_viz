@@ -2,18 +2,19 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Tuple, Literal, Union, List, Dict, Optional, Iterator
+import numpy as np
 import importlib
 import types
 from dataclasses import dataclass, asdict, fields
 
-from pandas import cut, merge, Interval
+from pandas import cut, merge, Interval, concat
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
 
-from numpy import ceil, log1p, log2, nan, mean
+from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
     LegendConfig,
     BasePlotConfig,
@@ -320,6 +321,23 @@ class BasePlot(ABC):
     def _create_figure(self) -> None:
         raise NotImplementedError
 
+    def _make_plot(self, fig, **kwargs) -> None:
+        # Check for tooltips in kwargs and pop
+        tooltips = kwargs.pop("tooltips", None)
+        custom_hover_data = kwargs.pop("custom_hover_data", None)
+
+        newlines, legend = self.plot(
+            fig, self.data, self.x, self.y, self.by, self.plot_3d, **kwargs
+        )
+        fixed_tooltip_for_trace = kwargs.pop("fixed_tooltip_for_trace", None)
+
+        if legend is not None:
+            self._add_legend(newlines, legend)
+        self._update_plot_aes(newlines, **kwargs)
+
+        if tooltips is not None and self._interactive:
+            self._add_tooltips(newlines, tooltips, custom_hover_data)
+
     @abstractmethod
     def plot(self) -> None:
         """
@@ -569,10 +587,10 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         if self.annotation_data is not None:
             self._add_peak_boundaries(self.annotation_data)
 
-    @abstractmethod
     def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
+        This is not a complete method should be overridden by subclasses.
 
         Args:
             annotation_data (DataFrame): The feature data containing the peak boundaries.
@@ -580,7 +598,18 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         Returns:
             None
         """
-        pass
+        # compute the apex intensity
+        self.compute_apex_intensity(annotation_data)
+
+    def compute_apex_intensity(self, annotation_data):
+        """
+        Compute the apex intensity of the peak group based on the peak boundaries
+        """
+        for idx, feature in annotation_data.iterrows():
+            annotation_data.loc[idx, "apexIntensity"] = self.data.loc[
+                self.data[self.x].between(feature["leftWidth"], feature["rightWidth"]),
+                self.y,
+            ].max()
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
@@ -698,6 +727,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
             entries=entries, index=False
         )
 
+        if self.by is None:
+            self.legend.show = False
+
+        # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
+        if self.peak_color is not None and self.peak_color in self.data.columns:
+            self.by = self.peak_color
+        elif (
+            self.ion_annotation is not None and self.ion_annotation in self.data.columns
+        ):
+            self.by = self.ion_annotation
+
         vlinePlot = self.get_vline_renderer(
             data=spectrum,
             config=self._config,
@@ -705,13 +745,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # color_gen = self._get_colors(spectrum, "peak")
 
-        self.canvas = vlinePlot.generate(tooltips, custom_hover_data)
+        spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
+        self.canvas = spectrum.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
             spectrum, self.x, self.y
         )
-        print(self.canvas)
         vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
 
         # Mirror spectrum
@@ -731,7 +771,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
                 reference_spectrum, self.x, self.y
             )
-            mirror_spectrum._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
+            spectrum._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
+
+        # Plot horizontal line to hide connection between peaks
+        self.plot_x_axis_line(self.fig, line_width=2)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
@@ -816,7 +859,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def _prepare_data(self, df, label_suffix=""):
         """
-        Prepare data for plotting based on configuration
+        Prepare data for plotting based on configuration (relative intensity, bin peaks)
 
         Args:
             df (DataFrame): The data to prepare.
@@ -840,26 +883,45 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None
     ):
         """Get color generators for peaks or annotations based on config."""
-        # Top priority: custom color
-        if kind is not None:
-            if kind == "peak" and self.peak_color in data.columns:
-                return ColorGenerator(data[self.peak_color])
-            elif kind == "annotation" and self.annotation_color in data.columns:
+        if kind == "annotation":
+            # Custom annotating colors with top priority
+            if (
+                self.annotation_color is not None
+                and self.annotation_color in data.columns
+            ):
                 return ColorGenerator(data[self.annotation_color])
-        # Colors based on ion annotation for peaks and annotation text
-        if self.ion_annotation is not None and self.ion_annotation in data.columns:
-            return self._get_ion_color_annotation(data)
-        # Color peaks of a group with the same color (from default colors)
-        if self.by:
-            if self.by in data.columns:
+            # Ion annotation colors
+            elif (
+                self.ion_annotation is not None and self.ion_annotation in data.columns
+            ):
+                # Generate colors based on ion annotations
+                return ColorGenerator(
+                    self._get_ion_color_annotation(data[self.ion_annotation])
+                )
+            # Grouped by colors (from default color map)
+            elif self.by is not None:
+                # Get unique values to determine number of distinct colors
                 uniques = data[self.by].unique()
                 color_gen = ColorGenerator()
+                # Generate a list of colors equal to the number of unique values
                 colors = [next(color_gen) for _ in range(len(uniques))]
+                # Create a mapping of unique values to their corresponding colors
                 color_map = {uniques[i]: colors[i] for i in range(len(colors))}
-                all_colors = data[self.by].apply(lambda x: color_map[x])
-                return ColorGenerator(all_colors)
-        # Lowest priority: return the first default color
-        return ColorGenerator(None, 1)
+                # Apply the color mapping to the specified column in the data and turn it into a ColorGenerator
+                return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
+            # Fallback ColorGenerator with one color
+            return ColorGenerator(n=1)
+        else:  # Peaks
+            if self.by:
+                uniques = data[self.by].unique().tolist()
+                # Custom colors with top priority
+                if self.peak_color is not None:
+                    return ColorGenerator(uniques)
+                # Colors based on ion annotation for peaks and annotation text
+                if self.ion_annotation is not None and self.peak_color is None:
+                    return ColorGenerator(self._get_ion_color_annotation(uniques))
+            # Else just use default colors
+            return ColorGenerator()
 
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
@@ -895,7 +957,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             ann_texts.append("\n".join(texts))
         return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
 
-    def _get_ion_color_annotation(self, data: DataFrame) -> str:
+    def _get_ion_color_annotation(self, ion_annotations: str) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
         colormap = {
             "a": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.PURPLE],
@@ -928,8 +990,50 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 ColorGenerator.Colors.DARKGRAY
             ]
 
-        colors = data[self.ion_annotation].apply(get_ion_color)
-        return ColorGenerator(colors)
+        return [get_ion_color(ion) for ion in ion_annotations]
+
+    def to_line(self, x, y):
+        x = repeat(x, 3)
+        y = repeat(y, 3)
+        y[::3] = y[2::3] = 0
+        return x, y
+
+    def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
+        if self.by is None:
+            x_data, y_data = self.to_line(data[x], data[y])
+            return DataFrame({x: x_data, y: y_data})
+        else:
+            dfs = []
+            for name, df in data.groupby(self.by, sort=False):
+                x_data, y_data = self.to_line(df[x], df[y])
+                dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
+            return concat(dfs)
+
+    def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
+        """Get tooltip data for a spectrum plot."""
+
+        # Need to group data in correct order for tooltips
+        if self.by is not None:
+            grouped = spectrum.groupby(self.by, sort=False)
+            self.data = concat([group for _, group in grouped], ignore_index=True)
+
+        # Hover tooltips with m/z, intensity and optional information
+        entries = {"m/z": x, "intensity": y}
+        for optional in (
+            "native_id",
+            self.ion_annotation,
+            self.sequence_annotation,
+        ):
+            if optional in self.data.columns:
+                entries[optional.replace("_", " ")] = optional
+        # Create tooltips and custom hover data with backend specific formatting
+        tooltips, custom_hover_data = self._create_tooltips(
+            entries=entries, index=False
+        )
+        # Repeat data each time (since each peak is represented by three points in line plot)
+        custom_hover_data = repeat(custom_hover_data, 3, axis=0)
+
+        return tooltips, custom_hover_data
 
 
 class PeakMapPlot(BaseMSPlot, ABC):
@@ -1128,6 +1232,41 @@ class PeakMapPlot(BaseMSPlot, ABC):
             None
         """
         pass
+
+    def _compute_3D_annotations(self, annotation_data, x, y, z):
+        def center_of_gravity(x, m):
+            return np.sum(x * m) / np.sum(m)
+
+        # Contains tuple of coordinates + text + color (x, y, z, t, c)
+        annotations_3d = []
+        for _, feature in annotation_data.iterrows():
+            x0 = feature[self.annotation_x_lb]
+            x1 = feature[self.annotation_x_ub]
+            y0 = feature[self.annotation_y_lb]
+            y1 = feature[self.annotation_y_ub]
+            t = feature[self.annotation_names]
+            c = feature[self.annotation_colors]
+            selected_data = self.data[
+                (self.data[x] > x0)
+                & (self.data[x] < x1)
+                & (self.data[y] > y0)
+                & (self.data[y] < y1)
+            ]
+            if len(selected_data) == 0:
+                annotations_3d.append(
+                    (np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c)
+                )
+            else:
+                annotations_3d.append(
+                    (
+                        center_of_gravity(selected_data[x], selected_data[z]),
+                        center_of_gravity(selected_data[y], selected_data[z]),
+                        np.max(selected_data[z]) * 1.05,
+                        t,
+                        c,
+                    )
+                )
+        return map(list, zip(*annotations_3d))
 
 
 class PlotAccessor:

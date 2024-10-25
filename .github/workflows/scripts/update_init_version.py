@@ -34,7 +34,7 @@ def update_version(init_file_path, version_type='patch'):
         # Replace the version in the content
         updated_content = re.sub(r"(__version__ = \")(.*?)(\")", rf"\g<1>{new_version}\g<3>", init_content)
 
-        print(f"Updating {init_file_path}:\n{updated_content}...")
+        # print(f"Updating {init_file_path}:\n{updated_content}...")
         # Write the updated content back to the file
         with open(init_file_path, 'w') as file:
             file.write(updated_content)
