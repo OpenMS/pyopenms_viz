@@ -615,6 +615,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             # Update the figure size
             self.superFig.set_size_inches(self.width / 100, self.height / 100)
             self.superFig.subplots_adjust(wspace=0, hspace=0)
+            self.fig = self.ax_grid  # set figure as ax_grid object
 
     def combine_plots(
         self, x_fig, y_fig
