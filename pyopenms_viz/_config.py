@@ -233,12 +233,17 @@ class ChromatogramConfig(LineConfig):
 
         config = super().from_dict(chromatogram_config_dict)
         config.annotation_legend_config = legend_config
+
         return config
 
     def __post_init__(self):
         super().__post_init__()
         if self.annotation_data is not None:
             self.annotation_data = self.annotation_data.copy()
+        if isinstance(self.annotation_legend_config, dict):
+            self.annotation_legend_config = super().from_dict(
+                self.annotation_legend_config
+            )
 
 
 @dataclass(kw_only=True)

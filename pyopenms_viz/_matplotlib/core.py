@@ -500,7 +500,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
             None
         """
         super()._add_peak_boundaries(annotation_data)
-        if self.by is not None and self.legend.show:
+        if self.by is not None and self.annotation_legend_config.show:
             legend = self.ax.get_legend()
             self.ax.add_artist(legend)
 
