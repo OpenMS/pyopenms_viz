@@ -18,10 +18,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[all,testing]
-        # ensure matplotlib and plotly version is the same as when generated tests
-        pip install matplotlib==3.9.2
-        pip install plotly==5.24.1
+        pip install -r requirements-test.txt # visual tests are very finiky so fix the versions
+        pip install . # install pyopenms-viz
     - name: Test
       run: |
         python -m pytest --snapshot-warn-unused test/ # do not fail if unused snapshot, just warn
