@@ -3314,9 +3314,10 @@
     "shapes": [
       {
         "line": {
-          "color": "black",
-          "width": 1
+          "color": "#EEEEEE",
+          "width": 1.5
         },
+        "opacity": 1,
         "type": "line",
         "x0": 0,
         "x1": 1,
