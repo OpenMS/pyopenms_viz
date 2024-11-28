@@ -18,6 +18,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
+    SequencePlot,
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
@@ -478,6 +479,73 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 legend_lines.append(scatter)
                 legend_labels.append(group)
             return ax, (legend_lines, legend_labels)
+
+
+class MATPLOTLIBSequencePlot(MATPLOTLIBPlot, SequencePlot):
+
+    def plot(self):
+        sequence = self.data[self.seq_col].iloc[0]
+        n_residues = len(sequence)
+
+        # Remap `x` position to be the left edge of the peptide.
+        self.x_pos = self.x_pos - n_residues * self.spacing / 2 + self.spacing / 2
+
+        # Plot the amino acids in the peptide.
+        for i, aa in enumerate(sequence):
+            self.fig.text(
+                *(self.x_pos + i * self.spacing, self.y_pos, aa),
+                fontsize=self.seq_fontsize,
+                ha="center",
+                transform=self.fig.transAxes,
+                va="center",
+            )
+        # Indicate matched fragments.
+        for annot, color in zip(
+            self.data[self.ion_annotation], self.data[self.color_annotation]
+        ):
+            ion_type = annot[0]
+            ion_i = int(i) if (i := annot[1:].rstrip("+")) else 1
+            x_i = self.x_pos + self.spacing / 2 + (ion_i - 1) * self.spacing
+
+            # Length of the fragment line.
+            if ion_type in "ax":
+                y_i = 2 * self.frag_len
+            elif ion_type in "by":
+                y_i = self.frag_len
+            elif ion_type in "cz":
+                y_i = 3 * self.frag_len
+            else:
+                # Ignore unknown ion types.
+                continue
+
+            # N-terminal fragmentation.
+            if ion_type in "abc":
+                xs = [x_i, x_i, x_i - self.spacing / 2]
+                ys = [self.y_pos, self.y_pos + y_i, self.y_pos + y_i]
+                nterm = True
+            # C-terminal fragmentation.
+            elif ion_type in "xyz":
+                xs = [x_i + self.spacing / 2, x_i, x_i]
+                ys = [self.y_pos - y_i, self.y_pos - y_i, self.y_pos]
+                nterm = False
+            else:
+                # Ignore unknown ion types.
+                continue
+
+            self.fig.plot(
+                xs, ys, clip_on=False, color=color, transform=self.fig.transAxes
+            )
+
+            self.fig.text(
+                x_i,
+                self.y_pos + (1.05 if nterm else -1.05) * y_i,
+                annot,
+                color=color,
+                fontsize=self.annotation_font_size,
+                ha="right" if nterm else "left",
+                transform=self.fig.transAxes,
+                va="top" if not nterm else "bottom",
+            )
 
 
 class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
