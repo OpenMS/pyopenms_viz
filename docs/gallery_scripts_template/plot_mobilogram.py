@@ -27,8 +27,10 @@ try:
         print(f"Downloaded {file_name} successfully.")
 except requests.RequestException as e:
     print(f"Error downloading file: {e}")
+    raise e
 except IOError as e:
     print(f"Error writing file: {e}")
+    raise e
 
 
 # Code to add annotation to ionMobilityTestFeatureDf data
