@@ -6,6 +6,7 @@ This example shows a chromatogram colored by mass trace. Since all fragment ion 
 """
 import pandas as pd
 import requests
+import os
 
 pd.options.plotting.backend = 'TEMPLATE'
 
@@ -28,6 +29,11 @@ except requests.RequestException as e:
     print(f"Error downloading file: {e}")
 except IOError as e:
     print(f"Error writing file: {e}")
+
+tmp = os.listdir()
+
+for f in tmp:
+    print(f)
 
 # # Code to add annotation to ionMobilityTestFeatureDf data
 df = pd.read_csv(file_name, sep="\t")
