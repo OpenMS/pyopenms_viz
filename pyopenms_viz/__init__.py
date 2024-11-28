@@ -8,8 +8,32 @@ from typing import Any
 from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
+from pathlib import Path
 
 __version__ = "0.1.5"
+
+
+def TEST_DATA_PATH():
+    """Find the full path to the nearest '.git' directory by climbing up the directory tree.
+
+    Args:
+        start_path (str or Path, optional): The starting path for the search. If not provided,
+            the current working directory is used.
+
+    Returns:
+        Path or None: The full path to the '.git' directory if found, or None if not found.
+    """
+    # If start_path is not provided, use the current working directory
+    start_path = Path.cwd()
+    # Iterate through parent directories until .git is found
+    current_path = start_path
+    while current_path:
+        git_path = current_path / "test" / "test_data"
+        if git_path.is_dir():
+            return git_path.resolve()
+        current_path = current_path.parent
+
+    raise ValueError("Could not find the test directory.")
 
 
 class PlotAccessor:

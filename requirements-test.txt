@@ -68,7 +68,7 @@ syrupy==4.7.2
     # via pyopenms_viz (pyproject.toml)
 tenacity==9.0.0
     # via plotly
-tornado==6.4.1
+tornado==6.4.2
     # via bokeh
 tzdata==2024.2
     # via pandas

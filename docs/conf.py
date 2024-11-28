@@ -200,6 +200,7 @@ def setup(app):
             # Save the modified content to a new file
             with open(gallery_scripts / backend / f'{file_name.stem}_{backend.name}.py', 'w') as new_file:
                 new_file.write(new_contents)
+                print(new_contents)
 
     # copy files that are specific to a backend
     files = [ f for f in gallery_scripts_template.iterdir() if (f.suffix == ".py") and f.is_file() and not (f.name.startswith('.')) and ('_ms_' in f.name)  ]
