@@ -75,6 +75,13 @@ class UnifiedDataFrame:
         else:
             raise TypeError(f"Unsupported data type {type(data)}. Must be either pandas DataFrame or Polars DataFrame.")
         
+    def __repr__(self):
+        """Return a string representation of the DataFrame."""
+        if isinstance(self.data, PandasDataFrame):
+            return str(self.data)  
+        elif isinstance(self.data, PolarsDataFrame):
+            return self.data.__str__()
+        
     def __getitem__(self, key):
         """Allow access to columns using bracket notation."""
         if isinstance(self.data, PandasDataFrame):
