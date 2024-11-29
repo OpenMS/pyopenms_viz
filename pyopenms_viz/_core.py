@@ -25,6 +25,8 @@ from ._misc import (
 from .constants import IS_SPHINX_BUILD
 import warnings
 
+import polars as pl
+
 
 _common_kinds = ("line", "vline", "scatter")
 _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
@@ -150,7 +152,7 @@ class BasePlot(ABC):
     ) -> None:
 
         # Data attributes
-        self.data = data.copy()
+        self.data = self._copy_or_clone(data)
         self.kind = kind
         self.by = by
         self.plot_3d = plot_3d
@@ -222,6 +224,15 @@ class BasePlot(ABC):
         self._load_extension()
         self._create_figure()
 
+    def _copy_or_clone(self, data):
+        """Return a copy or clone of the provided DataFrame based on its type."""
+        if isinstance(data, ABCDataFrame):
+            return data.copy()
+        elif isinstance(data, pl.DataFrame):
+            return data.clone()
+        else:
+            raise TypeError("Unsupported data type. Must be either pandas DataFrame or Polars DataFrame.")
+
     def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
@@ -238,18 +249,30 @@ class BasePlot(ABC):
                 col for col in self.known_columns if col != self.y
             ]
 
-        if self.data[known_columns_without_int].duplicated().any():
-            if self.aggregate_duplicates:
-                self.data = (
-                    self.data[self.known_columns]
-                    .groupby(known_columns_without_int)
-                    .sum()
-                    .reset_index()
-                )
-            else:
-                warnings.warn(
-                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
-                )
+        if isinstance(self.data, ABCDataFrame):
+            if self.data[known_columns_without_int].duplicated().any():
+                if self.aggregate_duplicates:
+                    self.data = (
+                        self.data[self.known_columns]
+                        .groupby(known_columns_without_int)
+                        .sum()
+                        .reset_index()
+                    )
+                else:
+                    warnings.warn(
+                        "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                    )
+        elif isinstance(self.data, pl.DataFrame):
+            if self.data[known_columns_without_int].is_duplicated().any():
+                if self.aggregate_duplicates:
+                    self.data = (
+                        self.data.groupby(known_columns_without_int)
+                        .agg(pl.sum(pl.col(self.known_columns)))
+                    )
+                else:
+                    warnings.warn(
+                        "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                    )
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -564,7 +587,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         super().__init__(data, x, y, **kwargs)
 
         if annotation_data is not None:
-            self.annotation_data = annotation_data.copy()
+            self.annotation_data = self._copy_or_clone(annotation_data)
         else:
             self.annotation_data = None
         self.label_suffix = self.x  # set label suffix for bounding box
@@ -918,9 +941,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Prepares data for plotting based on configuration (copy, relative intensity, bin peaks)."""
 
         # copy spectrum data to not modify the original
-        spectrum = spectrum.copy()
+        spectrum = self._copy_or_clone(spectrum)
         reference_spectrum = (
-            self.reference_spectrum.copy() if reference_spectrum is not None else None
+            self._copy_or_clone(self.reference_spectrum) if reference_spectrum is not None else None
         )
 
         # Convert to relative intensity if required
@@ -1141,7 +1164,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.fill_by_z = fill_by_z
 
         if annotation_data is not None:
-            self.annotation_data = annotation_data.copy()
+            self.annotation_data = self._copy_or_clone(annotation_data)
         else:
             self.annotation_data = None
         self.annotation_x_lb = annotation_x_lb
@@ -1439,7 +1462,7 @@ class PlotAccessor:
         dict
             The arguments to pass to the plotting backend.
         """
-        if isinstance(data, ABCDataFrame):
+        if isinstance(data, ABCDataFrame) or isinstance(data, pl.DataFrame):
             arg_def = [
                 ("x", None),
                 ("y", None),
@@ -1508,7 +1531,7 @@ def _load_backend(backend: str) -> types.ModuleType:
     """
     if backend == "bokeh":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._bokeh")
+            module = importlib.import_module("pyopenms_viz._bokeh")
         except ImportError:
             raise ImportError(
                 "Bokeh is required for plotting when the 'bokeh' backend is selected."
@@ -1517,7 +1540,7 @@ def _load_backend(backend: str) -> types.ModuleType:
 
     elif backend == "matplotlib":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._matplotlib")
+            module = importlib.import_module("pyopenms_viz._matplotlib")
         except ImportError:
             raise ImportError(
                 "Matplotlib is required for plotting when the 'matplotlib' backend is selected."
@@ -1526,7 +1549,7 @@ def _load_backend(backend: str) -> types.ModuleType:
 
     elif backend == "plotly":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._plotly")
+            module = importlib.import_module("pyopenms_viz._plotly")
         except ImportError:
             raise ImportError(
                 "Plotly is required for plotting when the 'plotly' backend is selected."
@@ -1548,3 +1571,43 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
+
+
+
+@pl.api.register_dataframe_namespace("mass")
+class PolarsPyOpenMSViz:
+
+    def __init__(self, df: pl.DataFrame) -> None:
+
+        self._df = df
+        
+    def plot(self, x: str, y: str, kind: str = "line", **kwargs) -> Any:
+
+        return PlotAccessor(self._df)(x, y, kind, **kwargs)
+
+
+    def by_first_letter_of_column_names(self) -> list[pl.DataFrame]:
+
+        return [
+
+            self._df.select([col for col in self._df.columns if col[0] == f])
+
+            for f in dict.fromkeys(col[0] for col in self._df.columns)
+
+        ]
+
+
+    def by_first_letter_of_column_values(self, col: str) -> list[pl.DataFrame]:
+
+        return [
+
+            self._df.filter(pl.col(col).str.starts_with(c))
+
+            for c in sorted(
+
+                set(self._df.select(pl.col(col).str.slice(0, 1)).to_series())
+
+            )
+
+        ]
