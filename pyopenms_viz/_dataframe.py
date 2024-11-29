@@ -26,6 +26,10 @@ class PolarsColumnWrapper:
         """Delegate attribute access to the underlying Polars Series."""
         return getattr(self.series, name)
     
+    def astype(self, dtype):
+        """Cast the Series to the specified dtype."""
+        return self.series.cast(dtype)
+    
     def duplicated(self):
         """Return a boolean Series indicating duplicate values."""
         return self.series.is_duplicated()
@@ -34,6 +38,29 @@ class PolarsColumnWrapper:
         """Return the Series as a list."""
         return self.series.to_list()
    
+class GroupedDataFrame:
+    """Class to handle grouped DataFrames for both Pandas and Polars."""
+    def __init__(self, grouped_data, is_pandas=True):
+        self.grouped_data = grouped_data
+        self.is_pandas = is_pandas
+        
+    def __iter__(self):
+        """Allow iteration over groups."""
+        if self.is_pandas:
+            for group_name, group_df in self.grouped_data:
+                yield group_name, UnifiedDataFrame(group_df)
+        else:
+            for group_name, group_df in self.grouped_data:
+                yield group_name, UnifiedDataFrame(group_df)
+
+    def sum(self):
+        """Sum the grouped data."""
+        if self.is_pandas:
+            summed_data = self.grouped_data.sum().reset_index()  
+            return UnifiedDataFrame(summed_data)
+        else:
+            summed_data = self.grouped_data.agg(pl.all().sum())
+            return UnifiedDataFrame(summed_data)
  
 class UnifiedDataFrame:
     """
@@ -43,14 +70,20 @@ class UnifiedDataFrame:
         if isinstance(data, (PandasDataFrame, PolarsDataFrame)):
             self.data = data
         else:
-            raise TypeError("Unsupported data type. Must be either pandas DataFrame or Polars DataFrame.")
+            raise TypeError(f"Unsupported data type {type(data)}. Must be either pandas DataFrame or Polars DataFrame.")
         
     def __getitem__(self, key):
         """Allow access to columns using bracket notation."""
         if isinstance(self.data, PandasDataFrame):
-            return PandasColumnWrapper(self.data[key])  
+            if isinstance(key, list):  
+                return UnifiedDataFrame(self.data[key])  
+            else:  
+                return PandasColumnWrapper(self.data[key])
         elif isinstance(self.data, PolarsDataFrame):
-            return PolarsColumnWrapper(self.data[key])  
+            if isinstance(key, list):  
+                return UnifiedDataFrame(self.data.select(key)) 
+            else:  
+                return PolarsColumnWrapper(self.data[key]) 
         else:
             raise KeyError(f"Column '{key}' not found in DataFrame.")
     
@@ -85,14 +118,21 @@ class UnifiedDataFrame:
         elif isinstance(self.data, PolarsDataFrame):
             return UnifiedDataFrame(self.data.clone())
 
-    def sort_values(self, by, ascending=True):
+    def sort_values(self, by, ascending=True, inplace=False):
         """Sort the DataFrame by the specified column(s)."""
-        if isinstance(self.data, PandasDataFrame):
-            return UnifiedDataFrame(self.data.sort_values(by=by, ascending=ascending).reset_index(drop=True))
-        elif isinstance(self.data, PolarsDataFrame):
-            return UnifiedDataFrame(
-                self.data.sort(by=by, descending=not ascending).with_row_count().rename({"row_nr": "index"})
-            )
+        if isinstance(self.data, PandasDataFrame):  
+            if inplace:
+                self.data.sort_values(by=by, ascending=ascending, inplace=True)
+            else:
+                sorted_data = self.data.sort_values(by=by, ascending=ascending)
+                return UnifiedDataFrame(sorted_data)
+        
+        elif isinstance(self.data, PolarsDataFrame):  
+            sorted_data = self.data.sort(by=by, descending=not ascending)
+            if inplace:
+                self.data = sorted_data
+            else:
+                return UnifiedDataFrame(sorted_data)
             
     def reset_index(self, drop=False):
         """Reset the index of the DataFrame."""
@@ -101,6 +141,13 @@ class UnifiedDataFrame:
         elif isinstance(self.data, PolarsDataFrame):
             # For Polars we can just return the same DataFrame since it doesn't have an index like Pandas.
             return UnifiedDataFrame(self.data)  
+        
+    def duplicated(self):
+        """Return a boolean Series indicating duplicate rows."""
+        if isinstance(self.data, PandasDataFrame):
+            return self.data.duplicated()
+        elif isinstance(self.data, PolarsDataFrame):
+            return self.data.is_duplicated()
 
     def iterrows(self):
         """Return an iterator for rows of the DataFrame."""
@@ -109,19 +156,14 @@ class UnifiedDataFrame:
         elif isinstance(self.data, PolarsDataFrame):
             return enumerate(self.data.iter_rows(named=True))
         
-    def groupby(self, by):
+    def groupby(self, by, sort=True):
         """Group by specified columns."""
-        if isinstance(self.data, PolarsDataFrame):
-            return UnifiedDataFrame(self.data.groupby(by))  
+        if isinstance(self.data, PandasDataFrame):
+            grouped = self.data.groupby(by, sort=sort)
+            return GroupedDataFrame(grouped)
         elif isinstance(self.data, PolarsDataFrame):
-            return UnifiedDataFrame(self.data.groupby(by))  
-
-    def sum(self):
-        """Sum the grouped data."""
-        if isinstance(self.data, PandasGroupBy):  
-            return UnifiedDataFrame(self.data.sum().reset_index())  
-        elif isinstance(self.data, PolarsGroupBy):  
-            return UnifiedDataFrame(self.data.agg(pl.sum(pl.col("*"))))  
+            grouped = self.data.group_by(by)
+            return GroupedDataFrame(grouped, is_pandas=False)
         
     def tolist(self, column_name):
         """Return a list of values from a specified column."""

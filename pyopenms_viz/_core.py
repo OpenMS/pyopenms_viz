@@ -151,9 +151,9 @@ class BasePlot(ABC):
         _config: _BasePlotConfig | None = None,
         **kwargs,
     ) -> None:
-
+        
         # Data attributes
-        self.data = UnifiedDataFrame(data)
+        self.data = UnifiedDataFrame(data) if not isinstance(data, UnifiedDataFrame) else data
         self.kind = kind
         self.by = by
         self.plot_3d = plot_3d
