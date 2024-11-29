@@ -7,6 +7,8 @@ from polars.dataframe.group_by import GroupBy as PolarsGroupBy
 import polars as pl
 
 
+
+
 class PandasColumnWrapper:
     """Wrapper for Pandas Series to add custom methods."""
     def __init__(self, series):
@@ -61,7 +63,8 @@ class GroupedDataFrame:
         else:
             summed_data = self.grouped_data.agg(pl.all().sum())
             return UnifiedDataFrame(summed_data)
- 
+
+@pl.api.register_dataframe_namespace("mass") 
 class UnifiedDataFrame:
     """
     Wrapper class for Pandas and Polars DataFrames to provide a unified interface.
@@ -164,7 +167,11 @@ class UnifiedDataFrame:
         elif isinstance(self.data, PolarsDataFrame):
             grouped = self.data.group_by(by)
             return GroupedDataFrame(grouped, is_pandas=False)
-        
+
+    def plot(self, x: str, y: str, kind: str = "line", **kwargs):
+        from ._core import PlotAccessor
+        return PlotAccessor(self.data)(x, y, kind, **kwargs)
+    
     def tolist(self, column_name):
         """Return a list of values from a specified column."""
         if isinstance(self.data, PandasDataFrame):
