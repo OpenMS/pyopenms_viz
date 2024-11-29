@@ -91,6 +91,36 @@ class GroupedDataFrame:
         else:
             summed_data = self.grouped_data.agg(pl.all().sum())
             return UnifiedDataFrame(summed_data)
+        
+    def agg(self, agg_dict):
+        """
+        Aggregate the grouped data using the specified aggregation methods.
+        
+        Parameters:
+        - agg_dict: A dictionary where keys are column names and values are aggregation functions.
+        
+        Returns:
+        A UnifiedDataFrame containing the aggregated results.
+        """
+        if self.is_pandas:
+            aggregated_data = self.grouped_data.agg(agg_dict).reset_index()
+            return UnifiedDataFrame(aggregated_data)
+        
+        else:
+            # For Polars, we need to construct the aggregation expression
+            agg_expressions = []
+            for col, func in agg_dict.items():
+                if func == 'mean':
+                    agg_expressions.append(pl.col(col).mean().alias(col))
+                elif func == 'sum':
+                    agg_expressions.append(pl.col(col).sum().alias(col))
+                elif func == 'max':
+                    agg_expressions.append(pl.col(col).max().alias(col))
+                else:
+                    raise ValueError(f"Unsupported aggregation function: {func}")
+
+            aggregated_data = self.grouped_data.agg(agg_expressions)
+            return UnifiedDataFrame(aggregated_data)
 
 @pl.api.register_dataframe_namespace("mass") 
 class UnifiedDataFrame:
@@ -110,6 +140,13 @@ class UnifiedDataFrame:
         elif isinstance(self.data, PolarsDataFrame):
             return self.data.__str__()
         
+    def __getattribute__(self, name):
+        """Delegate attribute access to the underlying DataFrame."""
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return getattr(self.data, name)
+        
     def __getitem__(self, key):
         """Allow access to columns using bracket notation."""
         if isinstance(self.data, PandasDataFrame):
@@ -127,12 +164,15 @@ class UnifiedDataFrame:
     
     def __setitem__(self, key, value):
         """Allow assignment to columns using bracket notation."""
-        if isinstance(self.data, PandasDataFrame):
+        if isinstance(self.data, pd.DataFrame):
             self.data[key] = value  
-        elif isinstance(self.data, PolarsDataFrame):
-            self.data = self.data.with_columns(
-                PolarsSeries(key, value)  
-            )
+        elif isinstance(self.data, pl.DataFrame):
+            # Ensure value is of the correct type before assignment
+            if isinstance(value, PolarsColumnWrapper):
+                self.data = self.data.with_columns(value.series.alias(key))  
+            else:
+                # If value is not wrapped, convert it to a Polars Series
+                self.data = self.data.with_columns(pl.Series(name=key, values=value))
             
     def __len__(self):
         """Return the number of rows in the DataFrame."""
@@ -259,3 +299,38 @@ def concat(udfs, ignore_index=True):
     
     else:
         raise TypeError("Unsupported data type in UnifiedDataFrames.")
+    
+
+def cut(series, bins, right=True, labels=None):
+    """
+    Bin values into discrete intervals for a Series (Pandas or Polars).
+    
+    Parameters:
+    - series: A PolarsColumnWrapper or Pandas Series instance.
+    - bins: The criteria to bin by (can be an integer or a sequence of scalars).
+    - right: Indicates whether intervals include the rightmost edge.
+    - labels: Specifies the labels for the returned bins.
+    
+    Returns:
+    A new Series with binned data.
+    """
+    if isinstance(series.series, pd.Series):
+        # Use Pandas cut
+        binned = pd.cut(series.series, bins=bins, right=right, labels=labels)
+        return PandasColumnWrapper(binned)  # Assuming you have a PandasColumnWrapper
+
+    elif isinstance(series.series, pl.Series):
+        if isinstance(bins, int):
+            # Create equal-width bins if bins is an integer
+            min_val = series.series.min()
+            max_val = series.series.max()
+            bin_edges = [min_val + i * (max_val - min_val) / bins for i in range(bins + 1)]
+        else:
+            bin_edges = bins
+        
+        # Use Polars cut method with generated bin edges
+        binned_series = series.series.cut(breaks=bin_edges, labels=labels, left_closed=not right)
+        return PolarsColumnWrapper(binned_series)  # Return wrapped Polars Series
+    
+    else:
+        raise TypeError("Unsupported data type in the provided series.")
