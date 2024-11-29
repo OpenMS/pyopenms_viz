@@ -53,7 +53,7 @@ class GroupedDataFrame:
                 yield group_name, UnifiedDataFrame(group_df)
         else:
             for group_name, group_df in self.grouped_data:
-                yield group_name, UnifiedDataFrame(group_df)
+                yield group_name[0], UnifiedDataFrame(group_df)
 
     def sum(self):
         """Sum the grouped data."""
@@ -105,6 +105,14 @@ class UnifiedDataFrame:
             return len(self.data)
         elif isinstance(self.data, PolarsDataFrame):
             return self.data.height
+    
+    @property
+    def index(self):
+        """Return the index of the DataFrame."""
+        if isinstance(self.data, PandasDataFrame):
+            return self.data.index  
+        elif isinstance(self.data, PolarsDataFrame):
+            return list(range(self.data.height)) 
     
     @property
     def columns(self):
