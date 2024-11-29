@@ -4,6 +4,7 @@ from polars.dataframe.frame import DataFrame as PolarsDataFrame
 from polars.series import Series as PolarsSeries
 from polars.dataframe.group_by import GroupBy as PolarsGroupBy
 
+import pandas as pd
 import polars as pl
 
 
@@ -26,9 +27,21 @@ class PolarsColumnWrapper:
         """Delegate attribute access to the underlying Polars Series."""
         return getattr(self.series, name)
     
+    def __getitem__(self, key):
+        """Allow access to elements using bracket notation."""
+        return PolarsColumnWrapper(self.series[key])
+    
+    def __len__(self):
+        """Return the length of the Series."""
+        return self.series.len()
+    
     def astype(self, dtype):
         """Cast the Series to the specified dtype."""
         return self.series.cast(dtype)
+    
+    def unique(self):
+        """Return unique values in the Series."""
+        return self.series.unique().to_numpy()
     
     def duplicated(self, keep='first'):
         """Return a boolean Series indicating duplicate values."""
@@ -46,6 +59,10 @@ class PolarsColumnWrapper:
 
         else:
             raise ValueError("keep must be 'first', 'last', or False")
+        
+    def apply(self, func):
+        """Apply a function to each element of the Series."""
+        return self.series.map_elements(func, skip_nulls=True)
 
     def tolist(self):
         """Return the Series as a list."""
@@ -211,3 +228,34 @@ class UnifiedDataFrame:
             return self.data.to_dict(orient=orient)
         elif isinstance(self.data, PolarsDataFrame):
             return self.data.to_dict(as_series=False)
+        
+
+def concat(udfs, ignore_index=True):
+    """
+    Concatenate multiple UnifiedDataFrames into one.
+    
+    Parameters:
+    - udfs: A list of UnifiedDataFrames to concatenate.
+    - ignore_index: Whether to ignore the index during concatenation.
+    
+    Returns:
+    A new UnifiedDataFrame containing concatenated data.
+    """
+    if not udfs:
+        raise ValueError("No UnifiedDataFrames provided for concatenation.")
+    
+    if hasattr(udfs[0], 'data'): # If udfs is a list of UnifiedDataFrames
+        dataframes = [udf.data for udf in udfs]
+    else:
+        dataframes = udfs
+    
+    if isinstance(dataframes[0], PandasDataFrame):
+        concatenated_df = pd.concat(dataframes, ignore_index=ignore_index)
+        return UnifiedDataFrame(concatenated_df)
+    
+    elif isinstance(dataframes[0], PolarsDataFrame):
+        concatenated_df = pl.concat(dataframes)
+        return UnifiedDataFrame(concatenated_df)
+    
+    else:
+        raise TypeError("Unsupported data type in UnifiedDataFrames.")
