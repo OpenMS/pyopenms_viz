@@ -15,6 +15,7 @@ from pandas.util._decorators import Appender
 
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 
+from ._dataframe import UnifiedDataFrame
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import (
     ColorGenerator,
@@ -152,7 +153,7 @@ class BasePlot(ABC):
     ) -> None:
 
         # Data attributes
-        self.data = self._copy_or_clone(data)
+        self.data = UnifiedDataFrame(data)
         self.kind = kind
         self.by = by
         self.plot_3d = plot_3d
@@ -224,15 +225,6 @@ class BasePlot(ABC):
         self._load_extension()
         self._create_figure()
 
-    def _copy_or_clone(self, data):
-        """Return a copy or clone of the provided DataFrame based on its type."""
-        if isinstance(data, ABCDataFrame):
-            return data.copy()
-        elif isinstance(data, pl.DataFrame):
-            return data.clone()
-        else:
-            raise TypeError("Unsupported data type. Must be either pandas DataFrame or Polars DataFrame.")
-
     def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
@@ -249,30 +241,18 @@ class BasePlot(ABC):
                 col for col in self.known_columns if col != self.y
             ]
 
-        if isinstance(self.data, ABCDataFrame):
-            if self.data[known_columns_without_int].duplicated().any():
-                if self.aggregate_duplicates:
-                    self.data = (
-                        self.data[self.known_columns]
-                        .groupby(known_columns_without_int)
-                        .sum()
-                        .reset_index()
-                    )
-                else:
-                    warnings.warn(
-                        "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
-                    )
-        elif isinstance(self.data, pl.DataFrame):
-            if self.data[known_columns_without_int].is_duplicated().any():
-                if self.aggregate_duplicates:
-                    self.data = (
-                        self.data.groupby(known_columns_without_int)
-                        .agg(pl.sum(pl.col(self.known_columns)))
-                    )
-                else:
-                    warnings.warn(
-                        "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
-                    )
+        if self.data[known_columns_without_int].duplicated().any():
+            if self.aggregate_duplicates:
+                self.data = (
+                    self.data[self.known_columns]
+                    .groupby(known_columns_without_int)
+                    .sum()
+                    .reset_index()
+                )
+            else:
+                warnings.warn(
+                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                )
 
     def _verify_column(self, colname: str | int, name: str) -> str:
         """fetch data from column name
@@ -587,7 +567,8 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         super().__init__(data, x, y, **kwargs)
 
         if annotation_data is not None:
-            self.annotation_data = self._copy_or_clone(annotation_data)
+            annotation_data = UnifiedDataFrame(annotation_data)
+            self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
         self.label_suffix = self.x  # set label suffix for bounding box
@@ -748,7 +729,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, **kwargs)
 
-        self.reference_spectrum = reference_spectrum
+        self.reference_spectrum = UnifiedDataFrame(reference_spectrum) if reference_spectrum is not None else None
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
         self.bin_peaks = bin_peaks
@@ -941,9 +922,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Prepares data for plotting based on configuration (copy, relative intensity, bin peaks)."""
 
         # copy spectrum data to not modify the original
-        spectrum = self._copy_or_clone(spectrum)
+        spectrum = spectrum.copy()
         reference_spectrum = (
-            self._copy_or_clone(self.reference_spectrum) if reference_spectrum is not None else None
+            self.reference_spectrum if reference_spectrum is not None else None
         )
 
         # Convert to relative intensity if required
@@ -1164,7 +1145,8 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.fill_by_z = fill_by_z
 
         if annotation_data is not None:
-            self.annotation_data = self._copy_or_clone(annotation_data)
+            annotation_data = UnifiedDataFrame(annotation_data)
+            self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
         self.annotation_x_lb = annotation_x_lb
