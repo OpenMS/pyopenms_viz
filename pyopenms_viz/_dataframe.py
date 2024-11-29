@@ -193,3 +193,10 @@ class UnifiedDataFrame:
             return self.data[column_name].tolist()
         elif isinstance(self.data, PolarsDataFrame):
             return self.data[column_name].to_list()
+        
+    def to_dict(self):
+        """Return the DataFrame as a dictionary."""
+        if isinstance(self.data, PandasDataFrame):
+            return self.data.to_dict()
+        elif isinstance(self.data, PolarsDataFrame):
+            return self.data.to_dict()
