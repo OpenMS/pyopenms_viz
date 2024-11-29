@@ -7,8 +7,6 @@ from polars.dataframe.group_by import GroupBy as PolarsGroupBy
 import polars as pl
 
 
-
-
 class PandasColumnWrapper:
     """Wrapper for Pandas Series to add custom methods."""
     def __init__(self, series):
@@ -32,9 +30,22 @@ class PolarsColumnWrapper:
         """Cast the Series to the specified dtype."""
         return self.series.cast(dtype)
     
-    def duplicated(self):
+    def duplicated(self, keep='first'):
         """Return a boolean Series indicating duplicate values."""
-        return self.series.is_duplicated()
+        duplicated_mask = self.series.is_duplicated()
+        if keep == 'first':
+            first_occurrences = self.series.is_first_distinct()
+            return duplicated_mask & ~first_occurrences
+
+        elif keep == 'last':
+            last_occurrences = self.series.is_last_distinct()
+            return duplicated_mask & ~last_occurrences
+
+        elif keep is False:
+            return duplicated_mask.cast(pl.Boolean)
+
+        else:
+            raise ValueError("keep must be 'first', 'last', or False")
 
     def tolist(self):
         """Return the Series as a list."""
