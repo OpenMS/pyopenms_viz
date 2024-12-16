@@ -690,17 +690,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return freedman_diaconis_rule(self.data, self.x)
             elif self.bin_method == "mz-tol-bin":
                 self.num_x_bins = mz_tolerance_binning(self.data, self.x, self.mz_tol)
-            else:  # self.bin_method == 'none'
-                return self.num_x_bins
+            elif self.bin_method == "none":
+                self.num_x_bins = self.num_x_bins
+            else:  # throw error if bin_method is not recognized
+                raise ValueError(f"bin_method {self.bin_method} not recognized")
+        else:
+            self.num_x_bins = self.num_x_bins
 
-        return self.num_x_bins
-
-    def __init__(
-        self,
-        data,
-        **kwargs,
-    ) -> None:
-        super().__init__(data, **kwargs)
+        self._check_and_aggregate_duplicates()
 
         self.plot()
 
