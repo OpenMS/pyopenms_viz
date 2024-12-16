@@ -35,7 +35,10 @@ def plot(data, kind, **kwargs):
     if plot_obj.show_plot:
         return plot_obj.show()
     else:
-        return plot_obj.fig
+        if isinstance(plot_obj, MATPLOTLIBPeakMapPlot) and plot_obj.add_marginals:
+            return plot_obj.fig
+        else:
+            return plot_obj.canvas
 
 
 __all__ = ["plot"]

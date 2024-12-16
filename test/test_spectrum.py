@@ -12,7 +12,7 @@ import pandas as pd
     [
         dict(),
         dict(by="color_annotation"),
-        dict(by="color_annotation", scale_intensity=True),
+        dict(by="color_annotation", relative_intensity=True),
         dict(xlabel="RETENTION", ylabel="INTENSITY"),
     ],
 )

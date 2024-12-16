@@ -20,7 +20,7 @@ def load_backend(request):
     [
         dict(),
         dict(by="Annotation"),
-        dict(scale_intensity=True),
+        dict(relative_intensity=True),
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):

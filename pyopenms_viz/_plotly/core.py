@@ -458,61 +458,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
             )
             self.fig.update_layout(scene_camera=camera)
 
-    def _add_annotations(
-        self,
-        ann_texts: list[str],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-        ann_zs: list[float] = None,
-    ):
-        annotations = []
-        for i, (text, x, y, color) in enumerate(
-            zip(ann_texts, ann_xs, ann_ys, ann_colors)
-        ):
-            if text is not nan and text != "" and text != "nan":
-                if is_latex_formatted(text):
-                    # NOTE: Plotly uses MathJax for LaTeX rendering. Newlines are rendered as \\.
-                    text = text.replace("\n", r" \\\ ")
-                    text = r"${}$".format(text)
-                else:
-                    text = text.replace("\n", "<br>")
-                if not self.plot_3d:
-                    annotation = go.layout.Annotation(
-                        text=text,
-                        x=x,
-                        y=y,
-                        showarrow=False,
-                        xanchor="left",
-                        font=dict(
-                            family="Open Sans Mono, monospace",
-                            size=self.annotation_font_size,
-                            color=color,
-                        ),
-                    )
-                else:
-                    annotation = go.layout.scene.Annotation(
-                        text=text,
-                        x=x,
-                        y=y,
-                        z=ann_zs[i],
-                        showarrow=False,
-                        xanchor="left",
-                        font=dict(
-                            family="Open Sans Mono, monospace",
-                            size=self.annotation_font_size,
-                            color=color,
-                        ),
-                    )
-
-                annotations.append(annotation)
-        if not self.plot_3d:
-            for annotation in annotations:
-                self.fig.add_annotation(annotation)
-        else:
-            for annotation in annotations:
-                fig.layout.scene.annotations += (annotation,)
-
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
@@ -561,7 +506,7 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         else:
             for group, df in self.data.groupby(self.by):
                 if self.z is not None:
-                    marker_dict["color"] = self.df[self.z]
+                    marker_dict["color"] = self.data[self.z]
                 trace = go.Scatter(
                     x=df[self.x],
                     y=df[self.y],
@@ -640,9 +585,9 @@ class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
                     line=dict(
                         color=next(color_gen),
                         dash=bokeh_line_dash_mapper(
-                            self.plot_config.annotation_line_type, "plotly"
+                            self.annotation_line_type, "plotly"
                         ),
-                        width=self.plot_config.annotation_line_width,
+                        width=self.annotation_line_width,
                     ),
                     name=legend_label,
                 )
@@ -660,7 +605,7 @@ class PLOTLYMobilogramPlot(PLOTLYChromatogramPlot, MobilogramPlot):
 class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
     def _prepare_data(self, df, label_suffix=" (ref)"):
         df = super()._prepare_data(df, label_suffix)
-        if self.by is not None:
+        if self.reference_spectrum is not None and self.by is not None:
             self.reference_spectrum[self.by] = (
                 self.reference_spectrum[self.by] + label_suffix
             )
@@ -689,21 +634,22 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
-            return self.fig
         else:
             vlinePlot = self.get_vline_renderer(
-                self.data, x=self.x, y=self.y, _config=self._config
+                data=self.data, x=self.x, y=self.y, config=self._config
             )
-            self.fig = vlinePlot.generate(data=self.data, x=self.x, y=self.y)
+            self.fig = vlinePlot.generate(None, None)
             if self.annotation_data is not None:
                 a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
                     self.annotation_data, self.x, self.y, self.z
                 )
                 vlinePlot._add_annotations(self.fig, a_t, a_x, a_y, a_c, a_z)
 
-            # TODO: Custom tooltips currently not working as expected for 3D plot, it has it's own tooltip that works out of the box, but with set x, y, z name to value
-            # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
-            # self._add_tooltips(fig, tooltips, custom_hover_data=custom_hover_data
+        return self.fig
+
+        # TODO: Custom tooltips currently not working as expected for 3D plot, it has it's own tooltip that works out of the box, but with set x, y, z name to value
+        # tooltips, custom_hover_data = self._create_tooltips({self.xlabel: x, self.ylabel: y, self.zlabel: z})
+        # self._add_tooltips(fig, tooltips, custom_hover_data=custom_hover_data
 
     def create_x_axis_plot(self) -> Figure:
         x_fig = super().create_x_axis_plot()

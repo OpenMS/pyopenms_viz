@@ -249,21 +249,40 @@ class MATPLOTLIBPlot(BasePlot, ABC):
 
     def _add_annotations(
         self,
-        fig,
+        ax,
         ann_texts: list[list[str]],
         ann_xs: list[float],
         ann_ys: list[float],
         ann_colors: list[str],
+        ann_zs: list[float] = None,
     ):
-        for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            fig.annotate(
-                text,
-                xy=(x, y),
-                xytext=(3, 0),
-                textcoords="offset points",
-                fontsize=8,
-                color=color,
-            )
+        for i, (text, x, y, color) in enumerate(
+            zip(ann_texts, ann_xs, ann_ys, ann_colors)
+        ):
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
+                if not self.plot_3d:
+                    ax.annotate(
+                        text,
+                        xy=(x, y),
+                        xytext=(3, 0),
+                        textcoords="offset points",
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
+                else:
+                    ax.text(
+                        x=x,
+                        y=y,
+                        z=ann_zs[i],
+                        s=text,
+                        fontsize=self.annotation_font_size,
+                        color=color,
+                    )
 
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
@@ -363,42 +382,6 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     def _get_annotations():
         pass
 
-    def _add_annotations(
-        self,
-        ann_texts: list[list[str]],
-        ann_xs: list[float],
-        ann_ys: list[float],
-        ann_colors: list[str],
-        ann_zs: list[float] = None,
-    ):
-        for i, (text, x, y, color) in enumerate(
-            zip(ann_texts, ann_xs, ann_ys, ann_colors)
-        ):
-            if text is not nan and text != "" and text != "nan":
-                if is_latex_formatted(text):
-                    # Wrap the text in '$' to indicate LaTeX math mode
-                    text = "\n".join(
-                        [r"${}$".format(line) for line in text.split("\n")]
-                    )
-                if not self.plot_3d:
-                    self.ax.annotate(
-                        text,
-                        xy=(x, y),
-                        xytext=(3, 0),
-                        textcoords="offset points",
-                        fontsize=self.annotation_font_size,
-                        color=color,
-                    )
-                else:
-                    self.ax.text(
-                        x=x,
-                        y=y,
-                        z=ann_zs[i],
-                        s=text,
-                        fontsize=self.annotation_font_size,
-                        color=color,
-                    )
-
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
@@ -437,17 +420,12 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
             if self.z is not None:
                 vmin, vmax = self.data[self.z].min(), self.data[self.z].max()
             for group, df in self.data.groupby(self.by):
-                use_color = self.current_color if self.z is None else self.data[self.z]
+                use_color = self.current_color if self.z is None else df[self.z]
                 # Normalize colors if z is specified
                 if self.z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)
                     scatter = self.ax.scatter(
-                        df[self.x],
-                        df[self.y],
-                        c=use_color,
-                        norm=normalize,
-                        marker=self.current_marker,
-                        **kwargs,
+                        df[self.x], df[self.y], c=use_color, norm=normalize, **kwargs
                     )
                 else:
                     scatter = self.ax.scatter(
@@ -505,7 +483,7 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
             self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
 
         legend_items = []
@@ -516,17 +494,17 @@ class MATPLOTLIBChromatogramPlot(MATPLOTLIB_MSPlot, ChromatogramPlot):
                 x=feature["leftWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.line_width,
+                lw=self.annotation_line_width,
                 color=use_color,
-                ls=self.feature_config.line_type,
+                ls=self.annotation_line_type,
             )
             self.ax.vlines(
                 x=feature["rightWidth"],
                 ymin=0,
                 ymax=self.data[self.y].max(),
-                lw=self.feature_config.line_width,
+                lw=self.annotation_line_width,
                 color=use_color,
-                ls=self.feature_config.line_type,
+                ls=self.annotation_line_type,
             )
             legend_items.append(left_vlne)
 

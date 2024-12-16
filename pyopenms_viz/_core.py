@@ -441,7 +441,6 @@ class VLinePlot(BasePlot, VLineConfig, ABC):
     @abstractmethod
     def _add_annotations(
         self,
-        fig,
         ann_texts: list[str],
         ann_xs: list[float],
         ann_ys: list[float],
@@ -451,7 +450,6 @@ class VLinePlot(BasePlot, VLineConfig, ABC):
         Add annotations to a VLinePlot figure.
 
         Parameters:
-        fig: The figure to add annotations to.
         ann_texts (list[str]): List of texts for the annotations.
         ann_xs (list[float]): List of x-coordinates for the annotations.
         ann_ys (list[float]): List of y-coordinates for the annotations.
@@ -650,6 +648,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _configClass(self):
         return SpectrumConfig
 
+    def __init__(
+        self,
+        data,
+        **kwargs,
+    ) -> None:
+        super().__init__(data, **kwargs)
+
+        self.plot()
+
     def load_config(self, **kwargs):
         if self._config is None:
             self._config = SpectrumConfig(**kwargs)
@@ -735,11 +742,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             self.by = self.ion_annotation
 
-        vlinePlot = self.get_vline_renderer(
-            data=spectrum,
-            config=self._config,
-        )
-
         # color_gen = self._get_colors(spectrum, "peak")
 
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
@@ -751,7 +753,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
             spectrum, self.x, self.y
         )
-        vlinePlot._add_annotations(ann_texts, ann_xs, ann_ys, ann_colors)
+        spectrumPlot._add_annotations(
+            self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
+        )
 
         # Mirror spectrum
         if self.mirror_spectrum and self.reference_spectrum is not None:
@@ -759,18 +763,20 @@ class SpectrumPlot(BaseMSPlot, ABC):
             # Set intensity to negative values
             reference_spectrum[self.y] = reference_spectrum[self.y] * -1
 
-            mirror_spectrum = self.get_vline_renderer(
+            mirrorSpectrumPlot = self.get_vline_renderer(
                 data=self.reference_spectrum, config=self._config
             )
 
-            mirror_spectrum.generate(None, None)
-            self.plot_x_axis_line()
+            mirrorSpectrumPlot.generate(None, None)
+            self.plot_x_axis_line(self.canvas)
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
                 reference_spectrum, self.x, self.y
             )
-            spectrum._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
+            mirrorSpectrumPlot._add_annotations(
+                self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
+            )
 
         # Plot horizontal line to hide connection between peaks
         self.plot_x_axis_line(
@@ -1065,7 +1071,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
     def prepare_data(self):
         # Convert intensity values to relative intensity if required
-        if self.relative_intensity:
+        if self.relative_intensity and self.z is not None:
             self.data[self.z] = self.data[self.z] / max(self.data[self.z]) * 100
 
         # Bin peaks if required
@@ -1075,20 +1081,21 @@ class PeakMapPlot(BaseMSPlot, ABC):
         ):
             self.data[self.x] = cut(self.data[self.x], bins=self.num_x_bins)
             self.data[self.y] = cut(self.data[self.y], bins=self.num_y_bins)
-            if self.by is not None:
-                # Group by x, y and by columns and calculate the mean intensity within each bin
-                self.data = (
-                    self.data.groupby([self.x, self.y, self.by], observed=True)
-                    .agg({self.z: self.aggregation_method})
-                    .reset_index()
-                )
-            else:
-                # Group by x and y bins and calculate the mean intensity within each bin
-                self.data = (
-                    self.data.groupby([self.x, self.y], observed=True)
-                    .agg({self.z: "mean"})
-                    .reset_index()
-                )
+            if self.z is not None:
+                if self.by is not None:
+                    # Group by x, y and by columns and calculate the mean intensity within each bin
+                    self.data = (
+                        self.data.groupby([self.x, self.y, self.by], observed=True)
+                        .agg({self.z: self.aggregation_method})
+                        .reset_index()
+                    )
+                else:
+                    # Group by x and y bins and calculate the mean intensity within each bin
+                    self.data = (
+                        self.data.groupby([self.x, self.y], observed=True)
+                        .agg({self.z: "mean"})
+                        .reset_index()
+                    )
             self.data[self.x] = (
                 self.data[self.x].apply(lambda interval: interval.mid).astype(float)
             )
@@ -1115,7 +1122,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 self._add_bounding_vertical_drawer()
             return self.combine_plots(main_plot, x_fig, y_fig)
         else:
-            self.fig = self.create_main_plot()
+            self.canvas = self.create_main_plot()
             if self._interactive:
                 self._add_bounding_box_drawer()
 
@@ -1198,7 +1205,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 canvas=canvas,
                 config=self.y_plot_config,
             )
-            y_fig = y_plot_obj.generate()
+            y_fig = y_plot_obj.generate(None, None)
         elif self.y_kind == "spectrum":
             y_plot_obj = self.get_vline_renderer(
                 data=y_data,

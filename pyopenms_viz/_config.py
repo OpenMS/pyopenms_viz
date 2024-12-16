@@ -259,7 +259,7 @@ class SpectrumConfig(VLineConfig):
     num_x_bins: int = 50
 
     # Annotation settings
-    annotate_top_n_peaks: int | None | Literal["all"] = (5,)
+    annotate_top_n_peaks: int | None | Literal["all"] = 5
     annotate_mz: bool = (True,)
 
     # Columns for additional annotation
