@@ -2947,7 +2947,7 @@
     },
     "xaxis": {
       "title": {
-        "text": "Retention Time",
+        "text": "m\u002fz",
         "font": {
           "family": "Helvetica",
           "size": 16
@@ -2968,7 +2968,7 @@
     },
     "yaxis": {
       "title": {
-        "text": "mass-to-charge",
+        "text": "Retention Time",
         "font": {
           "family": "Helvetica",
           "size": 16
@@ -2992,7 +2992,7 @@
     "scene": {
       "xaxis": {
         "title": {
-          "text": "Retention Time"
+          "text": "m\u002fz"
         },
         "nticks": 4,
         "gridcolor": "rgb(255, 255, 255)",
@@ -3000,7 +3000,7 @@
       },
       "yaxis": {
         "title": {
-          "text": "mass-to-charge"
+          "text": "Retention Time"
         },
         "nticks": 4,
         "gridcolor": "rgb(255, 255, 255)",
