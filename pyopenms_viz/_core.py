@@ -704,7 +704,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """
         Get a list of intervals to use in bins. Here bins are not evenly spaced. Currently this only occurs in mz-tol setting
         """
-        if self.bin_method == "mz-tol-bin":
+        if self.bin_method == "mz-tol-bin" and self.bin_peaks == "auto":
             return mz_tolerance_binning(self.data, self.x, self.mz_tol)
         else:
             return None
@@ -840,6 +840,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # if _peak_bins is set that they are used as the bins over the num_bins parameter
         if self._peak_bins is not None:
+            print("peak bins")
 
             # Function to assign each value to a bin
             def assign_bin(value):
@@ -851,6 +852,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             # Apply the binning
             df[self.x] = df[self.x].apply(assign_bin)
         else:  # use computed number of bins, bins evenly spaced
+            print("computed bins")
             df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
 
         # TODO: Find a better way to retain other columns
@@ -874,6 +876,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
             .agg({self.y: self.aggregation_method})
             .reset_index()
         )
+
+        print(df)
 
         def convert_to_numeric(value):
             if isinstance(value, Interval):
