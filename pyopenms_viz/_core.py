@@ -581,7 +581,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
         if self._interactive:
-            self.manual_boundary_renderer = self._add_bounding_box_drawer()
+            self.manual_boundary_renderer = self._add_bounding_vertical_drawer()
 
         if self.annotation_data is not None:
             self._add_peak_boundaries(self.annotation_data)
