@@ -402,13 +402,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         Plot a scatter plot
         """
 
-        kwargs = dict(
-            s=self.marker_size,
-            edgecolors="none",
-            cmap="magma_r",
-            zorder=2,
-            marker=self.current_marker,
-        )
+        kwargs = dict(s=self.marker_size, edgecolors="none", cmap="magma_r", zorder=2)
 
         legend_lines = []
         legend_labels = []
@@ -416,7 +410,11 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         if self.by is None:
             use_color = self.current_color if self.z is None else self.data[self.z]
             scatter = self.ax.scatter(
-                self.data[self.x], self.data[self.y], c=use_color, **kwargs
+                self.data[self.x],
+                self.data[self.y],
+                c=use_color,
+                marker=self.current_marker,
+                **kwargs,
             )
         else:
             if self.z is not None:
@@ -427,11 +425,21 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 if self.z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)
                     scatter = self.ax.scatter(
-                        df[self.x], df[self.y], c=use_color, norm=normalize, **kwargs
+                        df[self.x],
+                        df[self.y],
+                        c=use_color,
+                        norm=normalize,
+                        marker=self.current_marker,
+                        **kwargs,
                     )
                 else:
+                    df = df[[self.x, self.y]].drop_duplicates()
                     scatter = self.ax.scatter(
-                        df[self.x], df[self.y], c=use_color, **kwargs
+                        df[self.x],
+                        df[self.y],
+                        c=use_color,
+                        marker=self.current_marker,
+                        **kwargs,
                     )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
