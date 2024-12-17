@@ -19,7 +19,9 @@ def load_backend(request):
     "kwargs",
     [
         dict(xlabel="m/z", ylabel="Retention Time", zlabel="Intensity"),
-        dict(by="Annotation"),
+        dict(
+            by="Annotation", xlabel="m/z", ylabel="Retention Time", zlabel="Intensity"
+        ),
         dict(relative_intensity=True),
     ],
 )
