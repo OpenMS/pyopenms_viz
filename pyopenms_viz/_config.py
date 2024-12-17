@@ -194,11 +194,11 @@ class ScatterConfig(BasePlotConfig):
 @dataclass(kw_only=True)
 class ChromatogramConfig(LineConfig):
     def default_legend_factory():
-        return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.0, 0.5))
+        return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.2, 0.5))
 
     annotation_data: pd.DataFrame | None = None
-    annotation_colormap: str = "viridis"
-    annotation_line_width: float = 1
+    annotation_colormap: str = "Dark2"
+    annotation_line_width: float = 3
     annotation_line_type: str = "solid"
     annotation_legend_config: LegendConfig = field(
         default_factory=default_legend_factory
@@ -208,6 +208,15 @@ class ChromatogramConfig(LineConfig):
     xlabel: str = "Retention Time"
     ylabel: str = "Intensity"
     title: str = "Chromatogram"
+
+
+@dataclass(kw_only=True)
+class MobilogramConfig(ChromatogramConfig):
+    ### override from previous class
+
+    xlabel: str = "Ion Mobility"
+    ylabel: str = "Intensity"
+    title: str = "Mobilogram"
 
     @classmethod
     def from_dict(
@@ -303,7 +312,7 @@ class PeakMapConfig(ScatterConfig):
     ### override axes and title labels
     xlabel: str = "Retention Time"
     ylabel: str = "m/z"
-    title: str = "Peak Map"
+    title: str = "PeakMap"
     x_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
     y_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
 
@@ -467,7 +476,7 @@ class FeatureConfig:
         return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.5, 0.5))
 
     colormap: str = "viridis"
-    line_width: float = 1
+    line_width: float = 1.5
     line_type: str = "solid"
     legend: LegendConfig = field(default_factory=default_legend_factory)
 

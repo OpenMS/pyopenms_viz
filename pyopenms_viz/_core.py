@@ -20,6 +20,7 @@ from ._config import (
     BasePlotConfig,
     SpectrumConfig,
     ChromatogramConfig,
+    MobilogramConfig,
     PeakMapConfig,
     LineConfig,
     VLineConfig,
@@ -611,6 +612,22 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
+
+    @property
+    def _kind(self):
+        return "mobilogram"
+
+    @property
+    def _configClass(self):
+        return MobilogramConfig
+
+    def load_config(self, **kwargs):
+        if self._config is None:
+            self._config = MobilogramConfig(**kwargs)
+            self._update_from_config(self._config)
+            self.update_config()
+        else:
+            return super().load_config(**kwargs)
 
     def plot(self):
         fig = super().plot()
