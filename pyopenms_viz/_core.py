@@ -765,6 +765,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             self.by = self.ion_annotation
 
+        # Annotations for spectrum
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+            spectrum, self.x, self.y
+        )
+
         self.color = self._get_colors(spectrum, kind="peak")
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
         spectrumPlot = self.get_line_renderer(
@@ -776,10 +781,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
 
-        # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-            spectrum, self.x, self.y
-        )
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
         )
@@ -868,7 +869,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             cols.append(self.annotation_color)
 
         # Group by x bins and calculate the sum intensity within each bin
-        self.data = (
+        df = (
             self.data.groupby(cols, observed=True)
             .agg({self.y: self.aggregation_method})
             .reset_index()
