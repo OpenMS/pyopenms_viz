@@ -791,12 +791,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
             # Set intensity to negative values
             reference_spectrum[self.y] = reference_spectrum[self.y] * -1
 
-            mirrorSpectrumPlot = self.get_vline_renderer(
-                data=self.reference_spectrum, config=self._config
+            color_mirror = self._get_colors(reference_spectrum, kind="peak")
+            reference_spectrum = self.convert_for_line_plots(
+                reference_spectrum, self.x, self.y
+            )
+            mirrorSpectrumPlot = self.get_line_renderer(
+                data=reference_spectrum, color=color_mirror, config=self._config
             )
 
             mirrorSpectrumPlot.generate(None, None)
-            self.plot_x_axis_line(self.canvas)
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
