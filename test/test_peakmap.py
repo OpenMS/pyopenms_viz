@@ -14,7 +14,7 @@ import pandas as pd
         dict(by="Annotation"),
         dict(by="Annotation", num_x_bins=20, num_y_bins=20),
         dict(by="Annotation", z_log_scale=True),
-        dict(by="Annotation", fill_by_z=False),
+        dict(by="Annotation", fill_by_z=False, marker_size=50),
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):
