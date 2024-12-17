@@ -273,13 +273,16 @@ class SpectrumConfig(VLineConfig):
     peak_color: str | None = None
 
     # Binning settings
-    bin_peaks: Union[Literal["auto"], bool] = "auto"
-    bin_method: Literal["none", "sturges", "freedman-diaconis"] = "freedman-diaconis"
+    bin_peaks: Union[Literal["auto"], bool] = False
+    bin_method: Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"] = (
+        "mz-tol-bin"  # if "none" then num_x_bins will be used
+    )
     num_x_bins: int = 50
+    mz_tol: Union[float, Literal["freedman-diaconis", "1pct-diff"]] = "1pct-diff"
 
     # Annotation settings
     annotate_top_n_peaks: int | None | Literal["all"] = 5
-    annotate_mz: bool = (True,)
+    annotate_mz: bool = True
 
     # Columns for additional annotation
     ion_annotation: str | None = None
@@ -287,10 +290,10 @@ class SpectrumConfig(VLineConfig):
     custom_annotation: str | None = None
     annotation_color: str | None = None
 
-    aggregation_method: Literal["mean", "sum", "max"] = "mean"
+    aggregation_method: Literal["mean", "sum", "max"] = "max"
 
     ### override axes and title labels
-    xlabel: str = "m/z"
+    xlabel: str = "mass-to-charge"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
     color: str | Iterator[str] = "#4575B4"

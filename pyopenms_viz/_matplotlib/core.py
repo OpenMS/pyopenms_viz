@@ -299,14 +299,18 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
         legend_lines = []
         legend_labels = []
 
+        kwargs = dict(lw=self.line_width, ls=self.line_type)
+
         if self.by is None:
             (line,) = self.ax.plot(
-                self.data[self.x], self.data[self.y], color=self.current_color
+                self.data[self.x], self.data[self.y], color=self.current_color, **kwargs
             )
 
         else:
             for group, df in self.data.groupby(self.by, sort=False):
-                (line,) = self.ax.plot(df[self.x], df[self.y], color=self.current_color)
+                (line,) = self.ax.plot(
+                    df[self.x], df[self.y], color=self.current_color, **kwargs
+                )
                 legend_lines.append(line)
                 legend_labels.append(group)
             self._add_legend((legend_lines, legend_labels))

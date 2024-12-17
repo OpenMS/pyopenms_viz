@@ -700,6 +700,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     )
 
     @property
+    def _peak_bins(self):
+        """
+        Get a list of intervals to use in bins. Here bins are not evenly spaced. Currently this only occurs in mz-tol setting
+        """
+        if self.bin_method == "mz-tol-bin":
+            return mz_tolerance_binning(self.data, self.x, self.mz_tol)
+        else:
+            return None
+
+    @property
     def _computed_num_bins(self):
         """
         Compute the number of bins based on the number of peaks in the data.
@@ -709,21 +719,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """
         if self.bin_peaks == "auto":
             if self.bin_method == "sturges":
-                self.num_x_bins = sturges_rule(self.data, self.x)
+                return sturges_rule(self.data, self.x)
             elif self.bin_method == "freedman-diaconis":
                 return freedman_diaconis_rule(self.data, self.x)
             elif self.bin_method == "mz-tol-bin":
-                self.num_x_bins = mz_tolerance_binning(self.data, self.x, self.mz_tol)
+                return None
             elif self.bin_method == "none":
-                self.num_x_bins = self.num_x_bins
+                return self.num_x_bins
             else:  # throw error if bin_method is not recognized
                 raise ValueError(f"bin_method {self.bin_method} not recognized")
         else:
-            self.num_x_bins = self.num_x_bins
-
-        self._check_and_aggregate_duplicates()
-
-        self.plot()
+            return self.num_x_bins
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
@@ -759,10 +765,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             self.by = self.ion_annotation
 
-        # color_gen = self._get_colors(spectrum, "peak")
-
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-        # print(spectrum[spectrum["Annotation"] == "prec"])
         spectrumPlot = self.get_line_renderer(data=spectrum, config=self._config)
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
 
@@ -795,11 +798,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
             )
 
-        # Plot horizontal line to hide connection between peaks
-        self.plot_x_axis_line(
-            self.canvas, line_color="white", line_width=self.line_width * 6
-        )
-
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
         max_values = [spectrum[self.x].max()]
@@ -831,20 +829,21 @@ class SpectrumPlot(BaseMSPlot, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        if isinstance(self.num_x_bins, int):
-            df[self.x] = cut(df[self.x], bins=self.num_x_bins)
-        elif isinstance(self.num_x_bins, list) and all(
-            isinstance(item, tuple) for item in self.num_x_bins
-        ):
+
+        # if _peak_bins is set that they are used as the bins over the num_bins parameter
+        if self._peak_bins is not None:
+
             # Function to assign each value to a bin
             def assign_bin(value):
-                for low, high in self.num_x_bins:
+                for low, high in self._peak_bins:
                     if low <= value <= high:
                         return f"{low:.4f}-{high:.4f}"
                 return nan  # For values that don't fall into any bin
 
             # Apply the binning
             df[self.x] = df[self.x].apply(assign_bin)
+        else:  # use computed number of bins, bins evenly spaced
+            df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
 
         # TODO: Find a better way to retain other columns
         cols = [self.x]
