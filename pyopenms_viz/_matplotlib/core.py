@@ -349,7 +349,7 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     legend_labels.append(group)
 
                 self._add_legend((legend_lines, legend_labels))
-        else:
+        else:  # 3D Plot
             if self.by is None:
                 for i in range(len(self.data)):
                     (line,) = self.ax.plot(
@@ -366,13 +366,14 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                 legend_labels = []
 
                 for group, df in self.data.groupby(self.by):
+                    use_color = self.current_color
                     for i in range(len(df)):
                         (line,) = self.ax.plot(
                             [df[self.y].iloc[i], df[self.y].iloc[i]],
                             [df[self.z].iloc[i], 0],
                             [df[self.x].iloc[i], df[self.x].iloc[i]],
                             zdir="x",
-                            color=self.current_color,
+                            color=use_color,
                         )
                     legend_lines.append(line)
                     legend_labels.append(group)
