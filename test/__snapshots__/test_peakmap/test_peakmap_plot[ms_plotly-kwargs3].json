@@ -72,9 +72,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "square"
       },
       "mode": "markers",
@@ -352,9 +352,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "circle"
       },
       "mode": "markers",
@@ -632,9 +632,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "diamond"
       },
       "mode": "markers",
@@ -912,9 +912,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "cross"
       },
       "mode": "markers",
@@ -1192,9 +1192,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "x"
       },
       "mode": "markers",
@@ -1472,9 +1472,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "triangle-up"
       },
       "mode": "markers",
@@ -1752,9 +1752,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "triangle-down"
       },
       "mode": "markers",

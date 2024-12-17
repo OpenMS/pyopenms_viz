@@ -481,7 +481,8 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
                 color=self.data[self.z],
                 colorscale="Inferno_r",
                 showscale=False,
-                size=self.marker_size,
+                size=self.marker_size
+                / 3,  # divide by 3 so approximately same unit as other backends
                 opacity=self.opacity,
                 cmin=self.data[self.z].min(),
                 cmax=self.data[self.z].max(),
@@ -509,13 +510,16 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
         else:
             for group, df in self.data.groupby(self.by):
                 if self.z is not None:
-                    marker_dict["color"] = self.data[self.z]
+                    marker_dict["color"] = (
+                        df[self.z] if self.z is not None else self.current_color
+                    )
+                    marker_dict["symbol"] = self.current_marker
                 trace = go.Scatter(
                     x=df[self.x],
                     y=df[self.y],
                     mode="markers",
                     name=group,
-                    marker=dict(symbol=self.current_marker, color=self.current_color),
+                    marker=marker_dict,
                 )
                 traces.append(trace)
 
