@@ -754,8 +754,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
             entries=entries, index=False
         )
 
-        if self.by is None:
-            self.legend_config.show = False
+        # color generation is more complex for spectrum plots, so it has its own methods
+        # self.color = self._get_colors(spectrum, kind="peak")
 
         # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
@@ -765,8 +765,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             self.by = self.ion_annotation
 
+        self.color = self._get_colors(spectrum, kind="peak")
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-        spectrumPlot = self.get_line_renderer(data=spectrum, config=self._config)
+        spectrumPlot = self.get_line_renderer(
+            data=spectrum,
+            by=self.by,
+            color=self.color,
+            config=self._config,
+        )
+
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
 
         # Annotations for spectrum
@@ -948,9 +955,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
-        color_gen = self._get_colors(data, "annotation")
 
-        data["color"] = [next(color_gen) for _ in range(len(data))]
+        data["color"] = ["black" for _ in range(len(data))]
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks

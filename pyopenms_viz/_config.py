@@ -296,7 +296,6 @@ class SpectrumConfig(VLineConfig):
     xlabel: str = "mass-to-charge"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
-    color: str | Iterator[str] = "#4575B4"
 
     def __post_init__(self):
         super().__post_init__()
