@@ -142,8 +142,8 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         self.ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
         self.ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
         if self.plot_3d:
-            self.ax.set_zlabel(self.zlabel, fontsize=self.yaxis_label_font_size)
-            self.ax.tick_params(axis="z", labelsize=self.yaxis_tick_font_size)
+            self.ax.set_zlabel(self.zlabel, fontsize=self.zaxis_label_font_size)
+            self.ax.tick_params(axis="z", labelsize=self.zaxis_tick_font_size)
         return self.ax
 
     def _add_legend(self, legend):

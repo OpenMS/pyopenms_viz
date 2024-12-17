@@ -18,7 +18,7 @@ def load_backend(request):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        dict(),
+        dict(xlabel="m/z", ylabel="Retention Time", zlabel="Intensity"),
         dict(by="Annotation"),
         dict(relative_intensity=True),
     ],

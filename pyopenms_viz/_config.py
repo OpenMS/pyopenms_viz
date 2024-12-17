@@ -143,8 +143,10 @@ class BasePlotConfig(BaseConfig):
     title_font_size: int = 18
     xaxis_label_font_size: int = 16
     yaxis_label_font_size: int = 16
+    zaxis_label_font_size: int = 16
     xaxis_tick_font_size: int = 14
     yaxis_tick_font_size: int = 14
+    zaxis_tick_font_size: int = 14
     y_axis_location: Literal["left", "right"] = "left"
     x_axis_location: Literal["above", "below"] = "below"
     annotation_font_size: int = 12
@@ -320,6 +322,7 @@ class PeakMapConfig(ScatterConfig):
     ### override axes and title labels
     xlabel: str = "Retention Time"
     ylabel: str = "mass-to-charge"
+    zlabel: str = "Intensity"
     title: str = "PeakMap"
     x_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
     y_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
