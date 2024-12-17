@@ -187,7 +187,7 @@ class ScatterConfig(BasePlotConfig):
     num_y_bins: int = 50
     z_log_scale: bool = False
     fill_by_z: bool = True
-    marker_size: int = 10
+    marker_size: int = 30
     marker: Iterator[str] | None = None
 
 
@@ -311,7 +311,7 @@ class PeakMapConfig(ScatterConfig):
 
     ### override axes and title labels
     xlabel: str = "Retention Time"
-    ylabel: str = "m/z"
+    ylabel: str = "mass-to-charge"
     title: str = "PeakMap"
     x_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init
     y_plot_config: ChromatogramConfig | SpectrumConfig = None  # set in post init

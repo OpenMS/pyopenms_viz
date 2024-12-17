@@ -400,8 +400,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
 
         kwargs = dict(
-            s=self.marker_size
-            * 10,  # multiply by 10 to be consistent with markers from other backends
+            s=self.marker_size,
             edgecolors="none",
             cmap="magma_r",
             zorder=2,
