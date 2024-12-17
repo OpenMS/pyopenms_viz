@@ -1185,6 +1185,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 data=x_data,
                 x=self.x,
                 y=self.z,
+                by=self.by,
                 canvas=canvas,
                 config=self.x_plot_config,
             )
@@ -1193,6 +1194,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
                 data=x_data,
                 x=self.x,
                 y=self.z,
+                by=self.by,
                 canvas=canvas,
                 config=self.x_plot_config,
             )
