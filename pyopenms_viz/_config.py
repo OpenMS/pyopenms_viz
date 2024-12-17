@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict, fields
 from typing import Tuple, Literal, Dict, Any, Union, Iterator
 from enum import Enum
 from copy import deepcopy
-from ._misc import ColorGenerator
+from ._misc import ColorGenerator, MarkerShapeGenerator
 import pandas as pd
 from pandas.core.dtypes.common import is_integer
 
@@ -188,7 +188,15 @@ class ScatterConfig(BasePlotConfig):
     z_log_scale: bool = False
     fill_by_z: bool = True
     marker_size: int = 30
-    marker: Iterator[str] | None = None
+    marker: Iterator[str] | MarkerShapeGenerator = field(
+        default_factory=MarkerShapeGenerator
+    )
+
+    def __post_init__(self):
+
+        super().__post_init__()
+        if not isinstance(self.marker, MarkerShapeGenerator):
+            self.marker = MarkerShapeGenerator(shapes=self.marker)
 
 
 @dataclass(kw_only=True)

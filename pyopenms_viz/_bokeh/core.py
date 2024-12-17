@@ -384,8 +384,11 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
 
     def __init__(self, data, **kwargs):
         super().__init__(data, **kwargs)
-        if self.marker is None:
-            self.marker = MarkerShapeGenerator(engine="BOKEH")
+        if (
+            isinstance(self.marker, MarkerShapeGenerator)
+            and not self.marker.is_initialized()
+        ):
+            self.marker.initialize_shape_cycle_from_engine("BOKEH")
 
     @APPEND_PLOT_DOC
     def plot(self):
