@@ -30,11 +30,15 @@ def test_peakmap_plot(featureMap_data, snapshot, kwargs):
     assert snapshot == out
 
 
+# use peakmap to plot a 2D spectrum
 def test_peakmap_mz_im(featureMap_data, snapshot):
     out = featureMap_data.plot(
-        x="rt",
+        x="mz",
         y="im",
         z="int",
+        ylabel="Ion Mobility",
+        xlabel="mass-to-charge",
+        title="2D Spectrum",
         kind="peakmap",
         show_plot=False,
     )
