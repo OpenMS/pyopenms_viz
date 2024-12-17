@@ -573,7 +573,9 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             tooltip_entries["annotation"] = "Annotation"
         if "product_mz" in self.data.columns:
             tooltip_entries["product m/z"] = "product_mz"
-        tooltips, custom_hover_data = self._create_tooltips(tooltip_entries)
+        tooltips, custom_hover_data = self._create_tooltips(
+            tooltip_entries, index=False
+        )
 
         linePlot = self.get_line_renderer(data=self.data, config=self._config)
 
