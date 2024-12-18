@@ -1,10 +1,6 @@
 {
   "data": [
     {
-      "marker": {
-        "color": "#4575B4",
-        "symbol": "square"
-      },
       "mode": "markers",
       "name": "prec",
       "x": [
@@ -3951,10 +3947,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#D73027",
-        "symbol": "circle"
-      },
       "mode": "markers",
       "name": "y4^1",
       "x": [
@@ -7950,10 +7942,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#91BFDB",
-        "symbol": "diamond"
-      },
       "mode": "markers",
       "name": "y5^1",
       "x": [
@@ -15232,10 +15220,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#FC8D59",
-        "symbol": "cross"
-      },
       "mode": "markers",
       "name": "y6^1",
       "x": [
@@ -22486,10 +22470,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#7B2C65",
-        "symbol": "x"
-      },
       "mode": "markers",
       "name": "y7^1",
       "x": [
@@ -30265,10 +30245,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#FCCF53",
-        "symbol": "triangle-up"
-      },
       "mode": "markers",
       "name": "y8^1",
       "x": [
@@ -39794,10 +39770,6 @@
       "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}"
     },
     {
-      "marker": {
-        "color": "#555555",
-        "symbol": "triangle-down"
-      },
       "mode": "markers",
       "name": "y9^1",
       "x": [

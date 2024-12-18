@@ -324,7 +324,8 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         Plot a set of vertical lines
         """
 
-        self.data["line_color"] = [self.current_color for _ in range(len(self.data))]
+        use_color = self.current_color
+        self.data["line_color"] = [use_color for _ in range(len(self.data))]
         self.data["line_width"] = [self.line_width for _ in range(len(self.data))]
         if not self.plot_3d:
             if self.by is None:
