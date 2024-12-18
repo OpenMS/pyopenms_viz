@@ -845,8 +845,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # if _peak_bins is set that they are used as the bins over the num_bins parameter
         if self._peak_bins is not None:
-            print("peak bins")
-
             # Function to assign each value to a bin
             def assign_bin(value):
                 for low, high in self._peak_bins:
@@ -857,8 +855,20 @@ class SpectrumPlot(BaseMSPlot, ABC):
             # Apply the binning
             df[self.x] = df[self.x].apply(assign_bin)
         else:  # use computed number of bins, bins evenly spaced
-            print("computed bins")
-            df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
+            bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
+
+            def assign_bin(value):
+                for low_idx in range(len(bins) - 1):
+                    if bins[low_idx] <= value <= bins[low_idx + 1]:
+                        return f"{bins[low_idx]:.4f}-{bins[low_idx + 1]:.4f}"
+                return nan  # For values that don't fall into any bin
+
+            # Apply the binning
+            df[self.x] = df[self.x].apply(assign_bin)
+
+            # TODO I am not sure why "cut" method seems to be failing with plotly so created a workaround for now
+            # error is that object is not JSON serializable because of Interval type
+            # df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
 
         # TODO: Find a better way to retain other columns
         cols = [self.x]
@@ -877,12 +887,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Group by x bins and calculate the sum intensity within each bin
         df = (
-            self.data.groupby(cols, observed=True)
+            df.groupby(cols, observed=True)
             .agg({self.y: self.aggregation_method})
             .reset_index()
         )
-
-        print(df)
 
         def convert_to_numeric(value):
             if isinstance(value, Interval):

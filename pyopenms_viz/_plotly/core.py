@@ -313,6 +313,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
         if not self.plot_3d:
             traces = []
+            use_color = self.current_color
             if self.by is None:
                 for _, row in self.data.iterrows():
                     if self.direction == "horizontal":
@@ -328,12 +329,13 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                         mode="lines",
                         name="",
                         showlegend=False,
-                        line=dict(color=self.current_color),
+                        line=dict(color=use_color),
                     )
                     traces.append(trace)
             else:
                 show_legend = self.legend_config.show
                 for group, df in self.data.groupby(self.by):
+                    use_color = self.current_color
                     for _, row in df.iterrows():
                         if self.direction == "horizontal":
                             x_data = [0, row[self.x]]
@@ -349,7 +351,7 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
                             name=group,
                             legendgroup=group,
                             showlegend=show_legend,
-                            line=dict(color=self.current_color),
+                            line=dict(color=use_color),
                         )
                         show_legend = False  # only show the legend for one trace
                         traces.append(trace)
