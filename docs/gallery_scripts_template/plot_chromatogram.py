@@ -19,5 +19,5 @@ df.plot(
     x="rt",
     y="int",
     by="Annotation",
-    legend=dict(bbox_to_anchor=(1, 0.7)),
+    legend_config=dict(bbox_to_anchor=(1, 0.7)),
 )

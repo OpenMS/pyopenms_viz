@@ -210,7 +210,7 @@ class ChromatogramConfig(LineConfig):
     annotation_colormap: str = "Dark2"
     annotation_line_width: float = 3
     annotation_line_type: str = "solid"
-    annotation_legend_config: LegendConfig = field(
+    annotation_legend_config: Dict | LegendConfig = field(
         default_factory=default_legend_factory
     )
 
@@ -218,6 +218,13 @@ class ChromatogramConfig(LineConfig):
     xlabel: str = "Retention Time"
     ylabel: str = "Intensity"
     title: str = "Chromatogram"
+
+    def __post_init__(self):
+        super().__post_init__()
+        if not isinstance(self.annotation_legend_config, LegendConfig):
+            self.annotation_legend_config = LegendConfig.from_dict(
+                self.annotation_legend_config
+            )
 
 
 @dataclass(kw_only=True)
