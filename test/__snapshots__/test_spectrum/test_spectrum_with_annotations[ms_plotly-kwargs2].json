@@ -127,38 +127,38 @@
           "c5+"
         ],
         [
-          101.545,
-          12,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ],
         [
-          101.545,
-          12,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ],
         [
-          101.545,
-          12,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ],
         [
-          102.5343,
-          6,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ],
         [
-          102.5343,
-          6,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ],
         [
-          102.5343,
-          6,
+          100.5332,
+          25,
           "spec_0",
           "c5+"
         ]
@@ -184,22 +184,22 @@
       "type": "scatter",
       "customdata": [
         [
-          160.2,
-          13,
+          101.545,
+          12,
           "spec_0",
-          "y9+"
+          "c5+"
         ],
         [
-          160.2,
-          13,
+          101.545,
+          12,
           "spec_0",
-          "y9+"
+          "c5+"
         ],
         [
-          160.2,
-          13,
+          101.545,
+          12,
           "spec_0",
-          "y9+"
+          "c5+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -223,22 +223,22 @@
       "type": "scatter",
       "customdata": [
         [
-          175.993,
-          8,
+          102.5343,
+          6,
           "spec_0",
-          "z3+"
+          "c5+"
         ],
         [
-          175.993,
-          8,
+          102.5343,
+          6,
           "spec_0",
-          "z3+"
+          "c5+"
         ],
         [
-          175.993,
-          8,
+          102.5343,
+          6,
           "spec_0",
-          "z3+"
+          "c5+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -268,40 +268,40 @@
       "type": "scatter",
       "customdata": [
         [
-          200.4232,
-          17,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ],
         [
-          200.4232,
-          17,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ],
         [
-          200.4232,
-          17,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ],
         [
-          200.9232,
-          7,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ],
         [
-          200.9232,
-          7,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ],
         [
-          200.9232,
-          7,
+          160.2,
+          13,
           "spec_0",
-          "x4+"
+          "y9+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -1235,7 +1235,7 @@
         "text": "Trace"
       }
     },
-    "showlegend": false,
+    "showlegend": true,
     "font": {
       "family": "Helvetica"
     },
@@ -1243,7 +1243,7 @@
     "annotations": [
       {
         "font": {
-          "color": "#91BFDB",
+          "color": "black",
           "family": "Open Sans Mono, monospace",
           "size": 12
         },
@@ -1255,7 +1255,7 @@
       },
       {
         "font": {
-          "color": "#4575B4",
+          "color": "black",
           "family": "Open Sans Mono, monospace",
           "size": 12
         },
@@ -1267,7 +1267,7 @@
       },
       {
         "font": {
-          "color": "#FCCF53",
+          "color": "black",
           "family": "Open Sans Mono, monospace",
           "size": 12
         },
@@ -1279,7 +1279,7 @@
       },
       {
         "font": {
-          "color": "#D73027",
+          "color": "black",
           "family": "Open Sans Mono, monospace",
           "size": 12
         },
@@ -1291,7 +1291,7 @@
       },
       {
         "font": {
-          "color": "#91BFDB",
+          "color": "black",
           "family": "Open Sans Mono, monospace",
           "size": 12
         },
@@ -1300,22 +1300,6 @@
         "x": 101.545,
         "xanchor": "left",
         "y": 12
-      }
-    ],
-    "shapes": [
-      {
-        "line": {
-          "color": "#EEEEEE",
-          "width": 2
-        },
-        "opacity": 1,
-        "type": "line",
-        "x0": 0,
-        "x1": 1,
-        "xref": "x domain",
-        "y0": 0,
-        "y1": 0,
-        "yref": "y"
       }
     ]
   }

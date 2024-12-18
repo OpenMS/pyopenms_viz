@@ -18,9 +18,11 @@ def load_backend(request):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        dict(),
-        dict(by="Annotation"),
-        dict(scale_intensity=True),
+        dict(xlabel="m/z", ylabel="Retention Time", zlabel="Intensity"),
+        dict(
+            by="Annotation", xlabel="m/z", ylabel="Retention Time", zlabel="Intensity"
+        ),
+        dict(relative_intensity=True, xlabel="m/z", ylabel="Retention Time"),
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):

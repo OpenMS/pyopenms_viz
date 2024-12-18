@@ -21,5 +21,5 @@ df.plot(
     y="int",
     by="Annotation",
     aggregate_duplicates=True,
-    legend=dict(bbox_to_anchor=(1, 0.7)),
+    legend_config=dict(bbox_to_anchor=(1, 0.7)),
 )
