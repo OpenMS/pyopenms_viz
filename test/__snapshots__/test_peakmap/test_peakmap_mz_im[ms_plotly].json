@@ -295,7 +295,7 @@
         ],
         "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "square"
       },
       "mode": "markers",
@@ -2267,7 +2267,7 @@
           4008.902816023256
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003emass-to-charge: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003e: %{customdata[3]}"
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003emass-to-charge: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}"
     }
   ],
   "layout": {
