@@ -73,7 +73,7 @@ fig, axs = plt.subplots(4, 2, figsize=(14, 14))
 i = j = 0
 for params in params_list:
     p = df.plot(
-        kind="spectrum", x="mz", y="intensity", fig=axs[i][j], grid=False, **params
+        kind="spectrum", x="mz", y="intensity", canvas=axs[i][j], grid=False, **params
     )
     j += 1
     if j >= 2:  # If we've filled two columns, move to the next row
