@@ -107,7 +107,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 print("Lists have different lengths")
                 return False
             # lists are unordered so we need to compare every element one by one
-            for i in json1:
+            for idx, i in enumerate(json1):
                 if isinstance(i, dict):
                     # find the corresponding dictionary in json2
                     for j in json2:
@@ -119,7 +119,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                     print(f"Element {i} not in second list")
                     return False
                 else:
-                    return json1[i] == json2[i]
+                    return json1[idx] == json2[idx]
             return True
         else:
             if json1 != json2:
