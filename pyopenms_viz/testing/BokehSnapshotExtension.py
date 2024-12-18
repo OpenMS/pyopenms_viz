@@ -96,7 +96,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 if key not in json2:
                     print(f"Key {key} not in second json")
                     return False
-                elif key not in ["id", "root_ids"]:  # add keys to ignore here
+                elif key in ["id", "root_ids"]:  # add keys to ignore here
                     pass
                 elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
                     print(f"Values for key {key} not equal")
