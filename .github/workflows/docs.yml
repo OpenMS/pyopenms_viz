@@ -1,0 +1,33 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12  # Adjust to your Python version
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-test.txt
+        pip install sphinx-gallery sphinx
+
+    - name: Build documentation
+      run: make html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_build/html
