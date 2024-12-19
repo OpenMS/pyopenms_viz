@@ -45,13 +45,12 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Push _build to gh_pages branch
         run: |
+          cd _build
           # Initialize a new Git repository in the _build directory
+          git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          cd _build
-          git init
-          
           # Add all files and commit changes
           git add .
           git branch -M gh-pages
