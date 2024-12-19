@@ -300,7 +300,7 @@ sphinx_gallery_conf = {
         "org": "OpenMS",
         "repo": "pyopenms_viz",
         "branch": "gh_pages",
-        "binderhub_url": "https://notebooks.gesis.org/",
+        "binderhub_url": "https://notebooks.gesis.org/binder",
         "dependencies": "./requirements.txt",
     },
 }
