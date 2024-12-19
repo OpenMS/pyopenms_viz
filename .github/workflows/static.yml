@@ -46,7 +46,7 @@ jobs:
       - name: Deploy to gh-pages branch
         run: |
           # Initialize a new Git repository in the _build directory
-          cd docs/_build
+          cd docs/
           git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

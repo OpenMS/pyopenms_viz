@@ -272,7 +272,7 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "OpenMS",
         "repo": "pyopenms_viz",
-        "branch": "main",
+        "branch": "gh-pages",
         "binderhub_url": "https://mybinder.org",
         "dependencies": "./requirements.txt",
     },
