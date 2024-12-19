@@ -95,6 +95,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.githubpages",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "bokeh.sphinxext.bokeh_plot",
