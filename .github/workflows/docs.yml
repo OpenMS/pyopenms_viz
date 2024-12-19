@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements-test.txt
-        pip install sphinx sphinx-gallery  # Ensure any necessary packages are installed
+        pip install sphinx sphinx-gallery sphinx_copybutton # Ensure any necessary packages are installed
 
     - name: Build documentation
       run: sphinx-build -b html ./docs ./docs/_build
