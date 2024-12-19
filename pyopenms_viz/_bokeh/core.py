@@ -27,6 +27,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
+    SequencePlot,
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
@@ -437,6 +438,11 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             legend = Legend(items=legend_items)
 
             return fig, legend
+
+
+class BOKEHSequencePlot(BOKEHPlot, SequencePlot):
+    def plot(self):
+        raise NotImplementedError("Sequence plot is not implemented for Plotly")
 
 
 class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
