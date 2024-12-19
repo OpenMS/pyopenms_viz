@@ -3,7 +3,7 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - main  # Adjust to the branch you want to trigger the build on
+      - add_docs_gha  # Adjust to the branch you want to trigger the build on
 
 jobs:
   build:
