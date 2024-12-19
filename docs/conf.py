@@ -29,6 +29,30 @@ import plotly.io as pio
 pio.renderers.default = "sphinx_gallery"
 
 
+def find_git_directory(start_path):
+    """Find the full path to the nearest '.git' directory by climbing up the directory tree.
+
+    Args:
+        start_path (str or Path, optional): The starting path for the search. If not provided,
+            the current working directory is used.
+
+    Returns:
+        Path or None: The full path to the '.git' directory if found, or None if not found.
+    """
+    # If start_path is not provided, use the current working directory
+    start_path = Path(start_path)
+    # Iterate through parent directories until .git is found
+    current_path = start_path
+    while current_path:
+        git_path = current_path / ".git"
+        if git_path.is_dir():
+            return git_path.resolve()
+        current_path = current_path.parent
+
+    # If .git is not found in any parent directory, return None
+    return None
+
+
 # -- Project information -----------------------------------------------------
 project = "pyopenms_viz"
 copyright = f"{datetime.now().year}, OpenMS Team"
@@ -176,9 +200,11 @@ def setup(app):
 
     ########### create custom scripts for each backend #######
     # Iterate over all the files in the folder
-
-    gallery_scripts_template = Path("gallery_scripts_template")  # input directory
-    gallery_scripts = Path("gallery_scripts")  # output directory
+    docs_path = find_git_directory(Path(__file__).resolve()).parent / "docs"
+    gallery_scripts_template = docs_path / Path(
+        "gallery_scripts_template"
+    )  # input directory
+    gallery_scripts = docs_path / Path("gallery_scripts")  # output directory
 
     # create output directory structure, organized by backend
     gallery_scripts.mkdir(exist_ok=True)
@@ -272,7 +298,7 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "OpenMS",
         "repo": "pyopenms_viz",
-        "branch": "gh-pages",
+        "branch": "main",
         "binderhub_url": "https://mybinder.org",
         "dependencies": "./requirements.txt",
     },

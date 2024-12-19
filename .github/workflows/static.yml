@@ -40,21 +40,18 @@ jobs:
           pip install -r requirements.txt
           pip install .
       - name: Build Documentation
-        run: cd docs && sphinx-build -b html ./ ./_build && cd ..
+        run: cd sphinx-build -b html ./docs ./_docs
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Deploy to gh-pages branch
+      - name: Push _docs to main branch 
         run: |
           # Initialize a new Git repository in the _build directory
-          cd docs/
-          git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           # Add all files and commit changes
           git add .
-          git branch -M gh-pages
           git commit -m "Deploy documentation [skip ci]"
           
           # Force push to the gh-pages branch
-          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" main
