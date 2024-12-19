@@ -40,7 +40,7 @@ jobs:
           pip install -r requirements-test.txt
           pip install .
       - name: Build Documentation
-        run: cd docs && sphinx-build -b HTML ./ ./_build && cd ..
+        run: cd docs && sphinx-build -b html ./ ./_build && cd ..
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
