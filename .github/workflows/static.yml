@@ -54,6 +54,7 @@ jobs:
           
           # Add all files and commit changes
           git add .
+          git branch -M gh-pages
           git commit -m "Deploy documentation [skip ci]"
           
           # Force push to the gh-pages branch
