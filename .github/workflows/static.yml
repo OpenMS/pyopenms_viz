@@ -40,7 +40,7 @@ jobs:
           pip install -r requirements.txt
           pip install .
       - name: Build Documentation
-        run: cd sphinx-build -b html ./docs ./_docs
+        run: sphinx-build -b html ./docs ./_docs
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Push _docs to main branch 
