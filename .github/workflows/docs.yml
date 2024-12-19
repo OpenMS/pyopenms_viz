@@ -21,6 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements-test.txt
+        pip install .
 
     - name: Build documentation
       run: cd docs && sphinx-build -b html ./ ./_build && cd ..
