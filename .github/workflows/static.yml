@@ -57,4 +57,4 @@ jobs:
           git commit -m "Deploy documentation [skip ci]"
           
           # Force push to the gh-pages branch
-          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh_pages
+          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
