@@ -13,6 +13,8 @@ jobs:
         persist-credentials: false
     - name: Build HTML
       uses: ammaraskar/sphinx-action@7.3.7
+      with:
+        build-command: sphinx-build
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
