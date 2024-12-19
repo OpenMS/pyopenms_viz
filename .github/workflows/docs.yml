@@ -3,7 +3,7 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - main  # Adjust to the branch you want to trigger the build on
+      - add_docs_gha  # Adjust to the branch you want to trigger the build on
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements-test.txt
-        pip install sphinx sphinx-gallery sphinx_copybutton # Ensure any necessary packages are installed
+        pip install .
 
     - name: Build documentation
       run: cd docs && sphinx-build -b html ./ ./_build && cd ..
