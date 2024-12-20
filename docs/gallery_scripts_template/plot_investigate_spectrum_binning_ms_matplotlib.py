@@ -7,13 +7,18 @@ Here we use a dummy spectrum example to investigate spectrum binning.
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from pyopenms_viz import TEST_DATA_PATH
+import requests
+from io import StringIO
 
 pd.options.plotting.backend = "ms_matplotlib"
 
-# load the test file for example plotting
-data = TEST_DATA_PATH() / "TestSpectrumDf.tsv"
-df = pd.read_csv(data, sep="\t")
+# download the file for example plotting
+url = (
+    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
+)
+response = requests.get(url)
+response.raise_for_status()  # Check for any HTTP errors
+df = pd.read_csv(StringIO(response.text), sep="\t")
 
 # Let's assess the peak binning and create a 4 by 2 subplot to visualize the different methods of binning
 params_list = [
