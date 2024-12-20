@@ -17,6 +17,7 @@ from .._core import (
     LinePlot,
     VLinePlot,
     ScatterPlot,
+    SequencePlot,
     BaseMSPlot,
     ChromatogramPlot,
     MobilogramPlot,
@@ -598,6 +599,11 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
         fig.add_traces(data=traces)
         return fig, None
+
+
+class PLOTLYSequencePlot(PLOTLYPlot, SequencePlot):
+    def plot(self):
+        raise NotImplementedError("Sequence plot is not implemented for Plotly")
 
 
 class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
