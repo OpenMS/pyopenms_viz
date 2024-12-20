@@ -93,7 +93,9 @@ class BOKEHPlot(BasePlot, ABC):
             fig.legend.title = self.legend.title
             fig.legend.label_text_font_size = str(self.legend.fontsize) + "pt"
 
-    def _add_tooltips(self, fig, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True):
+    def _add_tooltips(
+        self, fig, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True
+    ):
         """
         Add tooltips to the plot
         """
@@ -202,7 +204,14 @@ class BOKEHPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         self.fig.y_range = Range1d(start=start, end=end)
 
+    def show_notebook(self):
+        from bokeh.io import output_notebook, show
+
+        output_notebook()
+        show(self.fig)
+
     def show_default(self):
+        # this works with streamlit
         from bokeh.io import show
 
         def app(doc):
@@ -230,7 +239,7 @@ class BOKEHPlot(BasePlot, ABC):
                     # NOTE: the newline break (\\) is currently not working in MathJax in Bokeh. The workaround is to wrap the expression in \displaylines{}
                     # See: https://github.com/mathjax/MathJax/issues/2312#issuecomment-538185951
                     text = text.replace("\n", r" \\\ ")
-                    text = r'$$\displaylines{{{}}}$$'.format(text)
+                    text = r"$$\displaylines{{{}}}$$".format(text)
                 label = Label(
                     x=x,
                     y=y,
@@ -241,6 +250,7 @@ class BOKEHPlot(BasePlot, ABC):
                     y_offset=0,
                 )
                 fig.add_layout(label)
+
 
 class BOKEHLinePlot(BOKEHPlot, LinePlot):
     """
@@ -452,7 +462,11 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
 
     def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
         zero_line = Span(
-            location=0, dimension="width", line_color=line_color, line_width=line_width, line_alpha=opacity
+            location=0,
+            dimension="width",
+            line_color=line_color,
+            line_width=line_width,
+            line_alpha=opacity,
         )
         fig.add_layout(zero_line)
 

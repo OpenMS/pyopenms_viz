@@ -22,7 +22,7 @@ from ._misc import (
     freedman_diaconis_rule,
     mz_tolerance_binning,
 )
-from .constants import IS_SPHINX_BUILD
+from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK
 import warnings
 
 
@@ -372,7 +372,12 @@ class BasePlot(ABC):
         self._update_plot_aes(newlines, **kwargs)
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(newlines, tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=fixed_tooltip_for_trace)
+            self._add_tooltips(
+                newlines,
+                tooltips,
+                custom_hover_data=custom_hover_data,
+                fixed_tooltip_for_trace=fixed_tooltip_for_trace,
+            )
 
     @abstractmethod
     def plot(
@@ -427,12 +432,17 @@ class BasePlot(ABC):
     def show(self):
         if IS_SPHINX_BUILD:
             return self.show_sphinx()
+        elif IS_NOTEBOOK:
+            return self.show_notebook()
         else:
             return self.show_default()
 
     @abstractmethod
     def show_default(self):
         pass
+
+    def show_notebook(self):
+        return self.show_default()
 
     # show method for running in sphinx build
     def show_sphinx(self):
@@ -759,7 +769,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def plot(self, x, y, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
-        kwargs.pop("fig", None) # remove figure from **kwargs if exists
+        kwargs.pop("fig", None)  # remove figure from **kwargs if exists
 
         # Prepare data
         spectrum, reference_spectrum = self._prepare_data(
@@ -773,7 +783,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         if self.peak_color is not None and self.peak_color in self.data.columns:
             self.by = self.peak_color
             kwargs["by"] = self.peak_color
-        elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
+        elif (
+            self.ion_annotation is not None and self.ion_annotation in self.data.columns
+        ):
             self.by = self.ion_annotation
             kwargs["by"] = self.ion_annotation
 
@@ -791,10 +803,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         spectrumPlot = self.get_line_renderer(spectrum, x, y, fig=self.fig, **kwargs)
         self.fig = spectrumPlot.generate(
-            line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=False
+            line_color=color_gen,
+            tooltips=tooltips,
+            custom_hover_data=custom_hover_data,
+            fixed_tooltip_for_trace=False,
         )
         spectrumPlot._add_annotations(self.fig, ann_texts, ann_xs, ann_ys, ann_colors)
-
 
         # Mirror spectrum
         if self.mirror_spectrum and reference_spectrum is not None:
@@ -807,16 +821,25 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 reference_spectrum, x, y
             )
 
-            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(reference_spectrum, x, y)
+            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(
+                reference_spectrum, x, y
+            )
 
-            custom_hover_data = concatenate((custom_hover_data, reference_custom_hover_data), axis=0)
+            custom_hover_data = concatenate(
+                (custom_hover_data, reference_custom_hover_data), axis=0
+            )
 
             reference_spectrum = self.convert_for_line_plots(reference_spectrum, x, y)
 
-            spectrumPlot = self.get_line_renderer(reference_spectrum, x, y, fig=self.fig, **kwargs)
+            spectrumPlot = self.get_line_renderer(
+                reference_spectrum, x, y, fig=self.fig, **kwargs
+            )
 
             spectrumPlot.generate(
-                line_color=color_gen, tooltips=tooltips, custom_hover_data=custom_hover_data, fixed_tooltip_for_trace=False
+                line_color=color_gen,
+                tooltips=tooltips,
+                custom_hover_data=custom_hover_data,
+                fixed_tooltip_for_trace=False,
             )
 
             spectrumPlot._add_annotations(
@@ -945,12 +968,19 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Get color generators for peaks or annotations based on config."""
         if kind == "annotation":
             # Custom annotating colors with top priority
-            if self.annotation_color is not None and self.annotation_color in data.columns:
+            if (
+                self.annotation_color is not None
+                and self.annotation_color in data.columns
+            ):
                 return ColorGenerator(data[self.annotation_color])
             # Ion annotation colors
-            elif self.ion_annotation is not None and self.ion_annotation in data.columns:
+            elif (
+                self.ion_annotation is not None and self.ion_annotation in data.columns
+            ):
                 # Generate colors based on ion annotations
-                return ColorGenerator(self._get_ion_color_annotation(data[self.ion_annotation]))  
+                return ColorGenerator(
+                    self._get_ion_color_annotation(data[self.ion_annotation])
+                )
             # Grouped by colors (from default color map)
             elif self.by is not None:
                 # Get unique values to determine number of distinct colors
@@ -964,7 +994,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
             # Fallback ColorGenerator with one color
             return ColorGenerator(n=1)
-        else: # Peaks
+        else:  # Peaks
             if self.by:
                 uniques = data[self.by].unique().tolist()
                 # Custom colors with top priority
@@ -1050,7 +1080,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y = repeat(y, 3)
         y[::3] = y[2::3] = 0
         return x, y
-    
+
     def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
         if self.by is None:
             x_data, y_data = self.to_line(data[x], data[y])
@@ -1063,7 +1093,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             return concat(dfs)
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
-        """ Get tooltip data for a spectrum plot. """
+        """Get tooltip data for a spectrum plot."""
 
         # Need to group data in correct order for tooltips
         if self.by is not None:
@@ -1087,6 +1117,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
         custom_hover_data = repeat(custom_hover_data, 3, axis=0)
 
         return tooltips, custom_hover_data
+
+
 class PeakMapPlot(BaseMSPlot, ABC):
     # need to inherit from ChromatogramPlot and SpectrumPlot for get_line_renderer and get_vline_renderer methods respectively
     @property
@@ -1113,12 +1145,12 @@ class PeakMapPlot(BaseMSPlot, ABC):
         y_kind="spectrum",
         x_kind="chromatogram",
         annotation_data: DataFrame | None = None,
-        annotation_x_lb : str = 'leftWidth',
-        annotation_x_ub : str = 'rightWidth',
-        annotation_y_lb : str = 'IM_leftWidth',
-        annotation_y_ub : str = 'IM_rightWidth',
-        annotation_colors : str = 'color',
-        annotation_names : str = 'name',
+        annotation_x_lb: str = "leftWidth",
+        annotation_x_ub: str = "rightWidth",
+        annotation_y_lb: str = "IM_leftWidth",
+        annotation_y_ub: str = "IM_rightWidth",
+        annotation_colors: str = "color",
+        annotation_names: str = "name",
         bin_peaks: Union[Literal["auto"], bool] = "auto",
         aggregation_method: Literal["mean", "sum", "max"] = "mean",
         num_x_bins: int = 50,
@@ -1150,7 +1182,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.annotation_y_ub = annotation_y_ub
         self.annotation_colors = annotation_colors
         self.annotation_names = annotation_names
-        
+
         super().__init__(data, x, y, z=z, **kwargs)
         self._check_and_aggregate_duplicates()
 
@@ -1351,11 +1383,11 @@ class PeakMapPlot(BaseMSPlot, ABC):
             None
         """
         pass
-    
+
     def _compute_3D_annotations(self, annotation_data, x, y, z):
         def center_of_gravity(x, m):
-            return np.sum(x*m) / np.sum(m)
-        
+            return np.sum(x * m) / np.sum(m)
+
         # Contains tuple of coordinates + text + color (x, y, z, t, c)
         annotations_3d = []
         for _, feature in annotation_data.iterrows():
@@ -1366,19 +1398,25 @@ class PeakMapPlot(BaseMSPlot, ABC):
             t = feature[self.annotation_names]
             c = feature[self.annotation_colors]
             selected_data = self.data[
-                (self.data[x] > x0) & (self.data[x] < x1) 
-                & (self.data[y] > y0) & (self.data[y] < y1)
+                (self.data[x] > x0)
+                & (self.data[x] < x1)
+                & (self.data[y] > y0)
+                & (self.data[y] < y1)
             ]
             if len(selected_data) == 0:
-                annotations_3d.append((
-                    np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c
-                ))
+                annotations_3d.append(
+                    (np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c)
+                )
             else:
-                annotations_3d.append((
-                    center_of_gravity(selected_data[x], selected_data[z]),
-                    center_of_gravity(selected_data[y], selected_data[z]),
-                    np.max(selected_data[z])*1.05, t, c
-                ))
+                annotations_3d.append(
+                    (
+                        center_of_gravity(selected_data[x], selected_data[z]),
+                        center_of_gravity(selected_data[y], selected_data[z]),
+                        np.max(selected_data[z]) * 1.05,
+                        t,
+                        c,
+                    )
+                )
         return map(list, zip(*annotations_3d))
 
 

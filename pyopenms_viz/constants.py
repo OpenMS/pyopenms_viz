@@ -30,3 +30,10 @@ try:
     IS_SPHINX_BUILD = hasattr(sphinx, "application")
 except ImportError:
     pass  # Not running SPHINX
+
+
+######################
+## Determine if running in Jupyter Notebook
+IS_NOTEBOOK = False
+if "JPY_PARENT_PID" in os.environ:
+    IS_NOTEBOOK = True
