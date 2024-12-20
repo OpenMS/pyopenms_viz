@@ -1,0 +1,1 @@
+pip install git+https://github.com/OpenMS/pyopenms_viz.git
