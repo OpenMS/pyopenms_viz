@@ -433,6 +433,7 @@ class BasePlot(ABC):
         if IS_SPHINX_BUILD:
             return self.show_sphinx()
         elif IS_NOTEBOOK:
+            print("is notebook")
             return self.show_notebook()
         else:
             return self.show_default()
