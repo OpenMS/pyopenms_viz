@@ -74,3 +74,6 @@ tzdata==2024.2
     # via pandas
 xyzservices==2024.9.0
     # via bokeh
+
+git+https://github.com/OpenMS/pyopenms_viz.git
+
