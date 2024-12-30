@@ -291,8 +291,8 @@ def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
 
 
 sphinx_gallery_conf = {
-    "examples_dirs": ["tutorials_scripts", "gallery_scripts"],
-    "gallery_dirs": ['tutorials', "gallery"],
+    "examples_dirs": ["gallery_scripts"],
+    "gallery_dirs": ["gallery"],
     "capture_repr": ("_repr_html_", "__repr__"),
     "image_scrapers": ("matplotlib", bokeh_scraper),
     "nested_sections": True,
