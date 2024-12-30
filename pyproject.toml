@@ -31,7 +31,7 @@ all = ["bokeh>=3.4.1", "plotly", "matplotlib"]
 bokeh = ["bokeh>=3.4.1"]
 matplotlib = ["matplotlib"]
 plotly = ["plotly"]
-docs = ["sphinx", "sphinx-gallery", "sphinx-copybutton", "pydata_sphinx_theme"]
+docs = ["sphinx", "sphinx-gallery", "sphinx-copybutton", "pydata_sphinx_theme", "nbsphinx"]
 
 [project.entry-points.pandas_plotting_backends]
 ms_bokeh = "pyopenms_viz._bokeh"
