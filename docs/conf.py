@@ -79,7 +79,6 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -99,6 +98,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "bokeh.sphinxext.bokeh_plot",
+    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -107,7 +107,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "gallery/**/*.ipynb"]
 
 autosummary_generate = True
 autosectionlabel_prefix_document = True
@@ -291,8 +291,8 @@ def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
 
 
 sphinx_gallery_conf = {
-    "examples_dirs": ["gallery_scripts"],
-    "gallery_dirs": ["gallery"],
+    "examples_dirs": ["tutorials_scripts", "gallery_scripts"],
+    "gallery_dirs": ['tutorials', "gallery"],
     "capture_repr": ("_repr_html_", "__repr__"),
     "image_scrapers": ("matplotlib", bokeh_scraper),
     "nested_sections": True,
