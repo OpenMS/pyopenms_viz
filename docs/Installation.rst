@@ -30,7 +30,7 @@ First clone the repository:
 
 .. code-block:: bash
 
-        git clone git@github.com:OpenMS/pyopenms-viz.git
+        git clone https://github.com/OpenMS/pyopenms_viz.git
 
 Change into the pyopenms-viz directory
 
