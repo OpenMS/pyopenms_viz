@@ -1,17 +1,6 @@
 PyOpenMS-Viz
 ============
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
-
-   Installation
-   User Guide
-   gallery/index
-   API
-
-
 Welcome to PyOpenMS-Viz Documentation! PyOpenMS-Viz is a visualization package for mass spectrometry data directly from pandas dataframes
 
 Key Features Include:
@@ -67,3 +56,13 @@ Citation
 ********
 If PyOpenMS-Viz was usefull in your research please cite the following:
 
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   Installation
+   Getting Started
+   Parameters/Parameters
+   gallery/index
+   API

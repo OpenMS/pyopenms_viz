@@ -1,0 +1,15 @@
+Parameter	Default	Type	Description
+x*		str	The column name for x-axis data
+y*		str	The column name for y-axis data
+kind*		str	'The kind of plot to create. One of: [ “line”, “vline”, scatter”, “chromatogram”, “mobilogram”, “spectrum”, “peak_map”]
+by		str	The column name to group by
+backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
+relative_intensity	False	bool	Convert y-axis values to relative intensity
+height		int	Height of plot, units dependent on backend.
+width		int	Width of plot in pixels, units dependent on backend.
+grid	False	bool	Whether to show grid on the plot
+toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
+fig	None	fig	Existing Figure object to plot on
+xlabel	None	str	Label for x axis
+ylabel 	None	str	Label for y axis
+show_plot	True	bool	Whether to display the plot
