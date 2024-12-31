@@ -56,7 +56,8 @@ Citation
 ********
 If PyOpenMS-Viz was usefull in your research please cite the following:
 
-
+User Guide
+**********
 .. toctree::
    :maxdepth: 1
    :glob:
@@ -65,4 +66,5 @@ If PyOpenMS-Viz was usefull in your research please cite the following:
    Getting Started
    Parameters/Parameters
    gallery/index
+   Data Formatting/Data Formatting
    API
