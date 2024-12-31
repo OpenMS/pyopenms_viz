@@ -81,7 +81,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.fig.set_xlabel(
                 self.xlabel,
                 fontsize=9,
-                labelpad=-2,
+                labelpad=16,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
@@ -90,25 +90,25 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.fig.set_ylabel(
                 self.ylabel,
                 fontsize=9,
-                labelpad=-2,
+                labelpad=17,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
             )
             self.fig.set_zlabel(
                 self.zlabel,
-                fontsize=10,
+                fontsize=12,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
-                labelpad=-2,
+                labelpad=9,
             )
 
             for axis in ("x", "y", "z"):
                 self.fig.tick_params(
                     axis=axis,
                     labelsize=8,
-                    pad=-2,
+                    pad=3,
                     colors=ColorGenerator.color_blind_friendly_map[
                         ColorGenerator.Colors.DARKGRAY
                     ],
@@ -244,7 +244,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                 xy=(x, y),
                 xytext=(3, 0),
                 textcoords="offset points",
-                fontsize=8,
+                fontsize=self.annotation_font_size,
                 color=color,
             )
 
@@ -457,6 +457,13 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         else:
             if z is not None:
                 vmin, vmax = data[z].min(), data[z].max()
+                # per group get highest value in z
+                highest_z_per_group = data.loc[data.groupby(by)[z].idxmax()]
+                highest_z_per_group.sort_values(by=z, inplace=True)
+                highest_z_per_group['order'] = range(len(highest_z_per_group))
+                data[f'{by}_provenance'] = data[by].copy()
+                data[by] = data[by].map(highest_z_per_group.set_index(by)['order'])
+
             for group, df in data.groupby(by):
                 if z is not None:
                     use_color = df[z].values
@@ -477,6 +484,11 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                     scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
                 legend_lines.append(scatter)
                 legend_labels.append(group)
+            
+            # Reset the group column to the original values
+            data[by] = data[f'{by}_provenance']
+            data.drop(columns=[f'{by}_provenance'], inplace=True)
+            
             return ax, (legend_lines, legend_labels)
 
 
