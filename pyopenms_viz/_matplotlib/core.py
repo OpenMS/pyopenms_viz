@@ -239,14 +239,19 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         ann_colors: list[str],
     ):
         for text, x, y, color in zip(ann_texts, ann_xs, ann_ys, ann_colors):
-            fig.annotate(
-                text,
-                xy=(x, y),
-                xytext=(3, 0),
-                textcoords="offset points",
-                fontsize=self.annotation_font_size,
-                color=color,
-            )
+            if text is not nan and text != "" and text != "nan":
+                if is_latex_formatted(text):
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                fig.annotate(
+                    text,
+                    xy=(x, y),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    fontsize=self.annotation_font_size,
+                    color=color,
+                )
+
 
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
