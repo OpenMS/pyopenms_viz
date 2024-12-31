@@ -107,7 +107,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "gallery/**/*.ipynb"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "gallery/**/*.ipynb", "gallery_scripts", "gallery_scripts_template"]
 
 autosummary_generate = True
 autosectionlabel_prefix_document = True
@@ -304,3 +304,5 @@ sphinx_gallery_conf = {
         "dependencies": "./requirements.txt",
     },
 }
+
+nbsphinx_execute = 'always'
