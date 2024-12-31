@@ -233,6 +233,10 @@ def setup(app):
             and not ("_ms_" in f.name)
         ]
 
+        ## if bokeh backend filter out 3D files
+        if backend == Path('ms_bokeh'):
+            files = [ f for f in files if not "3D" in f.name ]
+
         for file_name in files:
 
             # Define the paths to the original file and the new file
