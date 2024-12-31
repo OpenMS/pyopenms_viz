@@ -14,6 +14,8 @@ General Options include (mandatory fields are starred)
 Please click on a kind of plot below for more details on their specific parameters:
 
 .. toctree::
+   :maxdepth: 1
+
    Spectrum
    Chromatogram
    PeakMap
