@@ -21,9 +21,7 @@ python:
     - requirements: requirements.txt
     - method: pip
       path: .
-    - method: pip
-      spec: rdkit
 
 build:
   commands:
-    - pip install rdkit cairo-svg 
+    - pip install rdkit cairo-svg pymzml
