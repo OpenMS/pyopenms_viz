@@ -98,7 +98,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "bokeh.sphinxext.bokeh_plot",
-    'nbsphinx',
+    "nbsphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -107,7 +107,14 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "gallery/**/*.ipynb", "gallery_scripts", "gallery_scripts_template"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "gallery/**/*.ipynb",
+    "gallery_scripts",
+    "gallery_scripts_template",
+]
 
 autosummary_generate = True
 autosectionlabel_prefix_document = True
@@ -234,8 +241,8 @@ def setup(app):
         ]
 
         ## if bokeh backend filter out 3D files
-        if backend == Path('ms_bokeh'):
-            files = [ f for f in files if not "3D" in f.name ]
+        if backend == Path("ms_bokeh"):
+            files = [f for f in files if not "3D" in f.name]
 
         for file_name in files:
 
@@ -309,4 +316,6 @@ sphinx_gallery_conf = {
     },
 }
 
-nbsphinx_execute = 'always'
+nbsphinx_execute = "always"
+nbsphinx_requirejs_path = ""
+nbsphinx_allow_errors = True
