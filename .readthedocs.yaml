@@ -24,4 +24,4 @@ python:
 
 build:
   commands:
-    - pip install rdkit cairo-svg pymzml
+    - pip install rdkit cairo-svg pymzml ipython
