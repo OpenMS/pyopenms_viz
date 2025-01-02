@@ -39,7 +39,7 @@ jobs:
         run: |
           sudo apt install pandoc
           pip install -r requirements.txt 
-          pip install ipykernel rdkit cairosvg
+          pip install ipykernel rdkit cairosvg pymzml
           pip install .
       - name: Build Documentation
         run: sphinx-build -b html ./docs ./_build
