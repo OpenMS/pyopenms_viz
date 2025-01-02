@@ -70,6 +70,14 @@ with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
 # We will need to define the following helper methods below to help format/extract data and generate the molecular chemical drawings.
 
 # Utility to import RDKit modules and disable logging
+
+# %%
+#     .. code-block:: bash
+#
+#       %%bash
+#       pip install rdkit --quiet
+
+
 import importlib
 from PIL import Image, ImageOps
 import rdkit.RDLogger as RDLogger
