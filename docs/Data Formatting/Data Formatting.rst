@@ -9,6 +9,7 @@ Below are a few examples of how to format data as a pandas dataframe from variou
 -----
 
 .. toctree::
+   :maxdepth: 1
 
    pyopenms
    pymzml
@@ -21,6 +22,7 @@ Below are a few examples of how to format data as a pandas dataframe from variou
 --
 
 .. toctree::
+   :maxdepth: 1
 
    alphatims
 
