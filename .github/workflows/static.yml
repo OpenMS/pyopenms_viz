@@ -39,7 +39,7 @@ jobs:
         run: |
           sudo apt install pandoc
           pip install -r requirements.txt 
-          pip install ipykernel
+          pip install ipykernel rdkit
           pip install .
       - name: Build Documentation
         run: sphinx-build -b html ./docs ./_build
