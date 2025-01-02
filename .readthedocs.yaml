@@ -23,3 +23,7 @@ python:
       path: .
     - method: pip
       spec: rdkit
+
+build:
+  commands:
+    - pip install rdkit cairo-svg 
