@@ -584,8 +584,12 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self._check_and_aggregate_duplicates()
+        
         # sort data by x so in order
-        self.data.sort_values(by=x, inplace=True)
+        if self.by is not None:
+            self.data.sort_values(by=[self.by, x], inplace=True)
+        else:
+            self.data.sort_values(by=x, inplace=True)
 
         self.plot(self.data, self.x, self.y, **kwargs)
 
