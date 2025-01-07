@@ -242,7 +242,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
-                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
                 fig.annotate(
                     text,
                     xy=(x, y),
@@ -251,7 +253,6 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                     fontsize=self.annotation_font_size,
                     color=color,
                 )
-
 
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
@@ -282,7 +283,8 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
 
             return ax, None
         else:
-            for group, df in data.groupby(by, sort=False):
+            for group, df in data.groupby(by, sort=True):
+                print(df[by].iloc[0])
                 (line,) = ax.plot(
                     df[x],
                     df[y],
@@ -375,7 +377,6 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
     def _get_annotations():
         pass
 
-
     def _add_annotations(
         self,
         fig,
@@ -385,11 +386,15 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
         ann_colors: list[str],
         ann_zs: list[float] = None,
     ):
-        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
+        for i, (text, x, y, color) in enumerate(
+            zip(ann_texts, ann_xs, ann_ys, ann_colors)
+        ):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
                     # Wrap the text in '$' to indicate LaTeX math mode
-                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
                 if not self.plot_3d:
                     fig.annotate(
                         text,
@@ -401,13 +406,14 @@ class MATPLOTLIBVLinePlot(MATPLOTLIBPlot, VLinePlot):
                     )
                 else:
                     fig.text(
-                        x=x, 
-                        y=y, 
-                        z=ann_zs[i], 
-                        s=text, 
+                        x=x,
+                        y=y,
+                        z=ann_zs[i],
+                        s=text,
                         fontsize=self.annotation_font_size,
-                        color=color
+                        color=color,
                     )
+
 
 class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
     """
@@ -422,6 +428,7 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
+        print("HELLO!!!")
         # Colors
         color_gen = kwargs.pop("line_color", None)
         # Marker shapes
@@ -465,9 +472,9 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                 # per group get highest value in z
                 highest_z_per_group = data.loc[data.groupby(by)[z].idxmax()]
                 highest_z_per_group.sort_values(by=z, inplace=True)
-                highest_z_per_group['order'] = range(len(highest_z_per_group))
-                data[f'{by}_provenance'] = data[by].copy()
-                data[by] = data[by].map(highest_z_per_group.set_index(by)['order'])
+                highest_z_per_group["order"] = range(len(highest_z_per_group))
+                data[f"{by}_provenance"] = data[by].copy()
+                data[by] = data[by].map(highest_z_per_group.set_index(by)["order"])
 
             for group, df in data.groupby(by):
                 if z is not None:
@@ -489,11 +496,12 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                     scatter = ax.scatter(df[x], df[y], c=use_color, **kwargs)
                 legend_lines.append(scatter)
                 legend_labels.append(group)
-            
+
             # Reset the group column to the original values
-            data[by] = data[f'{by}_provenance']
-            data.drop(columns=[f'{by}_provenance'], inplace=True)
-            
+            if z is not None:
+                data[by] = data[f"{by}_provenance"]
+                data.drop(columns=[f"{by}_provenance"], inplace=True)
+
             return ax, (legend_lines, legend_labels)
 
 
@@ -509,7 +517,13 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
         return MATPLOTLIBScatterPlot(data, x, y, **kwargs)
 
     def plot_x_axis_line(self, fig, line_color="#EEEEEE", line_width=1.5, opacity=1):
-        fig.plot(fig.get_xlim(), [0, 0], color=line_color, linewidth=line_width, alpha=opacity)
+        fig.plot(
+            fig.get_xlim(),
+            [0, 0],
+            color=line_color,
+            linewidth=line_width,
+            alpha=opacity,
+        )
 
     def _create_tooltips(self, entries, index=True):
         # No tooltips for MATPLOTLIB because it is not interactive
@@ -720,9 +734,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
                     self.annotation_data, x, y, z
                 )
-                vlinePlot._add_annotations(
-                    self.fig, a_t, a_x, a_y, a_c, a_z
-                )
+                vlinePlot._add_annotations(self.fig, a_t, a_x, a_y, a_c, a_z)
 
     def create_main_plot_marginals(self, x, y, z, class_kwargs, other_kwargs):
         scatterPlot = self.get_scatter_renderer(
@@ -771,7 +783,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 edgecolor=color,
                 linestyle=self.feature_config.line_type,
                 linewidth=self.feature_config.line_width,
-                zorder=5
+                zorder=5,
             )
             self.fig.add_patch(custom_lines)
 
