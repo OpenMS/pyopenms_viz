@@ -1,9 +1,7 @@
 Spectrum
 ========
 
-Supported Backends 
-
-A spectrum can be plot using kind = "spectrum"  
+A spectrum can be plot using kind = "spectrum". In this plot, mass-to-charge is on the x-axis and intensity is on the y-axis. 
 
 
 Parameters
@@ -29,4 +27,5 @@ Example Usage
    gallery_scripts/ms_plotly/plot_spectrum_dia_ms_plotly.py
    gallery_scripts/ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.py
    gallery_scripts/ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.py
+   gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py
 
