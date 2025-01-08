@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Install the current package using Flit
+pip install git+https://github.com/OpenMS/pyopenms_viz.git
