@@ -276,7 +276,6 @@ class BasePlot(ABC):
         # if integer is supplied get the corresponding column associated with that index
         if is_integer(colname) and not holds_integer(self.data.columns):
             if colname >= len(self.data.columns):
-                print(self.data.columns)
                 raise ValueError(
                     f"Column index `{colname}` out of range, `{name}` could not be set"
                 )
@@ -584,7 +583,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             self.data[y] = self.data[y] / self.data[y].max() * 100
 
         self._check_and_aggregate_duplicates()
-        
+
         # sort data by x so in order
         if self.by is not None:
             self.data.sort_values(by=[self.by, x], inplace=True)

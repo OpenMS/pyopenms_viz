@@ -284,7 +284,6 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
             return ax, None
         else:
             for group, df in data.groupby(by, sort=True):
-                print(df[by].iloc[0])
                 (line,) = ax.plot(
                     df[x],
                     df[y],
@@ -428,7 +427,6 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         """
         Plot a scatter plot
         """
-        print("HELLO!!!")
         # Colors
         color_gen = kwargs.pop("line_color", None)
         # Marker shapes
