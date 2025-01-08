@@ -10,7 +10,7 @@ First create a new environment:
 
 .. code-block:: bash
 
-   conda create --name=pyopenms-viz python=3.11
+   conda create --name=pyopenms-viz python=3.12
    conda activate pyopenms-viz
 
 Then in the new environment install pyOpenMS-viz.
