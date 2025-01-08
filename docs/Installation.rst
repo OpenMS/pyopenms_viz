@@ -4,7 +4,7 @@ Installation
 (Recommended) The Python Package Index 
 --------------------------------------
 
-The recommended way of installing pyOpenMS-viz is through the Python Package Index (PyPI). We recommend installing MassDash in its own virtual environment using Anaconda to avoid packaging conflicts.
+The recommended way of installing pyOpenMS-viz is through the Python Package Index (PyPI). We recommend installing pyopenms_viz in its own virtual environment using Anaconda to avoid packaging conflicts.
 
 First create a new environment:
 
