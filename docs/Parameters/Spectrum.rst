@@ -20,6 +20,10 @@ Example Usage
 
 .. minigallery::
 
+
+   gallery_scripts/ms_matplotlib/plot_spectrum_ms_matplotlib.py
+   gallery_scripts/ms_bokeh/plot_spectrum_ms_bokeh.py
+   gallery_scripts/ms_plotly/plot_spectrum_ms_plotly.py
    gallery_scripts/ms_bokeh/plot_spectrum_dia_ms_bokeh.py
    gallery_scripts/ms_matplotlib/plot_spectrum_dia_ms_matplotlib.py
    gallery_scripts/ms_plotly/plot_spectrum_dia_ms_plotly.py
