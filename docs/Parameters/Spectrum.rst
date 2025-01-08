@@ -1,7 +1,7 @@
 Spectrum
 ========
 
-A spectrum can be plot using kind = "spectrum". In this plot, mass-to-charge is on the x-axis and intensity is on the y-axis. 
+A spectrum can be plot using kind = "spectrum". In this plot, mass-to-charge ratio is on the x-axis and intensity is on the y-axis. 
 
 
 Parameters
