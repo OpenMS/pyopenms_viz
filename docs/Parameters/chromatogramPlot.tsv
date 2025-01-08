@@ -12,4 +12,4 @@ toolbar_location	“above”		Location of toolbar for interactive plots. One of:
 fig	None	fig	Existing figure object to plot on. Useful for matplotlib backend 
 xlabel	None	str	Label for x axis
 ylabel 	None	str	Label for y axis
-show_plot	True	bool	Whether to display the plot
+show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None

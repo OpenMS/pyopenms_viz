@@ -14,10 +14,10 @@ fig	None	fig	Existing Figure object to plot on. Useful for matplotlib backend wh
 xlabel	“”	str	Label for x axis
 ylabel 	“”	str	Label for y axis
 zlabel	'’	str	Label for z-axis
-show_plot	True	bool	Whether to display the plot
-bin_peaks			
+show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
+bin_peaks	False	bool | “auto”	If True, will bin peaks based on specified number of bins in `num_x_bins`. If "auto", will automatically determine the number of bins based on the data using the strategy specified in `bin_method`. 
 aggregation_method	“mean”	Literal[“mean”, “sum”, “max”]	How to aggregate duplicate entries
 num_x_bins	50	int	Number of x-bins in heatmap
 num_y_bins	50	int	Number of y-bins in heatmap
-z_log_scale	False		
-fill_by_z	True	bool	
+z_log_scale	False	bool	Whether to log-transform z-axis
+fill_by_z	True	bool	Whether heatmap coloring should be based on z-axis values

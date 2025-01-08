@@ -13,7 +13,7 @@ toolbar_location	“above”		Location of toolbar for interactive plots. One of:
 fig	None	fig	Existing Figure object to plot on
 xlabel	None	str	Label for x axis
 ylabel 	None	str	Label for y axis
-show_plot	True	bool	Whether to display the plot
+show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
 bin_peaks	False	bool | “auto”	If True, will bin peaks based on specified number of bins in `num_x_bins`. If "auto", will automatically determine the number of bins based on the data using the strategy specified in `bin_method`. 
 bin_method		“mz-tol-bin”	Binning method, one of [ “none”, “sturges”, “freedman-diaconis”, “mz-tol-bin”]
 num_x_bins	50	int	Number of bins, will be adjusted if bin_peaks is “auto”
