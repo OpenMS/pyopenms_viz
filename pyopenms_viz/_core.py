@@ -7,7 +7,7 @@ import importlib
 import types
 import re
 
-from pandas import cut, merge, Interval, concat
+from pandas import cut, Interval
 from pandas.core.frame import DataFrame
 from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
@@ -15,6 +15,7 @@ from pandas.util._decorators import Appender
 
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 
+from ._dataframe import UnifiedDataFrame, concat
 from ._config import LegendConfig, FeatureConfig, _BasePlotConfig
 from ._misc import (
     ColorGenerator,
@@ -24,6 +25,8 @@ from ._misc import (
 )
 from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK
 import warnings
+
+import polars as pl
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -148,9 +151,9 @@ class BasePlot(ABC):
         _config: _BasePlotConfig | None = None,
         **kwargs,
     ) -> None:
-
+        
         # Data attributes
-        self.data = data.copy()
+        self.data = UnifiedDataFrame(data) if not isinstance(data, UnifiedDataFrame) else data
         self.kind = kind
         self.by = by
         self.plot_3d = plot_3d
@@ -573,6 +576,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         super().__init__(data, x, y, **kwargs)
 
         if annotation_data is not None:
+            annotation_data = UnifiedDataFrame(annotation_data)
             self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
@@ -738,7 +742,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         super().__init__(data, x, y, **kwargs)
 
-        self.reference_spectrum = reference_spectrum
+        self.reference_spectrum = UnifiedDataFrame(reference_spectrum) if reference_spectrum is not None else None
         self.mirror_spectrum = mirror_spectrum
         self.relative_intensity = relative_intensity
         self.bin_peaks = bin_peaks
@@ -946,7 +950,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # copy spectrum data to not modify the original
         spectrum = spectrum.copy()
         reference_spectrum = (
-            self.reference_spectrum.copy() if reference_spectrum is not None else None
+            self.reference_spectrum if reference_spectrum is not None else None
         )
 
         # Convert to relative intensity if required
@@ -993,6 +997,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 colors = [next(color_gen) for _ in range(len(uniques))]
                 # Create a mapping of unique values to their corresponding colors
                 color_map = {uniques[i]: colors[i] for i in range(len(colors))}
+                
                 # Apply the color mapping to the specified column in the data and turn it into a ColorGenerator
                 return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
             # Fallback ColorGenerator with one color
@@ -1176,6 +1181,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
         self.fill_by_z = fill_by_z
 
         if annotation_data is not None:
+            annotation_data = UnifiedDataFrame(annotation_data)
             self.annotation_data = annotation_data.copy()
         else:
             self.annotation_data = None
@@ -1439,7 +1445,7 @@ class PlotAccessor:
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         backend_name = kwargs.get("backend", None)
         if backend_name is None:
-            backend_name = "matplotlib"
+            backend_name = "ms_matplotlib"
 
         plot_backend = _get_plot_backend(backend_name)
 
@@ -1480,7 +1486,7 @@ class PlotAccessor:
         dict
             The arguments to pass to the plotting backend.
         """
-        if isinstance(data, ABCDataFrame):
+        if isinstance(data, ABCDataFrame) or isinstance(data, pl.DataFrame):
             arg_def = [
                 ("x", None),
                 ("y", None),
@@ -1547,27 +1553,27 @@ def _load_backend(backend: str) -> types.ModuleType:
     types.ModuleType
         The imported backend.
     """
-    if backend == "bokeh":
+    if backend == "ms_bokeh":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._bokeh")
+            module = importlib.import_module("pyopenms_viz._bokeh")
         except ImportError:
             raise ImportError(
                 "Bokeh is required for plotting when the 'bokeh' backend is selected."
             ) from None
         return module
 
-    elif backend == "matplotlib":
+    elif backend == "ms_matplotlib":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._matplotlib")
+            module = importlib.import_module("pyopenms_viz._matplotlib")
         except ImportError:
             raise ImportError(
                 "Matplotlib is required for plotting when the 'matplotlib' backend is selected."
             ) from None
         return module
 
-    elif backend == "plotly":
+    elif backend == "ms_plotly":
         try:
-            module = importlib.import_module("pyopenms_viz.plotting._plotly")
+            module = importlib.import_module("pyopenms_viz._plotly")
         except ImportError:
             raise ImportError(
                 "Plotly is required for plotting when the 'plotly' backend is selected."
@@ -1575,7 +1581,7 @@ def _load_backend(backend: str) -> types.ModuleType:
         return module
 
     raise ValueError(
-        f"Could not find plotting backend '{backend}'. Needs to be one of 'bokeh', 'matplotlib', or 'plotly'."
+        f"Could not find plotting backend '{backend}'. Needs to be one of 'ms_bokeh', 'ms_matplotlib', or 'ms_plotly'."
     )
 
 
@@ -1589,3 +1595,4 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
