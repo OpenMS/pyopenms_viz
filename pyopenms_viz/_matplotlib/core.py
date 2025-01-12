@@ -82,7 +82,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.ax.set_xlabel(
                 self.xlabel,
                 fontsize=9,
-                labelpad=-2,
+                labelpad=16,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
@@ -91,25 +91,25 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             self.ax.set_ylabel(
                 self.ylabel,
                 fontsize=9,
-                labelpad=-2,
+                labelpad=17,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
             )
             self.ax.set_zlabel(
                 self.zlabel,
-                fontsize=10,
+                fontsize=12,
                 color=ColorGenerator.color_blind_friendly_map[
                     ColorGenerator.Colors.DARKGRAY
                 ],
-                labelpad=-2,
+                labelpad=9,
             )
 
             for axis in ("x", "y", "z"):
                 self.ax.tick_params(
                     axis=axis,
                     labelsize=8,
-                    pad=-2,
+                    pad=3,
                     colors=ColorGenerator.color_blind_friendly_map[
                         ColorGenerator.Colors.DARKGRAY
                     ],
@@ -307,7 +307,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
             )
 
         else:
-            for group, df in self.data.groupby(self.by, sort=False):
+            for group, df in self.data.groupby(self.by, sort=True):
                 (line,) = self.ax.plot(
                     df[self.x], df[self.y], color=self.current_color, **kwargs
                 )
@@ -424,8 +424,20 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
         else:
             if self.z is not None:
                 vmin, vmax = self.data[self.z].min(), self.data[self.z].max()
+                # per group get highest value in z
+                highest_z_per_group = self.data.loc[
+                    self.data.groupby(self.by)[self.z].idxmax()
+                ]
+                highest_z_per_group.sort_values(by=self.z, inplace=True)
+                highest_z_per_group["order"] = range(len(highest_z_per_group))
+                self.data[f"{self.by}_provenance"] = self.data[self.by].copy()
+                self.data[self.by] = self.data[self.by].map(
+                    highest_z_per_group.set_index(self.by)["order"]
+                )
+
             for group, df in self.data.groupby(self.by):
                 use_color = self.current_color if self.z is None else df[self.z]
+
                 # Normalize colors if z is specified
                 if self.z is not None:
                     normalize = plt.Normalize(vmin=vmin, vmax=vmax)
@@ -448,6 +460,12 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
                     )
                 legend_lines.append(scatter)
                 legend_labels.append(group)
+
+            # Reset the group column to the original values
+            if self.z is not None:
+                self.data[self.by] = self.data[f"{self.by}_provenance"]
+                self.data.drop(columns=[f"{self.by}_provenance"], inplace=True)
+
             self._add_legend((legend_lines, legend_labels))
 
 
@@ -681,6 +699,33 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 data=self.data, x=self.x, y=self.y, config=self._config
             )
             self.ax = vlinePlot.generate(None, None)
+
+        return self.ax
+
+    def create_main_plot(self):
+        if not self.plot_3d:
+            scatterPlot = self.get_scatter_renderer(
+                data=self.data,
+                x=self.x,
+                y=self.y,
+                z=self.z,
+                config=self._config,
+            )
+            self.ax = scatterPlot.generate(None, None)
+
+            if self.annotation_data is not None:
+                self._add_box_boundaries(self.annotation_data)
+        else:
+            vlinePlot = self.get_vline_renderer(
+                data=self.data, x=self.x, y=self.y, config=self._config
+            )
+            vlinePlot.generate(None, None)
+
+            if self.annotation_data is not None:
+                a_x, a_y, a_z, a_t, a_c = self._compute_3D_annotations(
+                    self.annotation_data, self.x, self.y, self.z
+                )
+                vlinePlot._add_annotations(self.fig, a_t, a_x, a_y, a_c, a_z)
 
         return self.ax
 

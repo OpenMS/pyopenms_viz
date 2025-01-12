@@ -1030,6 +1030,22 @@
         "xanchor": "left",
         "y": 17
       }
+    ],
+    "shapes": [
+      {
+        "line": {
+          "color": "#EEEEEE",
+          "width": 2
+        },
+        "opacity": 1,
+        "type": "line",
+        "x0": 0,
+        "x1": 1,
+        "xref": "x domain",
+        "y0": 0,
+        "y1": 0,
+        "yref": "y"
+      }
     ]
   }
 }

@@ -32,7 +32,7 @@ from ._misc import (
     freedman_diaconis_rule,
     mz_tolerance_binning,
 )
-from .constants import IS_SPHINX_BUILD
+from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK
 import warnings
 
 
@@ -394,12 +394,17 @@ class BasePlot(ABC):
     def show(self):
         if IS_SPHINX_BUILD:
             return self.show_sphinx()
+        elif IS_NOTEBOOK:
+            return self.show_notebook()
         else:
             return self.show_default()
 
     @abstractmethod
     def show_default(self):
         pass
+
+    def show_notebook(self):
+        return self.show_default()
 
     # show method for running in sphinx build
     def show_sphinx(self):
@@ -559,8 +564,12 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         self.label_suffix = self.x  # set label suffix for bounding box
 
         self._check_and_aggregate_duplicates()
+
         # sort data by x so in order
-        self.data.sort_values(by=self.x, inplace=True)
+        if self.by is not None:
+            self.data.sort_values(by=[self.by, self.x], inplace=True)
+        else:
+            self.data.sort_values(by=self.x, inplace=True)
 
         self.plot()
 
@@ -757,7 +766,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         # color generation is more complex for spectrum plots, so it has its own methods
-        # self.color = self._get_colors(spectrum, kind="peak")
 
         # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
@@ -772,17 +780,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
             spectrum, self.x, self.y
         )
 
-        self.color = self._get_colors(spectrum, kind="peak")
+        # Convert to line plot format
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
+
+        self.color = self._get_colors(spectrum, kind="peak")
         spectrumPlot = self.get_line_renderer(
-            data=spectrum,
-            by=self.by,
-            color=self.color,
-            config=self._config,
+            data=spectrum, by=self.by, color=self.color, config=self._config
         )
-
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
-
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
         )
@@ -795,6 +800,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
             color_mirror = self._get_colors(reference_spectrum, kind="peak")
             reference_spectrum = self.convert_for_line_plots(
+                reference_spectrum, self.x, self.y
+            )
+
+            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(
                 reference_spectrum, self.x, self.y
             )
             mirrorSpectrumPlot = self.get_line_renderer(
@@ -810,6 +819,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
             mirrorSpectrumPlot._add_annotations(
                 self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
             )
+
+        # Plot horizontal line to hide connection between peaks
+        self.plot_x_axis_line(self.canvas, line_width=2)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
@@ -1103,7 +1115,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
         return PeakMapConfig
 
     def __init__(self, data, **kwargs) -> None:
-
         super().__init__(data, **kwargs)
         self._check_and_aggregate_duplicates()
         self.prepare_data()

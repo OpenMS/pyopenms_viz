@@ -61,7 +61,8 @@ RUN_NAMES = [
     "Run #5 Spyogenes 10% human plasma",
 ]
 
-fig, axs = plt.subplots(len(np.unique(chrom_df["run"])), 1, figsize=(10, 10))
+fig, axs = plt.subplots(len(np.unique(chrom_df["run"])), 1, figsize=(10, 15))
+
 # plt.close ### required for running in jupyter notebook setting
 
 # For each run fill in the axs object with the corresponding chromatogram
@@ -78,17 +79,18 @@ for i, run in enumerate(RUN_NAMES):
         by="ion_annotation",
         title=run_df.iloc[0]["run_name"],
         title_font_size=16,
-        xaxis_label_font_size=16,
-        yaxis_label_font_size=16,
-        xaxis_tick_font_size=14,
-        yaxis_tick_font_size=14,
-        canvas=axs[i],
+        xaxis_label_font_size=14,
+        yaxis_label_font_size=14,
+        xaxis_tick_font_size=12,
+        yaxis_tick_font_size=12,
+        fig=axs[i],
         relative_intensity=True,
         annotation_data=current_bounds,
         xlabel="Retention Time (sec)",
         ylabel="Relative\nIntensity",
-        annotation_legend_config=dict(show=False),
+        annotation_legend_config=dict(legend={"show": False}),
         legend_config={"show": False},
     )
 
+fig.tight_layout()
 fig

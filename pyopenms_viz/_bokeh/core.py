@@ -220,6 +220,12 @@ class BOKEHPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         self.fig.y_range = Range1d(start=start, end=end)
 
+    def show_notebook(self):
+        from bokeh.io import output_notebook, show
+
+        output_notebook()
+        show(self.fig)
+
     def generate(self, tooltips, custom_hover_data) -> figure:
         """
         Generate the plot
@@ -236,6 +242,7 @@ class BOKEHPlot(BasePlot, ABC):
         return self.canvas
 
     def show_default(self):
+        # this works with streamlit
         from bokeh.io import show
 
         def app(doc):

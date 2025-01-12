@@ -6,13 +6,17 @@ This example shows a chromatogram colored by mass trace. Since all fragment ion 
 """
 
 import pandas as pd
-from pyopenms_viz import TEST_DATA_PATH
+import requests
+from io import StringIO
 
 pd.options.plotting.backend = "TEMPLATE"
 
-# load the test file for example plotting
-data = TEST_DATA_PATH() / "ionMobilityTestChromatogramDf.tsv"
-df = pd.read_csv(data, sep="\t")
+
+# download the file for example plotting
+url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestChromatogramDf.tsv"
+response = requests.get(url)
+response.raise_for_status()  # Check for any HTTP errors
+df = pd.read_csv(StringIO(response.text), sep="\t")
 
 df.plot(
     kind="chromatogram",
