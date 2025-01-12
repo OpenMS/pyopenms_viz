@@ -108,10 +108,19 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 return False
             # lists are unordered so we need to compare every element one by one
             for idx, i in enumerate(json1):
+                check = True
                 if isinstance(i, dict):
+                    if (
+                        "type" not in i.keys()
+                    ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
+                        check = False
                     # find the corresponding dictionary in json2
                     for j in json2:
-                        if j["type"] == i["type"]:
+                        if (
+                            "type" not in j.keys()
+                        ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
+                            check = False
+                        if check and (j["type"] == i["type"]):
                             if not BokehSnapshotExtension.compare_json(i, j):
                                 print(f"Element {i} not equal to {j}")
                                 return False
