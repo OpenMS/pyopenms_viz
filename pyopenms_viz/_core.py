@@ -571,6 +571,10 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         else:
             self.data.sort_values(by=self.x, inplace=True)
 
+        # Convert to relative intensity if required
+        if self.relative_intensity:
+            self.data[self.y] = self.data[self.y] / self.data[self.y].max() * 100
+
         self.plot()
 
     def plot(self):

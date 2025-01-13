@@ -413,7 +413,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
             )
 
         kwargs = dict(
-            size=self.marker_size,
+            size=self.marker_size / 4,  # divide so units similar to other backends
             line_width=0,
             fill_color=mapper if self.z is not None else self.current_color,
         )
