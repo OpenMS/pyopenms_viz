@@ -14,7 +14,7 @@ import pandas as pd
         dict(by="Annotation"),
         dict(by="Annotation", num_x_bins=20, num_y_bins=20),
         dict(by="Annotation", z_log_scale=True),
-        dict(by="Annotation", fill_by_z=False),
+        dict(by="Annotation", fill_by_z=False, marker_size=50),
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):
@@ -30,11 +30,15 @@ def test_peakmap_plot(featureMap_data, snapshot, kwargs):
     assert snapshot == out
 
 
+# use peakmap to plot a 2D spectrum
 def test_peakmap_mz_im(featureMap_data, snapshot):
     out = featureMap_data.plot(
-        x="rt",
+        x="mz",
         y="im",
         z="int",
+        ylabel="Ion Mobility",
+        xlabel="mass-to-charge",
+        title="2D Spectrum",
         kind="peakmap",
         show_plot=False,
     )

@@ -11,8 +11,8 @@ import pandas as pd
     "kwargs",
     [
         dict(),
-        dict(by="color_annotation"),
-        dict(by="color_annotation", scale_intensity=True),
+        dict(by="spectrum"),
+        dict(peak_color="color_annotation", relative_intensity=True),
         dict(xlabel="RETENTION", ylabel="INTENSITY"),
     ],
 )

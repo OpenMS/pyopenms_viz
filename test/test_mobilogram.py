@@ -12,7 +12,7 @@ import pandas as pd
     [
         dict(),
         dict(by="Annotation"),
-        dict(by="Annotation", scale_intensity=True),
+        dict(by="Annotation", relative_intensity=True),
         dict(grid=False),
     ],
 )
