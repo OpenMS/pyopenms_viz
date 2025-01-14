@@ -83,12 +83,12 @@ for i, run in enumerate(RUN_NAMES):
         yaxis_label_font_size=14,
         xaxis_tick_font_size=12,
         yaxis_tick_font_size=12,
-        fig=axs[i],
+        canvas=axs[i],
         relative_intensity=True,
         annotation_data=current_bounds,
         xlabel="Retention Time (sec)",
         ylabel="Relative\nIntensity",
-        annotation_legend_config=dict(legend={"show": False}),
+        annotation_legend_config=dict(show=False),
         legend_config={"show": False},
     )
 
