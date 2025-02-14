@@ -47,6 +47,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Push _build to gh_pages branch
         run: |
+          cp -r ./.binder ./_build
           cd _build
           # Initialize a new Git repository in the _build directory
           git init
