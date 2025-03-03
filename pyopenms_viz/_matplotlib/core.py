@@ -693,28 +693,6 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
-
-        else:
-            vlinePlot = self.get_vline_renderer(
-                data=self.data, x=self.x, y=self.y, config=self._config
-            )
-            self.ax = vlinePlot.generate(None, None)
-
-        return self.ax
-
-    def create_main_plot(self):
-        if not self.plot_3d:
-            scatterPlot = self.get_scatter_renderer(
-                data=self.data,
-                x=self.x,
-                y=self.y,
-                z=self.z,
-                config=self._config,
-            )
-            self.ax = scatterPlot.generate(None, None)
-
-            if self.annotation_data is not None:
-                self._add_box_boundaries(self.annotation_data)
         else:
             vlinePlot = self.get_vline_renderer(
                 data=self.data, x=self.x, y=self.y, config=self._config

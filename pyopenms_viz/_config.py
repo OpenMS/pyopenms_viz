@@ -1,11 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field, asdict, fields
 from typing import Tuple, Literal, Dict, Any, Union, Iterator
-from enum import Enum
 from copy import deepcopy
 from ._misc import ColorGenerator, MarkerShapeGenerator
 import pandas as pd
-from pandas.core.dtypes.common import is_integer
 
 
 @dataclass(kw_only=True)
@@ -38,8 +36,8 @@ class BaseConfig(ABC):
         Args:
         other (BaseConfig): Another BaseConfig object containing values to update.
         """
-        for field in fields(other):
-            field_name = field.name
+        for field_obj in fields(other):
+            field_name = field_obj.name
             if getattr(self, field_name) is None:
                 setattr(self, field_name, getattr(other, field_name))
 
@@ -144,6 +142,9 @@ class BasePlotConfig(BaseConfig):
     xaxis_label_font_size: int = 16
     yaxis_label_font_size: int = 16
     zaxis_label_font_size: int = 16
+    xaxis_labelpad: int = 16
+    yaxis_labelpad: int = 16
+    zaxis_labelpad: int = 9
     xaxis_tick_font_size: int = 14
     yaxis_tick_font_size: int = 14
     zaxis_tick_font_size: int = 14
