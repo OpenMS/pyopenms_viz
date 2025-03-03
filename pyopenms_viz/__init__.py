@@ -10,7 +10,7 @@ import importlib
 import types
 from pathlib import Path
 
-__version__ = "0.1.6"
+__version__ = "0.1.5"
 
 
 def TEST_DATA_PATH():
