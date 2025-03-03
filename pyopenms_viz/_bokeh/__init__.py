@@ -35,9 +35,9 @@ PLOT_CLASSES: dict[str, type[BOKEHPlot]] = {
 def plot(data, kind, **kwargs):
     plot_obj = PLOT_CLASSES[kind](data, **kwargs)
     if plot_obj.show_plot:
-        return plot_obj.show()
-    else:
-        return plot_obj.fig
+        plot_obj.show()
+
+    return plot_obj.fig
 
 
 __all__ = ["plot"]
