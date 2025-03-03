@@ -51,12 +51,15 @@ def snapshot(snapshot):
 
 
 @pytest.fixture(
-    scope="session", autouse=True, params=["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+    scope="function", autouse=True, params=["ms_matplotlib", "ms_bokeh", "ms_plotly"]
 )
 def load_backend(request):
     import pandas as pd
 
     pd.set_option("plotting.backend", request.param)
+    yield
+
+    pd.reset_option("plotting.backend")
 
 
 @pytest.fixture

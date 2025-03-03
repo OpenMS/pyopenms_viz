@@ -74,7 +74,12 @@ class ColorGenerator:
                 colors = colormap
         if n is not None:
             colors = colors[:n]
+
+        self.colors = colors
         self.color_cycle = cycle(colors)
+
+    def __repr__(self):
+        return f"{self.__class__} with colors {str(self.colors)}"
 
     def __iter__(self):
         """
@@ -200,27 +205,54 @@ class MarkerShapeGenerator:
             engine (Literal["MATPLOTLIB", "PLOTLY", "BOKEH"] or None, optional): Plotting engine. Defaults to None.
             n (int or None, optional): The number of shapes to generate. Defaults to None.
         """
-        if engine is None and shapes is None:
-            raise ValueError("Pass either a list of shapes or an engine to initialize the MarkerShapeGenerator.")
+
+        self.shape_cycle = None
+        # If both are passed, shapes takes presedence
         if shapes is not None:
-            self.shape_cycle = cycle(shapes)
-            return
+            if engine is not None:
+                warnings.warn(
+                    "Both shapes and engine are passed. Shapes will take precedence.",
+                    UserWarning,
+                )
+            if n is not None:
+                warnings.warn(
+                    "Both shapes and n are passed. n will be ignored.", UserWarning
+                )
+            self.initialize_shape_cycle_from_shapes(shapes)
+        elif engine is not None:
+            self.initialize_shape_cycle_from_engine(engine, n)
+        else:
+            pass
+
+    def initialize_shape_cycle_from_shapes(self, shapes: list):
+        self.shape_cycle = cycle(shapes)
+        return
+
+    def initialize_shape_cycle_from_engine(
+        self,
+        engine: Literal["MATPLOTLIB", "PLOTLY", "BOKEH"] | None = None,
+        n: int | None = None,
+    ):
         if engine == "MATPLOTLIB":
             shapes = list(self.matplotlib_map.values())
         elif engine == "PLOTLY":
             shapes = list(self.plotly_map.values())
-        else:
+        else:  # engine == "BOKEH"
             shapes = list(self.bokeh_map.values())
+
         if n is not None:
             shapes = shapes[:n]
         self.shape_cycle = cycle(shapes)
         return
 
+    def is_initialized(self):
+        return self.shape_cycle is not None
+
     def __iter__(self):
         """
         Returns the MarkerShapeGenerator object itself.
         """
-        return self
+        return self.shape_cycle
 
     def __next__(self):
         """
@@ -232,11 +264,11 @@ class MarkerShapeGenerator:
 def sturges_rule(df, value):
     """
     Calculate the number of bins using Sturges' rule.
-    
+
     Args:
         df (pd.DataFrame): A pandas DataFrame containing the data.
         value (str): The column name of the data.
-        
+
     Returns:
         int: The number of bins.
     """
@@ -244,14 +276,15 @@ def sturges_rule(df, value):
     num_bins = int(np.ceil(1 + np.log2(n)))
     return num_bins
 
+
 def freedman_diaconis_rule(df, value, return_bin_width=False):
     """
     Calculate the number of bins using the Freedman-Diaconis rule.
-    
+
     Args:
         df (pd.DataFrame): A pandas DataFrame containing the data.
         value (str): The column name of the data.
-        
+
     Returns:
         int: The number of bins.
     """
@@ -264,7 +297,7 @@ def freedman_diaconis_rule(df, value, return_bin_width=False):
     n = len(df)
 
     # Calculate bin width using the Freedman-Diaconis rule
-    bin_width = 2 * IQR / (n ** (1/3))
+    bin_width = 2 * IQR / (n ** (1 / 3))
     if return_bin_width:
         return bin_width
 
@@ -272,14 +305,17 @@ def freedman_diaconis_rule(df, value, return_bin_width=False):
     num_bins = int((df[value].max() - df[value].min()) / bin_width)
     return num_bins
 
-def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis', '1pct-diff'] = '1pct-diff'):
+
+def mz_tolerance_binning(
+    df, value, tolerance: Literal[float, "freedman-diaconis", "1pct-diff"] = "1pct-diff"
+):
     """
     Bin data based on a fixed m/z tolerance and return bin ranges.
-    
+
     Args:
         df (pd.DataFrame): A pandas DataFrame containing the data.
         value (str): The column name of the m/z data.
-        tolerance (Union[int, str]): The method to define bin width. 
+        tolerance (Union[int, str]): The method to define bin width.
             - If an float, it specifies the fixed m/z tolerance.
             - If 'freedman-diaconis', it calculates the tolerance as the bin width using the Freedman-Diaconis rule.
             - If '1pct-diff', it calculates the tolerance as the 1% percentile of the non-zero differences between values.
@@ -293,20 +329,24 @@ def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis
     # Initialize bins - differences with first element of the bin
     bin_starts = [0]  # List to store bin start indices
     current_bin_start_value = values[0]
-    
-    method=""
+
+    method = ""
     if isinstance(tolerance, str):
-        method=f"auto computed ({tolerance}) "
+        method = f"auto computed ({tolerance}) "
         if tolerance == "freedman-diaconis":
             tolerance = np.floor(freedman_diaconis_rule(df, value, True))
         elif tolerance == "1pct-diff":
             diffs = values - current_bin_start_value
-            tolerance = np.floor(np.percentile(diffs[diffs!=0], 0.01))
+            tolerance = np.floor(np.percentile(diffs[diffs != 0], 0.01))
         else:
-            raise ValueError(f"Invalid tolerance method: {tolerance}.\n Valid options are a float value or 'freedman-diaconis' or '1pct-diff'.")
+            raise ValueError(
+                f"Invalid tolerance method: {tolerance}.\n Valid options are a float value or 'freedman-diaconis' or '1pct-diff'."
+            )
 
     if tolerance == 0:
-        warnings.warn(f"{method}tolerance is 0. Using default tolerance value of 1", UserWarning)
+        warnings.warn(
+            f"{method}tolerance is 0. Using default tolerance value of 1", UserWarning
+        )
         tolerance = 1
 
     # Iterate over the values and calculate where bins should start
@@ -329,18 +369,19 @@ def mz_tolerance_binning(df, value, tolerance: Literal[float, 'freedman-diaconis
     # print(f"bins: {bins}")
     return bins
 
+
 def is_latex_formatted(text):
     # LaTeX-specific patterns
     latex_patterns = [
-        r'\{.*?\}',  # Curly braces
-        r'\^',       # Superscript
-        r'_',        # Subscript
-        r'\\[a-zA-Z]+', # LaTeX commands
+        r"\{.*?\}",  # Curly braces
+        r"\^",  # Superscript
+        r"_",  # Subscript
+        r"\\[a-zA-Z]+",  # LaTeX commands
     ]
-    
+
     # Check if any LaTeX pattern is present in the text
     for pattern in latex_patterns:
         if re.search(pattern, text):
             return True
-    
+
     return False

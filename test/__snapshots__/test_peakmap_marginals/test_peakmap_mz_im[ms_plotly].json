@@ -1701,7 +1701,7 @@
           8.999481
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "prec",
       "marker": {
         "cmax": 20426.84433333333,
@@ -2033,9 +2033,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "square"
       },
       "mode": "markers",
@@ -3716,7 +3716,7 @@
           8.999583
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y4^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -3948,9 +3948,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "circle"
       },
       "mode": "markers",
@@ -6145,7 +6145,7 @@
           8.999613
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y5^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -6496,9 +6496,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "diamond"
       },
       "mode": "markers",
@@ -8817,7 +8817,7 @@
           8.999622
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y6^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -9149,9 +9149,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "cross"
       },
       "mode": "markers",
@@ -11666,7 +11666,7 @@
           8.999622
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y7^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -12037,9 +12037,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "x"
       },
       "mode": "markers",
@@ -14500,7 +14500,7 @@
           8.999796
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y8^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -14849,9 +14849,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "triangle-up"
       },
       "mode": "markers",
@@ -17040,7 +17040,7 @@
           8.999796
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003eIon Mobility: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "legendgroup": "y9^1",
       "marker": {
         "cmax": 20426.84433333333,
@@ -17351,9 +17351,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "triangle-down"
       },
       "mode": "markers",
@@ -17887,6 +17887,15 @@
         0.977,
         0.977
       ],
+      "type": "scatter",
+      "xaxis": "x4",
+      "yaxis": "y5"
+    },
+    {
+      "mode": "lines",
+      "showlegend": false,
+      "x": [],
+      "y": [],
       "type": "scatter",
       "xaxis": "x4",
       "yaxis": "y5"
@@ -19817,7 +19826,7 @@
           "family": "Helvetica",
           "size": 16
         },
-        "text": "mass-to-charge"
+        "text": "Intensity"
       },
       "tickfont": {
         "size": 14,
@@ -19848,7 +19857,7 @@
           "family": "Helvetica",
           "size": 16
         },
-        "text": "Intensity"
+        "text": "Ion Mobility"
       },
       "tickfont": {
         "size": 14,
@@ -19970,7 +19979,7 @@
         0.5
       ],
       "title": {
-        "text": "mass-to-charge",
+        "text": "Ion Mobility",
         "font": {
           "size": 16
         }
@@ -20050,7 +20059,7 @@
           "size": 18
         },
         "showarrow": false,
-        "text": "Integrated mass-to-charge",
+        "text": "Integrated Ion Mobility",
         "x": 0.235,
         "xanchor": "center",
         "xref": "paper",
@@ -20060,6 +20069,7 @@
       }
     ],
     "title": {
+      "text": "",
       "font": {
         "family": "Helvetica",
         "size": 18
@@ -20085,7 +20095,7 @@
     },
     "newshape": {
       "label": {
-        "texttemplate": "x0: %{x0:.2f} | x1: %{x1:.2f}\u003cbr\u003ey0: %{y0:.2f} | y1: %{y1:.2f}",
+        "texttemplate": "rt_0: %{x0:.2f} | rt_1: %{x1:.2f}",
         "textposition": "top left"
       },
       "line": {
@@ -20093,28 +20103,13 @@
         "dash": "dash"
       },
       "showlegend": true,
+      "drawdirection": "vertical",
       "opacity": 0.5
     },
     "width": 500,
     "height": 500,
     "dragmode": "select",
     "showlegend": true,
-    "plot_bgcolor": "#FFFFFF",
-    "shapes": [
-      {
-        "line": {
-          "color": "#EEEEEE",
-          "width": 1.5
-        },
-        "opacity": 1,
-        "type": "line",
-        "x0": 0,
-        "x1": 1,
-        "xref": "x domain",
-        "y0": 0,
-        "y1": 0,
-        "yref": "y"
-      }
-    ]
+    "plot_bgcolor": "#FFFFFF"
   }
 }

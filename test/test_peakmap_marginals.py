@@ -8,27 +8,27 @@ import pandas as pd
 
 
 def test_peakmap_marginals(featureMap_data, snapshot):
-    out = featureMap_data.plot(
+    fig = featureMap_data.plot(
         x="mz",
         y="rt",
         z="int",
         kind="peakmap",
+        xlabel="mass-to-charge",
+        ylabel="Retention Time",
+        zlabel="Intensity",
         add_marginals=True,
         show_plot=False,
     )
 
     # apply tight layout to matplotlib to ensure not cut off
     if pd.options.plotting.backend == "ms_matplotlib":
-        fig = out[1][1].figure
         fig.tight_layout()
-    else:
-        fig = out
 
     assert snapshot == fig
 
 
 def test_peakmap_mz_im(featureMap_data, snapshot):
-    out = featureMap_data.plot(
+    fig = featureMap_data.plot(
         x="rt",
         y="im",
         z="int",
@@ -36,15 +36,15 @@ def test_peakmap_mz_im(featureMap_data, snapshot):
         add_marginals=True,
         x_kind="chromatogram",
         y_kind="chromatogram",
+        xlabel="Retention Time",
+        ylabel="Ion Mobility",
+        zlabel="Intensity",
         kind="peakmap",
         show_plot=False,
     )
 
     # apply tight layout to matplotlib to ensure not cut off
     if pd.options.plotting.backend == "ms_matplotlib":
-        fig = out[1][1].figure
         fig.tight_layout()
-    else:
-        fig = out
 
     assert snapshot == fig

@@ -96,7 +96,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 if key not in json2:
                     print(f"Key {key} not in second json")
                     return False
-                elif key not in ["id", "root_ids"]:  # add keys to ignore here
+                elif key in ["id", "root_ids"]:  # add keys to ignore here
                     pass
                 elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
                     print(f"Values for key {key} not equal")
@@ -107,19 +107,29 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 print("Lists have different lengths")
                 return False
             # lists are unordered so we need to compare every element one by one
-            for i in json1:
+            for idx, i in enumerate(json1):
+                check = True
                 if isinstance(i, dict):
-                    # find the corresponding dictionary in json2
-                    for j in json2:
-                        if j["type"] == i["type"]:
-                            if not BokehSnapshotExtension.compare_json(i, j):
-                                print(f"Element {i} not equal to {j}")
-                                return False
-                            return True
-                    print(f"Element {i} not in second list")
-                    return False
+                    if (
+                        "type" not in i.keys()
+                    ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
+                        check = False
+                        pass
+                    if check:  # find corresponding entry in json2 only if check is true
+                        for j in json2:
+                            if (
+                                "type" not in j.keys()
+                            ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
+                                check = False
+                            if check and (j["type"] == i["type"]):
+                                if not BokehSnapshotExtension.compare_json(i, j):
+                                    print(f"Element {i} not equal to {j}")
+                                    return False
+                                return True
+                        print(f"Element {i} not in second list")
+                        return False
                 else:
-                    return json1[i] == json2[i]
+                    return json1[idx] == json2[idx]
             return True
         else:
             if json1 != json2:

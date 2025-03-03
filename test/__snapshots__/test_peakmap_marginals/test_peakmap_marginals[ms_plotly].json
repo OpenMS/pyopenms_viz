@@ -1011,7 +1011,7 @@
           5391.9276203750005
         ]
       ],
-      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003eRetention Time: %{customdata[1]}\u003cbr\u003emass-to-charge: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
+      "hovertemplate": "index: %{customdata[0]}\u003cbr\u003emass-to-charge: %{customdata[1]}\u003cbr\u003eRetention Time: %{customdata[2]}\u003cbr\u003eIntensity: %{customdata[3]}",
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
@@ -1227,9 +1227,9 @@
             "#000004"
           ]
         ],
-        "opacity": 0.8,
+        "opacity": 1.0,
         "showscale": false,
-        "size": 10,
+        "size": 10.0,
         "symbol": "square"
       },
       "mode": "markers",
@@ -1579,6 +1579,15 @@
       "yaxis": "y5"
     },
     {
+      "mode": "lines",
+      "showlegend": false,
+      "x": [],
+      "y": [],
+      "type": "scatter",
+      "xaxis": "x4",
+      "yaxis": "y5"
+    },
+    {
       "line": {
         "color": "#4575B4"
       },
@@ -1628,7 +1637,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#D73027"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1648,7 +1657,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#91BFDB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1668,7 +1677,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FC8D59"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1688,7 +1697,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#7B2C65"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1708,7 +1717,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FCCF53"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1728,7 +1737,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#555555"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1748,7 +1757,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#BBBBBB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1788,7 +1797,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#D73027"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1808,7 +1817,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#91BFDB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1828,7 +1837,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FC8D59"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1848,7 +1857,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#7B2C65"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1868,7 +1877,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FCCF53"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1888,7 +1897,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#555555"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1908,7 +1917,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#BBBBBB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1948,7 +1957,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#D73027"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1968,7 +1977,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#91BFDB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -1988,7 +1997,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FC8D59"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2008,7 +2017,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#7B2C65"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2028,7 +2037,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#FCCF53"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2048,7 +2057,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#555555"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2068,7 +2077,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#BBBBBB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2108,7 +2117,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#D73027"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -2128,7 +2137,7 @@
     {
       "legendgroup": "",
       "line": {
-        "color": "#91BFDB"
+        "color": "#4575B4"
       },
       "mode": "lines",
       "name": "",
@@ -3028,7 +3037,7 @@
           "family": "Helvetica",
           "size": 16
         },
-        "text": "mass-to-charge"
+        "text": "Intensity"
       },
       "tickfont": {
         "size": 14,
@@ -3059,7 +3068,7 @@
           "family": "Helvetica",
           "size": 16
         },
-        "text": "Intensity"
+        "text": "Retention Time"
       },
       "tickfont": {
         "size": 14,
@@ -3181,7 +3190,7 @@
         0.5
       ],
       "title": {
-        "text": "mass-to-charge",
+        "text": "Retention Time",
         "font": {
           "size": 16
         }
@@ -3203,7 +3212,7 @@
         0.94
       ],
       "title": {
-        "text": "Retention Time",
+        "text": "mass-to-charge",
         "font": {
           "size": 16
         }
@@ -3248,7 +3257,7 @@
           "size": 18
         },
         "showarrow": false,
-        "text": "Integrated Retention Time",
+        "text": "Integrated mass-to-charge",
         "x": 0.705,
         "xanchor": "center",
         "xref": "paper",
@@ -3261,7 +3270,7 @@
           "size": 18
         },
         "showarrow": false,
-        "text": "Integrated mass-to-charge",
+        "text": "Integrated Retention Time",
         "x": 0.235,
         "xanchor": "center",
         "xref": "paper",
@@ -3271,6 +3280,7 @@
       }
     ],
     "title": {
+      "text": "",
       "font": {
         "family": "Helvetica",
         "size": 18
@@ -3296,7 +3306,7 @@
     },
     "newshape": {
       "label": {
-        "texttemplate": "x0: %{x0:.2f} | x1: %{x1:.2f}\u003cbr\u003ey0: %{y0:.2f} | y1: %{y1:.2f}",
+        "texttemplate": "mz_0: %{x0:.2f} | mz_1: %{x1:.2f}",
         "textposition": "top left"
       },
       "line": {
@@ -3304,28 +3314,13 @@
         "dash": "dash"
       },
       "showlegend": true,
+      "drawdirection": "vertical",
       "opacity": 0.5
     },
     "width": 500,
     "height": 500,
     "dragmode": "select",
     "showlegend": true,
-    "plot_bgcolor": "#FFFFFF",
-    "shapes": [
-      {
-        "line": {
-          "color": "#EEEEEE",
-          "width": 1.5
-        },
-        "opacity": 1,
-        "type": "line",
-        "x0": 0,
-        "x1": 1,
-        "xref": "x domain",
-        "y0": 0,
-        "y1": 0,
-        "yref": "y"
-      }
-    ]
+    "plot_bgcolor": "#FFFFFF"
   }
 }
