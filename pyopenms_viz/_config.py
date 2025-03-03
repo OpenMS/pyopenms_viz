@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, ABCMeta
 from dataclasses import dataclass, field, asdict, fields
 from typing import Tuple, Literal, Dict, Any, Union, Iterator
 from copy import deepcopy
@@ -54,6 +54,22 @@ class BaseConfig(ABC):
 
 @dataclass(kw_only=True)
 class LegendConfig(BaseConfig):
+    """
+    Configuration for the legend in a plot.
+
+    Args:
+        loc (str): Location of the legend. Default is "right".
+        orientation (str): Orientation of the legend. Default is "vertical".
+        title (str): Title of the legend. Default is "Legend".
+        fontsize (int): Font size of the legend text. Default is 10.
+        show (bool): Whether to show the legend. Default is True.
+        onClick (Literal["hide", "mute"]): Action on legend click. Only valid for Bokeh. Default is "mute".
+        bbox_to_anchor (Tuple[float, float]): Fine control for legend positioning in Matplotlib. Default is (1.2, 0.5).
+
+    Returns:
+        LegendConfig: An instance of LegendConfig.
+    """
+
     loc: str = "right"
     orientation: str = "vertical"
     title: str = "Legend"
@@ -103,6 +119,37 @@ class LegendConfig(BaseConfig):
 
 @dataclass(kw_only=True)
 class BasePlotConfig(BaseConfig):
+    """
+    Base configuration for a plot.
+
+    Attributes:
+        kind (Literal["line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"] | None): Type of plot. Default is None.
+        x (str | None): X-axis data. Default is None.
+        y (str | None): Y-axis data. Default is None.
+        z (str | None): Z-axis data. Default is None.
+        by (str | None): Grouping variable. Default is None.
+        canvas (Any): Canvas for the plot. Default is None. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is a Axes object, and for Plotly, this is a plotly.graph_objects.Figure object.
+        height (int): Height of the plot. Default is 500.
+        width (int): Width of the plot. Default is 500.
+        grid (bool): Whether to show grid. Default is True.
+        toolbar_location (str): Location of the toolbar. Default is "above".
+        title (str): Title of the plot. Default is an empty string.
+        xlabel (str): Label for the X-axis. Default is an empty string.
+        ylabel (str): Label for the Y-axis. Default is an empty string.
+        zlabel (str): Label for the Z-axis. Default is an empty string.
+        x_axis_location (str): Location of the X-axis. Default is "below".
+        y_axis_location (str): Location of the Y-axis. Default is "left".
+        title_font_size (int): Font size of the title. Default is 18.
+        xaxis_label_font_size (int): Font size of the X-axis label. Default is 16.
+        yaxis_label_font_size (int): Font size of the Y-axis label. Default is 16.
+        zaxis_label_font_size (int): Font size of the Z-axis label. Default is 16.
+        xaxis_labelpad (int): Padding for the X-axis label. Default is 16.
+        yaxis_labelpad (int): Padding for the Y-axis label. Default is 16.
+        zaxis_labelpad (int): Padding for the Z-axis label. Default is 9.
+
+    Methods:
+        default_legend_factory(): Returns a default LegendConfig instance with the title "Trace".
+    """
 
     def default_legend_factory():
         return LegendConfig(title="Trace")
@@ -174,17 +221,45 @@ class BasePlotConfig(BaseConfig):
 
 @dataclass(kw_only=True)
 class LineConfig(BasePlotConfig):
+    """
+    Configuration for a line plot.
+
+    Attributes:
+        line_width (float): Width of the line. Default is 1.
+        line_type (str): Type of the line (e.g., "solid", "dashed"). Default is "solid".
+    """
+
     line_width: float = 1
     line_type: str = "solid"
 
 
 @dataclass(kw_only=True)
 class VLineConfig(LineConfig):
+    """
+    Configuration for a vertical or horizontal line plot.
+
+    Attributes:
+        direction (Literal["horizontal", "vertical"]): Direction of the line. Default is "vertical".
+    """
+
     direction: Literal["horizontal", "vertical"] = "vertical"
 
 
 @dataclass(kw_only=True)
 class ScatterConfig(BasePlotConfig):
+    """
+    Configuration for a scatter plot.
+
+    Attributes:
+        bin_peaks (Union[Literal["auto"], bool]): Whether to bin peaks. Default is "auto", can also be set to True or False.
+        num_x_bins (int): Number of bins along the X-axis. Default is 50. Ignored if bin_peaks is False or "auto".
+        num_y_bins (int): Number of bins along the Y-axis. Default is 50. Ignored if bin_peaks is False or "auto".
+        z_log_scale (bool): Whether to use logarithmic scale for Z-axis. Default is False.
+        fill_by_z (bool): Whether to fill markers by Z value. Default is True.
+        marker_size (int): Size of the markers. Default is 30.
+        marker (Iterator[str] | MarkerShapeGenerator): Marker shapes. Default is a MarkerShapeGenerator instance.
+    """
+
     bin_peaks: Union[Literal["auto"], bool] = "auto"
     num_x_bins: int = 50
     num_y_bins: int = 50
@@ -204,6 +279,20 @@ class ScatterConfig(BasePlotConfig):
 
 @dataclass(kw_only=True)
 class ChromatogramConfig(LineConfig):
+    """
+    Configuration for a chromatogram plot.
+
+    Attributes:
+        annotation_data (pd.DataFrame | None): Data for annotations. Default is None.
+        annotation_colormap (str): Colormap for annotations. Default is "Dark2".
+        annotation_line_width (float): Width of the annotation lines. Default is 3.
+        annotation_line_type (str): Type of the annotation lines (e.g., "solid", "dashed"). Default is "solid".
+        annotation_legend_config (Dict | LegendConfig): Configuration for the annotation legend. Default is a LegendConfig instance with title "Features".
+        xlabel (str): Label for the X-axis. Default is "Retention Time".
+        ylabel (str): Label for the Y-axis. Default is "Intensity".
+        title (str): Title of the plot. Default is "Chromatogram".
+    """
+
     def default_legend_factory():
         return LegendConfig(title="Features", loc="right", bbox_to_anchor=(1.2, 0.5))
 
@@ -230,6 +319,15 @@ class ChromatogramConfig(LineConfig):
 
 @dataclass(kw_only=True)
 class MobilogramConfig(ChromatogramConfig):
+    """
+    Configuration for a mobilogram plot.
+
+    Attributes:
+        xlabel (str): Label for the X-axis. Default is "Ion Mobility".
+        ylabel (str): Label for the Y-axis. Default is "Intensity".
+        title (str): Title of the plot. Default is "Mobilogram".
+    """
+
     ### override from previous class
 
     xlabel: str = "Ion Mobility"
@@ -239,6 +337,28 @@ class MobilogramConfig(ChromatogramConfig):
 
 @dataclass(kw_only=True)
 class SpectrumConfig(VLineConfig):
+    """
+    Configuration for a spectrum plot.
+
+    Attributes:
+        reference_spectrum (pd.DataFrame | None): Reference spectrum data. Default is None.
+        mirror_spectrum (bool): Whether to mirror the spectrum. Default is False.
+        peak_color (str | None): Color of the peaks. Default is None.
+        bin_peaks (Union[Literal["auto"], bool]): Whether to bin peaks. Default is False.
+        bin_method (Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"]): Method for binning peaks. Default is "mz-tol-bin".
+        num_x_bins (int): Number of bins along the X-axis. Default is 50. Ignored if bin_peaks is False or "auto".
+        mz_tol (Union[float, Literal["freedman-diaconis", "1pct-diff"]]): Tolerance for m/z binning. Default is "1pct-diff".
+        annotate_top_n_peaks (int | None | Literal["all"]): Number of top peaks to annotate. Default is 5.
+        annotate_mz (bool): Whether to annotate m/z values. Default is True.
+        ion_annotation (str | None): Column for ion annotations. Default is None.
+        sequence_annotation (str | None): Column for sequence annotations. Default is None.
+        custom_annotation (str | None): Column for custom annotations. Default is None.
+        annotation_color (str | None): Color for annotations. Default is None.
+        aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Default is "max".
+        xlabel (str): Label for the X-axis. Default is "mass-to-charge".
+        ylabel (str): Label for the Y-axis. Default is "Intensity".
+        title (str): Title of the plot. Default is "Mass Spectrum".
+    """
 
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
@@ -278,6 +398,22 @@ class SpectrumConfig(VLineConfig):
 
 @dataclass(kw_only=True)
 class PeakMapConfig(ScatterConfig):
+    """
+    Configuration for a peak map plot.
+
+    Attributes:
+        add_marginals (bool): Whether to add marginal plots. Default is False.
+        y_kind (str): Type of plot for the Y-axis marginal. Default is "spectrum".
+        x_kind (str): Type of plot for the X-axis marginal. Default is "chromatogram".
+        aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Default is "mean".
+        annotation_data (pd.DataFrame | None): Data for annotations. Default is None.
+        xlabel (str): Label for the X-axis. Default is "Retention Time".
+        ylabel (str): Label for the Y-axis. Default is "mass-to-charge".
+        zlabel (str): Label for the Z-axis. Default is "Intensity".
+        title (str): Title of the plot. Default is "PeakMap".
+        x_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the X-axis marginal plot. Set in post-init.
+        y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Set in post-init.
+    """
 
     @staticmethod
     def marginal_config_factory(kind):
