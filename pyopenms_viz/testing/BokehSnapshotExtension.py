@@ -114,19 +114,20 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                         "type" not in i.keys()
                     ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
                         check = False
-                    # find the corresponding dictionary in json2
-                    for j in json2:
-                        if (
-                            "type" not in j.keys()
-                        ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
-                            check = False
-                        if check and (j["type"] == i["type"]):
-                            if not BokehSnapshotExtension.compare_json(i, j):
-                                print(f"Element {i} not equal to {j}")
-                                return False
-                            return True
-                    print(f"Element {i} not in second list")
-                    return False
+                        pass
+                    if check:  # find corresponding entry in json2 only if check is true
+                        for j in json2:
+                            if (
+                                "type" not in j.keys()
+                            ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
+                                check = False
+                            if check and (j["type"] == i["type"]):
+                                if not BokehSnapshotExtension.compare_json(i, j):
+                                    print(f"Element {i} not equal to {j}")
+                                    return False
+                                return True
+                        print(f"Element {i} not in second list")
+                        return False
                 else:
                     return json1[idx] == json2[idx]
             return True
