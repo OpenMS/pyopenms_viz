@@ -10,6 +10,8 @@ import importlib
 import types
 from pathlib import Path
 
+import pyopenms_viz._dataframe # noqa: F401
+
 __version__ = "0.1.5"
 
 

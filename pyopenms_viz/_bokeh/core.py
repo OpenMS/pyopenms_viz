@@ -268,7 +268,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
             kwargs["line_width"] = 2.5
 
         if by is None:
-            source = ColumnDataSource(data)
+            source = ColumnDataSource(data.to_dict())
             if color_gen is not None:
                 kwargs["line_color"] = (
                     color_gen if isinstance(color_gen, str) else next(color_gen)
@@ -280,7 +280,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
 
             legend_items = []
             for group, df in data.groupby(by, sort=False):
-                source = ColumnDataSource(df)
+                source = ColumnDataSource(df.to_dict())
                 if color_gen is not None:
                     kwargs["line_color"] = (
                         color_gen if isinstance(color_gen, str) else next(color_gen)
@@ -313,7 +313,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
         if not plot_3d:
             direction = kwargs.pop("direction", "vertical")
             if by is None:
-                source = ColumnDataSource(data)
+                source = ColumnDataSource(data.to_dict())
                 if direction == "horizontal":
                     x0_data_var = 0
                     x1_data_var = x
@@ -336,7 +336,7 @@ class BOKEHVLinePlot(BOKEHPlot, VLinePlot):
             else:
                 legend_items = []
                 for group, df in data.groupby(by):
-                    source = ColumnDataSource(df)
+                    source = ColumnDataSource(df.to_dict())
                     if direction == "horizontal":
                         x0_data_var = 0
                         x1_data_var = x
@@ -432,7 +432,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 kwargs[k] = v
         if by is None:
             kwargs["marker"] = next(marker_gen)
-            source = ColumnDataSource(data)
+            source = ColumnDataSource(data.to_dict())
             line = fig.scatter(x=x, y=y, source=source, **kwargs)
             return fig, None
         else:
@@ -441,7 +441,7 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
                 kwargs["marker"] = next(marker_gen)
                 if z is None:
                     kwargs["fill_color"] = next(color_gen)
-                source = ColumnDataSource(df)
+                source = ColumnDataSource(df.to_dict())
                 line = fig.scatter(x=x, y=y, source=source, **kwargs)
                 legend_items.append((group, [line]))
             legend = Legend(items=legend_items)
