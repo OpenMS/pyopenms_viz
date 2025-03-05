@@ -183,8 +183,6 @@ class BasePlotConfig(BaseConfig):
     xlabel: str = ""
     ylabel: str = ""
     zlabel: str = ""
-    x_axis_location: str = "below"
-    y_axis_location: str = "left"
     title_font_size: int = 18
     xaxis_label_font_size: int = 16
     yaxis_label_font_size: int = 16
