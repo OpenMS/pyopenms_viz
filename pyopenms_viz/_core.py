@@ -1500,3 +1500,19 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
+def plot_chromatogram(data, x=None, y=None, backend=None, **kwargs):
+    """Plot a chromatogram using a seaborn-like API."""
+    return data.plot(x=x, y=y, kind='chromatogram', backend=backend, **kwargs)
+
+def plot_spectrum(data, x=None, y=None, backend=None, **kwargs):
+    """Plot a mass spectrum using a seaborn-like API."""
+    return data.plot(x=x, y=y, kind='spectrum', backend=backend, **kwargs)
+
+def plot_mobilogram(data, x=None, y=None, backend=None, **kwargs):
+    """Plot a mobilogram using a seaborn-like API."""
+    return data.plot(x=x, y=y, kind='mobilogram', backend=backend, **kwargs)
+
+def plot_peakmap(data, x=None, y=None, z=None, backend=None, **kwargs):
+    """Plot a peakmap using a seaborn-like API."""
+    return data.plot(x=x, y=y, z=z, kind='peakmap', backend=backend, **kwargs)
