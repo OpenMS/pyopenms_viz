@@ -9,9 +9,14 @@ from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
 from pathlib import Path
+from ._core import (
+    plot_chromatogram,
+    plot_spectrum,
+    plot_mobilogram,
+    plot_peakmap
+)
 
 __version__ = "1.0.0"
-
 
 def TEST_DATA_PATH():
     """Find the full path to the nearest '.git' directory by climbing up the directory tree.
@@ -198,3 +203,10 @@ def _get_plot_backend(backend: str | None = None):
 
 
 __all__ = ["PlotAccessor"]
+
+__all__ = [
+    'plot_chromatogram',
+    'plot_spectrum',
+    'plot_mobilogram',
+    'plot_peakmap'
+]
