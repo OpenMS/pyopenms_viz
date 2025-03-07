@@ -3,8 +3,12 @@ name: Auto Update TSV Files
 on:
   push:
     paths:
-      - "docs/conf.py"
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions UI
+      - "docs/conf.py"  # Triggers workflow when conf.py changes
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+permissions:
+  contents: write  # Allows writing to the repo
+  pull-requests: write  # Allows PR creation (if needed)
 
 jobs:
   update-tsv:
@@ -14,7 +18,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full history is available
+          fetch-depth: 0  # Ensures full history for proper commits
 
       - name: Set Up Python
         uses: actions/setup-python@v4
@@ -24,20 +28,20 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas watchdog pytest
+          pip install pandas watchdog
 
       - name: Run TSV Update Script
-        run: python update_tsv_sync.py  # Updated to match your script
+        run: python scripts/version_update_script.py  # Adjust path if needed
 
-      - name: Run Tests
-        run: pytest test/  # Runs all tests
-
-      - name: Commit and Push Changes
+      - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+
+      - name: Commit and Push Changes
+        run: |
           git add docs/Parameters/*.tsv
           git commit -m "Auto-update TSV files from conf.py changes" || echo "No changes to commit"
-          git push
+          git push origin ${{ github.ref_name }}  # Push to the same branch that triggered the workflow
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
