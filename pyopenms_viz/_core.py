@@ -1679,7 +1679,7 @@ def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, ba
     if z is None:
         raise ValueError("`z` must be provided for peakmap visualization.")
     if data.empty:
-        raise ValueError("DataFrame is empty, cannot plot with no data.")
+        raise ValueError("DataFrame (intensity) is empty, cannot plot with no data.")
 
     # Plot the peakmap
     return data.plot(x=x, y=y, z=z, kind="peakmap", backend=backend, **kwargs)
