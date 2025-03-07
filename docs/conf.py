@@ -321,5 +321,7 @@ sphinx_gallery_conf = {
 nbsphinx_execute = "always"
 nbsphinx_requirejs_path = ""
 nbsphinx_allow_errors = True
+spectrum_peak_count = 500  # New value
+
 
 
