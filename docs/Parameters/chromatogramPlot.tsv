@@ -1,6 +1,4 @@
 Parameter	Default	Type	Description
-x*		str	The column name for x-axis data
-y*		str	The column name for y-axis data
 by		str	The column name to group by. Will result in separate line traces per group
 backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
 annotation_data		DataFrame	DataFrame of annotation data with columns [‘leftWidth’, ‘rightWidth’]
