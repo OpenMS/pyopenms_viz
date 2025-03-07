@@ -19,7 +19,9 @@ Parameters
    x_kind          | Type of plot for the X-axis marginal (default: "chromatogram")
    aggregation_method | Method for aggregating data (default: "mean")
    annotation_data | Data for annotations (default: None)
+   kind             | Type of plot (default: None)
    xlabel          | Label for the X-axis (default: "Retention Time")
+
    ylabel          | Label for the Y-axis (default: "mass-to-charge")
    zlabel          | Label for the Z-axis (default: "Intensity")
    title           | Title of the plot (default: "PeakMap")

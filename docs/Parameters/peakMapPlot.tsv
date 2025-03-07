@@ -10,10 +10,10 @@ zlabel	"Intensity"	str	Label for the Z-axis.
 title	"PeakMap"	str	Title of the plot.
 x_plot_config		ChromatogramConfig | SpectrumConfig	Configuration for the X-axis marginal plot.
 y_plot_config		ChromatogramConfig | SpectrumConfig	Configuration for the Y-axis marginal plot.
-kind	None	Literal["line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"]	Type of plot.
-x	None	str	X-axis data.
-y	None	str	Y-axis data.
-z	None	str	Z-axis data.
+kind	"peakmap"	Literal["line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"]	Type of plot.
+x	"Retention Time"	str	X-axis data.
+y	"mass-to-charge"	str	Y-axis data.
+z	"Intensity"	str	Z-axis data.
 by	None	str	Grouping variable.
 canvas	None	Any	Canvas for the plot.
 height	500	int	Height of the plot.
