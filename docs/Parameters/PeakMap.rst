@@ -14,20 +14,6 @@ Parameters
    :header-rows: 1
    :delim: tab
 
-   add_marginals   | Whether to add marginal plots (default: False)
-   y_kind          | Type of plot for the Y-axis marginal (default: "spectrum")
-   x_kind          | Type of plot for the X-axis marginal (default: "chromatogram")
-   aggregation_method | Method for aggregating data (default: "mean")
-   annotation_data | Data for annotations (default: None)
-   kind             | Type of plot (default: None)
-   xlabel          | Label for the X-axis (default: "Retention Time")
-
-   ylabel          | Label for the Y-axis (default: "mass-to-charge")
-   zlabel          | Label for the Z-axis (default: "Intensity")
-   title           | Title of the plot (default: "PeakMap")
-   x_plot_config   | Configuration for the X-axis marginal plot (set in post-init)
-   y_plot_config   | Configuration for the Y-axis marginal plot (set in post-init)
-
 
 
 Example Usage
