@@ -321,3 +321,5 @@ sphinx_gallery_conf = {
 nbsphinx_execute = "always"
 nbsphinx_requirejs_path = ""
 nbsphinx_allow_errors = True
+
+
