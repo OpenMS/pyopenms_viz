@@ -201,10 +201,8 @@ def _get_plot_backend(backend: str | None = None):
     _backends[backend_str] = module
     return module
 
-
-__all__ = ["PlotAccessor"]
-
 __all__ = [
+    "PlotAccessor"
     'plot_chromatogram',
     'plot_spectrum',
     'plot_mobilogram',
