@@ -6,9 +6,11 @@ Chromatograms can be plotted using kind = chromatogram. In this plot, retention 
 Parameters
 ----------
 .. csv-table:: 
-   :file:chromatogramPlot.tsv
+   :file: chromatogramPlot.tsv
    :header-rows: 1
    :delim: tab
+
+
 
 Example Usage
 -------------

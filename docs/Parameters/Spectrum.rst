@@ -7,7 +7,7 @@ Parameters
 ----------
 
 .. csv-table:: 
-   :file:spectrumPlot.tsv
+   :file: spectrumPlot.tsv
    :header-rows: 1
    :delim: tab
 
