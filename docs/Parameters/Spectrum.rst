@@ -6,6 +6,11 @@ A spectrum can be plotted using kind = "spectrum". In this plot, mass-to-charge 
 Parameters
 ----------
 
+.. csv-table:: 
+   :file:Spectrum.tsv
+   :header-rows: 1
+   :delim: tab
+
 - **reference_spectrum**: 
   - **Type**: `pd.DataFrame | None`
   - **Description**: Reference spectrum data. Default is None.
