@@ -5,14 +5,10 @@ Chromatograms can be plotted using kind = chromatogram. In this plot, retention 
 
 Parameters
 ----------
-
-- **annotation_data**: Data for annotations (pd.DataFrame | None). Default is None.
-- **annotation_colormap**: Colormap for annotations (str). Default is "Dark2".
-- **annotation_line_width**: Width of the annotation lines (float). Default is 3.
-- **annotation_line_type**: Type of the annotation lines (str). Default is "solid".
-- **xlabel**: Label for the X-axis (str). Default is "Retention Time".
-- **ylabel**: Label for the Y-axis (str). Default is "Intensity".
-- **title**: Title of the plot (str). Default is "Chromatogram".
+.. csv-table:: 
+   :file:chromatogramPlot.tsv
+   :header-rows: 1
+   :delim: tab
 
 Example Usage
 -------------
