@@ -5,7 +5,7 @@ test/test_peakmap
 
 import pytest
 import pandas as pd
-
+import pyopenms_viz as oms_viz
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -49,3 +49,24 @@ def test_peakmap_mz_im(featureMap_data, snapshot):
         fig.tight_layout()
 
     assert snapshot == out
+
+# New tests for plot_peakmap function
+def test_plot_peakmap_basic(featureMap_data):
+    # Test basic functionality
+    fig = oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt', z='int')
+    assert fig is not None
+
+def test_plot_peakmap_missing_z(featureMap_data):
+    # Test missing z parameter
+    with pytest.raises(ValueError):
+        oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt')
+
+def test_plot_peakmap_invalid_backend(featureMap_data):
+    # Test invalid backend
+    with pytest.raises(ValueError):
+        oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt', z='int', backend='invalid_backend')
+
+def test_plot_peakmap_empty_data():
+    # Test empty DataFrame
+    with pytest.raises(ValueError):
+        oms_viz.plot_peakmap(pd.DataFrame(), x='mz', y='rt', z='int')
