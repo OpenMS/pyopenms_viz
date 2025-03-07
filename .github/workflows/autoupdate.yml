@@ -31,7 +31,8 @@ jobs:
           pip install pandas watchdog
 
       - name: Run TSV Update Script
-        run: python scripts/version_update_script.py  # Adjust path if needed
+        run: python update_tsv_sync.py  # script path
+
 
       - name: Configure Git
         run: |
