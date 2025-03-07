@@ -1631,6 +1631,7 @@ def plot_mobilogram(data: pd.DataFrame, x: str, y: str, backend: Optional[str] =
     return data.plot(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
 
 
+
 def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, backend: Optional[str] = None, **kwargs):
     """
     Plot a peakmap using a seaborn-like API.
@@ -1644,7 +1645,7 @@ def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, ba
     y : str
         The column name for the y-axis data.
     z : str, optional
-        The column name for the z-axis data (intensity).
+        The column name for the z-axis data (intensity). This parameter is required for peakmap visualization.
     backend : str, optional
         The backend to use for plotting. If not provided, it will try to use
         matplotlib, bokeh, or plotly in that order.
@@ -1662,7 +1663,9 @@ def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, ba
     Raises
     ------
     ValueError
-        If `x` or `y` is not provided.
+        - If `x` or `y` is not provided.
+        - If `z` is not provided.
+        - If the DataFrame is empty.
 
     Examples
     --------
@@ -1671,6 +1674,13 @@ def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, ba
     >>> data = pd.DataFrame({'mz': [100, 200, 300], 'rt': [1, 2, 3], 'intensity': [10, 20, 30]})
     >>> oms_viz.plot_peakmap(data, x='mz', y='rt', z='intensity', backend='ms_plotly')
     """
+    # Validate required parameters
     if x is None or y is None:
         raise ValueError("Both `x` and `y` must be provided.")
+    if z is None:
+        raise ValueError("`z` must be provided for peakmap visualization.")
+    if data.empty:
+        raise ValueError("DataFrame is empty, cannot plot with no data.")
+
+    # Plot the peakmap
     return data.plot(x=x, y=y, z=z, kind="peakmap", backend=backend, **kwargs)
