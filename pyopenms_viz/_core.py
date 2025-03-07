@@ -13,7 +13,6 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
-from typing import Optional
 import pandas as pd
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
