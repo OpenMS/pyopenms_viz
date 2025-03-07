@@ -1634,6 +1634,7 @@ def plot_mobilogram(data: pd.DataFrame, x: str, y: str, backend: Optional[str] =
     return data.plot(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
 
 
+
 def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, backend: Optional[str] = None, **kwargs):
     """
     Plot a peakmap using a seaborn-like API.
