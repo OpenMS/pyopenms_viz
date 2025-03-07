@@ -5,7 +5,7 @@ test/plotting/test_matplotlib
 
 import pytest
 import pandas as pd
-
+import pyopenms_viz as oms_viz
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -29,7 +29,6 @@ def test_chromatogram_plot(chromatogram_data, snapshot, kwargs):
 
     assert snapshot == out
 
-
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -47,9 +46,30 @@ def test_chromatogram_with_annotation(
         show_plot=False,
         **kwargs,
     )
-    # apply tight layout to maplotlib to ensure not cut off
+    # apply tight layout to matplotlib to ensure not cut off
     if pd.options.plotting.backend == "ms_matplotlib":
         fig = out.get_figure()
         fig.tight_layout()
 
     assert snapshot == out
+
+# New tests for plot_chromatogram function
+def test_plot_chromatogram_basic(chromatogram_data):
+    # Test basic functionality
+    fig = oms_viz.plot_chromatogram(chromatogram_data, x='rt', y='int')
+    assert fig is not None
+
+def test_plot_chromatogram_missing_y(chromatogram_data):
+    # Test missing y parameter
+    with pytest.raises(ValueError):
+        oms_viz.plot_chromatogram(chromatogram_data, x='rt')
+
+def test_plot_chromatogram_invalid_backend(chromatogram_data):
+    # Test invalid backend
+    with pytest.raises(ValueError):
+        oms_viz.plot_chromatogram(chromatogram_data, x='rt', y='int', backend='invalid_backend')
+
+def test_plot_chromatogram_empty_data():
+    # Test empty DataFrame
+    with pytest.raises(ValueError):
+        oms_viz.plot_chromatogram(pd.DataFrame(), x='rt', y='int')
