@@ -5,7 +5,7 @@ test/test_spectrum
 
 import pytest
 import pandas as pd
-
+import pyopenms_viz as oms_viz
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -91,3 +91,24 @@ def test_spectrum_with_annotations(spectrum_data, snapshot, kwargs):
         fig.tight_layout()
 
     assert snapshot == out
+
+# New tests for plot_spectrum function
+def test_plot_spectrum_basic(spectrum_data):
+    # Test basic functionality
+    fig = oms_viz.plot_spectrum(spectrum_data, x='mz', y='intensity')
+    assert fig is not None
+
+def test_plot_spectrum_missing_x(spectrum_data):
+    # Test missing x parameter
+    with pytest.raises(ValueError):
+        oms_viz.plot_spectrum(spectrum_data, y='intensity')
+
+def test_plot_spectrum_invalid_backend(spectrum_data):
+    # Test invalid backend
+    with pytest.raises(ValueError):
+        oms_viz.plot_spectrum(spectrum_data, x='mz', y='intensity', backend='invalid_backend')
+
+def test_plot_spectrum_empty_data():
+    # Test empty DataFrame
+    with pytest.raises(ValueError):
+        oms_viz.plot_spectrum(pd.DataFrame(), x='mz', y='intensity')

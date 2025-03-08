@@ -13,7 +13,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
-
+import pandas as pd
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
     LegendConfig,
@@ -1489,7 +1489,6 @@ def _load_backend(backend: str) -> types.ModuleType:
         f"Could not find plotting backend '{backend}'. Needs to be one of 'bokeh', 'matplotlib', or 'plotly'."
     )
 
-
 def _get_plot_backend(backend: str | None = None):
 
     backend_str: str = backend or "matplotlib"
@@ -1500,3 +1499,333 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
+
+def plot_chromatogram(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
+    **kwargs
+):
+    """
+    Plot a chromatogram using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Input data containing retention time and intensity values.
+    x : str
+        Column name for retention time (x-axis).
+    y : str
+        Column name for intensity values (y-axis).
+    backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
+    **kwargs
+        Additional keyword arguments for plot customization. 
+        See :ref:`plotting-parameters` for available options.
+
+    Returns
+    -------
+    Figure
+        Backend-specific figure object:
+        - matplotlib.axes.Axes for ms_matplotlib
+        - bokeh.plotting.Figure for ms_bokeh
+        - plotly.graph_objects.Figure for ms_plotly
+
+    Raises
+    ------
+    ValueError
+        - If `x` or `y` columns are missing from the DataFrame
+        - If `x` or `y` contain non-numeric data
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'retention_time': [1.0, 2.0, 3.0],
+    ...     'intensity': [100, 200, 150]
+    ... })
+    >>> fig = viz.plot_chromatogram(
+    ...     data=data,
+    ...     x='retention_time',
+    ...     y='intensity',
+    ...     backend='ms_plotly',
+    ...     color='blue',
+    ...     title='Sample Chromatogram'
+    ... )
+    >>> fig.show()  # For Plotly backend
+    """
+    # Validate input columns
+    if x not in data.columns:
+        raise ValueError(f"Column '{x}' not found in DataFrame")
+    if y not in data.columns:
+        raise ValueError(f"Column '{y}' not found in DataFrame")
+
+    # Validate numeric data
+    if not pd.api.types.is_numeric_dtype(data[x]):
+        raise ValueError(f"Column '{x}' must contain numeric data")
+    if not pd.api.types.is_numeric_dtype(data[y]):
+        raise ValueError(f"Column '{y}' must contain numeric data")
+
+    return data.plot(
+        x=x,
+        y=y,
+        kind="chromatogram",
+        backend=backend,
+        **kwargs
+    )
+
+
+def plot_spectrum(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
+    **kwargs
+):
+    """
+    Plot a mass spectrum using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Input data containing mass-to-charge (m/z) and intensity values.
+    x : str
+        Column name for mass-to-charge ratio (m/z, x-axis).
+    y : str
+        Column name for intensity values (y-axis).
+    backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
+    **kwargs
+        Additional keyword arguments for plot customization. 
+        See :ref:`plotting-parameters` for available options.
+
+    Returns
+    -------
+    Figure
+        Backend-specific figure object:
+        - matplotlib.axes.Axes for ms_matplotlib
+        - bokeh.plotting.Figure for ms_bokeh
+        - plotly.graph_objects.Figure for ms_plotly
+
+    Raises
+    ------
+    ValueError
+        - If `x` or `y` columns are missing from the DataFrame
+        - If `x` or `y` contain non-numeric data
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'mz': [100.0, 200.0, 300.0],
+    ...     'intensity': [1000, 2000, 1500]
+    ... })
+    >>> fig = viz.plot_spectrum(
+    ...     data=data,
+    ...     x='mz',
+    ...     y='intensity',
+    ...     backend='ms_matplotlib',
+    ...     color='red',
+    ...     title='Mass Spectrum',
+    ...     line_width=1.5
+    ... )
+    >>> fig.show()  # For Matplotlib backend
+    """
+    # Validate input columns
+    if x not in data.columns:
+        raise ValueError(f"Column '{x}' not found in DataFrame")
+    if y not in data.columns:
+        raise ValueError(f"Column '{y}' not found in DataFrame")
+
+    # Validate numeric data
+    if not pd.api.types.is_numeric_dtype(data[x]):
+        raise ValueError(f"Column '{x}' must contain numeric data")
+    if not pd.api.types.is_numeric_dtype(data[y]):
+        raise ValueError(f"Column '{y}' must contain numeric data")
+
+    return data.plot(
+        x=x,
+        y=y,
+        kind="spectrum",
+        backend=backend,
+        **kwargs
+    )
+
+
+def plot_mobilogram(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
+    **kwargs
+):
+    """
+    Plot a mobilogram (ion mobility spectrum) using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Input data containing ion mobility and intensity values
+    x : str
+        Column name for ion mobility values (x-axis)
+    y : str
+        Column name for intensity values (y-axis)
+    backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
+    **kwargs
+        Additional keyword arguments for plot customization.
+        See :ref:`plotting-parameters` for available options.
+
+    Returns
+    -------
+    Figure
+        Backend-specific figure object:
+        - matplotlib.axes.Axes for ms_matplotlib
+        - bokeh.plotting.Figure for ms_bokeh
+        - plotly.graph_objects.Figure for ms_plotly
+
+    Raises
+    ------
+    ValueError
+        - If `x` or `y` columns are missing from the DataFrame
+        - If `x` or `y` contain non-numeric data
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'ion_mobility': [0.5, 1.0, 1.5],
+    ...     'intensity': [500, 1500, 800]
+    ... })
+    >>> fig = viz.plot_mobilogram(
+    ...     data=data,
+    ...     x='ion_mobility',
+    ...     y='intensity',
+    ...     backend='ms_bokeh',
+    ...     color='green',
+    ...     title='Ion Mobility Spectrum',
+    ...     line_width=2
+    ... )
+    >>> fig.show()  # For Bokeh backend
+    """
+    # Validate input columns
+    if x not in data.columns:
+        raise ValueError(f"Column '{x}' not found in DataFrame")
+    if y not in data.columns:
+        raise ValueError(f"Column '{y}' not found in DataFrame")
+
+    # Validate numeric data
+    if not pd.api.types.is_numeric_dtype(data[x]):
+        raise ValueError(f"Column '{x}' must contain numeric data")
+    if not pd.api.types.is_numeric_dtype(data[y]):
+        raise ValueError(f"Column '{y}' must contain numeric data")
+
+    return data.plot(
+        x=x,
+        y=y,
+        kind="mobilogram",
+        backend=backend,
+        **kwargs
+    )
+
+def plot_peakmap(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    z: str,
+    backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
+    **kwargs
+):
+    """
+    Plot a peakmap (2D intensity map) using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Input data containing coordinates and intensity values
+    x : str
+        Column name for x-axis values (typically m/z or retention time)
+    y : str
+        Column name for y-axis values (typically retention time or m/z)
+    z : str
+        Column name for intensity values (z-axis/color scale)
+    backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh heatmaps
+        - "ms_plotly": Interactive Plotly heatmaps
+    **kwargs
+        Additional keyword arguments for plot customization.
+        See :ref:`plotting-parameters` for available options.
+
+    Returns
+    -------
+    Figure
+        Backend-specific figure object:
+        - matplotlib.axes.Axes for ms_matplotlib
+        - bokeh.plotting.Figure for ms_bokeh
+        - plotly.graph_objects.Figure for ms_plotly
+
+    Raises
+    ------
+    ValueError
+        - If `x`, `y`, or `z` columns are missing
+        - If any axis contains non-numeric data
+        - If the DataFrame is empty
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'mz': [100, 200, 300, 100, 200, 300],
+    ...     'rt': [1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+    ...     'intensity': [10, 20, 30, 15, 25, 35]
+    ... })
+    >>> fig = viz.plot_peakmap(
+    ...     data=data,
+    ...     x='mz',
+    ...     y='rt',
+    ...     z='intensity',
+    ...     backend='ms_plotly',
+    ...     color_scale='Viridis',
+    ...     title='LC-MS Peakmap'
+    ... )
+    >>> fig.show()  # For Plotly backend
+    """
+    # Validate input data
+    if data.empty:
+        raise ValueError("Cannot plot peakmap - DataFrame is empty")
+    
+    required_columns = [x, y, z]
+    missing = [col for col in required_columns if col not in data.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+
+    # Validate numeric data
+    for col in required_columns:
+        if not pd.api.types.is_numeric_dtype(data[col]):
+            raise ValueError(f"Column '{col}' must contain numeric data")
+
+    return data.plot(
+        x=x,
+        y=y,
+        z=z,
+        kind="peakmap",
+        backend=backend,
+        **kwargs
+    )
