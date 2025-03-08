@@ -1,15 +1,35 @@
 Parameter	Default	Type	Description
 x*		str	The column name for x-axis data
 y*		str	The column name for y-axis data
-kind*		str	'The kind of plot to create. One of: [ “line”, “vline”, scatter”, “chromatogram”, “mobilogram”, “spectrum”, “peak_map”]
+kind*		str	The kind of plot to create. One of: [ "line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"]
 by		str	The column name to group by
-backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
-relative_intensity	False	bool	Convert y-axis values to relative intensity
-height		int	Height of plot, units dependent on backend.
-width		int	Width of plot in pixels, units dependent on backend.
-grid	False	bool	Whether to show grid on the plot
-toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
-fig	None	fig	Existing Figure object to plot on
-xlabel	None	str	Label for x axis
-ylabel 	None	str	Label for y axis
+canvas		Any	Canvas for the plot. Default is None.
+height		500	int	Height of plot, units dependent on backend.
+width		500	int	Width of plot in pixels, units dependent on backend.
+grid	True	bool	Whether to show grid on the plot
+toolbar_location	"above"	str	Location of toolbar for interactive plots. One of: ["above", "below", "left"]
+title	""	str	Title of the plot
+xlabel	""	str	Label for x axis
+ylabel	""	str	Label for y axis
+zlabel	""	str	Label for z axis
 show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
+relative_intensity	False	bool	Convert y-axis values to relative intensity
+x_axis_location	"below"	str	Location of the X-axis. Default is "below".
+y_axis_location	"left"	str	Location of the Y-axis. Default is "left".
+title_font_size	18	int	Font size of the title. Default is 18.
+xaxis_label_font_size	16	int	Font size of the X-axis label. Default is 16.
+yaxis_label_font_size	16	int	Font size of the Y-axis label. Default is 16.
+zaxis_label_font_size	16	int	Font size of the Z-axis label. Default is 16.
+xaxis_labelpad	16	int	Padding for the X-axis label. Default is 16.
+yaxis_labelpad	16	int	Padding for the Y-axis label. Default is 16.
+zaxis_labelpad	9	int	Padding for the Z-axis label. Default is 9.
+xaxis_tick_font_size	14	int	Font size of the X-axis ticks. Default is 14.
+yaxis_tick_font_size	14	int	Font size of the Y-axis ticks. Default is 14.
+zaxis_tick_font_size	14	int	Font size of the Z-axis ticks. Default is 14.
+annotation_font_size	12	int	Font size of annotations. Default is 12.
+color		ColorGenerator	str	Color for the plot. Default is ColorGenerator.
+plot_3d	False	bool	Whether to plot in 3D. Default is False.
+min_border	0	int	Minimum border around the plot. Default is 0.
+aggregate_duplicates	False	bool	Whether to aggregate duplicate values. Default is False.
+legend_config	LegendConfig | dict	Configuration for the legend. Default is LegendConfig.
+opacity	1.0	float	Opacity of the plot. Default is 1.0.

@@ -1,15 +1,22 @@
 Parameter	Default	Type	Description
-x*		str	The column name for x-axis data
-y*		str	The column name for y-axis data
-by		str	The column name to group by. Will result in separate line traces per group
-backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
-annotation_data		DataFrame	DataFrame of annotation data with columns [‘leftWidth’, ‘rightWidth’]
-relative_intensity	False	bool	Convert y-axis values to relative intensity
-height		int	Height of plot, units dependent on backend.
-width		int	Width of plot in pixels, units dependent on backend.
-grid	False	bool	Whether to show grid on the plot
-toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
-fig	None	fig	Existing figure object to plot on. Useful for matplotlib backend 
-xlabel	None	str	Label for x axis
-ylabel 	None	str	Label for y axis
-show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
+height	500	int	Height of the plot in pixels.
+width	500	int	Width of the plot in pixels.
+grid	True	bool	Whether to display grid lines.
+toolbar_location	"above"	str	Location of the toolbar. Options: "above", "below", "left", "right".
+title	"Mobilogram"	str	Title of the plot.
+xlabel	"Ion Mobility"	str	Label for the X-axis.
+ylabel	"Intensity"	str	Label for the Y-axis.
+title_font_size	18	int	Font size of the title.
+xaxis_label_font_size	16	int	Font size of the X-axis label.
+yaxis_label_font_size	16	int	Font size of the Y-axis label.
+xaxis_labelpad	16	int	Padding for the X-axis label.
+yaxis_labelpad	16	int	Padding for the Y-axis label.
+x_axis_location	"below"	str	Location of the X-axis.
+y_axis_location	"left"	str	Location of the Y-axis.
+show_plot	True	bool	Whether to display the plot.
+annotation_data		DataFrame	Data for annotations. If provided, annotations will be added to the plot.
+annotation_colormap	"Dark2"	str	Colormap for annotations.
+annotation_line_width	3	float	Width of the annotation lines.
+annotation_line_type	"solid"	str	Type of the annotation lines.
+annotation_legend_config		Dict | LegendConfig	Configuration for the annotation legend.
+legend_config		LegendConfig | dict	Configuration for the legend.

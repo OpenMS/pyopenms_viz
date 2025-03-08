@@ -1,7 +1,7 @@
 Mobilogram
 ==========
 
-Chromatograms can be plotted using kind = mobilogram. In this plot, ion mobility is on the x-axis and intensity is on the y-axis. The by parameter can be used to separate out different mass traces. Functionally these plots have very similar to chromatograms
+Mobilograms are a type of plot used to visualize ion mobility data. In this plot, ion mobility is represented on the x-axis, while intensity is shown on the y-axis. The `by` parameter can be utilized to separate different mass traces, allowing for a clearer analysis of the data. Mobilograms function similarly to chromatograms, providing insights into the behavior of ions under varying conditions.
 
 Parameters
 ----------
@@ -14,10 +14,10 @@ Parameters
 Example Usage
 -------------
 
+To create a mobilogram plot, you can use the following example scripts:
 
 .. minigallery::
 
    gallery_scripts/ms_bokeh/plot_mobilogram_ms_bokeh.py
    gallery_scripts/ms_matplotlib/plot_mobilogram_ms_matplotlib.py
    gallery_scripts/ms_plotly/plot_mobilogram_ms_plotly.py
-

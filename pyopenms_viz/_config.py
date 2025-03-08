@@ -204,6 +204,7 @@ class BasePlotConfig(BaseConfig):
     aggregate_duplicates: bool = False
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
     opacity: float = 1.0
+    
 
     def __post_init__(self):
         # if legend_config is a dictionary, update it to LegendConfig object
