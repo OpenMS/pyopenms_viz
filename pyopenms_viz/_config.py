@@ -69,7 +69,7 @@ class LegendConfig(BaseConfig):
     Returns:
         LegendConfig: An instance of LegendConfig.
     """
-
+    
     loc: str = "right"
     orientation: str = "vertical"
     title: str = "Legend"
@@ -130,7 +130,7 @@ class BasePlotConfig(BaseConfig):
         by (str | None): Grouping variable. Default is None.
         canvas (Any): Canvas for the plot. Default is None. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is a Axes object, and for Plotly, this is a plotly.graph_objects.Figure object.
         height (int): Height of the plot. Default is 500.
-        width (int): Width of the plot. Default is 500.
+        width (float): Width of the plot. Default is 500.
         grid (bool): Whether to show grid. Default is True.
         toolbar_location (str): Location of the toolbar. Default is "above".
         title (str): Title of the plot. Default is an empty string.
