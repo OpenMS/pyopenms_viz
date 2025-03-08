@@ -13,7 +13,7 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
-
+import pandas as pd
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
     LegendConfig,
@@ -1489,7 +1489,6 @@ def _load_backend(backend: str) -> types.ModuleType:
         f"Could not find plotting backend '{backend}'. Needs to be one of 'bokeh', 'matplotlib', or 'plotly'."
     )
 
-
 def _get_plot_backend(backend: str | None = None):
 
     backend_str: str = backend or "matplotlib"
@@ -1500,3 +1499,186 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
+
+def plot_chromatogram(data: pd.DataFrame, x: str, y: str, backend: Optional[str] = None, **kwargs):
+    """
+    Plot a chromatogram using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data to plot.
+    x : str
+        The column name for the x-axis data.
+    y : str
+        The column name for the y-axis data.
+    backend : str, optional
+        The backend to use for plotting. If not provided, it will try to use
+        matplotlib, bokeh, or plotly in that order.
+    **kwargs
+        Additional keyword arguments passed to the plotting function. Supported arguments depend on the backend:
+        - For `ms_matplotlib`: See matplotlib documentation.
+        - For `ms_bokeh`: See bokeh documentation.
+        - For `ms_plotly`: See plotly documentation.
+
+    Returns
+    -------
+    Figure
+        The plotted figure.
+
+    Raises
+    ------
+    ValueError
+        If `x` or `y` is not provided.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as oms_viz
+    >>> data = pd.DataFrame({'rt': [1, 2, 3], 'intensity': [10, 20, 30]})
+    >>> oms_viz.plot_chromatogram(data, x='rt', y='intensity', backend='ms_plotly')
+    """
+    if x is None or y is None:
+        raise ValueError("Both `x` and `y` must be provided.")
+    return data.plot(x=x, y=y, kind="chromatogram", backend=backend, **kwargs)
+
+
+def plot_spectrum(data: pd.DataFrame, x: str, y: str, backend: Optional[str] = None, **kwargs):
+    """
+    Plot a mass spectrum using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data to plot.
+    x : str
+        The column name for the x-axis data.
+    y : str
+        The column name for the y-axis data.
+    backend : str, optional
+        The backend to use for plotting. If not provided, it will try to use
+        matplotlib, bokeh, or plotly in that order.
+    **kwargs
+        Additional keyword arguments passed to the plotting function. Supported arguments depend on the backend:
+        - For `ms_matplotlib`: See matplotlib documentation.
+        - For `ms_bokeh`: See bokeh documentation.
+        - For `ms_plotly`: See plotly documentation.
+
+    Returns
+    -------
+    Figure
+        The plotted figure.
+
+    Raises
+    ------
+    ValueError
+        If `x` or `y` is not provided.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as oms_viz
+    >>> data = pd.DataFrame({'mz': [100, 200, 300], 'intensity': [10, 20, 30]})
+    >>> oms_viz.plot_spectrum(data, x='mz', y='intensity', backend='ms_plotly')
+    """
+    if x is None or y is None:
+        raise ValueError("Both `x` and `y` must be provided.")
+    return data.plot(x=x, y=y, kind="spectrum", backend=backend, **kwargs)
+
+
+def plot_mobilogram(data: pd.DataFrame, x: str, y: str, backend: Optional[str] = None, **kwargs):
+    """
+    Plot a mobilogram using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data to plot.
+    x : str
+        The column name for the x-axis data.
+    y : str
+        The column name for the y-axis data.
+    backend : str, optional
+        The backend to use for plotting. If not provided, it will try to use
+        matplotlib, bokeh, or plotly in that order.
+    **kwargs
+        Additional keyword arguments passed to the plotting function. Supported arguments depend on the backend:
+        - For `ms_matplotlib`: See matplotlib documentation.
+        - For `ms_bokeh`: See bokeh documentation.
+        - For `ms_plotly`: See plotly documentation.
+
+    Returns
+    -------
+    Figure
+        The plotted figure.
+
+    Raises
+    ------
+    ValueError
+        If `x` or `y` is not provided.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as oms_viz
+    >>> data = pd.DataFrame({'im': [1, 2, 3], 'intensity': [10, 20, 30]})
+    >>> oms_viz.plot_mobilogram(data, x='im', y='intensity', backend='ms_plotly')
+    """
+    if x is None or y is None:
+        raise ValueError("Both `x` and `y` must be provided.")
+    return data.plot(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
+
+
+def plot_peakmap(data: pd.DataFrame, x: str, y: str, z: Optional[str] = None, backend: Optional[str] = None, **kwargs):
+    """
+    Plot a peakmap using a seaborn-like API.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data to plot.
+    x : str
+        The column name for the x-axis data.
+    y : str
+        The column name for the y-axis data.
+    z : str, optional
+        The column name for the z-axis data (intensity). This parameter is required for peakmap visualization.
+    backend : str, optional
+        The backend to use for plotting. If not provided, it will try to use
+        matplotlib, bokeh, or plotly in that order.
+    **kwargs
+        Additional keyword arguments passed to the plotting function. Supported arguments depend on the backend:
+        - For `ms_matplotlib`: See matplotlib documentation.
+        - For `ms_bokeh`: See bokeh documentation.
+        - For `ms_plotly`: See plotly documentation.
+
+    Returns
+    -------
+    Figure
+        The plotted figure.
+
+    Raises
+    ------
+    ValueError
+        - If `x` or `y` is not provided.
+        - If `z` is not provided.
+        - If the DataFrame is empty.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as oms_viz
+    >>> data = pd.DataFrame({'mz': [100, 200, 300], 'rt': [1, 2, 3], 'intensity': [10, 20, 30]})
+    >>> oms_viz.plot_peakmap(data, x='mz', y='rt', z='intensity', backend='ms_plotly')
+    """
+    # Validate required parameters
+    if x is None or y is None:
+        raise ValueError("Both `x` and `y` must be provided.")
+    if z is None:
+        raise ValueError("`z` must be provided for peakmap visualization.")
+    if data.empty:
+        raise ValueError("DataFrame is empty, cannot plot with no data.")
+
+    # Plot the peakmap
+    return data.plot(x=x, y=y, z=z, kind="peakmap", backend=backend, **kwargs)
