@@ -96,7 +96,6 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.githubpages",
     "sphinx_copybutton",
-    "sphinx.ext.csv",  # Add this line
     "sphinx_gallery.gen_gallery",
 
     "bokeh.sphinxext.bokeh_plot",
