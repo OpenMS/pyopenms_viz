@@ -1,38 +1,30 @@
 name: Upload Python Package
-
-on:
+'on':
   release:
-    types: [published]
-
+    types:
+      - published
 permissions:
   contents: read
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  # Updated to latest version
-
+        uses: actions/checkout@v4
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
-
+          python-version: 3.x
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build twine  # Added `twine` for verification
-
       - name: Build Package
         run: python -m build
-
       - name: Verify Package (Optional but Recommended)
         run: twine check dist/*
-
       - name: Publish Package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1  # Uses the official stable version
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          password: '${{ secrets.PYPI_API_TOKEN }}'
