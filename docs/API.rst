@@ -3,27 +3,6 @@ API
 
 Note: This section provides a comprehensive overview of all methods and classes available in PyOpenMS-Viz. This content is generated automatically using Sphinx autosummary and autodoc based on the Python documentation.
 
-Configuration Classes
-********************
-
-.. currentmodule:: pyopenms_viz._config
-
-.. autosummary::
-   :nosignatures:
-   :toctree: generated/
-   :template: class.rst
-
-   BaseConfig
-   LegendConfig
-   BasePlotConfig
-   LineConfig
-   VLineConfig
-   ScatterConfig
-   ChromatogramConfig
-   MobilogramConfig
-   SpectrumConfig
-   PeakMapConfig
-
 Core
 ****
 
@@ -193,3 +172,24 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    MATPLOTLIBMobilogramPlot
    MATPLOTLIBSpectrumPlot
    MATPLOTLIBPeakMapPlot
+
+   Configuration Classes
+********************
+
+.. currentmodule:: pyopenms_viz._config
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   BaseConfig
+   LegendConfig
+   BasePlotConfig
+   LineConfig
+   VLineConfig
+   ScatterConfig
+   ChromatogramConfig
+   MobilogramConfig
+   SpectrumConfig
+   PeakMapConfig
