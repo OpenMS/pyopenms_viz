@@ -1,48 +1,38 @@
-name: Auto Update TSV Files
+name: Upload Python Package
 
 on:
-  push:
-    paths:
-      - "docs/conf.py"  # Triggers workflow when conf.py changes
-  workflow_dispatch:  # Allows manual triggering from GitHub UI
+  release:
+    types: [published]
 
 permissions:
-  contents: write  # Allows writing to the repo
-  pull-requests: write  # Allows PR creation (if needed)
+  contents: read
 
 jobs:
-  update-tsv:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Ensures full history for proper commits
+        uses: actions/checkout@v4  # Updated to latest version
 
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.x"
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas watchdog
+          pip install build twine  # Added `twine` for verification
 
-      - name: Run TSV Update Script
-        run: python update_tsv_sync.py  # script path
+      - name: Build Package
+        run: python -m build
 
+      - name: Verify Package (Optional but Recommended)
+        run: twine check dist/*
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      - name: Commit and Push Changes
-        run: |
-          git add docs/Parameters/*.tsv
-          git commit -m "Auto-update TSV files from conf.py changes" || echo "No changes to commit"
-          git push origin ${{ github.ref_name }}  # Push to the same branch that triggered the workflow
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1  # Uses the official stable version
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
