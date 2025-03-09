@@ -17,7 +17,6 @@ from html.parser import HTMLParser
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class BokehHTMLParser(HTMLParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
