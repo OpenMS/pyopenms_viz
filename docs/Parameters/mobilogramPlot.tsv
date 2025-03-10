@@ -1,22 +1,17 @@
 Parameter	Default	Type	Description
-height	500	int	Height of the plot in pixels.
-width	500	int	Width of the plot in pixels.
-grid	True	bool	Whether to display grid lines.
-toolbar_location	"above"	str	Location of the toolbar. Options: "above", "below", "left", "right".
+x*	"Retention Time"	str	X-axis data.
+y*	"mass-to-charge"	str	Y-axis data.
 title	"Mobilogram"	str	Title of the plot.
 xlabel	"Ion Mobility"	str	Label for the X-axis.
 ylabel	"Intensity"	str	Label for the Y-axis.
-title_font_size	18	int	Font size of the title.
-xaxis_label_font_size	16	int	Font size of the X-axis label.
-yaxis_label_font_size	16	int	Font size of the Y-axis label.
-xaxis_labelpad	16	int	Padding for the X-axis label.
-yaxis_labelpad	16	int	Padding for the Y-axis label.
-x_axis_location	"below"	str	Location of the X-axis.
-y_axis_location	"left"	str	Location of the Y-axis.
-show_plot	True	bool	Whether to display the plot.
-annotation_data		DataFrame	Data for annotations. If provided, annotations will be added to the plot.
+grid	True	bool	Whether to display grid lines.
+height	500	int	Height of the plot.
+width	500	int	Width of the plot.
+toolbar_location	["above", "below", "left", "right"]	str	Location of the toolbar.
+annotation_data	None	DataFrame	Data for annotations.
 annotation_colormap	"Dark2"	str	Colormap for annotations.
 annotation_line_width	3	float	Width of the annotation lines.
 annotation_line_type	"solid"	str	Type of the annotation lines.
-annotation_legend_config		Dict | LegendConfig	Configuration for the annotation legend.
-legend_config		LegendConfig | dict	Configuration for the legend.
+annotation_legend_config	None	Dict | LegendConfig	Configuration for the annotation legend.
+legend_config	None	LegendConfig | dict	Configuration for the legend.
+show_plot	True	bool	Whether to display the plot.

@@ -1,17 +1,15 @@
 Parameter	Default	Type	Description
-by		str	The column name to group by. Will result in separate line traces per group
-backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
-annotation_data		DataFrame	DataFrame of annotation data with columns [‘leftWidth’, ‘rightWidth’]
-annotation_colormap	"Dark2"	str	Colormap for annotations
-annotation_line_width	3	float	Width of the annotation lines
-annotation_line_type	"solid"	str	Type of the annotation lines
-relative_intensity	False	bool	Convert y-axis values to relative intensity
-height		500	int	Height of plot, units dependent on backend.
-width		500	int	Width of plot in pixels, units dependent on backend.
-grid	True	bool	Whether to show grid on the plot
-toolbar_location	"above"	str	Location of toolbar for interactive plots. One of: ["above", "below", "left"]
-fig	None	fig	Existing figure object to plot on. Useful for matplotlib backend 
-xlabel	"Retention Time"	str	Label for x axis
-ylabel	"Intensity"	str	Label for y axis
-title	"Chromatogram"	str	Title of the plot
-show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
+x*	"Retention Time"	str	X-axis data.
+y*	"mass-to-charge"	str	Y-axis data.
+annotation_data	None	DataFrame	Data for annotations.
+annotation_colormap	"Dark2"	str	Colormap for annotations.
+annotation_line_width	3	float	Width of the annotation lines.
+annotation_line_type	"solid"	str	Type of the annotation lines.
+grid	True	bool	Whether to display grid lines.
+height	500	int	Height of the plot.
+width	500	int	Width of the plot.
+toolbar_location	["above", "below", "left", "right"]	str	Location of the toolbar.
+title	"Chromatogram"	str	Title of the plot.
+xlabel	"Retention Time"	str	Label for the X-axis.
+ylabel	"Intensity"	str	Label for the Y-axis.
+show_plot	True	bool	Whether to display the plot.

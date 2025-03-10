@@ -1,18 +1,14 @@
 Parameter	Default	Type	Description
-reference_spectrum	None	pd.DataFrame | None	Reference spectrum data. Default is None.
-mirror_spectrum	False	bool	Whether to mirror the spectrum. Default is False.
-peak_color	None	str | None	Color of the peaks. Default is None.
-bin_peaks	False	Union[Literal["auto"], bool]	Whether to bin peaks. Default is False.
-bin_method	"mz-tol-bin"	Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"]	Method for binning peaks. Default is "mz-tol-bin".
-num_x_bins	50	int	Number of bins along the X-axis. Default is 50.
-mz_tol	"1pct-diff"	Union[float, Literal["freedman-diaconis", "1pct-diff"]]	Tolerance for m/z binning. Default is "1pct-diff".
-annotate_top_n_peaks	5	int	Number of top peaks to annotate. Default is 5.
-annotate_mz	True	bool	Whether to annotate m/z values. Default is True.
-ion_annotation	None	str | None	Column for ion annotations. Default is None.
-sequence_annotation	None	str | None	Column for sequence annotations. Default is None.
-custom_annotation	None	str | None	Column for custom annotations. Default is None.
-annotation_color	None	str | None	Color for annotations. Default is None.
-aggregation_method	"max"	Literal["mean", "sum", "max"]	Method for aggregating data. Default is "max".
-xlabel	"mass-to-charge"	str	Label for the X-axis. Default is "mass-to-charge".
-ylabel	"Intensity"	str	Label for the Y-axis. Default is "Intensity".
-title	"Mass Spectrum"	str	Title of the plot. Default is "Mass Spectrum".
+x*	"Retention Time"	str	X-axis data.
+y*	"mass-to-charge"	str	Y-axis data.
+reference_spectrum	None	pd.DataFrame | None	Reference spectrum data.
+mirror_spectrum	False	bool	Whether to mirror the spectrum.
+bin_peaks	False	Union[Literal["auto"], bool]	Whether to bin peaks.
+bin_method	"mz-tol-bin"	Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"]	Method for binning peaks.
+num_x_bins	50	int	Number of bins along the X-axis.
+mz_tol	"1pct-diff"	Union[float, Literal["freedman-diaconis", "1pct-diff"]]	Tolerance for m/z binning.
+annotate_top_n_peaks	5	int	Number of top peaks to annotate.
+annotate_mz	True	bool	Whether to annotate m/z values.
+xlabel	"mass-to-charge"	str	Label for the X-axis.
+ylabel	"Intensity"	str	Label for the Y-axis.
+title	"Mass Spectrum"	str	Title of the plot.
