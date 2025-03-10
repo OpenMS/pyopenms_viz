@@ -256,6 +256,8 @@ class ScatterConfig(BasePlotConfig):
         marker (Iterator[str] | MarkerShapeGenerator): Marker shapes. Default is a MarkerShapeGenerator instance.
     """
 
+    
+    new_parameter: bool = False  # A new test parameter for verification
     bin_peaks: Union[Literal["auto"], bool] = "auto"
     num_x_bins: int = 50
     num_y_bins: int = 50
