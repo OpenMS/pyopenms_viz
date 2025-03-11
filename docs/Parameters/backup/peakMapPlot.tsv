@@ -1,0 +1,17 @@
+Parameter	Default	Type	Description
+x*	"Retention Time"	str	X-axis data.
+y*	"mass-to-charge"	str	Y-axis data.
+z	"Intensity"	str	Z-axis data.
+add_marginals	False	bool	Whether to add marginal plots.
+y_kind	"spectrum"	str	Type of plot for the Y-axis marginal.
+x_kind	"chromatogram"	str	Type of plot for the X-axis marginal.
+aggregation_method	"mean"	Literal['mean', 'sum', 'max']	Method for aggregating data.
+annotation_data	None	DataFrame	Data for annotations.
+xlabel	"Retention Time"	str	Label for the X-axis.
+ylabel	"mass-to-charge"	str	Label for the Y-axis.
+zlabel	"Intensity"	str	Label for the Z-axis.
+title	"PeakMap"	str	Title of the plot.
+height	500	int	Height of the plot.
+width	500	int	Width of the plot.
+toolbar_location	["above", "below", "left", "right"]	str	Location of the toolbar.
+show_plot	True	bool	Whether to display the plot.

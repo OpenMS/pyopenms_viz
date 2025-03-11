@@ -1,7 +1,7 @@
 Mobilogram
 ==========
 
-Mobilograms are a type of plot used to visualize ion mobility data. In this plot, ion mobility is represented on the x-axis, while intensity is shown on the y-axis. The `by` parameter can be utilized to separate different mass traces, allowing for a clearer analysis of the data. Mobilograms function similarly to chromatograms, providing insights into the behavior of ions under varying conditions.
+Mobilograms are a type of plot used to visualize ion mobility data. In this plot, ion mobility is represented on the x-axis, while intensity is shown on the y-axis. The `by` parameter can be utilized to separate different mass traces. Functionally, mobilograms are similar to chromatograms.
 
 Parameters
 ----------
@@ -13,8 +13,6 @@ Parameters
 
 Example Usage
 -------------
-
-To create a mobilogram plot, you can use the following example scripts:
 
 .. minigallery::
 

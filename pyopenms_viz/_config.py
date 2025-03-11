@@ -145,8 +145,6 @@ class BasePlotConfig(BaseConfig):
         xaxis_labelpad (int): Padding for the X-axis label. Default is 16.
         yaxis_labelpad (int): Padding for the Y-axis label. Default is 16.
         zaxis_labelpad (int): Padding for the Z-axis label. Default is 9.
-        auto_generated_test_param: str = "TestAutoUpdate"  # Test parameter for TSV auto-update
-
 
     Methods:
         default_legend_factory(): Returns a default LegendConfig instance with the title "Trace".
@@ -257,6 +255,9 @@ class ScatterConfig(BasePlotConfig):
         marker_size (int): Size of the markers. Default is 30.
         marker (Iterator[str] | MarkerShapeGenerator): Marker shapes. Default is a MarkerShapeGenerator instance.
     """
+
+    
+      # A new test parameter for verification
     bin_peaks: Union[Literal["auto"], bool] = "auto"
     num_x_bins: int = 50
     num_y_bins: int = 50
@@ -280,6 +281,7 @@ class ChromatogramConfig(LineConfig):
     Configuration for a chromatogram plot.
 
     Attributes:
+        new_parameter: bool = False
         annotation_data (pd.DataFrame | None): Data for annotations. Default is None.
         annotation_colormap (str): Colormap for annotations. Default is "Dark2".
         annotation_line_width (float): Width of the annotation lines. Default is 3.

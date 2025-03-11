@@ -1,0 +1,17 @@
+Parameter	Default	Type	Description
+x*	"Retention Time"	str	X-axis data.
+y*	"mass-to-charge"	str	Y-axis data.
+title	"Mobilogram"	str	Title of the plot.
+xlabel	"Ion Mobility"	str	Label for the X-axis.
+ylabel	"Intensity"	str	Label for the Y-axis.
+grid	True	bool	Whether to display grid lines.
+height	500	int	Height of the plot.
+width	500	int	Width of the plot.
+toolbar_location	["above", "below", "left", "right"]	str	Location of the toolbar.
+annotation_data	None	DataFrame	Data for annotations.
+annotation_colormap	"Dark2"	str	Colormap for annotations.
+annotation_line_width	3	float	Width of the annotation lines.
+annotation_line_type	"solid"	str	Type of the annotation lines.
+annotation_legend_config	None	Dict | LegendConfig	Configuration for the annotation legend.
+legend_config	None	LegendConfig | dict	Configuration for the legend.
+show_plot	True	bool	Whether to display the plot.
