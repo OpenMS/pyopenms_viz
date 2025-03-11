@@ -51,7 +51,7 @@ def parse_docstring(doc: str) -> Dict[str, str]:
 def get_all_attributes(class_name, class_definitions, inheritance_map):
     """Recursively retrieves all attributes from a given class, including inherited attributes."""
     attributes = {}
-
+    
     if class_name not in class_definitions:
         logging.error(f"Class {class_name} not found in class definitions!")
         return attributes

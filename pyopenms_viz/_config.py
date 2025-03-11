@@ -281,7 +281,7 @@ class ChromatogramConfig(LineConfig):
     Configuration for a chromatogram plot.
 
     Attributes:
-        new_parameter: bool = False
+
         annotation_data (pd.DataFrame | None): Data for annotations. Default is None.
         annotation_colormap (str): Colormap for annotations. Default is "Dark2".
         annotation_line_width (float): Width of the annotation lines. Default is 3.
@@ -322,6 +322,7 @@ class MobilogramConfig(ChromatogramConfig):
     Configuration for a mobilogram plot.
 
     Attributes:
+    
         xlabel (str): Label for the X-axis. Default is "Ion Mobility".
         ylabel (str): Label for the Y-axis. Default is "Intensity".
         title (str): Title of the plot. Default is "Mobilogram".
@@ -338,6 +339,7 @@ class SpectrumConfig(VLineConfig):
     Configuration for a spectrum plot.
 
     Attributes:
+        peak_threshold (float): Threshold for peak detection. Default is 0.1.  # New parameter
         reference_spectrum (pd.DataFrame | None): Reference spectrum data. Default is None.
         mirror_spectrum (bool): Whether to mirror the spectrum. Default is False.
         peak_color (str | None): Color of the peaks. Default is None.
@@ -356,7 +358,7 @@ class SpectrumConfig(VLineConfig):
         ylabel (str): Label for the Y-axis. Default is "Intensity".
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
-
+    peak_threshold: float = 0.1  # Default value for the new parameter
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
