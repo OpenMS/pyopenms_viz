@@ -104,7 +104,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 if key not in json2:
                     logger.warning(f"Key {key} not found in the second JSON.")
                     return False
-                elif key in ["id", "root_ids"]:  # Keys to ignore
+                elif key in ["id", "root_ids"]:  # Ignore these keys as they may change
                     continue
                 elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
                     logger.warning(f"Values for key {key} are not equal.")
@@ -116,15 +116,15 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 logger.warning("Lists have different lengths.")
                 return False
 
-            matched_elements = []
+            json2_matched = set()
             for i in json1:
-                matched = any(
-                    BokehSnapshotExtension.compare_json(i, j)
-                    for j in json2 if j not in matched_elements
-                )
-                if matched:
-                    matched_elements.append(i)
-                else:
+                matched = False
+                for j in json2:
+                    if j not in json2_matched and BokehSnapshotExtension.compare_json(i, j):
+                        json2_matched.add(j)
+                        matched = True
+                        break
+                if not matched:
                     logger.warning(f"Element {i} not found in the second list.")
                     return False
             return True
@@ -132,7 +132,8 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         else:
             if json1 != json2:
                 logger.warning(f"Values not equal: {json1} != {json2}")
-            return json1 == json2
+                return False
+            return True
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
@@ -165,11 +166,11 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         Args:
             snapshot_collection (SnapshotCollection): The snapshot collection to be written
         """
-        filepath, data = (
-            snapshot_collection.location,
-            next(iter(snapshot_collection)).data,
-        )
         try:
+            filepath, data = (
+                snapshot_collection.location,
+                next(iter(snapshot_collection)).data,
+            )
             with open(filepath, "w") as f:
                 f.write(data)
         except OSError as e:
