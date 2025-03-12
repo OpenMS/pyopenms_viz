@@ -761,7 +761,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         else:
             return self.num_x_bins
 
-    def plot(self):
+    def plot(self, **kwargs):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
         # Prepare data
