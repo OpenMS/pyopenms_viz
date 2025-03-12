@@ -357,6 +357,11 @@ class SpectrumConfig(VLineConfig):
         ylabel (str): Label for the Y-axis. Default is "Intensity".
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
+    display_peptide_sequence: bool = False
+    peptide_sequence_fontsize: int = 12
+    peptide_sequence_color: str = "black"
+    highlight_color: str = "yellow"
+    highlight_alpha: float = 0.3
 
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False

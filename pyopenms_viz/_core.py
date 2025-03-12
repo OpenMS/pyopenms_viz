@@ -689,6 +689,21 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         self.plot()
 
+    @abstractmethod
+    def add_peptide_sequence(self, peptide_sequence: str, matched_fragments: List[Tuple[int, int]]):
+        """
+        Abstract method to add a peptide sequence to the plot.
+
+        Parameters
+        ----------
+        peptide_sequence : str
+            The peptide sequence to be plotted.
+        matched_fragments : List[Tuple[int, int]]
+            List of tuples representing the start and end indices of matched fragments.
+        """
+        pass
+
+
     def load_config(self, **kwargs):
         if self._config is None:
             self._config = SpectrumConfig(**kwargs)
@@ -795,6 +810,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
         )
+
+        # Add peptide sequence if configured
+        if hasattr(self._config, "display_peptide_sequence") and self._config.display_peptide_sequence:
+            peptide_sequence = kwargs.get("peptide_sequence", None)
+            matched_fragments = kwargs.get("matched_fragments", [])
+            if peptide_sequence:
+                self.add_peptide_sequence(peptide_sequence, matched_fragments)
 
         # Mirror spectrum
         if self.mirror_spectrum and self.reference_spectrum is not None:

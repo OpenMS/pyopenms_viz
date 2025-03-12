@@ -580,10 +580,47 @@ class MATPLOTLIBMobilogramPlot(MATPLOTLIBChromatogramPlot, MobilogramPlot):
 @APPEND_PLOT_DOC
 class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     """
-    Class for assembling a matplotlib spectrum plot
+    Class for assembling a matplotlib spectrum plot.
     """
 
-    pass
+def add_peptide_sequence(self, peptide_sequence: str, matched_fragments: List[Tuple[int, int]]):
+    """
+    Add a peptide sequence to the Matplotlib plot.
+    """
+    if not peptide_sequence:
+        raise ValueError("Peptide sequence cannot be empty.")
+
+    ax = self.canvas.axes  # Get the current axes
+
+    # Get the y-axis limits to position the peptide sequence above the plot
+    y_min, y_max = ax.get_ylim()
+    sequence_y = y_max * 1.05  # Position the sequence slightly above the plot
+
+    # Plot the peptide sequence
+    for i, aa in enumerate(peptide_sequence):
+        ax.text(
+            i,  # x-position (index of the amino acid)
+            sequence_y,  # y-position
+            aa,  # amino acid
+            ha="center",  # horizontal alignment
+            va="bottom",  # vertical alignment
+            fontsize=self._config.peptide_sequence_fontsize,  # Use configurable font size
+            color=self._config.peptide_sequence_color,  # Use configurable text color
+        )
+
+    # Highlight matched fragments
+    for start, end in matched_fragments:
+        if start < 0 or end >= len(peptide_sequence) or start > end:
+            raise ValueError(f"Invalid fragment range: ({start}, {end}). Must be within (0, {len(peptide_sequence) - 1}).")
+        ax.axvspan(
+            start - 0.5,  # start position (adjusted for alignment)
+            end + 0.5,  # end position (adjusted for alignment)
+            color=self._config.highlight_color,  # Use configurable highlight color
+            alpha=self._config.highlight_alpha,  # Use configurable transparency
+        )
+
+    # Adjust the y-axis limits to accommodate the peptide sequence
+    ax.set_ylim(y_min, sequence_y * 1.1)
 
 
 class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
