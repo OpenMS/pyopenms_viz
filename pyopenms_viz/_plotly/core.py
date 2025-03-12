@@ -619,6 +619,8 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
                 self.reference_spectrum[self.by] + label_suffix
             )
         return df
+    def add_peptide_sequence(self, peptide_sequence: str, matched_fragments: List[Tuple[int, int]]):
+        raise NotImplementedError("Not implemented for Plotly")
 
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):

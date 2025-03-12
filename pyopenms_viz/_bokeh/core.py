@@ -541,11 +541,9 @@ class BOKEHMobilogramPlot(BOKEHChromatogramPlot, MobilogramPlot):
 
 
 class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
-    """
-    Class for assembling a Bokeh spectrum plot
-    """
+    def add_peptide_sequence(self, peptide_sequence: str, matched_fragments: List[Tuple[int, int]]):
+        raise NotImplementedError("Not implemented for Bokeh")
 
-    pass
 
 
 class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
