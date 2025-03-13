@@ -125,8 +125,11 @@ class BasePlot(ABC):
     @canvas.setter
     def canvas(self, value):
         self._config.canvas = value
-
     def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
+         # New empty DataFrame check
+        if data.empty:
+            raise ValueError("Cannot plot - DataFrame is empty")
+            
         self.data = data.copy()
         if config is None:
             self._config = self._configClass(**kwargs)
@@ -1531,16 +1534,7 @@ def plot_chromatogram(
     Returns
     -------
     Figure
-        Backend-specific figure object:
-        - matplotlib.axes.Axes for ms_matplotlib
-        - bokeh.plotting.Figure for ms_bokeh
-        - plotly.graph_objects.Figure for ms_plotly
-
-    Raises
-    ------
-    ValueError
-        - If `x` or `y` columns are missing from the DataFrame
-        - If `x` or `y` contain non-numeric data
+        Backend-specific figure object
 
     Example
     -------
@@ -1558,20 +1552,8 @@ def plot_chromatogram(
     ...     color='blue',
     ...     title='Sample Chromatogram'
     ... )
-    >>> fig.show()  # For Plotly backend
+    >>> fig.show()
     """
-    # Validate input columns
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    # Validate numeric data
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
     return data.plot(
         x=x,
         y=y,
@@ -1579,7 +1561,6 @@ def plot_chromatogram(
         backend=backend,
         **kwargs
     )
-
 
 def plot_spectrum(
     data: pd.DataFrame,
@@ -1611,16 +1592,7 @@ def plot_spectrum(
     Returns
     -------
     Figure
-        Backend-specific figure object:
-        - matplotlib.axes.Axes for ms_matplotlib
-        - bokeh.plotting.Figure for ms_bokeh
-        - plotly.graph_objects.Figure for ms_plotly
-
-    Raises
-    ------
-    ValueError
-        - If `x` or `y` columns are missing from the DataFrame
-        - If `x` or `y` contain non-numeric data
+        Backend-specific figure object
 
     Example
     -------
@@ -1639,20 +1611,8 @@ def plot_spectrum(
     ...     title='Mass Spectrum',
     ...     line_width=1.5
     ... )
-    >>> fig.show()  # For Matplotlib backend
+    >>> fig.show()
     """
-    # Validate input columns
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    # Validate numeric data
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
     return data.plot(
         x=x,
         y=y,
@@ -1660,7 +1620,6 @@ def plot_spectrum(
         backend=backend,
         **kwargs
     )
-
 
 def plot_mobilogram(
     data: pd.DataFrame,
@@ -1692,16 +1651,7 @@ def plot_mobilogram(
     Returns
     -------
     Figure
-        Backend-specific figure object:
-        - matplotlib.axes.Axes for ms_matplotlib
-        - bokeh.plotting.Figure for ms_bokeh
-        - plotly.graph_objects.Figure for ms_plotly
-
-    Raises
-    ------
-    ValueError
-        - If `x` or `y` columns are missing from the DataFrame
-        - If `x` or `y` contain non-numeric data
+        Backend-specific figure object
 
     Example
     -------
@@ -1720,20 +1670,8 @@ def plot_mobilogram(
     ...     title='Ion Mobility Spectrum',
     ...     line_width=2
     ... )
-    >>> fig.show()  # For Bokeh backend
+    >>> fig.show()
     """
-    # Validate input columns
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    # Validate numeric data
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
     return data.plot(
         x=x,
         y=y,
@@ -1758,11 +1696,11 @@ def plot_peakmap(
     data : pd.DataFrame
         Input data containing coordinates and intensity values
     x : str
-        Column name for x-axis values (typically m/z or retention time)
+        Column name for x-axis values
     y : str
-        Column name for y-axis values (typically retention time or m/z)
+        Column name for y-axis values
     z : str
-        Column name for intensity values (z-axis/color scale)
+        Column name for intensity values
     backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
         Visualization backend to use:
         - "ms_matplotlib": Static Matplotlib plots
@@ -1775,17 +1713,7 @@ def plot_peakmap(
     Returns
     -------
     Figure
-        Backend-specific figure object:
-        - matplotlib.axes.Axes for ms_matplotlib
-        - bokeh.plotting.Figure for ms_bokeh
-        - plotly.graph_objects.Figure for ms_plotly
-
-    Raises
-    ------
-    ValueError
-        - If `x`, `y`, or `z` columns are missing
-        - If any axis contains non-numeric data
-        - If the DataFrame is empty
+        Backend-specific figure object
 
     Example
     -------
@@ -1805,22 +1733,8 @@ def plot_peakmap(
     ...     color_scale='Viridis',
     ...     title='LC-MS Peakmap'
     ... )
-    >>> fig.show()  # For Plotly backend
+    >>> fig.show()
     """
-    # Validate input data
-    if data.empty:
-        raise ValueError("Cannot plot peakmap - DataFrame is empty")
-    
-    required_columns = [x, y, z]
-    missing = [col for col in required_columns if col not in data.columns]
-    if missing:
-        raise ValueError(f"Missing required columns: {missing}")
-
-    # Validate numeric data
-    for col in required_columns:
-        if not pd.api.types.is_numeric_dtype(data[col]):
-            raise ValueError(f"Column '{col}' must contain numeric data")
-
     return data.plot(
         x=x,
         y=y,

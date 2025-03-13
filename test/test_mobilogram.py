@@ -30,21 +30,36 @@ def test_mobilogram_plot(featureMap_data, snapshot, kwargs):
 
 # New tests for plot_mobilogram function
 def test_plot_mobilogram_basic(featureMap_data):
-    # Test basic functionality
-    fig = oms_viz.plot_mobilogram(featureMap_data, x='im', y='int')
+    fig = oms_viz.plot_mobilogram(
+        featureMap_data, 
+        x='im', 
+        y='int',
+        backend='ms_matplotlib'  # Add backend
+    )
     assert fig is not None
 
 def test_plot_mobilogram_missing_y(featureMap_data):
-    # Test missing y parameter
     with pytest.raises(ValueError):
-        oms_viz.plot_mobilogram(featureMap_data, x='im')
+        oms_viz.plot_mobilogram(
+            featureMap_data, 
+            x='im',
+            backend='ms_matplotlib'  # Add backend
+        )
 
 def test_plot_mobilogram_invalid_backend(featureMap_data):
-    # Test invalid backend
     with pytest.raises(ValueError):
-        oms_viz.plot_mobilogram(featureMap_data, x='im', y='int', backend='invalid_backend')
+        oms_viz.plot_mobilogram(
+            featureMap_data, 
+            x='im', 
+            y='int',
+            backend='invalid_backend'  # Keep invalid backend
+        )
 
 def test_plot_mobilogram_empty_data():
-    # Test empty DataFrame
     with pytest.raises(ValueError):
-        oms_viz.plot_mobilogram(pd.DataFrame(), x='im', y='int')
+        oms_viz.plot_mobilogram(
+            pd.DataFrame(), 
+            x='im', 
+            y='int',
+            backend='ms_matplotlib'  # Add backend
+        )
