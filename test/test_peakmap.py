@@ -52,21 +52,40 @@ def test_peakmap_mz_im(featureMap_data, snapshot):
 
 # New tests for plot_peakmap function
 def test_plot_peakmap_basic(featureMap_data):
-    # Test basic functionality
-    fig = oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt', z='int')
+    fig = oms_viz.plot_peakmap(
+        featureMap_data, 
+        x='mz', 
+        y='rt', 
+        z='int',
+        backend='ms_matplotlib'  # Add backend
+    )
     assert fig is not None
 
 def test_plot_peakmap_missing_z(featureMap_data):
-    # Test missing z parameter
     with pytest.raises(ValueError):
-        oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt')
+        oms_viz.plot_peakmap(
+            featureMap_data, 
+            x='mz', 
+            y='rt',
+            backend='ms_matplotlib'  # Add backend
+        )
 
 def test_plot_peakmap_invalid_backend(featureMap_data):
-    # Test invalid backend
     with pytest.raises(ValueError):
-        oms_viz.plot_peakmap(featureMap_data, x='mz', y='rt', z='int', backend='invalid_backend')
+        oms_viz.plot_peakmap(
+            featureMap_data, 
+            x='mz', 
+            y='rt', 
+            z='int',
+            backend='invalid_backend'  # Keep invalid backend
+        )
 
 def test_plot_peakmap_empty_data():
-    # Test empty DataFrame
     with pytest.raises(ValueError):
-        oms_viz.plot_peakmap(pd.DataFrame(), x='mz', y='rt', z='int')
+        oms_viz.plot_peakmap(
+            pd.DataFrame(), 
+            x='mz', 
+            y='rt', 
+            z='int',
+            backend='ms_matplotlib'  # Add backend
+        )

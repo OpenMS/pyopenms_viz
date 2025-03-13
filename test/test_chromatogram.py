@@ -55,21 +55,36 @@ def test_chromatogram_with_annotation(
 
 # New tests for plot_chromatogram function
 def test_plot_chromatogram_basic(chromatogram_data):
-    # Test basic functionality
-    fig = oms_viz.plot_chromatogram(chromatogram_data, x='rt', y='int')
+    fig = oms_viz.plot_chromatogram(
+        chromatogram_data, 
+        x='rt', 
+        y='int',
+        backend='ms_matplotlib'  # Add backend
+    )
     assert fig is not None
 
 def test_plot_chromatogram_missing_y(chromatogram_data):
-    # Test missing y parameter
     with pytest.raises(ValueError):
-        oms_viz.plot_chromatogram(chromatogram_data, x='rt')
+        oms_viz.plot_chromatogram(
+            chromatogram_data, 
+            x='rt',
+            backend='ms_matplotlib'  # Add backend
+        )
 
 def test_plot_chromatogram_invalid_backend(chromatogram_data):
-    # Test invalid backend
     with pytest.raises(ValueError):
-        oms_viz.plot_chromatogram(chromatogram_data, x='rt', y='int', backend='invalid_backend')
+        oms_viz.plot_chromatogram(
+            chromatogram_data, 
+            x='rt', 
+            y='int',
+            backend='invalid_backend'  # Keep invalid backend
+        )
 
 def test_plot_chromatogram_empty_data():
-    # Test empty DataFrame
     with pytest.raises(ValueError):
-        oms_viz.plot_chromatogram(pd.DataFrame(), x='rt', y='int')
+        oms_viz.plot_chromatogram(
+            pd.DataFrame(), 
+            x='rt', 
+            y='int',
+            backend='ms_matplotlib'  # Add backend
+        )

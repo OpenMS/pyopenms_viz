@@ -13,7 +13,6 @@ from pandas.core.dtypes.generic import ABCDataFrame
 from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
-from typing import Optional
 import pandas as pd
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
@@ -126,8 +125,11 @@ class BasePlot(ABC):
     @canvas.setter
     def canvas(self, value):
         self._config.canvas = value
-
     def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
+         # New empty DataFrame check
+        if data.empty:
+            raise ValueError("Cannot plot - DataFrame is empty")
+            
         self.data = data.copy()
         if config is None:
             self._config = self._configClass(**kwargs)
@@ -1521,37 +1523,44 @@ def plot_chromatogram(
     y : str
         Column name for intensity values (y-axis).
     backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
-        Visualization backend to use.
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
     **kwargs
-        Additional keyword arguments for plot customization.
+        Additional keyword arguments for plot customization. 
+        See :ref:`plotting-parameters` for available options.
 
     Returns
     -------
     Figure
-        Backend-specific figure object.
+        Backend-specific figure object
 
-    Raises
-    ------
-    ValueError
-        - If input DataFrame is empty
-        - If `x` or `y` columns are missing
-        - If `x` or `y` contain non-numeric data
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'retention_time': [1.0, 2.0, 3.0],
+    ...     'intensity': [100, 200, 150]
+    ... })
+    >>> fig = viz.plot_chromatogram(
+    ...     data=data,
+    ...     x='retention_time',
+    ...     y='intensity',
+    ...     backend='ms_plotly',
+    ...     color='blue',
+    ...     title='Sample Chromatogram'
+    ... )
+    >>> fig.show()
     """
-    # Validate input data
-    if data.empty:
-        raise ValueError("DataFrame is empty, cannot plot with no data.")
-    
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
-    return data.plot(x=x, y=y, kind="chromatogram", backend=backend, **kwargs)
+    return data.plot(
+        x=x,
+        y=y,
+        kind="chromatogram",
+        backend=backend,
+        **kwargs
+    )
 
 def plot_spectrum(
     data: pd.DataFrame,
@@ -1572,34 +1581,45 @@ def plot_spectrum(
     y : str
         Column name for intensity values (y-axis).
     backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
-        Visualization backend to use.
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
+    **kwargs
+        Additional keyword arguments for plot customization. 
+        See :ref:`plotting-parameters` for available options.
 
     Returns
     -------
     Figure
-        Backend-specific figure object.
+        Backend-specific figure object
 
-    Raises
-    ------
-    ValueError
-        - If input DataFrame is empty
-        - If `x` or `y` columns are missing
-        - If `x` or `y` contain non-numeric data
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'mz': [100.0, 200.0, 300.0],
+    ...     'intensity': [1000, 2000, 1500]
+    ... })
+    >>> fig = viz.plot_spectrum(
+    ...     data=data,
+    ...     x='mz',
+    ...     y='intensity',
+    ...     backend='ms_matplotlib',
+    ...     color='red',
+    ...     title='Mass Spectrum',
+    ...     line_width=1.5
+    ... )
+    >>> fig.show()
     """
-    if data.empty:
-        raise ValueError("DataFrame is empty, cannot plot with no data.")
-    
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
-    return data.plot(x=x, y=y, kind="spectrum", backend=backend, **kwargs)
+    return data.plot(
+        x=x,
+        y=y,
+        kind="spectrum",
+        backend=backend,
+        **kwargs
+    )
 
 def plot_mobilogram(
     data: pd.DataFrame,
@@ -1609,7 +1629,7 @@ def plot_mobilogram(
     **kwargs
 ):
     """
-    Plot a mobilogram (ion mobility spectrum).
+    Plot a mobilogram (ion mobility spectrum) using a seaborn-like API.
 
     Parameters
     ----------
@@ -1620,29 +1640,45 @@ def plot_mobilogram(
     y : str
         Column name for intensity values (y-axis)
     backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
-        Visualization backend to use.
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh visualizations
+        - "ms_plotly": Interactive Plotly visualizations
+    **kwargs
+        Additional keyword arguments for plot customization.
+        See :ref:`plotting-parameters` for available options.
 
-    Raises
-    ------
-    ValueError
-        - If input DataFrame is empty
-        - If `x` or `y` columns are missing
-        - If `x` or `y` contain non-numeric data
+    Returns
+    -------
+    Figure
+        Backend-specific figure object
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'ion_mobility': [0.5, 1.0, 1.5],
+    ...     'intensity': [500, 1500, 800]
+    ... })
+    >>> fig = viz.plot_mobilogram(
+    ...     data=data,
+    ...     x='ion_mobility',
+    ...     y='intensity',
+    ...     backend='ms_bokeh',
+    ...     color='green',
+    ...     title='Ion Mobility Spectrum',
+    ...     line_width=2
+    ... )
+    >>> fig.show()
     """
-    if data.empty:
-        raise ValueError("DataFrame is empty, cannot plot with no data.")
-    
-    if x not in data.columns:
-        raise ValueError(f"Column '{x}' not found in DataFrame")
-    if y not in data.columns:
-        raise ValueError(f"Column '{y}' not found in DataFrame")
-
-    if not pd.api.types.is_numeric_dtype(data[x]):
-        raise ValueError(f"Column '{x}' must contain numeric data")
-    if not pd.api.types.is_numeric_dtype(data[y]):
-        raise ValueError(f"Column '{y}' must contain numeric data")
-
-    return data.plot(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
+    return data.plot(
+        x=x,
+        y=y,
+        kind="mobilogram",
+        backend=backend,
+        **kwargs
+    )
 
 def plot_peakmap(
     data: pd.DataFrame,
@@ -1653,7 +1689,7 @@ def plot_peakmap(
     **kwargs
 ):
     """
-    Plot a peakmap (2D intensity map).
+    Plot a peakmap (2D intensity map) using a seaborn-like API.
 
     Parameters
     ----------
@@ -1666,25 +1702,44 @@ def plot_peakmap(
     z : str
         Column name for intensity values
     backend : Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"]
-        Visualization backend to use.
+        Visualization backend to use:
+        - "ms_matplotlib": Static Matplotlib plots
+        - "ms_bokeh": Interactive Bokeh heatmaps
+        - "ms_plotly": Interactive Plotly heatmaps
+    **kwargs
+        Additional keyword arguments for plot customization.
+        See :ref:`plotting-parameters` for available options.
 
-    Raises
-    ------
-    ValueError
-        - If input DataFrame is empty
-        - If `x`, `y`, or `z` columns are missing
-        - If any axis contains non-numeric data
+    Returns
+    -------
+    Figure
+        Backend-specific figure object
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> import pyopenms_viz as viz
+    >>> data = pd.DataFrame({
+    ...     'mz': [100, 200, 300, 100, 200, 300],
+    ...     'rt': [1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+    ...     'intensity': [10, 20, 30, 15, 25, 35]
+    ... })
+    >>> fig = viz.plot_peakmap(
+    ...     data=data,
+    ...     x='mz',
+    ...     y='rt',
+    ...     z='intensity',
+    ...     backend='ms_plotly',
+    ...     color_scale='Viridis',
+    ...     title='LC-MS Peakmap'
+    ... )
+    >>> fig.show()
     """
-    if data.empty:
-        raise ValueError("DataFrame is empty, cannot plot with no data.")
-    
-    required_columns = [x, y, z]
-    missing = [col for col in required_columns if col not in data.columns]
-    if missing:
-        raise ValueError(f"Missing required columns: {missing}")
-
-    for col in required_columns:
-        if not pd.api.types.is_numeric_dtype(data[col]):
-            raise ValueError(f"Column '{col}' must contain numeric data")
-
-    return data.plot(x=x, y=y, z=z, kind="peakmap", backend=backend, **kwargs)
+    return data.plot(
+        x=x,
+        y=y,
+        z=z,
+        kind="peakmap",
+        backend=backend,
+        **kwargs
+    )

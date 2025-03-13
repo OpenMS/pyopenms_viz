@@ -94,21 +94,36 @@ def test_spectrum_with_annotations(spectrum_data, snapshot, kwargs):
 
 # New tests for plot_spectrum function
 def test_plot_spectrum_basic(spectrum_data):
-    # Test basic functionality
-    fig = oms_viz.plot_spectrum(spectrum_data, x='mz', y='intensity')
+    fig = oms_viz.plot_spectrum(
+        spectrum_data, 
+        x='mz', 
+        y='intensity',
+        backend='ms_matplotlib'  # Add backend
+    )
     assert fig is not None
 
 def test_plot_spectrum_missing_x(spectrum_data):
-    # Test missing x parameter
     with pytest.raises(ValueError):
-        oms_viz.plot_spectrum(spectrum_data, y='intensity')
+        oms_viz.plot_spectrum(
+            spectrum_data, 
+            y='intensity',
+            backend='ms_matplotlib'  # Add backend
+        )
 
 def test_plot_spectrum_invalid_backend(spectrum_data):
-    # Test invalid backend
     with pytest.raises(ValueError):
-        oms_viz.plot_spectrum(spectrum_data, x='mz', y='intensity', backend='invalid_backend')
+        oms_viz.plot_spectrum(
+            spectrum_data, 
+            x='mz', 
+            y='intensity',
+            backend='invalid_backend'  # Keep invalid backend
+        )
 
 def test_plot_spectrum_empty_data():
-    # Test empty DataFrame
     with pytest.raises(ValueError):
-        oms_viz.plot_spectrum(pd.DataFrame(), x='mz', y='intensity')
+        oms_viz.plot_spectrum(
+            pd.DataFrame(), 
+            x='mz', 
+            y='intensity',
+            backend='ms_matplotlib'  # Add backend
+        )
