@@ -67,7 +67,7 @@ def test_spectrum_peptide_sequence_matplotlib(chromatogram_data, snapshot):
     kwargs = {
         "display_peptide_sequence": True,
         "peptide_sequence": "PEPTIDEABC",
-        "matched_fragments": [(100, 500), (200, 1000)],
+        "matched_fragments": [(100, 500), (200, 1000)], # (m/z, intensity) pairs
     }
     out = chromatogram_data.plot(
         x="rt",
