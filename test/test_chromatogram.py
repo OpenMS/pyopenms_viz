@@ -63,7 +63,7 @@ def test_chromatogram_with_annotation(
     pd.options.plotting.backend != "ms_matplotlib",
     reason="Only supported for Matplotlib backend",
 )
-def test_chromatogram_peptide_sequence_matplotlib(chromatogram_data, snapshot):
+def test_spectrum_peptide_sequence_matplotlib(chromatogram_data, snapshot):
     kwargs = {
         "display_peptide_sequence": True,
         "peptide_sequence": "PEPTIDEABC",
