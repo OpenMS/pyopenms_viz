@@ -545,7 +545,11 @@ class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
     Class for assembling a Bokeh spectrum plot
     """
 
-    pass
+    def plot_peptide_sequence(self, peptide_sequence: str, matched_fragments=None):
+        """
+        Raises a NotImplementedError because peptide sequence plotting is not supported for Bokeh.
+        """
+        raise NotImplementedError("Peptide sequence plotting is currently unsupported in the Bokeh backend.")
 
 
 class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):

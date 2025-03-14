@@ -583,7 +583,39 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     Class for assembling a matplotlib spectrum plot
     """
 
-    pass
+    def plot_peptide_sequence(self, peptide_sequence: str, matched_fragments=None):
+        """
+        Renders a peptide sequence annotation on the spectrum using matplotlib.
+
+        Args:
+            peptide_sequence (str): The peptide sequence to display.
+            matched_fragments (list, optional): List of (fragment_index, intensity) tuples or similar.
+        """
+        ax = self.ax
+
+        # Example: place the peptide sequence in the upper left corner
+        ax.text(
+            0.02,
+            0.95,
+            f"Peptide: {peptide_sequence}",
+            transform=ax.transAxes,
+            fontsize=self._config.peptide_sequence_fontsize,
+            color=self._config.peptide_sequence_color,
+            verticalalignment="top",
+        )
+
+        # If matched_fragments passed in, annotate them as an example:
+        if matched_fragments:
+            for (frag_index, frag_intensity) in matched_fragments:
+                ax.annotate(
+                    f"Frag {frag_index}",
+                    xy=(frag_index, frag_intensity),
+                    xytext=(frag_index, frag_intensity + 0.02),
+                    arrowprops=dict(arrowstyle="->", color=self._config.highlight_color),
+                    fontsize=self._config.peptide_sequence_fontsize,
+                    color=self._config.highlight_color,
+                    alpha=self._config.highlight_alpha,
+                )
 
 
 class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):

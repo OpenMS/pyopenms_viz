@@ -5,7 +5,10 @@ test/plotting/test_matplotlib
 
 import pytest
 import pandas as pd
+import matplotlib
 
+# Force non-interactive backend to avoid Tcl/Tk issues
+matplotlib.use("Agg")
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -53,3 +56,41 @@ def test_chromatogram_with_annotation(
         fig.tight_layout()
 
     assert snapshot == out
+
+
+# Run this snapshot test ONLY for the Matplotlib backend.
+@pytest.mark.skipif(
+    pd.options.plotting.backend != "ms_matplotlib",
+    reason="Only supported for Matplotlib backend",
+)
+def test_chromatogram_peptide_sequence_matplotlib(chromatogram_data, snapshot):
+    kwargs = {
+        "display_peptide_sequence": True,
+        "peptide_sequence": "PEPTIDEABC",
+        "matched_fragments": [(100, 500), (200, 1000)],
+    }
+    out = chromatogram_data.plot(
+        x="rt",
+        y="int",
+        kind="spectrum",
+        show_plot=False,
+        **kwargs,
+    )
+    fig = out.get_figure()
+    fig.tight_layout()
+    assert snapshot == out
+
+
+# Test that peptide sequence plotting is unsupported for Bokeh and Plotly.
+@pytest.mark.parametrize("backend", ["ms_bokeh", "ms_plotly"])
+def test_chromatogram_peptide_sequence_unsupported(chromatogram_data, backend):
+    pd.options.plotting.backend = backend
+    with pytest.raises(NotImplementedError, match="unsupported"):
+        chromatogram_data.plot(
+            x="rt",
+            y="int",
+            kind="spectrum",
+            show_plot=False,
+            display_peptide_sequence=True,
+            peptide_sequence="PEPTIDEXYZ",
+        )
