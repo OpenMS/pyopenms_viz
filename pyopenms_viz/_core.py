@@ -1118,17 +1118,25 @@ class PeakMapPlot(BaseMSPlot, ABC):
     def _configClass(self):
         return PeakMapConfig
 
+    import pandas as pd
+
     def __init__(self, data, z_log_scale=False, **kwargs) -> None:
         super().__init__(data, **kwargs)
         self.z_log_scale = z_log_scale
 
-    # ✅ Store original intensity values before applying log transformation
-        if hasattr(self, "z"):
-            self.z_original = self.z.copy()  # Preserve raw intensities for marginal histograms
+        # ✅ Store original intensity values before applying log transformation
+        if hasattr(self, "z") and isinstance(self.z, str):
+            if isinstance(self.data, pd.DataFrame) and self.z in self.data.columns:
+                self.z_original = self.data[self.z].copy()  # Ensure it's a Series before copying
+            else:
+                self.z_original = None  # Handle cases where z is not a valid column
+        else:
+            self.z_original = None  # Handle unexpected cases
 
         self._check_and_aggregate_duplicates()
         self.prepare_data()
         self.plot()
+
 
     def prepare_data(self):
         """
