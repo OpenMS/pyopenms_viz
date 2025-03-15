@@ -216,7 +216,6 @@ if demo == "Test DataFrame Input":
         fig = st.session_state.chrom_df.plot(**main_input_args, backend=backend_map[engine], show_plot=False, **figure_kwargs)
     
     
-    
     with tabs[0]:
         display_fig(fig.fig, engine)
         if common_params["extract_manual_features"]:

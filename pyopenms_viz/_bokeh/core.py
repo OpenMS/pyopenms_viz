@@ -585,24 +585,43 @@ def create_main_plot(self, canvas=None):
     
 
     def create_x_axis_plot(self):
+        """
+        Creates the X-axis marginal histogram plot.
+        - Uses `z_original` to ensure raw intensity values are displayed.
+        """
         x_fig = super().create_x_axis_plot()
 
-        # Modify plot
+        # ✅ Ensure marginal plots use raw intensity values
         x_fig.x_range = self.main_fig.x_range
         x_fig.width = self.x_plot_config.width
         x_fig.xaxis.visible = False
 
+        # ✅ Use `z_original` for raw intensity in histograms
+        if "z_original" in self.data.columns:
+            x_fig.circle(self.data[self.x], self.data["z_original"], size=5, color="gray")
+
         return x_fig
 
+
     def create_y_axis_plot(self):
+        """
+        Creates the Y-axis marginal histogram plot.
+        - Uses `z_original` to ensure raw intensity values are displayed.
+        """
         y_fig = super().create_y_axis_plot()
 
-        # Modify plot
+        # ✅ Ensure marginal plots use raw intensity values
         y_fig.y_range = self.main_fig.y_range
         y_fig.height = self.y_plot_config.height
         y_fig.legend.orientation = self.y_plot_config.legend_config.orientation
         y_fig.x_range.flipped = True
+
+        # ✅ Use `z_original` for raw intensity in histograms
+        if "z_original" in self.data.columns:
+            y_fig.circle(self.data["z_original"], self.data[self.y], size=5, color="gray")
+
         return y_fig
+
 
     def combine_plots(self, main_fig, x_fig, y_fig):
         # Modify the main plot

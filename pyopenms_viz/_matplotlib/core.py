@@ -629,7 +629,12 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         pass
 
     def create_x_axis_plot(self, canvas=None):
-        ax = super().create_x_axis_plot(canvas=canvas)
+        """
+        Modifies the X-axis marginal plot for Matplotlib.
+        - Uses `z_original` to ensure raw intensity values are displayed.
+        - Maintains modifications to axis settings.
+        """
+        ax = super().create_x_axis_plot(canvas=canvas)  # ✅ If superclass returns `ax`, we must return it.
 
         ax.set_title(None)
         ax.set_xlabel(None)
@@ -641,8 +646,18 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.yaxis.tick_right()
         ax.legend_ = None
 
+        # ✅ Ensure raw intensity values are used for the marginal histogram
+        if "z_original" in self.data.columns:
+            ax.hist(self.data["z_original"], bins=30, color="gray", alpha=0.6)
+
+        return ax  # ✅ Return `ax` only if the superclass does.
+
+
     def create_y_axis_plot(self, canvas=None):
-        # Note y_config is different so we cannot use the base class methods
+        """
+        Creates the Y-axis marginal histogram plot.
+        - Uses `z_original` to ensure raw intensity values are displayed.
+        """
         group_cols = [self.y]
         if self.by is not None:
             group_cols.append(self.by)
@@ -652,7 +667,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         if self.y_kind in ["chromatogram", "mobilogram"]:
             y_plot_obj = self.get_line_renderer(
                 data=y_data,
-                x=self.z,
+                x=self.z_original if "z_original" in y_data.columns else self.z,  # ✅ Use `z_original`
                 y=self.y,
                 by=self.by,
                 canvas=canvas,
@@ -661,7 +676,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         elif self.y_kind == "spectrum":
             y_plot_obj = self.get_vline_renderer(
                 data=y_data,
-                x=self.z,
+                x=self.z_original if "z_original" in y_data.columns else self.z,  # ✅ Use `z_original`
                 y=self.y,
                 by=self.by,
                 canvas=canvas,
@@ -669,9 +684,8 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             )
         else:
             raise ValueError(f"Invalid y_kind: {self.y_kind}")
-        ax = y_plot_obj.generate(None, None)
-
-        # self.plot_x_axis_line()
+        
+        ax = y_plot_obj.generate(None, None)  # ✅ Ensure we return `ax` since superclass does.
 
         ax.set_xlim((0, y_data[self.z].max() + y_data[self.z].max() * 0.1))
         ax.invert_xaxis()
@@ -679,8 +693,8 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         ax.set_xlabel(self.y_plot_config.xlabel)
         ax.set_ylabel(self.y_plot_config.ylabel)
         ax.set_ylim(ax.get_ylim())
-        return ax
 
+        return ax  # ✅ Ensure return type consistency with superclass.
     def create_main_plot(self):
         """
         Implements PeakMap plotting for Matplotlib.
