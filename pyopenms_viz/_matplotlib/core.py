@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Tuple
 import re
+import numpy as np
 from numpy import nan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -681,18 +682,28 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
         return ax
 
     def create_main_plot(self):
+        """
+        Implements PeakMap plotting for Matplotlib.
+        - Applies log scaling only to PeakMap colors.
+        - Uses raw intensities for marginal histograms.
+        - Keeps 3D PeakMap and annotation logic intact.
+        """
         if not self.plot_3d:
+            # ✅ Apply log scaling only to colors, not raw intensity values
+            log_intensity = np.log1p(self.data[self.z]) if self.z_log_scale else self.data[self.z]
+
             scatterPlot = self.get_scatter_renderer(
                 data=self.data,
                 x=self.x,
                 y=self.y,
-                z=self.z,
+                z=log_intensity,  # ✅ Only log-transform color scale
                 config=self._config,
             )
             self.ax = scatterPlot.generate(None, None)
 
             if self.annotation_data is not None:
                 self._add_box_boundaries(self.annotation_data)
+
         else:
             vlinePlot = self.get_vline_renderer(
                 data=self.data, x=self.x, y=self.y, config=self._config
@@ -706,7 +717,6 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 vlinePlot._add_annotations(self.fig, a_t, a_x, a_y, a_c, a_z)
 
         return self.ax
-
     def create_main_plot_marginals(self, canvas=None):
         scatterPlot = self.get_scatter_renderer(
             data=self.data,
