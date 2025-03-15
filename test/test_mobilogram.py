@@ -39,7 +39,7 @@ def test_plot_mobilogram_basic(featureMap_data):
     assert fig is not None
 
 def test_plot_mobilogram_missing_y(featureMap_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_mobilogram(
             featureMap_data, 
             x='im',
@@ -47,7 +47,7 @@ def test_plot_mobilogram_missing_y(featureMap_data):
         )
 
 def test_plot_mobilogram_invalid_backend(featureMap_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_mobilogram(
             featureMap_data, 
             x='im', 
@@ -56,7 +56,7 @@ def test_plot_mobilogram_invalid_backend(featureMap_data):
         )
 
 def test_plot_mobilogram_empty_data():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_mobilogram(
             pd.DataFrame(), 
             x='im', 

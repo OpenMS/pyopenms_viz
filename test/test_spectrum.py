@@ -103,7 +103,7 @@ def test_plot_spectrum_basic(spectrum_data):
     assert fig is not None
 
 def test_plot_spectrum_missing_x(spectrum_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_spectrum(
             spectrum_data, 
             y='intensity',
@@ -111,7 +111,7 @@ def test_plot_spectrum_missing_x(spectrum_data):
         )
 
 def test_plot_spectrum_invalid_backend(spectrum_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_spectrum(
             spectrum_data, 
             x='mz', 
@@ -120,7 +120,7 @@ def test_plot_spectrum_invalid_backend(spectrum_data):
         )
 
 def test_plot_spectrum_empty_data():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_spectrum(
             pd.DataFrame(), 
             x='mz', 

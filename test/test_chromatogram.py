@@ -64,7 +64,7 @@ def test_plot_chromatogram_basic(chromatogram_data):
     assert fig is not None
 
 def test_plot_chromatogram_missing_y(chromatogram_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_chromatogram(
             chromatogram_data, 
             x='rt',
@@ -72,7 +72,7 @@ def test_plot_chromatogram_missing_y(chromatogram_data):
         )
 
 def test_plot_chromatogram_invalid_backend(chromatogram_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_chromatogram(
             chromatogram_data, 
             x='rt', 
@@ -81,7 +81,7 @@ def test_plot_chromatogram_invalid_backend(chromatogram_data):
         )
 
 def test_plot_chromatogram_empty_data():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_chromatogram(
             pd.DataFrame(), 
             x='rt', 

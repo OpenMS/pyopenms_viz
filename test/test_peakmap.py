@@ -62,7 +62,7 @@ def test_plot_peakmap_basic(featureMap_data):
     assert fig is not None
 
 def test_plot_peakmap_missing_z(featureMap_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_peakmap(
             featureMap_data, 
             x='mz', 
@@ -71,7 +71,7 @@ def test_plot_peakmap_missing_z(featureMap_data):
         )
 
 def test_plot_peakmap_invalid_backend(featureMap_data):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_peakmap(
             featureMap_data, 
             x='mz', 
@@ -81,7 +81,7 @@ def test_plot_peakmap_invalid_backend(featureMap_data):
         )
 
 def test_plot_peakmap_empty_data():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         oms_viz.plot_peakmap(
             pd.DataFrame(), 
             x='mz', 
