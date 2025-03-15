@@ -411,7 +411,12 @@ class PeakMapConfig(ScatterConfig):
         title (str): Title of the plot. Default is "PeakMap".
         x_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the X-axis marginal plot. Set in post-init.
         y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Set in post-init.
+        
+        # FIXED BEHAVIOR: Log scaling always applied to colors, not intensity
+        z_log_scale_colors: bool = True  # Always log scale colors
+        z_log_scale_intensity: bool = False  # Always keep raw intensities
     """
+
 
     @staticmethod
     def marginal_config_factory(kind):
@@ -437,9 +442,47 @@ class PeakMapConfig(ScatterConfig):
 
     def __post_init__(self):
         super().__post_init__()
-        # initial marginal configs
+
+        # Set default marginal configurations
         self.y_plot_config = PeakMapConfig.marginal_config_factory(self.y_kind)
         self.x_plot_config = PeakMapConfig.marginal_config_factory(self.x_kind)
+
+        # ✅ Ensure marginals always use raw intensity values
+        self.y_plot_config.z_log_scale = False
+        self.x_plot_config.z_log_scale = False
+
+        # ✅ Update labels for proper visualization
+        self.y_plot_config.xlabel = self.zlabel
+        self.y_plot_config.ylabel = self.ylabel
+        self.x_plot_config.ylabel = self.zlabel
+        self.y_plot_config.y_axis_location = "left"
+        self.x_plot_config.y_axis_location = "right"
+
+        # ✅ Update default settings for better visualization
+        self.y_plot_config.legend_config.show = True
+        self.y_plot_config.legend_config.loc = "below"
+        self.y_plot_config.legend_config.orientation = "horizontal"
+        self.y_plot_config.legend_config.bbox_to_anchor = (1, -0.4)
+
+        # ✅ Remove titles from marginal plots
+        if self.add_marginals:
+            self.title = ""
+            self.x_plot_config.title = ""
+            self.y_plot_config.title = ""
+
+        # ✅ Ensure only colors are log-scaled
+        if not self.fill_by_z:
+            self.z = None
+
+        self.annotation_data = (
+            None if self.annotation_data is None else self.annotation_data.copy()
+        )
+
+
+        # Ensure marginals always use raw intensity values
+        self.y_plot_config.z_log_scale = False
+        self.x_plot_config.z_log_scale = False
+
 
         # update y-axis labels and positioning to defaults
         self.y_plot_config.xlabel = self.zlabel
@@ -510,19 +553,3 @@ def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):
             # If it's already a valid Plotly dash type, return it as is
             if bokeh_dash in plotly_mapper.values():
                 return bokeh_dash
-            # Otherwise, map from Bokeh to Plotly
-            return plotly_mapper.get(bokeh_dash, "solid")
-        elif isinstance(bokeh_dash, list):
-            return " ".join(f"{num}px" for num in bokeh_dash)
-    elif target_library.lower() == "matplotlib":
-        if isinstance(bokeh_dash, str):
-            # If it's already a valid Matplotlib dash type, return it as is
-            if bokeh_dash in matplotlib_mapper.values():
-                return bokeh_dash
-            # Otherwise, map from Bokeh to Matplotlib
-            return matplotlib_mapper.get(bokeh_dash, "-")
-        elif isinstance(bokeh_dash, list):
-            return (None, tuple(bokeh_dash))
-
-    # Default return if target_library is not recognized or bokeh_dash is neither string nor list
-    return "solid" if target_library.lower() == "plotly" else "-"
