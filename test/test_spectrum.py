@@ -6,6 +6,9 @@ test/test_spectrum
 import pytest
 import pandas as pd
 
+import matplotlib
+
+matplotlib.use("Agg")
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -90,4 +93,29 @@ def test_spectrum_with_annotations(spectrum_data, snapshot, kwargs):
         fig = out.get_figure()
         fig.tight_layout()
 
+    assert snapshot == out
+
+@pytest.mark.skipif(
+    pd.options.plotting.backend != "ms_matplotlib",
+    reason="Only supported for Matplotlib backend",
+)
+def test_spectrum_peptide_sequence_matplotlib(spectrum_data, snapshot):
+    """
+    Tests that peptide sequence plotting works for Matplotlib
+    when plotting a spectrum.
+    """
+    kwargs = {
+        "display_peptide_sequence": True,
+        "peptide_sequence": "PEPTIDEK",  # Standard dummy peptide
+        "matched_fragments": [(100, 500), (200, 1000)],  # (m/z, intensity) pairs
+    }
+    out = spectrum_data.plot(
+        x="mz", 
+        y="intensity", 
+        kind="spectrum", 
+        show_plot=False, 
+        **kwargs,
+    )
+    fig = out.get_figure()
+    fig.tight_layout()
     assert snapshot == out

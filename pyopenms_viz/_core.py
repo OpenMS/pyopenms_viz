@@ -805,10 +805,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         # If config says display_sequence, call the abstract method
-        if self._config.display_peptide_sequence and self._config.peptide_sequence:
+        if self.display_peptide_sequence and self.peptide_sequence:
             self.plot_peptide_sequence(
-                self._config.peptide_sequence, 
-                matched_fragments=self._config.matched_fragments
+                self.peptide_sequence,
+                matched_fragments=self.matched_fragments
             )
 
         # Mirror spectrum
