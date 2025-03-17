@@ -16,7 +16,7 @@ Please click on a kind of plot below for more details on their specific paramete
 .. toctree::
    :maxdepth: 1
 
-   [Spectrum](https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/spectrumPlot.tsv)
-   [Chromatogram](https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/chromatogramPlot.tsv)
-   [PeakMap](https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/peakMapPlot.tsv)
-   [Mobilogram](https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/mobilogramPlot.tsv)
+   [Spectrum][https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/spectrumPlot.tsv]
+   [Chromatogram][https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/chromatogramPlot.tsv]
+   [PeakMap][https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/peakMapPlot.tsv]
+   [Mobilogram][https://github.com/OpenMS/pyopenms_viz/blob/main/docs/Parameters/mobilogramPlot.tsv]
