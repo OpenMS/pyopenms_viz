@@ -66,7 +66,7 @@ class PlotAccessor:
                 f"Valid plot kinds: {self._all_kinds}"
             )
 
-        # Call the plot method of the selected backend
+        # Remove the backend key to avoid passing it twice
         if "backend" in kwargs:
             kwargs.pop("backend")
         return plot_backend.plot(self._parent, x=x, y=y, kind=kind, **kwargs)
@@ -126,12 +126,14 @@ class PlotAccessor:
             )
 
         pos_args = {name: value for (name, _), value in zip(arg_def, args)}
-
+        
         kwargs = dict(arg_def, **pos_args, **kwargs)
 
         x = kwargs.pop("x", None)
         y = kwargs.pop("y", None)
         kind = kwargs.pop("kind", "line")
+        # Filter out parameters with None values so that unexpected kwargs (like "subplots") are removed
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
         return x, y, kind, kwargs
 
 
@@ -197,4 +199,40 @@ def _get_plot_backend(backend: str | None = None):
     return module
 
 
-__all__ = ["PlotAccessor"]
+def plot_chromatogram(data: DataFrame, x: str = "rt", y: str = "intensity", backend: str = "matplotlib", **kwargs):
+    """
+    Plot a chromatogram (Retention Time vs. Intensity).
+    """
+    return PlotAccessor(data)(x=x, y=y, kind="chromatogram", backend=backend, **kwargs)
+
+
+def plot_spectrum(data: DataFrame, x: str = "mz", y: str = "intensity", backend: str = "matplotlib", **kwargs):
+    """
+    Plot a mass spectrum (m/z vs. Intensity).
+    """
+    return PlotAccessor(data)(x=x, y=y, kind="spectrum", backend=backend, **kwargs)
+
+
+def plot_mobilogram(data: DataFrame, x: str = "mobility", y: str = "intensity", backend: str = "matplotlib", **kwargs):
+    """
+    Plot a mobilogram (Ion Mobility vs. Intensity).
+    """
+    return PlotAccessor(data)(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
+
+
+def plot_peakmap(data: DataFrame, x: str = "rt", y: str = "mz", backend: str = "matplotlib", **kwargs):
+    """
+    Plot a peak map (Retention Time vs. m/z).
+    """
+    return PlotAccessor(data)(x=x, y=y, kind="peakmap", backend=backend, **kwargs)
+
+
+__all__ = [
+    "PlotAccessor",
+    "plot_chromatogram",
+    "plot_spectrum",
+    "plot_mobilogram",
+    "plot_peakmap",
+    "TEST_DATA_PATH",
+]
+
