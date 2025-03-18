@@ -358,21 +358,15 @@ class SpectrumConfig(VLineConfig):
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
 
-    """
-    Configuration for a spectrum plot.
-
-    Attributes:
-        ...
-        peptide_sequence (str | None): The peptide sequence to display. Default is None.
-    """
-
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
 
     # Binning settings
     bin_peaks: Union[Literal["auto"], bool] = False
-    bin_method: Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"] = "mz-tol-bin"
+    bin_method: Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"] = (
+        "mz-tol-bin"  # if "none" then num_x_bins will be used
+    )
     num_x_bins: int = 50
     mz_tol: Union[float, Literal["freedman-diaconis", "1pct-diff"]] = "1pct-diff"
 
@@ -388,19 +382,17 @@ class SpectrumConfig(VLineConfig):
 
     aggregation_method: Literal["mean", "sum", "max"] = "max"
 
-    # Axes and title labels
+    ### override axes and title labels
     xlabel: str = "mass-to-charge"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
-
-    # NEW ATTRIBUTE for storing the peptide sequence
-    peptide_sequence: str | None = None
 
     def __post_init__(self):
         super().__post_init__()
         self.reference_spectrum = (
             None if self.reference_spectrum is None else self.reference_spectrum.copy()
         )
+
 
 @dataclass(kw_only=True)
 class PeakMapConfig(ScatterConfig):

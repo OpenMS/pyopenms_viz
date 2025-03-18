@@ -1,22 +1,14 @@
 from __future__ import annotations
 
-import matplotlib
-matplotlib.use("Agg")  # <-- set backend to Agg BEFORE importing pyplot
-
 from abc import ABC
 from typing import Tuple
 import re
 from numpy import nan
-
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
-# ... rest of your code ...
-
-
 
 from .._config import LegendConfig
 
@@ -796,40 +788,3 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):
         pass
-
-@APPEND_PLOT_DOC
-class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
-    """
-    Class for assembling a matplotlib spectrum plot
-    """
-
-    def plot_peptide_sequence(self, sequence: str, x: float = 0.5, y: float = 0.9):
-        """
-        Plot the given peptide sequence on the existing Matplotlib axes.
-
-        Parameters
-        ----------
-        sequence : str
-            The peptide sequence to display.
-        x : float
-            X-position for the text (using Axes coordinates from 0.0 to 1.0).
-        y : float
-            Y-position for the text (using Axes coordinates from 0.0 to 1.0).
-        """
-        # Simply place text at the specified (x, y) in "axes fraction" coordinates.
-        # You can adjust color, font size, etc. to your liking.
-        if self.ax is not None:
-            self.ax.text(
-                x,
-                y,
-                sequence,
-                ha="center",
-                va="center",
-                fontsize=12,
-                color="black",
-                transform=self.ax.transAxes,  # So (x,y) are in [0..1] of the axes
-            )
-        else:
-            print("No axes available to plot the peptide sequence.")
-
-

@@ -746,15 +746,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         else:
             return self.num_x_bins
 
-    def add_peptide_sequence(self, sequence: str) -> None:
-        """
-        Actually draw the peptide sequence on the plot.
-        """
-        # Example (pseudocode):
-        # self.canvas.add_annotation(x=..., y=..., text=sequence, ...)
-        # print(f"Peptide sequence: {sequence}")
-
-
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
@@ -764,10 +755,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
             reference_spectrum = self._prepare_data(self.reference_spectrum)
         else:
             reference_spectrum = None
-        
-        if self.sequence_annotation in self.data.columns:
-            sequence_str = self.data[self.sequence_annotation].iloc[0]
-            self.add_peptide_sequence(sequence_str)
 
         entries = {"m/z": self.x, "intensity": self.y}
         for optional in (
