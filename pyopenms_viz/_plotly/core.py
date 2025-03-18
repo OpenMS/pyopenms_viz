@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Any, Dict, Optional
 
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
@@ -28,6 +28,7 @@ from .._core import (
 from .._config import bokeh_line_dash_mapper
 from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
+from .._dataframe import DataFrameWrapper
 
 
 class PLOTLYPlot(BasePlot, ABC):

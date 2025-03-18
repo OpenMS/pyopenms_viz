@@ -2,9 +2,13 @@
 init
 """
 
-from pandas.plotting._core import PlotAccessor
+from __future__ import annotations
+
+from typing import Any, Union
+import pandas as pd
+import polars as pl
 from pandas.core.frame import DataFrame
-from typing import Any
+from pandas.plotting._core import PlotAccessor
 from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
@@ -195,6 +199,28 @@ def _get_plot_backend(backend: str | None = None):
     module = _load_backend(backend_str)
     _backends[backend_str] = module
     return module
+
+
+def plot(data: Union[pd.DataFrame, pl.DataFrame], *args, **kwargs):
+    """
+    Make plots of MassSpec data using pandas or polars DataFrames.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame or polars.DataFrame
+        The data to be plotted.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Returns
+    -------
+    figure
+        The plot figure object.
+    """
+    plot_obj = PlotAccessor(data)
+    return plot_obj(*args, **kwargs)
 
 
 __all__ = ["PlotAccessor"]
