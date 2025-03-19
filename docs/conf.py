@@ -54,6 +54,8 @@ def find_git_directory(start_path):
 
 
 # -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
 project = "pyopenms_viz"
 copyright = f"{datetime.now().year}, OpenMS Team"
 author = "OpenMS Team"
