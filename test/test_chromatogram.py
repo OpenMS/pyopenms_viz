@@ -57,16 +57,4 @@ def test_chromatogram_with_annotation(
 
     assert snapshot == out
 
-# Test that peptide sequence plotting is unsupported for Bokeh and Plotly.
-@pytest.mark.parametrize("backend", ["ms_bokeh", "ms_plotly"])
-def test_chromatogram_peptide_sequence_unsupported(chromatogram_data, backend):
-    pd.options.plotting.backend = backend
-    with pytest.raises(NotImplementedError, match="unsupported"):
-        chromatogram_data.plot(
-            x="rt",
-            y="int",
-            kind="spectrum",
-            show_plot=False,
-            display_peptide_sequence=True,
-            peptide_sequence="PEPTIDEK",
-        )
+

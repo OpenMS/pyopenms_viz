@@ -583,38 +583,101 @@ class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
     Class for assembling a matplotlib spectrum plot
     """
 
-    def plot_peptide_sequence(self, peptide_sequence: str, matched_fragments=None):
+    def plot_peptide_sequence(
+        self,
+        peptide_sequence: str,
+        matched_fragments=None,
+        x: float = 0.5,          # center horizontal position (axes fraction)
+        y: float = 0.95,         # vertical position (axes fraction)
+        spacing: float = 0.05,   # spacing between residues (axes fraction)
+        fontsize: int = 12,
+        fontsize_frag: int = 10,
+        frag_len: float = 0.05   # length for fragment lines (in axes fraction)
+    ):
         """
-        Renders a peptide sequence annotation on the spectrum using matplotlib.
+        Plot peptide sequence with matched fragments indicated.
 
-        Args:
-            peptide_sequence (str): The peptide sequence to display.
-            matched_fragments (list, optional): List of (fragment_index, intensity) tuples or similar.
+        The peptide is displayed in the top corner and the fragmentation pattern
+        is drawn as lines coming out from the letters -- using the dataframe columns
+        'ion_annotation' and 'ion_color' (or 'color_annotation'). No extra arguments are needed.
         """
         ax = self.ax
 
-        # Example: place the peptide sequence in the upper left corner
-        ax.text(
-            0.02,
-            0.95,
-            f"Peptide: {peptide_sequence}",
-            transform=ax.transAxes,
-            fontsize=self._config.peptide_sequence_fontsize,
-            color=self._config.peptide_sequence_color,
-            verticalalignment="top",
-        )
+        # Compute starting x so that the sequence is centered at x.
+        n_residues = len(peptide_sequence)
+        start_x = x - n_residues * spacing / 2 + spacing / 2
 
-        # If matched_fragments passed in, annotate them as an example:
+        # Draw each amino acid letter.
+        for i, aa in enumerate(peptide_sequence):
+            ax.text(
+                start_x + i * spacing,
+                y,
+                aa,
+                fontsize=fontsize,
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
+
+        # If matched_fragments is not provided, try to extract them from self.data.
+        if matched_fragments is None and hasattr(self, "data"):
+            df = self.data
+            # Check for column "ion_annotation" and either "ion_color" or "color_annotation"
+            color_col = "ion_color" if "ion_color" in df.columns else "color_annotation"
+            if "ion_annotation" in df.columns and color_col in df.columns:
+                matched_fragments = []
+                for _, row in df.iterrows():
+                    annot = str(row.get("ion_annotation", "")).strip()
+                    frag_color = row.get(color_col, "blue")
+                    # Ensure frag_color is a string; if not, fallback.
+                    if not isinstance(frag_color, str):
+                        frag_color = "blue"
+                    # Extract numeric index from annotation (e.g. "a3+").
+                    if len(annot) > 1:
+                        ion_type = annot[0].lower()
+                        try:
+                            ion_index = int(annot[1:].rstrip("+"))
+                        except ValueError:
+                            continue
+                        frag_x = start_x + (ion_index - 1) * spacing
+                        if ion_type in "abc":
+                            y_offset = frag_len
+                        elif ion_type in "xyz":
+                            y_offset = -frag_len
+                        else:
+                            y_offset = 0
+                        matched_fragments.append((annot, frag_color, frag_x, y_offset))
+        # Draw the fragments if any.
         if matched_fragments:
-            for (frag_index, frag_intensity) in matched_fragments:
-                ax.annotate(
-                    f"Frag {frag_index}",
-                    xy=(frag_index, frag_intensity),
-                    xytext=(frag_index, frag_intensity + 0.02),
-                    arrowprops=dict(arrowstyle="->", color=self._config.highlight_color),
-                    fontsize=self._config.peptide_sequence_fontsize,
-                    color=self._config.highlight_color,
-                    alpha=self._config.highlight_alpha,
+            for frag in matched_fragments:
+                if len(frag) == 2:
+                    annot, frag_color = frag
+                    frag_x = x
+                    y_offset = frag_len
+                elif len(frag) >= 4:
+                    annot, frag_color, frag_x, y_offset = frag
+                else:
+                    continue
+
+                if not isinstance(frag_color, str):
+                    frag_color = "blue"
+
+                ax.plot(
+                    [frag_x, frag_x],
+                    [y, y + y_offset],
+                    clip_on=False,
+                    color=frag_color,
+                    transform=ax.transAxes,
+                )
+                ax.text(
+                    frag_x,
+                    y + (y_offset * 1.1),
+                    annot,
+                    color=frag_color,
+                    fontsize=fontsize_frag,
+                    ha="center",
+                    va="bottom" if y_offset >= 0 else "top",
+                    transform=ax.transAxes,
                 )
 
 

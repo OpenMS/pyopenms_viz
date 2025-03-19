@@ -366,10 +366,7 @@ class SpectrumConfig(VLineConfig):
     display_peptide_sequence: bool = False
     peptide_sequence: str = ""
     matched_fragments: list[tuple] = field(default_factory=list)
-    peptide_sequence_fontsize: int = 12
-    peptide_sequence_color: str = "red"
-    highlight_color: str = "blue"
-    highlight_alpha: float = 0.8
+    
 
     # Binning settings
     bin_peaks: Union[Literal["auto"], bool] = False
