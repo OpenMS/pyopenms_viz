@@ -688,6 +688,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         super().__init__(data, **kwargs)
 
         self.plot()
+    
+    @abstractmethod
+    def plot_peptide_sequence(self, peptide_sequence: str, matched_fragments=None):
+        """
+        Renders a peptide sequence annotation on the spectrum.
+        Must be implemented by each backend (e.g., matplotlib).
+        """
+        pass
 
     def load_config(self, **kwargs):
         if self._config is None:
@@ -795,6 +803,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
         )
+
+        # If config says display_sequence, call the abstract method
+        if self.display_peptide_sequence and self.peptide_sequence:
+            self.plot_peptide_sequence(
+                self.peptide_sequence,
+                matched_fragments=self.matched_fragments
+            )
 
         # Mirror spectrum
         if self.mirror_spectrum and self.reference_spectrum is not None:

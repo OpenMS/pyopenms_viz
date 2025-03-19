@@ -619,6 +619,12 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
                 self.reference_spectrum[self.by] + label_suffix
             )
         return df
+    
+    def plot_peptide_sequence(self, peptide_sequence: str, matched_fragments=None):
+        """
+        Raises a NotImplementedError because peptide sequence plotting is not supported for Plotly.
+        """
+        raise NotImplementedError("Peptide sequence plotting is currently unsupported in the Plotly backend.")
 
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):

@@ -5,7 +5,10 @@ test/plotting/test_matplotlib
 
 import pytest
 import pandas as pd
+import matplotlib
 
+# Force non-interactive backend to avoid Tcl/Tk issues
+matplotlib.use("Agg")
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -53,3 +56,5 @@ def test_chromatogram_with_annotation(
         fig.tight_layout()
 
     assert snapshot == out
+
+
