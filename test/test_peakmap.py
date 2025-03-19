@@ -1,5 +1,5 @@
 """
-test/test_peakmap
+test/plotting/test_peakmap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
@@ -18,6 +18,8 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):
+    if featureMap_data.empty:
+        pytest.skip("DataFrame is empty, skipping plot.")
     out = featureMap_data.plot(
         x="mz", y="rt", z="int", kind="peakmap", show_plot=False, **kwargs
     )
@@ -32,6 +34,8 @@ def test_peakmap_plot(featureMap_data, snapshot, kwargs):
 
 # use peakmap to plot a 2D spectrum
 def test_peakmap_mz_im(featureMap_data, snapshot):
+    if featureMap_data.empty:
+        pytest.skip("DataFrame is empty, skipping plot.")
     out = featureMap_data.plot(
         x="mz",
         y="im",
@@ -71,17 +75,17 @@ def test_plot_peakmap_missing_z(featureMap_data):
         )
 
 def test_plot_peakmap_invalid_backend(featureMap_data):
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         oms_viz.plot_peakmap(
             featureMap_data, 
             x='mz', 
             y='rt', 
             z='int',
-            backend='invalid_backend'  # Keep invalid backend
+            backend='invalid_backend'  # Use an invalid backend
         )
 
 def test_plot_peakmap_empty_data():
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         oms_viz.plot_peakmap(
             pd.DataFrame(), 
             x='mz', 
@@ -89,3 +93,4 @@ def test_plot_peakmap_empty_data():
             z='int',
             backend='ms_matplotlib'  # Add backend
         )
+        

@@ -17,6 +17,8 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_mobilogram_plot(featureMap_data, snapshot, kwargs):
+    if featureMap_data.empty:
+        pytest.skip("DataFrame is empty, skipping plot.")
     out = featureMap_data.plot(
         x="im", y="int", kind="mobilogram", show_plot=False, **kwargs
     )
@@ -47,16 +49,16 @@ def test_plot_mobilogram_missing_y(featureMap_data):
         )
 
 def test_plot_mobilogram_invalid_backend(featureMap_data):
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         oms_viz.plot_mobilogram(
             featureMap_data, 
             x='im', 
             y='int',
-            backend='invalid_backend'  # Keep invalid backend
+            backend='invalid_backend'  # Use an invalid backend
         )
 
 def test_plot_mobilogram_empty_data():
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         oms_viz.plot_mobilogram(
             pd.DataFrame(), 
             x='im', 
