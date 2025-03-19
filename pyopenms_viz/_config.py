@@ -358,15 +358,30 @@ class SpectrumConfig(VLineConfig):
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
 
+    """
+    Configuration for a spectrum plot.
+    
+    Attributes:
+        reference_spectrum (pd.DataFrame | None): Reference spectrum data. Default is None.
+        mirror_spectrum (bool): Whether to mirror the spectrum. Default is False.
+        peak_color (str | None): Color of the peaks. Default is None.
+        ...
+        ylabel (str): Label for the Y-axis. Default is "Intensity".
+        title (str): Title of the plot. Default is "Mass Spectrum".
+        
+        # New options for displaying a peptide sequence:
+        display_peptide_sequence (bool): If True, the peptide sequence will be plotted on the spectrum.
+                                         Default is False.
+        peptide_sequence (str): The peptide sequence to display if display_peptide_sequence is True.
+                                Default is an empty string.
+    """
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
 
     # Binning settings
     bin_peaks: Union[Literal["auto"], bool] = False
-    bin_method: Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"] = (
-        "mz-tol-bin"  # if "none" then num_x_bins will be used
-    )
+    bin_method: Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"] = "mz-tol-bin"
     num_x_bins: int = 50
     mz_tol: Union[float, Literal["freedman-diaconis", "1pct-diff"]] = "1pct-diff"
 
@@ -387,12 +402,15 @@ class SpectrumConfig(VLineConfig):
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
 
+    # === New peptide sequence display options ===
+    display_peptide_sequence: bool = False
+    peptide_sequence: str = ""
+
     def __post_init__(self):
         super().__post_init__()
         self.reference_spectrum = (
             None if self.reference_spectrum is None else self.reference_spectrum.copy()
         )
-
 
 @dataclass(kw_only=True)
 class PeakMapConfig(ScatterConfig):
