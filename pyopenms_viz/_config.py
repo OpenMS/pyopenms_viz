@@ -358,23 +358,6 @@ class SpectrumConfig(VLineConfig):
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
 
-    """
-    Configuration for a spectrum plot.
-    
-    Attributes:
-        reference_spectrum (pd.DataFrame | None): Reference spectrum data. Default is None.
-        mirror_spectrum (bool): Whether to mirror the spectrum. Default is False.
-        peak_color (str | None): Color of the peaks. Default is None.
-        ...
-        ylabel (str): Label for the Y-axis. Default is "Intensity".
-        title (str): Title of the plot. Default is "Mass Spectrum".
-        
-        # New options for displaying a peptide sequence:
-        display_peptide_sequence (bool): If True, the peptide sequence will be plotted on the spectrum.
-                                         Default is False.
-        peptide_sequence (str): The peptide sequence to display if display_peptide_sequence is True.
-                                Default is an empty string.
-    """
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
