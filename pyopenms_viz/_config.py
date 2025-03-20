@@ -400,7 +400,7 @@ class PeakMapConfig(ScatterConfig):
     Configuration for a peak map plot.
 
     Attributes:
-        add_marginals (bool): Whether to add marginal plots. Default is False.
+        add_marginals (bool): Whether to add marginal plots. Default is False. [See note below]
         y_kind (str): Type of plot for the Y-axis marginal. Default is "spectrum".
         x_kind (str): Type of plot for the X-axis marginal. Default is "chromatogram".
         aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Default is "mean".
@@ -411,6 +411,9 @@ class PeakMapConfig(ScatterConfig):
         title (str): Title of the plot. Default is "PeakMap".
         x_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the X-axis marginal plot. Set in post-init.
         y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Set in post-init.
+
+    Note:
+        y_kind / x_kind is only relevant for this kind if add_marginals is set to True.
     """
 
     @staticmethod
