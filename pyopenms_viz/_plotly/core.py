@@ -837,3 +837,15 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                     name=legend_label,
                 )
             )
+            
+__all__ = [
+    'PLOTLYPlot',
+    'PLOTLY_MSPlot',
+    'PLOTLYLinePlot',
+    'PLOTLYVLinePlot',
+    'PLOTLYScatterPlot',
+    'PLOTLYChromatogramPlot',
+    'PLOTLYMobilogramPlot',
+    'PLOTLYSpectrumPlot',
+    'PLOTLYPeakMapPlot'
+]

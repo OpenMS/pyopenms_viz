@@ -4,13 +4,15 @@ from typing import TYPE_CHECKING
 from ..constants import IS_SPHINX_BUILD
 
 from .core import (
+    MATPLOTLIBPlot,
+    MATPLOTLIB_MSPlot,
     MATPLOTLIBLinePlot,
     MATPLOTLIBVLinePlot,
     MATPLOTLIBScatterPlot,
     MATPLOTLIBChromatogramPlot,
     MATPLOTLIBMobilogramPlot,
     MATPLOTLIBSpectrumPlot,
-    MATPLOTLIBPeakMapPlot,
+    MATPLOTLIBPeakMapPlot
 )
 
 if TYPE_CHECKING:
@@ -41,4 +43,15 @@ def plot(data, kind, **kwargs):
         return plot_obj.canvas
 
 
-__all__ = ["plot"]
+__all__ = [
+    'plot',
+    'MATPLOTLIBPlot',
+    'MATPLOTLIB_MSPlot',
+    'MATPLOTLIBLinePlot',
+    'MATPLOTLIBVLinePlot',
+    'MATPLOTLIBScatterPlot',
+    'MATPLOTLIBChromatogramPlot',
+    'MATPLOTLIBMobilogramPlot',
+    'MATPLOTLIBSpectrumPlot',
+    'MATPLOTLIBPeakMapPlot'
+]

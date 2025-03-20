@@ -33,6 +33,8 @@ Base
 ----
 These are base abstract classes that are inherited by other classes.
 
+.. currentmodule:: pyopenms_viz._core
+
 .. autosummary::
    :nosignatures:
    :toctree: generated/
@@ -92,7 +94,36 @@ Base
    BOKEHPlot
    BOKEH_MSPlot
 
-... rest of the extensions remain unchanged ...
+.. _bokeh-simple-plots:
+
+Simple Plots
+------------
+These are simple plots that inherit from the BasePlot class.
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   BOKEHLinePlot
+   BOKEHVLinePlot
+   BOKEHScatterPlot
+
+.. _bokeh-mass-spec-plots:
+
+Mass Spectrometry Plots
+-----------------------
+These are mass spectrometry plots that inherit from the BaseMSPlot class.
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   BOKEHChromatogramPlot
+   BOKEHMobilogramPlot
+   BOKEHSpectrumPlot
+   BOKEHPeakMapPlot
 
 Extension: MATPLOTLIB
 *********************

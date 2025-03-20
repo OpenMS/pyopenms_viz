@@ -9,7 +9,23 @@ from pandas.core.dtypes.generic import ABCDataFrame
 import importlib
 import types
 from pathlib import Path
-
+from ._core import *
+from ._bokeh import *
+from ._matplotlib import *
+from ._plotly import *
+from ._config import (
+    BaseConfig,
+    LegendConfig,
+    BasePlotConfig,
+    LineConfig,
+    VLineConfig,
+    ScatterConfig,
+    ChromatogramConfig,
+    MobilogramConfig,
+    SpectrumConfig,
+    PeakMapConfig,
+    bokeh_line_dash_mapper
+)
 __version__ = "1.0.0"
 
 
@@ -196,5 +212,60 @@ def _get_plot_backend(backend: str | None = None):
     _backends[backend_str] = module
     return module
 
-
-__all__ = ["PlotAccessor"]
+__all__ = [
+     # Configuration classes
+    'BaseConfig',
+    'LegendConfig',
+    'BasePlotConfig',
+    'LineConfig',
+    'VLineConfig',
+    'ScatterConfig',
+    'ChromatogramConfig',
+    'MobilogramConfig',
+    'SpectrumConfig',
+    'PeakMapConfig',
+    
+    # Core classes
+    'BasePlot',
+    'BaseMSPlot',
+    'LinePlot',
+    'VLinePlot',
+    'ScatterPlot',
+    'ChromatogramPlot',
+    'MobilogramPlot',
+    'SpectrumPlot',
+    'PeakMapPlot',
+    
+    # Bokeh exports
+    'BOKEHPlot',
+    'BOKEH_MSPlot',
+    'BOKEHLinePlot',
+    'BOKEHVLinePlot',
+    'BOKEHScatterPlot',
+    'BOKEHChromatogramPlot',
+    'BOKEHMobilogramPlot',
+    'BOKEHSpectrumPlot',
+    'BOKEHPeakMapPlot',
+    
+    # Matplotlib exports
+    'MATPLOTLIBPlot',
+    'MATPLOTLIB_MSPlot',
+    'MATPLOTLIBLinePlot',
+    'MATPLOTLIBVLinePlot',
+    'MATPLOTLIBScatterPlot',
+    'MATPLOTLIBChromatogramPlot',
+    'MATPLOTLIBMobilogramPlot',
+    'MATPLOTLIBSpectrumPlot',
+    'MATPLOTLIBPeakMapPlot',
+    
+    # Plotly exports
+    'PLOTLYPlot',
+    'PLOTLY_MSPlot',
+    'PLOTLYLinePlot',
+    'PLOTLYVLinePlot',
+    'PLOTLYScatterPlot',
+    'PLOTLYChromatogramPlot',
+    'PLOTLYMobilogramPlot',
+    'PLOTLYSpectrumPlot',
+    'PLOTLYPeakMapPlot'
+]

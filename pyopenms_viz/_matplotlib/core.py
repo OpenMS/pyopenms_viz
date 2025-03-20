@@ -788,3 +788,15 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):
         pass
+
+__all__ = [
+    'MATPLOTLIBPlot',
+    'MATPLOTLIB_MSPlot',
+    'MATPLOTLIBLinePlot',
+    'MATPLOTLIBVLinePlot',
+    'MATPLOTLIBScatterPlot',
+    'MATPLOTLIBChromatogramPlot',
+    'MATPLOTLIBMobilogramPlot',
+    'MATPLOTLIBSpectrumPlot',
+    'MATPLOTLIBPeakMapPlot'
+]
