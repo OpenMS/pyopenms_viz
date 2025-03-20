@@ -1118,54 +1118,41 @@ class PeakMapPlot(BaseMSPlot, ABC):
     def _configClass(self):
         return PeakMapConfig
 
-    def __init__(self, data, **kwargs) -> None:
+    import pandas as pd
+
+    def __init__(self, data, z_log_scale=False, **kwargs) -> None:
         super().__init__(data, **kwargs)
+        self.z_log_scale = z_log_scale
+
+        # ✅ Store original intensity values before applying log transformation
+        if hasattr(self, "z") and isinstance(self.z, str):
+            if isinstance(self.data, pd.DataFrame) and self.z in self.data.columns:
+                self.z_original = self.data[self.z].copy()  # Ensure it's a Series before copying
+            else:
+                self.z_original = None  # Handle cases where z is not a valid column
+        else:
+            self.z_original = None  # Handle unexpected cases
+
         self._check_and_aggregate_duplicates()
         self.prepare_data()
         self.plot()
 
+
     def prepare_data(self):
-        # Convert intensity values to relative intensity if required
-        if self.relative_intensity and self.z is not None:
-            self.data[self.z] = self.data[self.z] / max(self.data[self.z]) * 100
+        """
+        Prepares the dataset for plotting.
+        - Ensures log transformation applies only to colors.
+        - Keeps original intensity values (`z_original`) for marginal histograms.
+        """
+        if hasattr(self, "z"):
+            self.data["z_original"] = self.data[self.z]  # Save original intensity
 
-        # Bin peaks if required
-        if self.bin_peaks == True or (
-            self.data.shape[0] > self.num_x_bins * self.num_y_bins
-            and self.bin_peaks == "auto"
-        ):
-            self.data[self.x] = cut(self.data[self.x], bins=self.num_x_bins)
-            self.data[self.y] = cut(self.data[self.y], bins=self.num_y_bins)
-            if self.z is not None:
-                if self.by is not None:
-                    # Group by x, y and by columns and calculate the mean intensity within each bin
-                    self.data = (
-                        self.data.groupby([self.x, self.y, self.by], observed=True)
-                        .agg({self.z: self.aggregation_method})
-                        .reset_index()
-                    )
-                else:
-                    # Group by x and y bins and calculate the mean intensity within each bin
-                    self.data = (
-                        self.data.groupby([self.x, self.y], observed=True)
-                        .agg({self.z: "mean"})
-                        .reset_index()
-                    )
-            self.data[self.x] = (
-                self.data[self.x].apply(lambda interval: interval.mid).astype(float)
-            )
-            self.data[self.y] = (
-                self.data[self.y].apply(lambda interval: interval.mid).astype(float)
-            )
-            self.data = self.data.fillna(0)
-
-        # Log intensity scale
+        # ✅ Apply log scaling **only for PeakMap colors**.
         if self.z_log_scale:
-            self.data[self.z] = log1p(self.data[self.z])
+            self.data["color_intensity"] = np.log1p(self.data[self.z])
+        else:
+            self.data["color_intensity"] = self.data[self.z]
 
-        # Sort values by intensity in ascending order to plot highest intensity peaks last
-        if self.z is not None:
-            self.data = self.data.sort_values(self.z)
 
     def plot(self):
 
@@ -1201,8 +1188,28 @@ class PeakMapPlot(BaseMSPlot, ABC):
         pass
 
     # by default the main plot with marginals is plotted the same way as the main plot unless otherwise specified
-    def create_main_plot_marginals(self, canvas=None):
-        return self.create_main_plot(canvas)
+def create_main_plot_marginals(self, canvas=None):
+    """
+    Calls the abstract create_main_plot() function but ensures:
+    - Log scaling is only applied to PeakMap colors.
+    - Marginal plots use raw intensities (`z_original`).
+    """
+    fig = self.create_main_plot(canvas)
+
+    if self.add_marginals:
+        fig.subplots_adjust(hspace=0.2, wspace=0.2)
+        grid = fig.add_gridspec(4, 4)
+
+        ax_marg_x = fig.add_subplot(grid[0, 0:3], sharex=fig.axes[0])
+        ax_marg_x.hist(self.data["z_original"], bins=30, color="gray", alpha=0.6)
+        ax_marg_x.axis("off")
+
+        ax_marg_y = fig.add_subplot(grid[1:4, 3], sharey=fig.axes[0])
+        ax_marg_y.hist(self.data["z_original"], bins=30, orientation="horizontal", color="gray", alpha=0.6)
+        ax_marg_y.axis("off")
+
+    return fig
+
 
     @abstractmethod
     def create_x_axis_plot(self, canvas=None) -> "figure":
