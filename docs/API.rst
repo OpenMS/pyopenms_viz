@@ -64,8 +64,6 @@ Mass Spectrometry Plots
 -----------------------
 These are mass spectrometry plots that inherit from the BaseMSPlot class.
 
-.. currentmodule:: pyopenms_viz.core
-
 .. autosummary::
    :nosignatures:
    :toctree: generated/
