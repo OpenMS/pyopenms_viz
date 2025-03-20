@@ -1,17 +1,39 @@
 API
 ===
 
-Note: This section provides a comprehensive overview of all methods and classes avaliable in PyOpenMS-Viz. This content is generated automatically using sphinx autosummary and autodoc based on the python documentation.
+Note: This section provides a comprehensive overview of all methods and classes available in PyOpenMS-Viz. This content is generated automatically using Sphinx autosummary and autodoc based on the Python documentation.
+
+Configuration Classes
+*********************
+
+.. currentmodule:: pyopenms_viz._config
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   BaseConfig
+   LegendConfig
+   BasePlotConfig
+   LineConfig
+   VLineConfig
+   ScatterConfig
+   ChromatogramConfig
+   MobilogramConfig
+   SpectrumConfig
+   PeakMapConfig
 
 Core
 **************************************
 
-.. currentmodule:: pyopenms_viz._core
-
+.. _core-base:
 
 Base
 ----
 These are base abstract classes that are inherited by other classes.
+
+.. currentmodule:: pyopenms_viz._core
 
 .. autosummary::
    :nosignatures:
@@ -20,6 +42,8 @@ These are base abstract classes that are inherited by other classes.
 
    BasePlot
    BaseMSPlot
+
+.. _core-simple-plots:
 
 Simple Plots
 ------------
@@ -33,6 +57,8 @@ These are simple plots that inherit from the BasePlot class.
    LinePlot
    VLinePlot
    ScatterPlot
+
+.. _core-mass-spec-plots:
 
 Mass Spectrometry Plots
 -----------------------
@@ -48,8 +74,10 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    SpectrumPlot
    PeakMapPlot
 
-Extenstion: BOKEH
-*****************
+Extension: BOKEH
+****************
+
+.. _bokeh-base:
 
 Base
 ----
@@ -64,6 +92,8 @@ Base
    BOKEHPlot
    BOKEH_MSPlot
 
+.. _bokeh-simple-plots:
+
 Simple Plots
 ------------
 These are simple plots that inherit from the BasePlot class.
@@ -76,6 +106,8 @@ These are simple plots that inherit from the BasePlot class.
    BOKEHLinePlot
    BOKEHVLinePlot
    BOKEHScatterPlot
+
+.. _bokeh-mass-spec-plots:
 
 Mass Spectrometry Plots
 -----------------------
@@ -91,47 +123,10 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    BOKEHSpectrumPlot
    BOKEHPeakMapPlot
 
-Extenstion: PLOTLY
-******************
-.. currentmodule:: pyopenms_viz._plotly
+Extension: MATPLOTLIB
+*********************
 
-.. autosummary::
-   :nosignatures:
-   :toctree: generated/
-   :template: class.rst
-
-   PLOTLYPlot
-   PLOTLY_MSPlot
-
-Simple Plots
-------------
-These are simple plots that inherit from the BasePlot class.
-
-.. autosummary::
-   :nosignatures:
-   :toctree: generated/
-   :template: class.rst
-
-   PLOTLYLinePlot
-   PLOTLYVLinePlot
-   PLOTLYScatterPlot
-
-Mass Spectrometry Plots
------------------------
-These are mass spectrometry plots that inherit from the BaseMSPlot class.
-
-.. autosummary::
-   :nosignatures:
-   :toctree: generated/
-   :template: class.rst
-
-   PLOTLYChromatogramPlot
-   PLOTLYMobilogramPlot
-   PLOTLYSpectrumPlot
-   PLOTLYPeakMapPlot
-
-Extenstion: MATPLOTLIB
-**********************
+.. _matplotlib-base:
 
 Base
 ----
@@ -146,6 +141,8 @@ Base
    MATPLOTLIBPlot
    MATPLOTLIB_MSPlot
 
+.. _matplotlib-simple-plots:
+
 Simple Plots
 ------------
 These are simple plots that inherit from the BasePlot class.
@@ -158,6 +155,8 @@ These are simple plots that inherit from the BasePlot class.
    MATPLOTLIBLinePlot
    MATPLOTLIBVLinePlot
    MATPLOTLIBScatterPlot
+
+.. _matplotlib-mass-spec-plots:
 
 Mass Spectrometry Plots
 -----------------------
@@ -172,4 +171,3 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    MATPLOTLIBMobilogramPlot
    MATPLOTLIBSpectrumPlot
    MATPLOTLIBPeakMapPlot
-

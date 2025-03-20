@@ -1,13 +1,13 @@
 PyOpenMS-Viz
 ============
 
-Welcome to PyOpenMS-Viz Documentation! PyOpenMS-Viz is a visualization package for mass spectrometry data directly from pandas dataframes
+Welcome to PyOpenMS-Viz Documentation! PyOpenMS-Viz is a visualization package for mass spectrometry data directly from pandas dataframes.
 
 Key Features Include:
 
 * **DataFrame Based Plotting** - Plot directly from a pandas dataframe object
-* **Interactive and Static Plotting** - Multiple backends supported including matplotlib, bokeh and plotly.
-* **Usage Flexibility** - User-friendly web based dashboard for quick visualizations, advanced python package for more complex applications 
+* **Interactive and Static Plotting** - Multiple backends supported including matplotlib, bokeh, and plotly
+* **Usage Flexibility** - User-friendly web-based dashboard for quick visualizations, advanced python package for more complex applications 
 
 Quick Start
 ***********
@@ -15,32 +15,29 @@ Quick Start
 Installation
 ------------
 
-
 .. code-block:: shell
 
-        pip install pyopenms-viz 
-
+    pip install pyopenms-viz 
 
 Plotting a Spectrum
 -------------------
 
 .. code-block:: python
 
-        import pandas as pd
-        ms_data = pd.read_csv("path/to/ms_data.csv")
-        pd.set_option("plotting.backend", "ms_bokeh") # try changing backend to "ms_plotly" or "ms_matplotlib"
-        ms_data.plot(x="m/z", y="intensity", kind="spectrum") 
-        
+    import pandas as pd
+    ms_data = pd.read_csv("path/to/ms_data.csv")
+    pd.set_option("plotting.backend", "ms_bokeh")  # try changing backend to "ms_plotly" or "ms_matplotlib"
+    ms_data.plot(x="m/z", y="intensity", kind="spectrum") 
+    
 Plotting a Chromatogram
 -----------------------
 
 .. code-block:: python
 
-        import pandas as pd
-        ms_data = pd.read_csv("path/to/ms_data.csv")
-        pd.set_option("plotting.backend", "ms_bokeh") # try changing backend to "ms_plotly" or "ms_matplotlib"
-        ms_data.plot(x="rt", y="intensity", kind="chromatogram")
-
+    import pandas as pd
+    ms_data = pd.read_csv("path/to/ms_data.csv")
+    pd.set_option("plotting.backend", "ms_bokeh")  # try changing backend to "ms_plotly" or "ms_matplotlib"
+    ms_data.plot(x="rt", y="intensity", kind="chromatogram")
 
 Support
 *******
@@ -54,7 +51,7 @@ This project is licensed under the BSD 3-Clause license.
 
 Citation
 ********
-If PyOpenMS-Viz was usefull in your research please cite the following:
+If PyOpenMS-Viz was useful in your research, please cite the following:
 
 User Guide
 **********
