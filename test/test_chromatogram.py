@@ -53,3 +53,15 @@ def test_chromatogram_with_annotation(
         fig.tight_layout()
 
     assert snapshot == out
+
+@pytest.mark.parametrize("unsupported_backend", ["plotly"])
+def test_chromatogram_unsupported_backend(chromatogram_data, unsupported_backend):
+    """Ensure that calling plot with an unsupported backend raises NotImplementedError."""
+    original_backend = pd.options.plotting.backend  # Store original backend
+
+    try:
+        pd.options.plotting.backend = unsupported_backend  # Set an unsupported backend
+        with pytest.raises(NotImplementedError):
+            chromatogram_data.plot(x="rt", y="int", kind="chromatogram", show_plot=False)
+    finally:
+        pd.options.plotting.backend = original_backend  # Restore original backend
