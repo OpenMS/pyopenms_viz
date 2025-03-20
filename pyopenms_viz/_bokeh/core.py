@@ -687,15 +687,3 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
                 str(self.annotation_legend_config.fontsize) + "pt"
             )
             self.fig.add_layout(legend, self.annotation_legend_config.loc)
-
-__all__ = [
-    'BOKEHPlot',
-    'BOKEH_MSPlot',
-    'BOKEHLinePlot',
-    'BOKEHVLinePlot',
-    'BOKEHScatterPlot',
-    'BOKEHChromatogramPlot',
-    'BOKEHMobilogramPlot',
-    'BOKEHSpectrumPlot',
-    'BOKEHPeakMapPlot'
-]

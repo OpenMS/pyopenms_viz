@@ -5,15 +5,13 @@ from typing import TYPE_CHECKING
 from ..constants import IS_SPHINX_BUILD
 
 from .core import (
-    BOKEHPlot,
-    BOKEH_MSPlot,
     BOKEHLinePlot,
     BOKEHVLinePlot,
     BOKEHScatterPlot,
     BOKEHChromatogramPlot,
     BOKEHMobilogramPlot,
     BOKEHSpectrumPlot,
-    BOKEHPeakMapPlot
+    BOKEHPeakMapPlot,
 )
 
 if TYPE_CHECKING:
@@ -42,15 +40,4 @@ def plot(data, kind, **kwargs):
     return plot_obj.fig
 
 
-__all__ = [
-    'plot',
-    'BOKEHPlot',
-    'BOKEH_MSPlot',
-    'BOKEHLinePlot',
-    'BOKEHVLinePlot',
-    'BOKEHScatterPlot',
-    'BOKEHChromatogramPlot',
-    'BOKEHMobilogramPlot',
-    'BOKEHSpectrumPlot',
-    'BOKEHPeakMapPlot'
-]
+__all__ = ["plot"]

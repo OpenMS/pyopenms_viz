@@ -4,16 +4,15 @@ from typing import TYPE_CHECKING
 from ..constants import IS_SPHINX_BUILD
 
 from .core import (
-    PLOTLYPlot,
-    PLOTLY_MSPlot,
     PLOTLYLinePlot,
     PLOTLYVLinePlot,
     PLOTLYScatterPlot,
     PLOTLYChromatogramPlot,
     PLOTLYMobilogramPlot,
     PLOTLYSpectrumPlot,
-    PLOTLYPeakMapPlot
+    PLOTLYPeakMapPlot,
 )
+
 if TYPE_CHECKING:
     from .core import PLOTLYPlot
 
@@ -39,15 +38,4 @@ def plot(data, kind, **kwargs):
     return plot_obj.fig
 
 
-__all__ = [
-    'plot',
-    'PLOTLYPlot',
-    'PLOTLY_MSPlot',
-    'PLOTLYLinePlot',
-    'PLOTLYVLinePlot',
-    'PLOTLYScatterPlot',
-    'PLOTLYChromatogramPlot',
-    'PLOTLYMobilogramPlot',
-    'PLOTLYSpectrumPlot',
-    'PLOTLYPeakMapPlot'
-]
+__all__ = ["plot"]
