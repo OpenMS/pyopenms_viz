@@ -1,15 +1,33 @@
 Parameter	Default	Type	Description
-x*		str	The column name for x-axis data
-y*		str	The column name for y-axis data
-kind*		str	'The kind of plot to create. One of: [ “line”, “vline”, scatter”, “chromatogram”, “mobilogram”, “spectrum”, “peak_map”]
-by		str	The column name to group by
-backend		str	'Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally
-relative_intensity	False	bool	Convert y-axis values to relative intensity
-height		int	Height of plot, units dependent on backend.
-width		int	Width of plot in pixels, units dependent on backend.
-grid	False	bool	Whether to show grid on the plot
-toolbar_location	“above”		Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]
-fig	None	fig	Existing Figure object to plot on
-xlabel	None	str	Label for x axis
-ylabel 	None	str	Label for y axis
-show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
+kind*	""	str	The kind of plot to create. One of: ["line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"].
+x*	""	str	The column name for x-axis data.
+y*	""	str	The column name for y-axis data.
+z	""	str	The column name for z-axis data (if applicable).
+by	""	str	The column name to group by.
+canvas	None	Any	Canvas for the plot. Default is None.
+height	500	int	Height of plot, units dependent on backend.
+width	500	int	Width of plot, units dependent on backend.
+grid	True	bool	Whether to show grid on the plot.
+toolbar_location	["above", "below", "left", "right"]	str	Location of the toolbar.
+title	""	str	Title of the plot.
+xlabel	""	str	Label for x-axis.
+ylabel	""	str	Label for y-axis.
+zlabel	""	str	Label for z-axis.
+x_axis_location	"below"	str	Location of the X-axis.
+y_axis_location	"left"	str	Location of the Y-axis.
+title_font_size	18	int	Font size of the title.
+xaxis_label_font_size	16	int	Font size of the X-axis label.
+yaxis_label_font_size	16	int	Font size of the Y-axis label.
+zaxis_label_font_size	16	int	Font size of the Z-axis label.
+xaxis_labelpad	16	int	Padding for the X-axis label.
+yaxis_labelpad	16	int	Padding for the Y-axis label.
+zaxis_labelpad	9	int	Padding for the Z-axis label.
+annotation_font_size	12	int	Font size of annotations.
+color	ColorGenerator	str	Color for the plot.
+plot_3d	False	bool	Whether to plot in 3D.
+min_border	0	int	Minimum border around the plot.
+show_plot	True	bool	Whether to display the plot.
+relative_intensity	False	bool	Convert y-axis values to relative intensity.
+aggregate_duplicates	False	bool	Whether to aggregate duplicate values.
+legend_config	LegendConfig | dict	Configuration for the legend.
+opacity	1.0	float	Opacity of the plot.

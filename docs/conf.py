@@ -97,6 +97,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+
     "bokeh.sphinxext.bokeh_plot",
     "nbsphinx",
 ]
@@ -319,3 +320,7 @@ sphinx_gallery_conf = {
 nbsphinx_execute = "always"
 nbsphinx_requirejs_path = ""
 nbsphinx_allow_errors = True
+spectrum_peak_count = 500  # New value
+# Trigger workflow done
+
+

@@ -5,15 +5,15 @@ Chromatograms can be plotted using kind = chromatogram. In this plot, retention 
 
 Parameters
 ----------
-
 .. csv-table:: 
    :file: chromatogramPlot.tsv
    :header-rows: 1
    :delim: tab
 
+
+
 Example Usage
 -------------
-
 
 .. minigallery::
 
@@ -23,4 +23,3 @@ Example Usage
    gallery_scripts/ms_matplotlib/plot_spyogenes_subplots_ms_matplotlib.py
    gallery_scripts/ms_bokeh/plot_spyogenes_subplots_ms_bokeh.py
    gallery_scripts/ms_plotly/plot_spyogenes_subplots_ms_plotly.py
-
