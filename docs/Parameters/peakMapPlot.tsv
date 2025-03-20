@@ -24,4 +24,4 @@ num_y_bins	50	int	Number of y-bins in heatmap
 z_log_scale	False	bool	Whether to log-transform z-axis
 fill_by_z	True	bool	Whether heatmap coloring should be based on z-axis values
 
-Note: y_kind / x_kind is only relevant for this kind and if add_marginals is set to True.
+Note: y_kind / x_kind is only relevant for this kind and if add_marginals is set to True
