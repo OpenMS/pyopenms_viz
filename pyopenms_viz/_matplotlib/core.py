@@ -1,16 +1,22 @@
 from __future__ import annotations
 
+import matplotlib
+matplotlib.use("Agg")  # <-- set backend to Agg BEFORE importing pyplot
+
 from abc import ABC
 from typing import Tuple
 import re
 from numpy import nan
-import matplotlib
-matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
+# ... rest of your code ...
+
+
 
 from .._config import LegendConfig
 
@@ -27,7 +33,6 @@ from .._core import (
     PeakMapPlot,
     APPEND_PLOT_DOC,
 )
-
 
 
 class MATPLOTLIBPlot(BasePlot, ABC):
@@ -66,8 +71,9 @@ class MATPLOTLIBPlot(BasePlot, ABC):
     def _create_figure(self):
         """
         Create a figure and axes objects,
-        for consistency with other backends, the fig object stores the matplotlib axes object.
+        for consistency with other backends, the fig object stores the matplotlib axes object
         """
+        # TODO why is self.heigh and self.width checked if no alternatives
         if self.width is not None and self.height is not None and not self.plot_3d:
             self.fig, self.ax = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
@@ -85,28 +91,38 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                 self.xlabel,
                 fontsize=9,
                 labelpad=16,
-                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
                 style="italic",
             )
             self.ax.set_ylabel(
                 self.ylabel,
                 fontsize=9,
                 labelpad=17,
-                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
             )
             self.ax.set_zlabel(
                 self.zlabel,
                 fontsize=12,
-                color=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                color=ColorGenerator.color_blind_friendly_map[
+                    ColorGenerator.Colors.DARKGRAY
+                ],
                 labelpad=9,
             )
+
             for axis in ("x", "y", "z"):
                 self.ax.tick_params(
                     axis=axis,
                     labelsize=8,
                     pad=3,
-                    colors=ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY],
+                    colors=ColorGenerator.color_blind_friendly_map[
+                        ColorGenerator.Colors.DARKGRAY
+                    ],
                 )
+
             self.ax.set_box_aspect(aspect=None, zoom=0.88)
             self.ax.ticklabel_format(
                 axis="z", style="sci", useMathText=True, scilimits=(0, 0)
@@ -121,11 +137,16 @@ class MATPLOTLIBPlot(BasePlot, ABC):
     def _update_plot_aes(self):
         """
         Update the plot aesthetics.
+
+        Args:
+            **kwargs: Additional keyword arguments.
         """
         self.ax.grid(self.grid)
+        # Update the title, xlabel, and ylabel
         self.ax.set_title(self.title, fontsize=self.title_font_size)
         self.ax.set_xlabel(self.xlabel, fontsize=self.xaxis_label_font_size)
         self.ax.set_ylabel(self.ylabel, fontsize=self.yaxis_label_font_size)
+        # Update axis tick labels
         self.ax.tick_params(axis="x", labelsize=self.xaxis_tick_font_size)
         self.ax.tick_params(axis="y", labelsize=self.yaxis_tick_font_size)
         if self.plot_3d:
@@ -136,6 +157,10 @@ class MATPLOTLIBPlot(BasePlot, ABC):
     def _add_legend(self, legend):
         """
         Add a legend to the plot.
+
+        Args:
+            ax: The axes object.
+            legend: The legend configuration.
         """
         if legend is not None and self.legend_config.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
@@ -154,12 +179,21 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                 bbox_to_anchor=self.legend_config.bbox_to_anchor,
                 ncol=ncol,
             )
+
             legend.get_title().set_fontsize(str(self.legend_config.fontsize))
         return self.ax
 
-    def _modify_x_range(self, x_range: Tuple[float, float], padding: Tuple[float, float] | None = None):
+    def _modify_x_range(
+        self,
+        x_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
+    ):
         """
         Modify the x-axis range.
+
+        Args:
+            x_range (Tuple[float, float]): The x-axis range.
+            padding (Tuple[float, float] | None, optional): The padding for the range. Defaults to None.
         """
         start, end = x_range
         if padding is not None:
@@ -168,9 +202,17 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         self.ax.set_xlim(start, end)
         return
 
-    def _modify_y_range(self, y_range: Tuple[float, float], padding: Tuple[float, float] | None = None):
+    def _modify_y_range(
+        self,
+        y_range: Tuple[float, float],
+        padding: Tuple[float, float] | None = None,
+    ):
         """
         Modify the y-axis range.
+
+        Args:
+            y_range (Tuple[float, float]): The y-axis range.
+            padding (Tuple[float, float] | None, optional): The padding for the range. Defaults to None.
         """
         start, end = y_range
         if padding is not None:
@@ -178,6 +220,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             end = end + (end * padding[1])
         self.ax.set_ylim(start, end)
 
+    # since matplotlib creates static plots, we don't need to implement the following methods
     def _add_tooltips(self, tooltips):
         raise NotImplementedError(
             "Matplotlib does not support interactive plots and cannot use method '_add_tooltips'"
@@ -195,11 +238,12 @@ class MATPLOTLIBPlot(BasePlot, ABC):
 
     def generate(self, tooltips, custom_hover_data) -> Axes:
         """
-        Generate the plot.
+        Generate the plot
         """
         self._load_extension()
         if self.ax is None:
             self._create_figure()
+
         self.plot()
         self._update_plot_aes()
         return self.ax
@@ -220,10 +264,15 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         ann_colors: list[str],
         ann_zs: list[float] = None,
     ):
-        for i, (text, x, y, color) in enumerate(zip(ann_texts, ann_xs, ann_ys, ann_colors)):
+        for i, (text, x, y, color) in enumerate(
+            zip(ann_texts, ann_xs, ann_ys, ann_colors)
+        ):
             if text is not nan and text != "" and text != "nan":
                 if is_latex_formatted(text):
-                    text = "\n".join([r"${}$".format(line) for line in text.split("\n")])
+                    # Wrap the text in '$' to indicate LaTeX math mode
+                    text = "\n".join(
+                        [r"${}$".format(line) for line in text.split("\n")]
+                    )
                 if not self.plot_3d:
                     ax.annotate(
                         text,
@@ -243,29 +292,6 @@ class MATPLOTLIBPlot(BasePlot, ABC):
                         color=color,
                     )
 
-    # =========================
-    # NEW METHOD FOR PEPTIDE SEQUENCE PLOTTING
-    # =========================
-    def add_peptide_sequence(self, sequence: str, x_spacing: float = 0.02, y_offset: float = -0.05) -> float:
-        """
-        Plot a peptide sequence along the x-axis on the current axes.
-
-        Parameters:
-            sequence (str): The peptide sequence to be added (e.g., "ACDEFG").
-            x_spacing (float, optional): Horizontal spacing between residues. Default is 0.02.
-            y_offset (float, optional): Vertical offset at which to place the sequence text.
-                                        A negative value places the text below the x-axis.
-                                        Default is -0.05.
-
-        Returns:
-            float: The starting x-coordinate used for plotting the sequence.
-        """
-        n_residues = len(sequence)
-        x_start = -((n_residues - 1) / 2.0) * x_spacing
-        for i, residue in enumerate(sequence):
-            x_pos = x_start + i * x_spacing
-            self.ax.text(x_pos, y_offset, residue, ha='center', va='center', fontsize=12, color='black')
-        return x_start
 
 class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
     """
@@ -770,3 +796,38 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
     # since matplotlib is not interactive cannot implement the following methods
     def get_manual_bounding_box_coords(self):
         pass
+
+@APPEND_PLOT_DOC
+class MATPLOTLIBSpectrumPlot(MATPLOTLIB_MSPlot, SpectrumPlot):
+    """
+    Class for assembling a matplotlib spectrum plot
+    """
+
+    def plot_peptide_sequence(self, sequence: str, x: float = 0.5, y: float = 0.9):
+        """
+        Plot the given peptide sequence on the existing Matplotlib axes.
+
+        Parameters
+        ----------
+        sequence : str
+            The peptide sequence to display.
+        x : float
+            X-position for the text (using Axes coordinates from 0.0 to 1.0).
+        y : float
+            Y-position for the text (using Axes coordinates from 0.0 to 1.0).
+        """
+        # Simply place text at the specified (x, y) in "axes fraction" coordinates.
+        # You can adjust color, font size, etc. to your liking.
+        if self.ax is not None:
+            self.ax.text(
+                x,
+                y,
+                sequence,
+                ha="center",
+                va="center",
+                fontsize=12,
+                color="black",
+                transform=self.ax.transAxes,  # So (x,y) are in [0..1] of the axes
+            )
+        else:
+            print("No axes available to plot the peptide sequence.")

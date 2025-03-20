@@ -358,6 +358,14 @@ class SpectrumConfig(VLineConfig):
         title (str): Title of the plot. Default is "Mass Spectrum".
     """
 
+    """
+    Configuration for a spectrum plot.
+
+    Attributes:
+        ...
+        peptide_sequence (str | None): The peptide sequence to display. Default is None.
+    """
+
     reference_spectrum: pd.DataFrame | None = None
     mirror_spectrum: bool = False
     peak_color: str | None = None
@@ -380,14 +388,13 @@ class SpectrumConfig(VLineConfig):
 
     aggregation_method: Literal["mean", "sum", "max"] = "max"
 
-    ### override axes and title labels
+    # Axes and title labels
     xlabel: str = "mass-to-charge"
     ylabel: str = "Intensity"
     title: str = "Mass Spectrum"
 
-    # === New peptide sequence display options ===
-    display_peptide_sequence: bool = False
-    peptide_sequence: str = ""
+    # NEW ATTRIBUTE for storing the peptide sequence
+    peptide_sequence: str | None = None
 
     def __post_init__(self):
         super().__post_init__()

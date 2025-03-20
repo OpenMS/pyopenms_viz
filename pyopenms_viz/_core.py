@@ -650,7 +650,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
 
 class SpectrumPlot(BaseMSPlot, ABC):
-    
+
     @property
     def _kind(self):
         return "spectrum"
@@ -658,7 +658,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
     @property
     def known_columns(self) -> List[str]:
         """
-        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified.
+        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
         """
         known_columns = super().known_columns
         known_columns.extend([self.peak_color] if self.peak_color is not None else [])
@@ -680,10 +680,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _configClass(self):
         return SpectrumConfig
 
-    def __init__(self, data, **kwargs) -> None:
+    def __init__(
+        self,
+        data,
+        **kwargs,
+    ) -> None:
         super().__init__(data, **kwargs)
-        # Optionally store a peptide sequence if provided (e.g., via kwargs)
-        self.peptide_sequence = kwargs.get("peptide_sequence", None)
+
         self.plot()
 
     def load_config(self, **kwargs):
@@ -714,8 +717,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
     @property
     def _peak_bins(self):
         """
-        Get a list of intervals to use in bins. Here bins are not evenly spaced.
-        Currently this only occurs in mz-tol setting.
+        Get a list of intervals to use in bins. Here bins are not evenly spaced. Currently this only occurs in mz-tol setting
         """
         if self.bin_method == "mz-tol-bin" and self.bin_peaks == "auto":
             return mz_tolerance_binning(self.data, self.x, self.mz_tol)
@@ -739,89 +741,113 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return None
             elif self.bin_method == "none":
                 return self.num_x_bins
-            else:
+            else:  # throw error if bin_method is not recognized
                 raise ValueError(f"bin_method {self.bin_method} not recognized")
         else:
             return self.num_x_bins
 
-    @abstractmethod
-    def add_peptide_sequence(self, canvas, sequence: str, x_spacing: float = 0.02):
+    def add_peptide_sequence(self, sequence: str) -> None:
         """
-        Abstract method for adding a peptide sequence to the plot.
-
-        Parameters
-        ----------
-        canvas : object
-            The plotting canvas (e.g., a Plotly figure or Matplotlib axis) where the peptide sequence should be added.
-        sequence : str
-            The peptide sequence to add.
-        x_spacing : float, optional
-            The horizontal spacing between residues in the sequence.
-
-        Subclasses must implement this method to render the peptide sequence on the canvas.
+        Actually draw the peptide sequence on the plot.
         """
-        pass
+        # Example (pseudocode):
+        # self.canvas.add_annotation(x=..., y=..., text=sequence, ...)
+        # print(f"Peptide sequence: {sequence}")
+
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
+
         # Prepare data
         spectrum = self._prepare_data(self.data)
         if self.reference_spectrum is not None:
             reference_spectrum = self._prepare_data(self.reference_spectrum)
         else:
             reference_spectrum = None
+        
+        if self.sequence_annotation in self.data.columns:
+            sequence_str = self.data[self.sequence_annotation].iloc[0]
+            self.add_peptide_sequence(sequence_str)
 
         entries = {"m/z": self.x, "intensity": self.y}
-        for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
+        for optional in (
+            "native_id",
+            self.ion_annotation,
+            self.sequence_annotation,
+        ):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
 
-        tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
+        tooltips, custom_hover_data = self._create_tooltips(
+            entries=entries, index=False
+        )
 
-        # Determine peak coloring
+        # color generation is more complex for spectrum plots, so it has its own methods
+
+        # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
             self.by = self.peak_color
-        elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
+        elif (
+            self.ion_annotation is not None and self.ion_annotation in self.data.columns
+        ):
             self.by = self.ion_annotation
 
-        # Get annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, self.x, self.y)
+        # Annotations for spectrum
+        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+            spectrum, self.x, self.y
+        )
 
-        # Convert data for line plot rendering
+        # Convert to line plot format
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
+
         self.color = self._get_colors(spectrum, kind="peak")
-        spectrumPlot = self.get_line_renderer(data=spectrum, by=self.by, color=self.color, config=self._config)
+        spectrumPlot = self.get_line_renderer(
+            data=spectrum, by=self.by, color=self.color, config=self._config
+        )
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
-        spectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
+        spectrumPlot._add_annotations(
+            self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
+        )
 
-        # Mirror spectrum handling (if applicable)
+        # Mirror spectrum
         if self.mirror_spectrum and self.reference_spectrum is not None:
+            ## create a mirror spectrum
+            # Set intensity to negative values
             reference_spectrum[self.y] = reference_spectrum[self.y] * -1
+
             color_mirror = self._get_colors(reference_spectrum, kind="peak")
-            reference_spectrum = self.convert_for_line_plots(reference_spectrum, self.x, self.y)
-            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(reference_spectrum, self.x, self.y)
-            mirrorSpectrumPlot = self.get_line_renderer(data=reference_spectrum, color=color_mirror, config=self._config)
+            reference_spectrum = self.convert_for_line_plots(
+                reference_spectrum, self.x, self.y
+            )
+
+            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(
+                reference_spectrum, self.x, self.y
+            )
+            mirrorSpectrumPlot = self.get_line_renderer(
+                data=reference_spectrum, color=color_mirror, config=self._config
+            )
+
             mirrorSpectrumPlot.generate(None, None)
-            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(reference_spectrum, self.x, self.y)
-            mirrorSpectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
 
-        # --- Integration of Peptide Sequence ---
-        # If a peptide sequence is provided, call the abstract method to add it to the plot.
-        if self.peptide_sequence:
-            self.add_peptide_sequence(self.canvas, self.peptide_sequence, x_spacing=0.02)
+            # Annotations for reference spectrum
+            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
+                reference_spectrum, self.x, self.y
+            )
+            mirrorSpectrumPlot._add_annotations(
+                self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
+            )
 
-        # Continue with other plot elements
+        # Plot horizontal line to hide connection between peaks
         self.plot_x_axis_line(self.canvas, line_width=2)
 
-        # Adjust x-axis padding
+        # Adjust x axis padding (Plotly cuts outermost peaks)
         min_values = [spectrum[self.x].min()]
         max_values = [spectrum[self.x].max()]
         if reference_spectrum is not None:
             min_values.append(reference_spectrum[self.x].min())
             max_values.append(reference_spectrum[self.x].max())
         self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
-
-        # Adjust y-axis padding
+        # Adjust y axis padding (annotations should stay inside plot)
         max_value = spectrum[self.y].max()
         min_value = 0
         min_padding = 0
@@ -830,6 +856,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             min_value = reference_spectrum[self.y].min()
             min_padding = -0.2
             max_padding = 0.4
+
         self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
 
     def _bin_peaks(self, df: DataFrame) -> DataFrame:
