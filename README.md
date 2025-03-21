@@ -20,6 +20,9 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 - Versatile column selection for easy adaptation to different data formats
 - Consistent API across different plotting backends for easy switching between static and interactive plots
 - Suitable for use in scripts, Jupyter notebooks, and web applications
+- Now supports both pandas and polars DataFrames!
+- Interactive plots with zoom, pan, and hover capabilities
+- Customizable plot styling and annotations
 
 ## Suported Plots
 | **Plot Type**   | **Required Dimensions** | **pyopenms_viz Name**                                     | **Matplotlib** | **Bokeh** | **Plotly** |
@@ -57,3 +60,33 @@ Documentation can be found [here](https://pyopenms-viz.readthedocs.io/en/latest/
 - Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods 21, 365–367 (2024). [https://doi.org/10.1038/s41592-024-02197-7](https://doi.org/10.1038/s41592-024-02197-7)
 
 - Röst HL, Schmitt U, Aebersold R, Malmström L. pyOpenMS: a Python-based interface to the OpenMS mass-spectrometry algorithm library. Proteomics. 2014 Jan;14(1):74-7. [https://doi.org/10.1002/pmic.201300246](https://doi.org/10.1002/pmic.201300246). PMID: [24420968](https://pubmed.ncbi.nlm.nih.gov/24420968/).
+
+## Quick Start
+
+```python
+import pandas as pd
+import polars as pl
+from pyopenms_viz import plot
+
+# Using pandas DataFrame
+df = pd.DataFrame({
+    'mz': [100, 200, 300],
+    'intensity': [1000, 2000, 3000]
+})
+plot(df, x='mz', y='intensity', kind='spectrum')
+
+# Using polars DataFrame
+df_pl = pl.DataFrame({
+    'mz': [100, 200, 300],
+    'intensity': [1000, 2000, 3000]
+})
+plot(df_pl, x='mz', y='intensity', kind='spectrum')
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

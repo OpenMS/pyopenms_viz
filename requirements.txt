@@ -217,6 +217,7 @@ webencodings==0.5.1
     #   tinycss2
 xyzservices==2024.9.0
     # via bokeh
+polars>=0.20.7
 
 # pyopenms-viz
 git+https://github.com/OpenMS/pyopenms_viz.git

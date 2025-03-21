@@ -31,9 +31,12 @@ from ._misc import (
     sturges_rule,
     freedman_diaconis_rule,
     mz_tolerance_binning,
+    MarkerShapeGenerator,
+    is_latex_formatted,
 )
-from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK
+from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK, PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 import warnings
+from ._dataframe import DataFrameType, DataFrameWrapper, wrap_dataframe
 
 
 _common_kinds = ("line", "vline", "scatter")
@@ -126,8 +129,8 @@ class BasePlot(ABC):
     def canvas(self, value):
         self._config.canvas = value
 
-    def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
-        self.data = data.copy()
+    def __init__(self, data: Union[DataFrame, DataFrameType], config: BasePlotConfig = None, **kwargs):
+        self.data = wrap_dataframe(data)
         if config is None:
             self._config = self._configClass(**kwargs)
         else:
@@ -145,7 +148,7 @@ class BasePlot(ABC):
         if self.by is not None:
             # Ensure by column data is string
             self.by = self._verify_column(self.by, "by")
-            self.data[self.by] = self.data[self.by].astype(str)
+            self.data.set_column(self.by, self.data.get_column(self.by).astype(str))
 
     # only value that needs to be dynamically set
     def _copy_config_attributes(self):
@@ -178,7 +181,7 @@ class BasePlot(ABC):
             raise ValueError(f"For `{self._kind}` plot, `{name}` must be set")
 
         # if integer is supplied get the corresponding column associated with that index
-        if is_integer(colname) and not holds_integer(self.data.columns):
+        if is_integer(colname) and not holds_integer(self.data.get_column(colname)):
             if colname >= len(self.data.columns):
                 raise ValueError(
                     f"Column index `{colname}` out of range, `{name}` could not be set"
@@ -229,11 +232,10 @@ class BasePlot(ABC):
                 col for col in self.known_columns if col != self.y
             ]
 
-        if self.data[known_columns_without_int].duplicated().any():
+        if self.data.get_column(known_columns_without_int).duplicated().any():
             if self.aggregate_duplicates:
                 self.data = (
-                    self.data[self.known_columns]
-                    .groupby(known_columns_without_int)
+                    self.data.groupby(known_columns_without_int)
                     .sum()
                     .reset_index()
                 )
@@ -573,7 +575,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
         # Convert to relative intensity if required
         if self.relative_intensity:
-            self.data[self.y] = self.data[self.y] / self.data[self.y].max() * 100
+            self.data.set_column(self.y, self.data.get_column(self.y) / self.data.get_column(self.y).max() * 100)
 
         self.plot()
 
@@ -593,7 +595,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         linePlot = self.get_line_renderer(data=self.data, config=self._config)
 
         self.canvas = linePlot.generate(tooltips, custom_hover_data)
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        self._modify_y_range((0, self.data.get_column(self.y).max()), (0, 0.1))
 
         if self._interactive:
             self.manual_boundary_renderer = self._add_bounding_vertical_drawer()
@@ -620,9 +622,8 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         Compute the apex intensity of the peak group based on the peak boundaries
         """
         for idx, feature in annotation_data.iterrows():
-            annotation_data.loc[idx, "apexIntensity"] = self.data.loc[
-                self.data[self.x].between(feature["leftWidth"], feature["rightWidth"]),
-                self.y,
+            annotation_data.loc[idx, "apexIntensity"] = self.data.get_column(self.y).loc[
+                self.data.get_column(self.x).between(feature["leftWidth"], feature["rightWidth"])
             ].max()
 
 
@@ -646,7 +647,7 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
     def plot(self):
         fig = super().plot()
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+        self._modify_y_range((0, self.data.get_column(self.y).max()), (0, 0.1))
 
 
 class SpectrumPlot(BaseMSPlot, ABC):
@@ -701,11 +702,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
         super()._check_and_aggregate_duplicates()
 
         if self.reference_spectrum is not None:
-            if self.reference_spectrum[self.known_columns].duplicated().any():
+            if self.reference_spectrum.get_column(self.known_columns).duplicated().any():
                 if self.aggregate_duplicates:
                     self.reference_spectrum = (
-                        self.reference_spectrum[self.known_columns]
-                        .groupby(self.known_columns)
+                        self.reference_spectrum.groupby(self.known_columns)
                         .sum()
                         .reset_index()
                     )
@@ -800,7 +800,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         if self.mirror_spectrum and self.reference_spectrum is not None:
             ## create a mirror spectrum
             # Set intensity to negative values
-            reference_spectrum[self.y] = reference_spectrum[self.y] * -1
+            reference_spectrum.set_column(self.y, reference_spectrum.get_column(self.y) * -1)
 
             color_mirror = self._get_colors(reference_spectrum, kind="peak")
             reference_spectrum = self.convert_for_line_plots(
@@ -828,19 +828,19 @@ class SpectrumPlot(BaseMSPlot, ABC):
         self.plot_x_axis_line(self.canvas, line_width=2)
 
         # Adjust x axis padding (Plotly cuts outermost peaks)
-        min_values = [spectrum[self.x].min()]
-        max_values = [spectrum[self.x].max()]
+        min_values = [spectrum.get_column(self.x).min()]
+        max_values = [spectrum.get_column(self.x).max()]
         if reference_spectrum is not None:
-            min_values.append(reference_spectrum[self.x].min())
-            max_values.append(reference_spectrum[self.x].max())
+            min_values.append(reference_spectrum.get_column(self.x).min())
+            max_values.append(reference_spectrum.get_column(self.x).max())
         self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
         # Adjust y axis padding (annotations should stay inside plot)
-        max_value = spectrum[self.y].max()
+        max_value = spectrum.get_column(self.y).max()
         min_value = 0
         min_padding = 0
         max_padding = 0.15
         if reference_spectrum is not None and self.mirror_spectrum:
-            min_value = reference_spectrum[self.y].min()
+            min_value = reference_spectrum.get_column(self.y).min()
             min_padding = -0.2
             max_padding = 0.4
 
@@ -869,9 +869,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return nan  # For values that don't fall into any bin
 
             # Apply the binning
-            df[self.x] = df[self.x].apply(assign_bin)
+            df.set_column(self.x, df.get_column(self.x).apply(assign_bin))
         else:  # use computed number of bins, bins evenly spaced
-            bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
+            bins = np.histogram_bin_edges(df.get_column(self.x), self._computed_num_bins)
 
             def assign_bin(value):
                 for low_idx in range(len(bins) - 1):
@@ -880,7 +880,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return nan  # For values that don't fall into any bin
 
             # Apply the binning
-            df[self.x] = df[self.x].apply(assign_bin)
+            df.set_column(self.x, df.get_column(self.x).apply(assign_bin))
 
             # TODO I am not sure why "cut" method seems to be failing with plotly so created a workaround for now
             # error is that object is not JSON serializable because of Interval type
@@ -916,7 +916,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             else:
                 return value
 
-        df[self.x] = df[self.x].apply(convert_to_numeric).astype(float)
+        df.set_column(self.x, df.get_column(self.x).apply(convert_to_numeric).astype(float))
 
         df = df.fillna(0)
         return df
@@ -935,7 +935,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Convert to relative intensity if required
         if self.relative_intensity or self.mirror_spectrum:
-            df[self.y] = df[self.y] / df[self.y].max() * 100
+            df.set_column(self.y, df.get_column(self.y) / df.get_column(self.y).max() * 100)
 
         # Bin peaks if required
         if self.bin_peaks == True or (self.bin_peaks == "auto"):
@@ -953,31 +953,31 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.annotation_color is not None
                 and self.annotation_color in data.columns
             ):
-                return ColorGenerator(data[self.annotation_color])
+                return ColorGenerator(data.get_column(self.annotation_color))
             # Ion annotation colors
             elif (
                 self.ion_annotation is not None and self.ion_annotation in data.columns
             ):
                 # Generate colors based on ion annotations
                 return ColorGenerator(
-                    self._get_ion_color_annotation(data[self.ion_annotation])
+                    self._get_ion_color_annotation(data.get_column(self.ion_annotation))
                 )
             # Grouped by colors (from default color map)
             elif self.by is not None:
                 # Get unique values to determine number of distinct colors
-                uniques = data[self.by].unique()
+                uniques = data.get_column(self.by).unique().tolist()
                 color_gen = ColorGenerator()
                 # Generate a list of colors equal to the number of unique values
                 colors = [next(color_gen) for _ in range(len(uniques))]
                 # Create a mapping of unique values to their corresponding colors
                 color_map = {uniques[i]: colors[i] for i in range(len(colors))}
                 # Apply the color mapping to the specified column in the data and turn it into a ColorGenerator
-                return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
+                return ColorGenerator(data.get_column(self.by).apply(lambda x: color_map[x]))
             # Fallback ColorGenerator with one color
             return ColorGenerator(n=1)
         else:  # Peaks
             if self.by:
-                uniques = data[self.by].unique().tolist()
+                uniques = data.get_column(self.by).unique().tolist()
                 # Custom colors with top priority
                 if self.peak_color is not None:
                     return ColorGenerator(uniques)
@@ -990,7 +990,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
 
-        data["color"] = ["black" for _ in range(len(data))]
+        data.set_column("color", ["black" for _ in range(len(data))])
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
@@ -1000,25 +1000,25 @@ class SpectrumPlot(BaseMSPlot, ABC):
             top_n = 0
         # sort values for top intensity peaks on top (ascending for reference spectra with negative values)
         data = data.sort_values(
-            y, ascending=True if data[y].min() < 0 else False
+            y, ascending=True if data.get_column(y).min() < 0 else False
         ).reset_index()
 
         for i, row in data.iterrows():
             texts = []
             if i < top_n:
                 if self.annotate_mz:
-                    texts.append(str(round(row[x], 4)))
+                    texts.append(str(round(row.get_column(x), 4)))
                 if self.ion_annotation and self.ion_annotation in data.columns:
-                    texts.append(str(row[self.ion_annotation]))
+                    texts.append(str(row.get_column(self.ion_annotation)))
                 if (
                     self.sequence_annotation
                     and self.sequence_annotation in data.columns
                 ):
-                    texts.append(str(row[self.sequence_annotation]))
+                    texts.append(str(row.get_column(self.sequence_annotation)))
                 if self.custom_annotation and self.custom_annotation in data.columns:
-                    texts.append(str(row[self.custom_annotation]))
+                    texts.append(str(row.get_column(self.custom_annotation)))
             ann_texts.append("\n".join(texts))
-        return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
+        return ann_texts, data.get_column(x).tolist(), data.get_column(y).tolist(), data.get_column("color").tolist()
 
     def _get_ion_color_annotation(self, ion_annotations: str) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
@@ -1063,12 +1063,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
         if self.by is None:
-            x_data, y_data = self.to_line(data[x], data[y])
+            x_data, y_data = self.to_line(data.get_column(x), data.get_column(y))
             return DataFrame({x: x_data, y: y_data})
         else:
             dfs = []
             for name, df in data.groupby(self.by, sort=False):
-                x_data, y_data = self.to_line(df[x], df[y])
+                x_data, y_data = self.to_line(df.get_column(x), df.get_column(y))
                 dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
             return concat(dfs)
 
@@ -1127,15 +1127,15 @@ class PeakMapPlot(BaseMSPlot, ABC):
     def prepare_data(self):
         # Convert intensity values to relative intensity if required
         if self.relative_intensity and self.z is not None:
-            self.data[self.z] = self.data[self.z] / max(self.data[self.z]) * 100
+            self.data.set_column(self.z, self.data.get_column(self.z) / max(self.data.get_column(self.z)) * 100)
 
         # Bin peaks if required
         if self.bin_peaks == True or (
             self.data.shape[0] > self.num_x_bins * self.num_y_bins
             and self.bin_peaks == "auto"
         ):
-            self.data[self.x] = cut(self.data[self.x], bins=self.num_x_bins)
-            self.data[self.y] = cut(self.data[self.y], bins=self.num_y_bins)
+            self.data.set_column(self.x, cut(self.data.get_column(self.x), bins=self.num_x_bins))
+            self.data.set_column(self.y, cut(self.data.get_column(self.y), bins=self.num_y_bins))
             if self.z is not None:
                 if self.by is not None:
                     # Group by x, y and by columns and calculate the mean intensity within each bin
@@ -1151,17 +1151,13 @@ class PeakMapPlot(BaseMSPlot, ABC):
                         .agg({self.z: "mean"})
                         .reset_index()
                     )
-            self.data[self.x] = (
-                self.data[self.x].apply(lambda interval: interval.mid).astype(float)
-            )
-            self.data[self.y] = (
-                self.data[self.y].apply(lambda interval: interval.mid).astype(float)
-            )
+            self.data.set_column(self.x, self.data.get_column(self.x).apply(lambda interval: interval.mid).astype(float))
+            self.data.set_column(self.y, self.data.get_column(self.y).apply(lambda interval: interval.mid).astype(float))
             self.data = self.data.fillna(0)
 
         # Log intensity scale
         if self.z_log_scale:
-            self.data[self.z] = log1p(self.data[self.z])
+            self.data.set_column(self.z, log1p(self.data.get_column(self.z)))
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         if self.z is not None:
@@ -1312,21 +1308,21 @@ class PeakMapPlot(BaseMSPlot, ABC):
             t = feature[self.annotation_names]
             c = feature[self.annotation_colors]
             selected_data = self.data[
-                (self.data[x] > x0)
-                & (self.data[x] < x1)
-                & (self.data[y] > y0)
-                & (self.data[y] < y1)
+                (self.data.get_column(x) > x0)
+                & (self.data.get_column(x) < x1)
+                & (self.data.get_column(y) > y0)
+                & (self.data.get_column(y) < y1)
             ]
             if len(selected_data) == 0:
                 annotations_3d.append(
-                    (np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data[z]), t, c)
+                    (np.mean((x0, x1)), np.mean((y0, y1)), np.mean(self.data.get_column(z)), t, c)
                 )
             else:
                 annotations_3d.append(
                     (
-                        center_of_gravity(selected_data[x], selected_data[z]),
-                        center_of_gravity(selected_data[y], selected_data[z]),
-                        np.max(selected_data[z]) * 1.05,
+                        center_of_gravity(selected_data.get_column(x), selected_data.get_column(z)),
+                        center_of_gravity(selected_data.get_column(y), selected_data.get_column(z)),
+                        np.max(selected_data.get_column(z)) * 1.05,
                         t,
                         c,
                     )

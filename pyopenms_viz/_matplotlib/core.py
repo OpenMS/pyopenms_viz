@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Tuple
+from typing import Tuple, Any, Dict, List, Optional, Union
 import re
 from numpy import nan
 import matplotlib.pyplot as plt
@@ -9,6 +9,9 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+import numpy as np
+from pandas import DataFrame
+from mpl_toolkits.mplot3d import Axes3D
 
 from .._config import LegendConfig
 
@@ -25,6 +28,7 @@ from .._core import (
     PeakMapPlot,
     APPEND_PLOT_DOC,
 )
+from .._dataframe import DataFrameWrapper
 
 
 class MATPLOTLIBPlot(BasePlot, ABC):
@@ -307,7 +311,7 @@ class MATPLOTLIBLinePlot(MATPLOTLIBPlot, LinePlot):
             )
 
         else:
-            for group, df in self.data.groupby(self.by, sort=True):
+            for group, df in self.data.groupby(self.by):
                 (line,) = self.ax.plot(
                     df[self.x], df[self.y], color=self.current_color, **kwargs
                 )

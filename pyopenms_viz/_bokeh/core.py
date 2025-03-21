@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 
-from typing import Tuple, Iterator
+from typing import Tuple, Iterator, Any, Dict, List, Optional, Union
 from dataclasses import dataclass
 
 from bokeh.plotting import figure
@@ -21,6 +21,7 @@ from bokeh.models import (
 
 from pandas.core.frame import DataFrame
 from numpy import nan
+import numpy as np
 
 # pyopenms_viz imports
 from .._core import (
@@ -35,6 +36,7 @@ from .._core import (
     SpectrumPlot,
     APPEND_PLOT_DOC,
 )
+from .._dataframe import DataFrameWrapper
 from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
@@ -294,7 +296,7 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
         Plot a line plot
         """
         if self.by is None:
-            source = ColumnDataSource(self.data)
+            source = ColumnDataSource(self.data.to_pandas())
             line = self.fig.line(
                 x=self.x,
                 y=self.y,
@@ -303,10 +305,9 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
                 line_width=self.line_width,
             )
         else:
-
             legend_items = []
             for group, df in self.data.groupby(self.by, sort=False):
-                source = ColumnDataSource(df)
+                source = ColumnDataSource(df.to_pandas())
                 line = self.fig.line(
                     x=self.x,
                     y=self.y,
