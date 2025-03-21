@@ -413,7 +413,7 @@ class PeakMapConfig(ScatterConfig):
         y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Set in post-init.
 
     Note:
-        y_kind / x_kind is only relevant for this kind if add_marginals is set to True.
+        y_kind / x_kind is only relevant if add_marginals is set to True.
     """
 
     @staticmethod
