@@ -1,5 +1,5 @@
 """
-test/plotting/test_peakmap
+test/test_peakmap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
