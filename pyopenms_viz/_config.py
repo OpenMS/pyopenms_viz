@@ -400,9 +400,9 @@ class PeakMapConfig(ScatterConfig):
     Configuration for a peak map plot.
 
     Attributes:
-        add_marginals (bool): Whether to add marginal plots. Default is False. [See note below]
-        y_kind (str): Type of plot for the Y-axis marginal. Default is "spectrum".
-        x_kind (str): Type of plot for the X-axis marginal. Default is "chromatogram".
+        add_marginals (bool): Whether to add marginal plots. Default is False. 
+        y_kind (str): Type of plot for the Y-axis marginal. Default is "spectrum". [See note below]
+        x_kind (str): Type of plot for the X-axis marginal. Default is "chromatogram". [See note below]
         aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Default is "mean".
         annotation_data (pd.DataFrame | None): Data for annotations. Default is None.
         xlabel (str): Label for the X-axis. Default is "Retention Time".
