@@ -57,7 +57,7 @@ def find_git_directory(start_path):
 project = "pyopenms_viz"
 copyright = f"{datetime.now().year}, OpenMS Team"
 author = "OpenMS Team"
-version = "3.3.0"
+version = "1.0.1"
 release = version
 
 # if the variable is not set (e.g., when building locally and not on RTD)
