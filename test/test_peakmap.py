@@ -18,8 +18,7 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):
-    if featureMap_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
+
     out = featureMap_data.plot(
         x="mz", y="rt", z="int", kind="peakmap", show_plot=False, **kwargs
     )
