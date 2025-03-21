@@ -148,7 +148,8 @@ class BasePlot(ABC):
         if self.by is not None:
             # Ensure by column data is string
             self.by = self._verify_column(self.by, "by")
-            self.data[self.by] = self.data[self.by].astype(str)
+            # Use pandas string type to preserve NaN values
+            self.data[self.by] = self.data[self.by].astype(pd.StringDtype())
 
     # only value that needs to be dynamically set
     def _copy_config_attributes(self):
@@ -219,31 +220,37 @@ class BasePlot(ABC):
     def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
-        Modifies self.data
+        Properly handles data types and only aggregates relevent columns
         """
+         # Determine intensity column and relevant grouping columns
+        intensity_col = self.z if self._kind == "peakmap" else self.y
+        group_cols = [col for col in self.known_columns if col != intensity_col]
 
-        # get all columns except for intensity column (typically this is 'y' however is 'z' for peakmaps)
-        if self._kind in {"peakmap"}:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.z
-            ]
-        else:
-            known_columns_without_int = [
-                col for col in self.known_columns if col != self.y
-            ]
-
-        if self.data[known_columns_without_int].duplicated().any():
+        # Check for duplicates in non-intensity columns
+        has_duplicates = self.data.duplicated(subset=group_cols).any()
+        
+        if has_duplicates:
             if self.aggregate_duplicates:
+                # Ensure numeric type for intensity column before aggregation
+                self.data[intensity_col] = self.data[intensity_col].astype(
+                    float
+                )
+
+                # Group by non-intensity columns and sum intensities
                 self.data = (
-                    self.data[self.known_columns]
-                    .groupby(known_columns_without_int)
+                    self.data
+                    .groupby(group_cols , observed=True , dropna=False)
+                    [intensity_col]
                     .sum()
-                    .reset_index()
+                    .reset_index() 
                 )
             else:
                 warnings.warn(
-                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`."
+                    "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`.",
+                    UserWarning,
+                    stacklevel=2
                 )
+            
 
     def __repr__(self):
         return f"{self.__class__.__name__}(kind={self._kind}, data=DataFrame({self.data.shape[0]} rows {self.data.shape[1]} columns), x={self.x}, y={self.y}, by={self.by})"
