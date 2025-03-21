@@ -4,7 +4,9 @@ y*		str	The column name for y-axis data
 z*		str	The column name for z-axis data
 backend		Literal[“ms_matplotlib”, “ms_bokeh”, “ms_plotly”]	'Backend to use. Must be specified if not set globally
 by		str	The column name to group by
-add_marginals	False	bool	Whether to add marginal plots, ( x vs z and y vs z plots) [See note below]
+add_marginals	False	bool	Whether to add marginal plots, ( x vs z and y vs z plots) 
+x_kind  ''  str Marginal plot for x-axis [Note: x_kind is only relevant for this kind if add_marginals is True]
+y_kind  ''  str Marginal plot for y-axis [Note: y_kind is only relevant for this kind if add_marginals is True]
 relative_intensity	False	bool	Convert y-axis values to relative intensity
 height		int	Height of plot, units dependent on backend.
 width		int	Width of plot in pixels, units dependent on backend.
@@ -14,8 +16,6 @@ fig	None	fig	Existing Figure object to plot on. Useful for matplotlib backend wh
 xlabel	“”	str	Label for x axis
 ylabel 	“”	str	Label for y axis
 zlabel	'’	str	Label for z-axis
-x_kind  ''  str Marginal plot for x-axis [See note below]
-y_kind  ''  str Marginal plot for y-axis [See note below]
 show_plot	True	bool	Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None
 bin_peaks	False	bool | “auto”	If True, will bin peaks based on specified number of bins in `num_x_bins`. If "auto", will automatically determine the number of bins based on the data using the strategy specified in `bin_method`. 
 aggregation_method	“mean”	Literal[“mean”, “sum”, “max”]	How to aggregate duplicate entries
@@ -23,5 +23,3 @@ num_x_bins	50	int	Number of x-bins in heatmap
 num_y_bins	50	int	Number of y-bins in heatmap
 z_log_scale	False	bool	Whether to log-transform z-axis
 fill_by_z	True	bool	Whether heatmap coloring should be based on z-axis values
-
-Note: y_kind / x_kind is only relevant for this kind and if add_marginals is set to True
