@@ -1,5 +1,5 @@
 """
-test/plotting/test_spectrum
+test/test_spectrum
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
