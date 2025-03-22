@@ -5,7 +5,7 @@ test/test_peakmap
 
 import pytest
 import pandas as pd
-
+import pyopenms_viz as oms_viz
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -18,6 +18,7 @@ import pandas as pd
     ],
 )
 def test_peakmap_plot(featureMap_data, snapshot, kwargs):
+
     out = featureMap_data.plot(
         x="mz", y="rt", z="int", kind="peakmap", show_plot=False, **kwargs
     )
@@ -49,3 +50,44 @@ def test_peakmap_mz_im(featureMap_data, snapshot):
         fig.tight_layout()
 
     assert snapshot == out
+
+# New tests for plot_peakmap function
+def test_plot_peakmap_basic(featureMap_data):
+    fig = oms_viz.plot_peakmap(
+        featureMap_data, 
+        x='mz', 
+        y='rt', 
+        z='int',
+        backend='ms_matplotlib'  # Add backend
+    )
+    assert fig is not None
+
+def test_plot_peakmap_missing_z(featureMap_data):
+    with pytest.raises(TypeError):
+        oms_viz.plot_peakmap(
+            featureMap_data, 
+            x='mz', 
+            y='rt',
+            backend='ms_matplotlib'  # Add backend
+        )
+
+def test_plot_peakmap_invalid_backend(featureMap_data):
+    with pytest.raises(ValueError):
+        oms_viz.plot_peakmap(
+            featureMap_data, 
+            x='mz', 
+            y='rt', 
+            z='int',
+            backend='invalid_backend'  # Use an invalid backend
+        )
+
+def test_plot_peakmap_empty_data():
+    with pytest.raises(ValueError):
+        oms_viz.plot_peakmap(
+            pd.DataFrame(), 
+            x='mz', 
+            y='rt', 
+            z='int',
+            backend='ms_matplotlib'  # Add backend
+        )
+        
