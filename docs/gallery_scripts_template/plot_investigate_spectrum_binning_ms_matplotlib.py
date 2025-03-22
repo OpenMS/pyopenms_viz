@@ -1,8 +1,8 @@
 """
-Investigate Spectrum Binning ms_matplotlib
-===========================================
+Investigate Spctrum Binning ms_matplotlib
+=======================================
 
-Here we use a dummy spectrum example to investigate spectrum binning.
+Here we use a dummy spectrum example to investigate spectrum binning. 
 """
 
 import pandas as pd
@@ -10,10 +10,9 @@ import matplotlib.pyplot as plt
 import requests
 from io import StringIO
 
-# Set the plotting backend
 pd.options.plotting.backend = "ms_matplotlib"
 
-# Download the file for example plotting
+# download the file for example plotting
 url = (
     "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 )
@@ -21,7 +20,7 @@ response = requests.get(url)
 response.raise_for_status()  # Check for any HTTP errors
 df = pd.read_csv(StringIO(response.text), sep="\t")
 
-# Define different parameters for spectrum binning visualization
+# Let's assess the peak binning and create a 4 by 2 subplot to visualize the different methods of binning
 params_list = [
     {"title": "Spectrum (Raw)", "bin_peaks": False},
     {
@@ -73,26 +72,18 @@ params_list = [
     },
 ]
 
-# Create a 4x2 subplot layout for the different binning methods
+# Create a 3-row subplot
 fig, axs = plt.subplots(4, 2, figsize=(14, 14))
 
 i = j = 0
 for params in params_list:
-    df.plot(
-        kind="spectrum",
-        x="mz",
-        y="intensity",
-        canvas=axs[i][j],
-        grid=False,
-        show_plot=False,
-        **params
+    p = df.plot(
+        kind="spectrum", x="mz", y="intensity", canvas=axs[i][j], grid=False, show_plot=False, **params
     )
     j += 1
-    if j >= 2:
+    if j >= 2:  # If we've filled two columns, move to the next row
         j = 0
         i += 1
 
 fig.tight_layout()
-
-# Use plt.show() to display the figure and manage the event loop properly.
 plt.show()
