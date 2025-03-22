@@ -17,8 +17,6 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_mobilogram_plot(featureMap_data, snapshot, kwargs):
-    if featureMap_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = featureMap_data.plot(
         x="im", y="int", kind="mobilogram", show_plot=False, **kwargs
     )

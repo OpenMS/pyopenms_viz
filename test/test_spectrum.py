@@ -17,8 +17,6 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_spectrum_plot(spectrum_data, snapshot, kwargs):
-    if spectrum_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )
@@ -44,8 +42,6 @@ def test_spectrum_plot(spectrum_data, snapshot, kwargs):
     ],
 )
 def test_spectrum_binning(spectrum_data, snapshot, kwargs):
-    if spectrum_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )
@@ -59,8 +55,6 @@ def test_spectrum_binning(spectrum_data, snapshot, kwargs):
 
 
 def test_mirror_spectrum(spectrum_data, snapshot, **kwargs):
-    if spectrum_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = spectrum_data.plot(
         x="mz",
         y="intensity",
@@ -87,8 +81,6 @@ def test_mirror_spectrum(spectrum_data, snapshot, **kwargs):
     ],
 )
 def test_spectrum_with_annotations(spectrum_data, snapshot, kwargs):
-    if spectrum_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = spectrum_data.plot(
         x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
     )

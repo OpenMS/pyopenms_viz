@@ -33,8 +33,6 @@ def test_peakmap_plot(featureMap_data, snapshot, kwargs):
 
 # use peakmap to plot a 2D spectrum
 def test_peakmap_mz_im(featureMap_data, snapshot):
-    if featureMap_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = featureMap_data.plot(
         x="mz",
         y="im",

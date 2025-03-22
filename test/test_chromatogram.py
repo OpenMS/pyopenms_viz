@@ -18,8 +18,6 @@ import pyopenms_viz as oms_viz
     ],
 )
 def test_chromatogram_plot(chromatogram_data, snapshot, kwargs):
-    if chromatogram_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = chromatogram_data.plot(
         x="rt", y="int", kind="chromatogram", show_plot=False, **kwargs
     )
@@ -40,8 +38,6 @@ def test_chromatogram_plot(chromatogram_data, snapshot, kwargs):
 def test_chromatogram_with_annotation(
     chromatogram_data, chromatogram_features, snapshot, kwargs
 ): 
-    if chromatogram_data.empty:
-        pytest.skip("DataFrame is empty, skipping plot.")
     out = chromatogram_data.plot(
         x="rt",
         y="int",
