@@ -90,7 +90,8 @@ for i, run in enumerate(RUN_NAMES):
         ylabel="Relative\nIntensity",
         annotation_legend_config=dict(show=False),
         legend_config={"show": False},
+        show_plot=False,
     )
 
 fig.tight_layout()
-fig
+fig.show()
