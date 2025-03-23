@@ -3,6 +3,7 @@ API
 
 Note: This section provides a comprehensive overview of all methods and classes available in PyOpenMS-Viz. This content is generated automatically using Sphinx autosummary and autodoc based on the Python documentation.
 
+
 Configuration Classes
 *********************
 
@@ -23,6 +24,7 @@ Configuration Classes
    MobilogramConfig
    SpectrumConfig
    PeakMapConfig
+
 
 Core
 **************************************
@@ -123,8 +125,58 @@ These are mass spectrometry plots that inherit from the BaseMSPlot class.
    BOKEHSpectrumPlot
    BOKEHPeakMapPlot
 
+
+Extension: PLOTLY
+*****************
+
+.. _plotly-base:
+
+Base
+----
+.. currentmodule:: pyopenms_viz._plotly
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   PLOTLYPlot
+   PLOTLY_MSPlot
+
+.. _plotly-simple-plots:
+
+Simple Plots
+------------
+These are simple plots that inherit from the BasePlot class.
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   PLOTLYLinePlot
+   PLOTLYVLinePlot
+   PLOTLYScatterPlot
+
+.. _plotly-mass-spec-plots:
+
+Mass Spectrometry Plots
+-----------------------
+These are mass spectrometry plots that inherit from the BaseMSPlot class.
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   PLOTLYChromatogramPlot
+   PLOTLYMobilogramPlot
+   PLOTLYSpectrumPlot
+   PLOTLYPeakMapPlot
+
 Extension: MATPLOTLIB
 *********************
+
 
 .. _matplotlib-base:
 
