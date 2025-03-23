@@ -5,7 +5,7 @@ test/plotting/test_mobilogram
 
 import pytest
 import pandas as pd
-
+import pyopenms_viz as oms_viz
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -27,3 +27,39 @@ def test_mobilogram_plot(featureMap_data, snapshot, kwargs):
         fig.tight_layout()
 
     assert snapshot == out
+
+# New tests for plot_mobilogram function
+def test_plot_mobilogram_basic(featureMap_data):
+    fig = oms_viz.plot_mobilogram(
+        featureMap_data, 
+        x='im', 
+        y='int',
+        backend='ms_matplotlib'  # Add backend
+    )
+    assert fig is not None
+
+def test_plot_mobilogram_missing_y(featureMap_data):
+    with pytest.raises(TypeError):
+        oms_viz.plot_mobilogram(
+            featureMap_data, 
+            x='im',
+            backend='ms_matplotlib'  # Add backend
+        )
+
+def test_plot_mobilogram_invalid_backend(featureMap_data):
+    with pytest.raises(ValueError):
+        oms_viz.plot_mobilogram(
+            featureMap_data, 
+            x='im', 
+            y='int',
+            backend='invalid_backend'  # Use an invalid backend
+        )
+
+def test_plot_mobilogram_empty_data():
+    with pytest.raises(ValueError):
+        oms_viz.plot_mobilogram(
+            pd.DataFrame(), 
+            x='im', 
+            y='int',
+            backend='ms_matplotlib'  # Add backend
+        )
