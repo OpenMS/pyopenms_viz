@@ -19,10 +19,10 @@ response.raise_for_status()
 df = pd.read_csv(StringIO(response.text), sep="\t")
 
 
-fig, axs = plt.subplots(1, 3, figsize=(18, 6), sharex=True, sharey=True)
+fig, axs = plt.subplots(3, 1, figsize=(5, 15), sharex=True, sharey=True)
 
 
-binning_levels = [(10, 10), (50, 50), (100, 100)]
+binning_levels = [(10, 10), (40, 40), (100, 100)]
 
 for ax, (num_x_bins, num_y_bins) in zip(axs, binning_levels):
     
@@ -36,8 +36,13 @@ for ax, (num_x_bins, num_y_bins) in zip(axs, binning_levels):
         num_y_bins=num_y_bins,
         canvas=ax,
         title=f"Binning: {num_x_bins} x {num_y_bins}",
+        title_font_size=12,
+        show_plot = False,
+        xaxis_label_font_size=10,
+        yaxis_label_font_size=10,
+        xaxis_tick_font_size=9,
+        yaxis_tick_font_size=9,
     )
 
-
-fig.suptitle("Effect of Different Binning Levels in Peak Maps", fontsize=16)
-fig.tight_layout()
+fig.subplots_adjust(top=0.95, hspace=0.3, bottom=0.13)
+plt.show()
