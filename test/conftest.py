@@ -1,12 +1,13 @@
 import pytest
 import pandas as pd
+import matplotlib
 from pathlib import Path
 from pyopenms_viz.testing import (
     MatplotlibSnapshotExtension,
     BokehSnapshotExtension,
     PlotlySnapshotExtension,
 )
-
+matplotlib.use('Agg')
 
 def find_git_directory(start_path):
     """Find the full path to the nearest '.git' directory by climbing up the directory tree.
@@ -80,3 +81,10 @@ def spectrum_data(test_path):
 @pytest.fixture
 def chromatogram_features(test_path):
     return pd.read_csv(test_path / "ionMobilityTestChromatogramFeatures.tsv", sep="\t")
+
+@pytest.fixture(autouse=True)
+def close_plots():
+    """Close all plots after each test to prevent GUI hangs"""
+    import matplotlib.pyplot as plt
+    yield
+    plt.close('all')
