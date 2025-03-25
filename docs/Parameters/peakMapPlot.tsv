@@ -5,8 +5,8 @@ z*		str	The column name for z-axis data
 backend		Literal[“ms_matplotlib”, “ms_bokeh”, “ms_plotly”]	'Backend to use. Must be specified if not set globally
 by		str	The column name to group by
 add_marginals	False	bool	Whether to add marginal plots, ( x vs z and y vs z plots) 
-x_kind  ''  str Marginal plot for x-axis [Note: x_kind is only relevant if add_marginals is True]
-y_kind  ''  str Marginal plot for y-axis [Note: y_kind is only relevant if add_marginals is True]
+x_kind	"chromatogram"	str	Marginal plot for x-axis [Note: x_kind is only relevant if add_marginals is True]
+y_kind	"spectrum"	str	Marginal plot for y-axis [Note: y_kind is only relevant if add_marginals is True]
 relative_intensity	False	bool	Convert y-axis values to relative intensity
 height		int	Height of plot, units dependent on backend.
 width		int	Width of plot in pixels, units dependent on backend.
