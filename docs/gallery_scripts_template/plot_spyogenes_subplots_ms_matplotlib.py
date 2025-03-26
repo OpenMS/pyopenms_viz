@@ -11,8 +11,6 @@ import zipfile
 import matplotlib.pyplot as plt
 import sys
 
-# Append the local module path
-sys.path.append("c:/Users/ACER/multiplot_interface/pyopenms_viz")
 
 # Set the plotting backend
 pd.options.plotting.backend = "ms_matplotlib"
