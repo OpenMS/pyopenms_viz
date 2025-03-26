@@ -14,6 +14,10 @@ from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
 
+import matplotlib.pyplot as plt
+from math import ceil
+import numpy as np
+
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
     LegendConfig,
@@ -539,7 +543,6 @@ class BaseMSPlot(BasePlot, ABC):
 
 
 class ChromatogramPlot(BaseMSPlot, ABC):
-
     _config: ChromatogramConfig = None
 
     @property
@@ -560,9 +563,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
     def __init__(self, data, config: ChromatogramConfig = None, **kwargs) -> None:
         super().__init__(data, config, **kwargs)
-
         self.label_suffix = self.x  # set label suffix for bounding box
-
         self._check_and_aggregate_duplicates()
 
         # sort data by x so in order
@@ -579,45 +580,89 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
     def plot(self):
         """
-        Create the plot
+        Create the plot. If the configuration includes a valid tile_by column,
+        the data will be split into subplots based on unique values in that column.
         """
-        tooltip_entries = {"retention time": self.x, "intensity": self.y}
-        if "Annotation" in self.data.columns:
-            tooltip_entries["annotation"] = "Annotation"
-        if "product_mz" in self.data.columns:
-            tooltip_entries["product m/z"] = "product_mz"
-        tooltips, custom_hover_data = self._create_tooltips(
-            tooltip_entries, index=False
-        )
+        # Check for tiling functionality
+        tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
 
-        linePlot = self.get_line_renderer(data=self.data, config=self._config)
+        if tile_by and tile_by in self.data.columns:
+            # Group the data by the tile_by column
+            grouped = self.data.groupby(tile_by)
+            num_groups = len(grouped)
+            
+            # Get tiling options from config
+            tile_columns = self._config.tile_columns if hasattr(self._config, "tile_columns") else 1
+            tile_rows = int(ceil(num_groups / tile_columns))
+            figsize = self._config.tile_figsize if hasattr(self._config, "tile_figsize") else (10, 15)
 
-        self.canvas = linePlot.generate(tooltips, custom_hover_data)
-        self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+            # Create a figure with a grid of subplots
+            fig, axes = plt.subplots(tile_rows, tile_columns, figsize=figsize, squeeze=False)
+            axes = axes.flatten()  # Easier indexing for a 1D list
 
-        if self._interactive:
-            self.manual_boundary_renderer = self._add_bounding_vertical_drawer()
+            # Loop through each group and plot on its own axis
+            for i, (group_val, group_df) in enumerate(grouped):
+                ax = axes[i]
+                
+                # Prepare tooltips for this group (if applicable)
+                tooltip_entries = {"retention time": self.x, "intensity": self.y}
+                if "Annotation" in group_df.columns:
+                    tooltip_entries["annotation"] = "Annotation"
+                if "product_mz" in group_df.columns:
+                    tooltip_entries["product m/z"] = "product_mz"
+                tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
+                
+                # Get a line renderer instance and generate the plot for the current group,
+                # passing the current axis (canvas) using a parameter like `canvas` or `ax`.
+                linePlot = self.get_line_renderer(data=group_df, config=self._config)
+                # Here, we assume that your renderer can accept the axis to plot on:
+                linePlot.canvas = ax
+                linePlot.generate(tooltips, custom_hover_data)
 
-        if self.annotation_data is not None:
-            self._add_peak_boundaries(self.annotation_data)
+                
+                # Set the title of this subplot based on the group value
+                ax.set_title(f"{tile_by}: {group_val}", fontsize=14)
+                # Optionally adjust the y-axis limits for the subplot
+                ax.set_ylim(0, group_df[self.y].max())
+                
+                # If you have annotations that should be split, filter them too
+                if self.annotation_data is not None and tile_by in self.annotation_data.columns:
+                    group_annotations = self.annotation_data[self.annotation_data[tile_by] == group_val]
+                    self._add_peak_boundaries(group_annotations)
+            
+            # Remove any extra axes if the grid size is larger than the number of groups
+            for j in range(i + 1, len(axes)):
+                fig.delaxes(axes[j])
+            
+            fig.tight_layout()
+            self.canvas = fig
+        else:
+            # Fallback: plot on a single canvas if no valid tiling is specified
+            tooltip_entries = {"retention time": self.x, "intensity": self.y}
+            if "Annotation" in self.data.columns:
+                tooltip_entries["annotation"] = "Annotation"
+            if "product_mz" in self.data.columns:
+                tooltip_entries["product m/z"] = "product_mz"
+            tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
+            linePlot = self.get_line_renderer(data=self.data, config=self._config)
+            self.canvas = linePlot.generate(tooltips, custom_hover_data)
+            self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
+            
+            if self._interactive:
+                self.manual_boundary_renderer = self._add_bounding_vertical_drawer()
+            if self.annotation_data is not None:
+                self._add_peak_boundaries(self.annotation_data)
 
     def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
-        This is not a complete method should be overridden by subclasses.
-
-        Args:
-            annotation_data (DataFrame): The feature data containing the peak boundaries.
-
-        Returns:
-            None
+        (Override this method if needed.)
         """
-        # compute the apex intensity
         self.compute_apex_intensity(annotation_data)
 
     def compute_apex_intensity(self, annotation_data):
         """
-        Compute the apex intensity of the peak group based on the peak boundaries
+        Compute the apex intensity of the peak group based on the peak boundaries.
         """
         for idx, feature in annotation_data.iterrows():
             annotation_data.loc[idx, "apexIntensity"] = self.data.loc[
