@@ -16,7 +16,6 @@ import re
 
 import matplotlib.pyplot as plt
 from math import ceil
-import numpy as np
 
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
