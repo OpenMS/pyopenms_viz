@@ -792,103 +792,124 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
+        
+        # Check if tiling is requested
+        tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
+        if tile_by and tile_by in self.data.columns:
+            # Group data by tile_by column
+            grouped = self.data.groupby(tile_by)
+            num_groups = len(grouped)
+            from math import ceil
+            tile_columns = self._config.tile_columns if hasattr(self._config, "tile_columns") else 1
+            tile_rows = ceil(num_groups / tile_columns)
+            figsize = self._config.tile_figsize if hasattr(self._config, "tile_figsize") else (10, 15)
+            fig, axes = plt.subplots(tile_rows, tile_columns, figsize=figsize, squeeze=False)
+            axes = axes.flatten()
 
-        # Prepare data
-        spectrum = self._prepare_data(self.data)
-        if self.reference_spectrum is not None:
-            reference_spectrum = self._prepare_data(self.reference_spectrum)
+            for i, (group_val, group_df) in enumerate(grouped):
+                # Prepare group-specific spectrum data
+                group_spectrum = self._prepare_data(group_df)
+                # If reference spectrum exists and tile_by is present in it, filter accordingly.
+                if self.reference_spectrum is not None and tile_by in self.reference_spectrum.columns:
+                    group_reference = self._prepare_data(self.reference_spectrum[self.reference_spectrum[tile_by] == group_val])
+                else:
+                    group_reference = None
+
+                # Prepare tooltips
+                entries = {"m/z": self.x, "intensity": self.y}
+                for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
+                    if optional in group_df.columns:
+                        entries[optional.replace("_", " ")] = optional
+                tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
+
+                # Determine grouping for color generation
+                if self.peak_color is not None and self.peak_color in group_df.columns:
+                    self.by = self.peak_color
+                elif self.ion_annotation is not None and self.ion_annotation in group_df.columns:
+                    self.by = self.ion_annotation
+
+                # Get annotations for this group
+                ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_spectrum, self.x, self.y)
+                # Convert group spectrum to line plot format
+                group_spectrum = self.convert_for_line_plots(group_spectrum, self.x, self.y)
+                self.color = self._get_colors(group_spectrum, kind="peak")
+                spectrumPlot = self.get_line_renderer(data=group_spectrum, by=self.by, color=self.color, config=self._config)
+                # Set current axis as canvas using property setter
+                spectrumPlot.canvas = axes[i]
+                spectrumPlot.generate(tooltips, custom_hover_data)
+                spectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
+                axes[i].set_title(f"{tile_by}: {group_val}", fontsize=14)
+                
+                # (Optional: handle mirror spectrum for each group similarly)
+                if self.mirror_spectrum and group_reference is not None:
+                    # Set intensity to negative values
+                    group_reference[self.y] = group_reference[self.y] * -1
+                    color_mirror = self._get_colors(group_reference, kind="peak")
+                    group_reference = self.convert_for_line_plots(group_reference, self.x, self.y)
+                    _, reference_custom_hover_data = self.get_spectrum_tooltip_data(group_reference, self.x, self.y)
+                    mirrorSpectrumPlot = self.get_line_renderer(data=group_reference, color=color_mirror, config=self._config)
+                    mirrorSpectrumPlot.canvas = axes[i]
+                    mirrorSpectrumPlot.generate(None, None)
+                    # Add mirror annotations
+                    ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_reference, self.x, self.y)
+                    mirrorSpectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
+                
+                # Optionally, adjust x/y ranges for the current axis
+                # e.g., axes[i].set_xlim(...), axes[i].set_ylim(...)
+                
+            # Remove any extra axes if present
+            for j in range(i + 1, len(axes)):
+                fig.delaxes(axes[j])
+            fig.tight_layout()
+            self.canvas = fig
         else:
-            reference_spectrum = None
-
-        entries = {"m/z": self.x, "intensity": self.y}
-        for optional in (
-            "native_id",
-            self.ion_annotation,
-            self.sequence_annotation,
-        ):
-            if optional in self.data.columns:
-                entries[optional.replace("_", " ")] = optional
-
-        tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
-        )
-
-        # color generation is more complex for spectrum plots, so it has its own methods
-
-        # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
-        if self.peak_color is not None and self.peak_color in self.data.columns:
-            self.by = self.peak_color
-        elif (
-            self.ion_annotation is not None and self.ion_annotation in self.data.columns
-        ):
-            self.by = self.ion_annotation
-
-        # Annotations for spectrum
-        ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-            spectrum, self.x, self.y
-        )
-
-        # Convert to line plot format
-        spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-
-        self.color = self._get_colors(spectrum, kind="peak")
-        spectrumPlot = self.get_line_renderer(
-            data=spectrum, by=self.by, color=self.color, config=self._config
-        )
-        self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
-        spectrumPlot._add_annotations(
-            self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
-        )
-
-        # Mirror spectrum
-        if self.mirror_spectrum and self.reference_spectrum is not None:
-            ## create a mirror spectrum
-            # Set intensity to negative values
-            reference_spectrum[self.y] = reference_spectrum[self.y] * -1
-
-            color_mirror = self._get_colors(reference_spectrum, kind="peak")
-            reference_spectrum = self.convert_for_line_plots(
-                reference_spectrum, self.x, self.y
-            )
-
-            _, reference_custom_hover_data = self.get_spectrum_tooltip_data(
-                reference_spectrum, self.x, self.y
-            )
-            mirrorSpectrumPlot = self.get_line_renderer(
-                data=reference_spectrum, color=color_mirror, config=self._config
-            )
-
-            mirrorSpectrumPlot.generate(None, None)
-
-            # Annotations for reference spectrum
-            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
-                reference_spectrum, self.x, self.y
-            )
-            mirrorSpectrumPlot._add_annotations(
-                self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
-            )
-
-        # Plot horizontal line to hide connection between peaks
-        self.plot_x_axis_line(self.canvas, line_width=2)
-
-        # Adjust x axis padding (Plotly cuts outermost peaks)
-        min_values = [spectrum[self.x].min()]
-        max_values = [spectrum[self.x].max()]
-        if reference_spectrum is not None:
-            min_values.append(reference_spectrum[self.x].min())
-            max_values.append(reference_spectrum[self.x].max())
-        self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
-        # Adjust y axis padding (annotations should stay inside plot)
-        max_value = spectrum[self.y].max()
-        min_value = 0
-        min_padding = 0
-        max_padding = 0.15
-        if reference_spectrum is not None and self.mirror_spectrum:
-            min_value = reference_spectrum[self.y].min()
-            min_padding = -0.2
-            max_padding = 0.4
-
-        self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
+            # Fallback to default single plot behavior
+            # [Existing code remains unchanged]
+            spectrum = self._prepare_data(self.data)
+            if self.reference_spectrum is not None:
+                reference_spectrum = self._prepare_data(self.reference_spectrum)
+            else:
+                reference_spectrum = None
+            entries = {"m/z": self.x, "intensity": self.y}
+            for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
+                if optional in self.data.columns:
+                    entries[optional.replace("_", " ")] = optional
+            tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
+            if self.peak_color is not None and self.peak_color in self.data.columns:
+                self.by = self.peak_color
+            elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
+                self.by = self.ion_annotation
+            ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, self.x, self.y)
+            spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
+            self.color = self._get_colors(spectrum, kind="peak")
+            spectrumPlot = self.get_line_renderer(data=spectrum, by=self.by, color=self.color, config=self._config)
+            self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
+            spectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
+            if self.mirror_spectrum and self.reference_spectrum is not None:
+                reference_spectrum[self.y] = reference_spectrum[self.y] * -1
+                color_mirror = self._get_colors(reference_spectrum, kind="peak")
+                reference_spectrum = self.convert_for_line_plots(reference_spectrum, self.x, self.y)
+                _, reference_custom_hover_data = self.get_spectrum_tooltip_data(reference_spectrum, self.x, self.y)
+                mirrorSpectrumPlot = self.get_line_renderer(data=reference_spectrum, color=color_mirror, config=self._config)
+                mirrorSpectrumPlot.generate(None, None)
+                ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(reference_spectrum, self.x, self.y)
+                mirrorSpectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
+            self.plot_x_axis_line(self.canvas, line_width=2)
+            min_values = [spectrum[self.x].min()]
+            max_values = [spectrum[self.x].max()]
+            if reference_spectrum is not None:
+                min_values.append(reference_spectrum[self.x].min())
+                max_values.append(reference_spectrum[self.x].max())
+            self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
+            max_value = spectrum[self.y].max()
+            min_value = 0
+            min_padding = 0
+            max_padding = 0.15
+            if reference_spectrum is not None and self.mirror_spectrum:
+                min_value = reference_spectrum[self.y].min()
+                min_padding = -0.2
+                max_padding = 0.4
+            self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
 
     def _bin_peaks(self, df: DataFrame) -> DataFrame:
         """
