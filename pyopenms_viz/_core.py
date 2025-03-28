@@ -541,10 +541,6 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
 
-from math import ceil
-import matplotlib.pyplot as plt
-import warnings
-
 class ChromatogramPlot(BaseMSPlot, ABC):
     _config: ChromatogramConfig = None
 
