@@ -710,16 +710,6 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
 
-import warnings
-from math import ceil
-from typing import List, Literal
-import re
-import numpy as np
-from pandas import DataFrame, concat
-from numpy import nan
-from statistics import mean
-# Import your other necessary modules (e.g., for ColorGenerator, mz_tolerance_binning, sturges_rule, freedman_diaconis_rule)
-
 class SpectrumPlot(BaseMSPlot, ABC):
 
     @property
