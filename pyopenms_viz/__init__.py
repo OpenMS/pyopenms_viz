@@ -119,6 +119,7 @@ class PlotAccessor:
                 ("feature_config", None),
                 ("_config", None),
                 ("backend", backend_name),
+                # ("tile_by", None),
             ]
         else:
             raise ValueError(

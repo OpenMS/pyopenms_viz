@@ -541,6 +541,10 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
 
+from math import ceil
+import matplotlib.pyplot as plt
+import warnings
+
 class ChromatogramPlot(BaseMSPlot, ABC):
     _config: ChromatogramConfig = None
 
@@ -565,45 +569,65 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         self.label_suffix = self.x  # set label suffix for bounding box
         self._check_and_aggregate_duplicates()
 
-        # sort data by x so in order
+        # Sort data by x (and by self.by if provided) so the data is in order.
         if self.by is not None:
             self.data.sort_values(by=[self.by, self.x], inplace=True)
         else:
             self.data.sort_values(by=self.x, inplace=True)
 
-        # Convert to relative intensity if required
+        # Convert to relative intensity if required.
         if self.relative_intensity:
             self.data[self.y] = self.data[self.y] / self.data[self.y].max() * 100
 
+        # Perform all validations for the plotting configuration.
+        self._validate_plot_config()
+
+        # Proceed to generate the plot.
         self.plot()
+
+    def _validate_plot_config(self):
+        """
+        Validate plot configuration options (e.g., tiling parameters) before plotting.
+        """
+        # Validate the tile_by option: check if the specified column exists in the data.
+        if hasattr(self._config, "tile_by"):
+            tile_by = self._config.tile_by
+            if tile_by not in self.data.columns:
+                warnings.warn(
+                    f"tile_by column '{tile_by}' not found in data. Plot will be generated without tiling."
+                )
+                self._config.tile_by = None
+
+        # Validate tile_columns: ensure it is a positive integer.
+        if hasattr(self._config, "tile_columns"):
+            if not isinstance(self._config.tile_columns, int) or self._config.tile_columns < 1:
+                warnings.warn("tile_columns must be a positive integer. Defaulting to 1.")
+                self._config.tile_columns = 1
 
     def plot(self):
         """
-        Create the plot. If the configuration includes a valid tile_by column,
-        the data will be split into subplots based on unique values in that column.
+        Create the plot using the validated configuration.
         """
-        # Check for tiling functionality
         tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
 
-        if tile_by and tile_by in self.data.columns:
-            # Group the data by the tile_by column
+        if tile_by:
+            # Group the data by the tile_by column.
             grouped = self.data.groupby(tile_by)
             num_groups = len(grouped)
             
-            # Get tiling options from config
-            tile_columns = self._config.tile_columns if hasattr(self._config, "tile_columns") else 1
-            tile_rows = int(ceil(num_groups / tile_columns))
-            figsize = self._config.tile_figsize if hasattr(self._config, "tile_figsize") else (10, 15)
+            # Use tiling options from the configuration and set instance properties.
+            self.tile_columns = self._config.tile_columns  # e.g. default value set in _config
+            self.tile_rows = int(ceil(num_groups / self.tile_columns))
 
-            # Create a figure with a grid of subplots
-            fig, axes = plt.subplots(tile_rows, tile_columns, figsize=figsize, squeeze=False)
-            axes = axes.flatten()  # Easier indexing for a 1D list
+            # Create a figure with a grid of subplots.
+            fig, axes = plt.subplots(self.tile_rows, self.tile_columns, squeeze=False)
+            axes = axes.flatten()  # Flatten for easier indexing.
 
-            # Loop through each group and plot on its own axis
+            # Loop through each group and generate the corresponding subplot.
             for i, (group_val, group_df) in enumerate(grouped):
                 ax = axes[i]
                 
-                # Prepare tooltips for this group (if applicable)
+                # Prepare tooltips for this group (if applicable).
                 tooltip_entries = {"retention time": self.x, "intensity": self.y}
                 if "Annotation" in group_df.columns:
                     tooltip_entries["annotation"] = "Annotation"
@@ -611,32 +635,29 @@ class ChromatogramPlot(BaseMSPlot, ABC):
                     tooltip_entries["product m/z"] = "product_mz"
                 tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
                 
-                # Get a line renderer instance and generate the plot for the current group,
-                # passing the current axis (canvas) using a parameter like `canvas` or `ax`.
+                # Get a line renderer instance and generate the plot for the current group.
                 linePlot = self.get_line_renderer(data=group_df, config=self._config)
-                # Here, we assume that your renderer can accept the axis to plot on:
                 linePlot.canvas = ax
                 linePlot.generate(tooltips, custom_hover_data)
 
-                
-                # Set the title of this subplot based on the group value
+                # Set the title of the subplot based on the group value.
                 ax.set_title(f"{tile_by}: {group_val}", fontsize=14)
-                # Optionally adjust the y-axis limits for the subplot
+                # Adjust the y-axis limits for the subplot.
                 ax.set_ylim(0, group_df[self.y].max())
                 
-                # If you have annotations that should be split, filter them too
+                # Add annotations if available.
                 if self.annotation_data is not None and tile_by in self.annotation_data.columns:
                     group_annotations = self.annotation_data[self.annotation_data[tile_by] == group_val]
                     self._add_peak_boundaries(group_annotations)
             
-            # Remove any extra axes if the grid size is larger than the number of groups
+            # Remove any extra axes if the grid size is larger than the number of groups.
             for j in range(i + 1, len(axes)):
                 fig.delaxes(axes[j])
             
             fig.tight_layout()
             self.canvas = fig
         else:
-            # Fallback: plot on a single canvas if no valid tiling is specified
+            # Fallback: plot on a single canvas if tiling is not specified.
             tooltip_entries = {"retention time": self.x, "intensity": self.y}
             if "Annotation" in self.data.columns:
                 tooltip_entries["annotation"] = "Annotation"
@@ -693,6 +714,16 @@ class MobilogramPlot(ChromatogramPlot, ABC):
         self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
 
 
+import warnings
+from math import ceil
+from typing import List, Literal
+import re
+import numpy as np
+from pandas import DataFrame, concat
+from numpy import nan
+from statistics import mean
+# Import your other necessary modules (e.g., for ColorGenerator, mz_tolerance_binning, sturges_rule, freedman_diaconis_rule)
+
 class SpectrumPlot(BaseMSPlot, ABC):
 
     @property
@@ -702,35 +733,48 @@ class SpectrumPlot(BaseMSPlot, ABC):
     @property
     def known_columns(self) -> List[str]:
         """
-        List of known columns in the data, if there are duplicates outside of these columns they will be grouped in aggregation if specified
+        List of known columns in the data. Any duplicates outside these columns
+        will be grouped in aggregation if specified.
         """
         known_columns = super().known_columns
         known_columns.extend([self.peak_color] if self.peak_color is not None else [])
-        known_columns.extend(
-            [self.ion_annotation] if self.ion_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.sequence_annotation] if self.sequence_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.custom_annotation] if self.custom_annotation is not None else []
-        )
-        known_columns.extend(
-            [self.annotation_color] if self.annotation_color is not None else []
-        )
+        known_columns.extend([self.ion_annotation] if self.ion_annotation is not None else [])
+        known_columns.extend([self.sequence_annotation] if self.sequence_annotation is not None else [])
+        known_columns.extend([self.custom_annotation] if self.custom_annotation is not None else [])
+        known_columns.extend([self.annotation_color] if self.annotation_color is not None else [])
         return known_columns
 
     @property
     def _configClass(self):
         return SpectrumConfig
 
-    def __init__(
-        self,
-        data,
-        **kwargs,
-    ) -> None:
+    def __init__(self, data, **kwargs) -> None:
         super().__init__(data, **kwargs)
+        
+        # (Other validations like _check_and_aggregate_duplicates, sorting, etc.)
+        self._check_and_aggregate_duplicates()
+        
+        # Sort data by x (and by self.by if provided)
+        if self.by is not None:
+            self.data.sort_values(by=[self.by, self.x], inplace=True)
+        else:
+            self.data.sort_values(by=self.x, inplace=True)
+        
+        # Convert to relative intensity if required.
+        if self.relative_intensity:
+            self.data[self.y] = self.data[self.y] / self.data[self.y].max() * 100
 
+        # Validate tiling configuration in the constructor
+        if hasattr(self._config, "tile_by"):
+            tile_by = self._config.tile_by
+            if tile_by not in self.data.columns:
+                warnings.warn(
+                    f"tile_by column '{tile_by}' not found in data. Plot will be generated without tiling."
+                )
+                self._config.tile_by = None
+        # (Other configuration validations can be added here as needed.)
+
+        # Proceed to generate the plot
         self.plot()
 
     def load_config(self, **kwargs):
@@ -743,7 +787,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def _check_and_aggregate_duplicates(self):
         super()._check_and_aggregate_duplicates()
-
         if self.reference_spectrum is not None:
             if self.reference_spectrum[self.known_columns].duplicated().any():
                 if self.aggregate_duplicates:
@@ -761,7 +804,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
     @property
     def _peak_bins(self):
         """
-        Get a list of intervals to use in bins. Here bins are not evenly spaced. Currently this only occurs in mz-tol setting
+        Get a list of intervals to use in bins.
+        Currently only used for the mz-tol setting.
         """
         if self.bin_method == "mz-tol-bin" and self.bin_peaks == "auto":
             return mz_tolerance_binning(self.data, self.x, self.mz_tol)
@@ -772,7 +816,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _computed_num_bins(self):
         """
         Compute the number of bins based on the number of peaks in the data.
-
         Returns:
             int: The number of bins.
         """
@@ -785,7 +828,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return None
             elif self.bin_method == "none":
                 return self.num_x_bins
-            else:  # throw error if bin_method is not recognized
+            else:
                 raise ValueError(f"bin_method {self.bin_method} not recognized")
         else:
             return self.num_x_bins
@@ -793,29 +836,33 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
         
-        # Check if tiling is requested
+        # Since tile_by was validated in __init__, we can assume that if set, the column exists.
         tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
-        if tile_by and tile_by in self.data.columns:
+        if tile_by:
             # Group data by tile_by column
             grouped = self.data.groupby(tile_by)
             num_groups = len(grouped)
-            from math import ceil
-            tile_columns = self._config.tile_columns if hasattr(self._config, "tile_columns") else 1
-            tile_rows = ceil(num_groups / tile_columns)
-            figsize = self._config.tile_figsize if hasattr(self._config, "tile_figsize") else (10, 15)
-            fig, axes = plt.subplots(tile_rows, tile_columns, figsize=figsize, squeeze=False)
+            
+            # Assign tiling properties to the instance
+            self.tile_columns = self._config.tile_columns
+            self.tile_rows = ceil(num_groups / self.tile_columns)
+
+            # Create a figure with a grid of subplots
+            fig, axes = plt.subplots(self.tile_rows, self.tile_columns, squeeze=False)
             axes = axes.flatten()
 
             for i, (group_val, group_df) in enumerate(grouped):
                 # Prepare group-specific spectrum data
                 group_spectrum = self._prepare_data(group_df)
-                # If reference spectrum exists and tile_by is present in it, filter accordingly.
+                # Filter reference spectrum for current group if applicable.
                 if self.reference_spectrum is not None and tile_by in self.reference_spectrum.columns:
-                    group_reference = self._prepare_data(self.reference_spectrum[self.reference_spectrum[tile_by] == group_val])
+                    group_reference = self._prepare_data(
+                        self.reference_spectrum[self.reference_spectrum[tile_by] == group_val]
+                    )
                 else:
                     group_reference = None
 
-                # Prepare tooltips
+                # Prepare tooltips for this group
                 entries = {"m/z": self.x, "intensity": self.y}
                 for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
                     if optional in group_df.columns:
@@ -828,21 +875,18 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 elif self.ion_annotation is not None and self.ion_annotation in group_df.columns:
                     self.by = self.ion_annotation
 
-                # Get annotations for this group
+                # Get annotations for this group and convert data for line plot
                 ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_spectrum, self.x, self.y)
-                # Convert group spectrum to line plot format
                 group_spectrum = self.convert_for_line_plots(group_spectrum, self.x, self.y)
                 self.color = self._get_colors(group_spectrum, kind="peak")
                 spectrumPlot = self.get_line_renderer(data=group_spectrum, by=self.by, color=self.color, config=self._config)
-                # Set current axis as canvas using property setter
                 spectrumPlot.canvas = axes[i]
                 spectrumPlot.generate(tooltips, custom_hover_data)
                 spectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
                 axes[i].set_title(f"{tile_by}: {group_val}", fontsize=14)
                 
-                # (Optional: handle mirror spectrum for each group similarly)
+                # Handle mirror spectrum if applicable
                 if self.mirror_spectrum and group_reference is not None:
-                    # Set intensity to negative values
                     group_reference[self.y] = group_reference[self.y] * -1
                     color_mirror = self._get_colors(group_reference, kind="peak")
                     group_reference = self.convert_for_line_plots(group_reference, self.x, self.y)
@@ -850,21 +894,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     mirrorSpectrumPlot = self.get_line_renderer(data=group_reference, color=color_mirror, config=self._config)
                     mirrorSpectrumPlot.canvas = axes[i]
                     mirrorSpectrumPlot.generate(None, None)
-                    # Add mirror annotations
                     ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_reference, self.x, self.y)
                     mirrorSpectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
-                
-                # Optionally, adjust x/y ranges for the current axis
-                # e.g., axes[i].set_xlim(...), axes[i].set_ylim(...)
-                
-            # Remove any extra axes if present
+            
+            # Remove any extra axes if present and finalize layout
             for j in range(i + 1, len(axes)):
                 fig.delaxes(axes[j])
             fig.tight_layout()
             self.canvas = fig
         else:
-            # Fallback to default single plot behavior
-            # [Existing code remains unchanged]
+            # Fallback: single plot behavior if tiling is not requested
             spectrum = self._prepare_data(self.data)
             if self.reference_spectrum is not None:
                 reference_spectrum = self._prepare_data(self.reference_spectrum)
@@ -875,6 +914,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 if optional in self.data.columns:
                     entries[optional.replace("_", " ")] = optional
             tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
+            
             if self.peak_color is not None and self.peak_color in self.data.columns:
                 self.by = self.peak_color
             elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
@@ -914,65 +954,31 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _bin_peaks(self, df: DataFrame) -> DataFrame:
         """
         Bin peaks based on x-axis values.
-
-        Args:
-            data (DataFrame): The data to bin.
-            x (str): The column name for the x-axis data.
-            y (str): The column name for the y-axis data.
-
-        Returns:
-            DataFrame: The binned data.
         """
-
-        # if _peak_bins is set that they are used as the bins over the num_bins parameter
         if self._peak_bins is not None:
-            # Function to assign each value to a bin
             def assign_bin(value):
                 for low, high in self._peak_bins:
                     if low <= value <= high:
                         return f"{low:.4f}-{high:.4f}"
-                return nan  # For values that don't fall into any bin
-
-            # Apply the binning
+                return nan
             df[self.x] = df[self.x].apply(assign_bin)
-        else:  # use computed number of bins, bins evenly spaced
+        else:
             bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
-
             def assign_bin(value):
                 for low_idx in range(len(bins) - 1):
                     if bins[low_idx] <= value <= bins[low_idx + 1]:
                         return f"{bins[low_idx]:.4f}-{bins[low_idx + 1]:.4f}"
-                return nan  # For values that don't fall into any bin
-
-            # Apply the binning
+                return nan
             df[self.x] = df[self.x].apply(assign_bin)
-
-            # TODO I am not sure why "cut" method seems to be failing with plotly so created a workaround for now
-            # error is that object is not JSON serializable because of Interval type
-            # df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
-
-        # TODO: Find a better way to retain other columns
+        # Retain other columns
         cols = [self.x]
-        if self.by is not None:
-            cols.append(self.by)
-        if self.peak_color is not None:
-            cols.append(self.peak_color)
-        if self.ion_annotation is not None:
-            cols.append(self.ion_annotation)
-        if self.sequence_annotation is not None:
-            cols.append(self.sequence_annotation)
-        if self.custom_annotation is not None:
-            cols.append(self.custom_annotation)
-        if self.annotation_color is not None:
-            cols.append(self.annotation_color)
-
-        # Group by x bins and calculate the sum intensity within each bin
-        df = (
-            df.groupby(cols, observed=True)
-            .agg({self.y: self.aggregation_method})
-            .reset_index()
-        )
-
+        if self.by is not None: cols.append(self.by)
+        if self.peak_color is not None: cols.append(self.peak_color)
+        if self.ion_annotation is not None: cols.append(self.ion_annotation)
+        if self.sequence_annotation is not None: cols.append(self.sequence_annotation)
+        if self.custom_annotation is not None: cols.append(self.custom_annotation)
+        if self.annotation_color is not None: cols.append(self.annotation_color)
+        df = df.groupby(cols, observed=True).agg({self.y: self.aggregation_method}).reset_index()
         def convert_to_numeric(value):
             if isinstance(value, Interval):
                 return value.mid
@@ -980,94 +986,52 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 return mean([float(i) for i in value.split("-")])
             else:
                 return value
-
         df[self.x] = df[self.x].apply(convert_to_numeric).astype(float)
-
-        df = df.fillna(0)
-        return df
+        return df.fillna(0)
 
     def _prepare_data(self, df, label_suffix=""):
         """
-        Prepare data for plotting based on configuration (relative intensity, bin peaks)
-
-        Args:
-            df (DataFrame): The data to prepare.
-            label_suffix (str, optional): The suffix to add to the label. Defaults to "", Only for plotly backend
-
-        Returns:
-            DataFrame: The prepared data.
+        Prepare data for plotting based on configuration (e.g. relative intensity, bin peaks)
         """
-
-        # Convert to relative intensity if required
         if self.relative_intensity or self.mirror_spectrum:
             df[self.y] = df[self.y] / df[self.y].max() * 100
-
-        # Bin peaks if required
-        if self.bin_peaks == True or (self.bin_peaks == "auto"):
+        if self.bin_peaks == True or self.bin_peaks == "auto":
             df = self._bin_peaks(df)
-
         return df
 
-    def _get_colors(
-        self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None
-    ):
+    def _get_colors(self, data: DataFrame, kind: Literal["peak", "annotation"] | None = None):
         """Get color generators for peaks or annotations based on config."""
         if kind == "annotation":
-            # Custom annotating colors with top priority
-            if (
-                self.annotation_color is not None
-                and self.annotation_color in data.columns
-            ):
+            if self.annotation_color is not None and self.annotation_color in data.columns:
                 return ColorGenerator(data[self.annotation_color])
-            # Ion annotation colors
-            elif (
-                self.ion_annotation is not None and self.ion_annotation in data.columns
-            ):
-                # Generate colors based on ion annotations
-                return ColorGenerator(
-                    self._get_ion_color_annotation(data[self.ion_annotation])
-                )
-            # Grouped by colors (from default color map)
+            elif self.ion_annotation is not None and self.ion_annotation in data.columns:
+                return ColorGenerator(self._get_ion_color_annotation(data[self.ion_annotation]))
             elif self.by is not None:
-                # Get unique values to determine number of distinct colors
                 uniques = data[self.by].unique()
                 color_gen = ColorGenerator()
-                # Generate a list of colors equal to the number of unique values
                 colors = [next(color_gen) for _ in range(len(uniques))]
-                # Create a mapping of unique values to their corresponding colors
                 color_map = {uniques[i]: colors[i] for i in range(len(colors))}
-                # Apply the color mapping to the specified column in the data and turn it into a ColorGenerator
                 return ColorGenerator(data[self.by].apply(lambda x: color_map[x]))
-            # Fallback ColorGenerator with one color
             return ColorGenerator(n=1)
-        else:  # Peaks
+        else:
             if self.by:
                 uniques = data[self.by].unique().tolist()
-                # Custom colors with top priority
                 if self.peak_color is not None:
                     return ColorGenerator(uniques)
-                # Colors based on ion annotation for peaks and annotation text
                 if self.ion_annotation is not None and self.peak_color is None:
                     return ColorGenerator(self._get_ion_color_annotation(uniques))
-            # Else just use default colors
             return ColorGenerator()
 
     def _get_annotations(self, data: DataFrame, x: str, y: str):
-        """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
-
+        """Create annotations for each peak."""
         data["color"] = ["black" for _ in range(len(data))]
-
         ann_texts = []
         top_n = self.annotate_top_n_peaks
         if top_n == "all":
             top_n = len(data)
         elif top_n is None:
             top_n = 0
-        # sort values for top intensity peaks on top (ascending for reference spectra with negative values)
-        data = data.sort_values(
-            y, ascending=True if data[y].min() < 0 else False
-        ).reset_index()
-
+        data = data.sort_values(y, ascending=True if data[y].min() < 0 else False).reset_index()
         for i, row in data.iterrows():
             texts = []
             if i < top_n:
@@ -1075,10 +1039,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                     texts.append(str(round(row[x], 4)))
                 if self.ion_annotation and self.ion_annotation in data.columns:
                     texts.append(str(row[self.ion_annotation]))
-                if (
-                    self.sequence_annotation
-                    and self.sequence_annotation in data.columns
-                ):
+                if self.sequence_annotation and self.sequence_annotation in data.columns:
                     texts.append(str(row[self.sequence_annotation]))
                 if self.custom_annotation and self.custom_annotation in data.columns:
                     texts.append(str(row[self.custom_annotation]))
@@ -1086,26 +1047,20 @@ class SpectrumPlot(BaseMSPlot, ABC):
         return ann_texts, data[x].tolist(), data[y].tolist(), data["color"].tolist()
 
     def _get_ion_color_annotation(self, ion_annotations: str) -> str:
-        """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
+        """Retrieve the color associated with an ion annotation."""
         colormap = {
             "a": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.PURPLE],
             "b": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.BLUE],
-            "c": ColorGenerator.color_blind_friendly_map[
-                ColorGenerator.Colors.LIGHTBLUE
-            ],
+            "c": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.LIGHTBLUE],
             "x": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.YELLOW],
             "y": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.RED],
             "z": ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.ORANGE],
         }
-
         def get_ion_color(ion):
             if isinstance(ion, str):
                 for key in colormap.keys():
-                    # Exact matches
                     if ion == key:
                         return colormap[key]
-                    # Fragment ions via regex
-                    ## Check if ion format is a1+, a1-, etc. or if it's a1^1, a1^2, etc.
                     if re.search(r"^[abcxyz]{1}[0-9]*[+-]$", ion):
                         x = re.search(r"^[abcxyz]{1}[0-9]*[+-]$", ion)
                     elif re.search(r"^[abcxyz]{1}[0-9]*\^[0-9]*$", ion):
@@ -1114,10 +1069,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                         x = None
                     if x:
                         return colormap[ion[0]]
-            return ColorGenerator.color_blind_friendly_map[
-                ColorGenerator.Colors.DARKGRAY
-            ]
-
+            return ColorGenerator.color_blind_friendly_map[ColorGenerator.Colors.DARKGRAY]
         return [get_ion_color(ion) for ion in ion_annotations]
 
     def to_line(self, x, y):
@@ -1139,29 +1091,17 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
         """Get tooltip data for a spectrum plot."""
-
-        # Need to group data in correct order for tooltips
         if self.by is not None:
             grouped = spectrum.groupby(self.by, sort=False)
             self.data = concat([group for _, group in grouped], ignore_index=True)
-
-        # Hover tooltips with m/z, intensity and optional information
         entries = {"m/z": x, "intensity": y}
-        for optional in (
-            "native_id",
-            self.ion_annotation,
-            self.sequence_annotation,
-        ):
+        for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
-        # Create tooltips and custom hover data with backend specific formatting
-        tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
-        )
-        # Repeat data each time (since each peak is represented by three points in line plot)
+        tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
         custom_hover_data = repeat(custom_hover_data, 3, axis=0)
-
         return tooltips, custom_hover_data
+
 
 
 class PeakMapPlot(BaseMSPlot, ABC):

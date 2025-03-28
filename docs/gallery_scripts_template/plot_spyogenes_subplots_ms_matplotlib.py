@@ -1,8 +1,8 @@
 """
-Plot Spyogenes subplots ms_matplotlib using tile_by
+Plot Spyogenes subplots ms_matplotlib
 ====================================================
 
-This script downloads the Spyogenes data and uses the new tile_by parameter to create subplots automatically.
+Here we show how we can plot multiple chromatograms across runs together
 """
 
 import pandas as pd
@@ -10,24 +10,30 @@ import requests
 import zipfile
 import matplotlib.pyplot as plt
 import sys
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 
 # Set the plotting backend
 pd.options.plotting.backend = "ms_matplotlib"
 
 ###### Load Data #######
+
+# URL of the zip file
 url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip"
 zip_filename = "spyogenes.zip"
 
 # Download the zip file
 try:
+    # Save the zip file to the current directory
     print(f"Downloading {zip_filename}...")
     response = requests.get(url)
     response.raise_for_status()  # Check for any HTTP errors
     with open(zip_filename, "wb") as out:
         out.write(response.content)
     print(f"Downloaded {zip_filename} successfully.")
-except Exception as e:
+except requests.RequestException as e:
     print(f"Error downloading zip file: {e}")
 
 # Unzip the file
@@ -35,7 +41,7 @@ try:
     with zipfile.ZipFile(zip_filename, "r") as zip_ref:
         zip_ref.extractall()
         print("Unzipped files successfully.")
-except Exception as e:
+except zipfile.BadZipFile as e:
     print(f"Error unzipping file: {e}")
 
 # Load the data
