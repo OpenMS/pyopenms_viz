@@ -35,6 +35,57 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         data (DataFrame): The input data frame.
     """
 
+    def _compute_y_range_and_padding(self, spectrum, reference_spectrum=None):
+        """
+        Compute the y-axis range and padding based on the spectrum data.
+        
+        Args:
+            spectrum (DataFrame): The primary spectrum data.
+            reference_spectrum (DataFrame, optional): The reference spectrum data.
+            
+        Returns:
+            Tuple[Tuple[float, float], Tuple[float, float]]: The y-axis range and padding.
+        """
+        max_value = spectrum[self.y].max()
+        if reference_spectrum is not None and self.mirror_spectrum:
+            min_value = reference_spectrum[self.y].min()
+            padding = (-0.2, 0.4)
+        else:
+            min_value = 0
+            padding = (0, 0.15)
+        return (min_value, max_value), padding
+
+
+
+    def _create_subplots(self, rows: int, columns: int):
+        """
+        Create a grid of subplots using matplotlib.
+        
+        Args:
+            rows (int): Number of subplot rows.
+            columns (int): Number of subplot columns.
+            figsize (Tuple[float, float]): Size of the figure in inches.
+        
+        Returns:
+            Tuple[Figure, List[Axes]]: The matplotlib Figure and a flattened list of Axes.
+        """
+        fig, axes = plt.subplots(rows, columns, squeeze=False)
+        axes = axes.flatten()
+        return fig, axes
+
+
+    def _delete_extra_axes(self, axes, start_index: int):
+        """
+        Remove any extra axes from a grid if the number of groups is smaller than
+        the number of subplot axes.
+        
+        Args:
+            axes (list): List of axes objects.
+            start_index (int): The index in the axes list from which to start deleting.
+        """
+        for j in range(start_index, len(axes)):
+            self.canvas.delaxes(axes[j])
+
     # In matplotlib the canvas is referred to as a Axes, the figure object is the encompassing object
     @property
     def ax(self):

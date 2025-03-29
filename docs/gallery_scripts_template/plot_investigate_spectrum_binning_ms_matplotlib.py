@@ -1,8 +1,8 @@
 """
-Investigate Spctrum Binning ms_matplotlib
+Investigate Spectrum Binning ms_matplotlib
 =======================================
 
-Here we use a dummy spectrum example to investigate spectrum binning. 
+Here we use a dummy spectrum example to investigate spectrum binning.
 """
 
 import pandas as pd
@@ -11,19 +11,30 @@ import requests
 from io import StringIO
 import sys
 import os
+
+# Add parent directories to the path (adjust as necessary)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
+# Set the plotting backend to ms_matplotlib
 pd.options.plotting.backend = "ms_matplotlib"
 
-# download the file for example plotting
-url = (
-    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
-)
+# Download the file for example plotting
+url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 response = requests.get(url)
 response.raise_for_status()  # Check for any HTTP errors
 df = pd.read_csv(StringIO(response.text), sep="\t")
 
-# Let's assess the peak binning and create a 4 by 2 subplot to visualize the different methods of binning
+# Add a 'Run' column and duplicate entries for each run group.
+# For example, here we create three run groups (1, 2, and 3).
+runs = [1, 2, 3]
+df_list = []
+for run in runs:
+    df_run = df.copy()
+    df_run["Run"] = run
+    df_list.append(df_run)
+df = pd.concat(df_list, ignore_index=True)
+
+# Update the parameters for binning and visualization.
 params_list = [
     {"title": "Spectrum (Raw)", "bin_peaks": False},
     {
@@ -75,16 +86,24 @@ params_list = [
     },
 ]
 
-# Create a 3-row subplot
+# Create a 4x2 subplot grid to visualize different binning methods.
 fig, axs = plt.subplots(4, 2, figsize=(14, 14))
 
 i = j = 0
 for params in params_list:
-    p = df.plot(
-        kind="spectrum", x="mz", y="intensity", canvas=axs[i][j], grid=False, show_plot=False, **params
+    # Here we pass the "Run" column to group the spectrum by run.
+    df.plot(
+        kind="spectrum",
+        x="mz",
+        y="intensity",
+        canvas=axs[i][j],
+        grid=False,
+        show_plot=False,
+        by="Run",
+        **params
     )
     j += 1
-    if j >= 2:  # If we've filled two columns, move to the next row
+    if j >= 2:  # Move to next row when two columns are filled.
         j = 0
         i += 1
 

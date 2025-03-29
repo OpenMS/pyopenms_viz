@@ -604,7 +604,15 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         """
         Create the plot using the validated configuration.
         """
-        tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
+        tile_by = self._config.tile_by
+
+        # Define tooltips based on the overall data columns.
+        tooltip_entries = {"retention time": self.x, "intensity": self.y}
+        if "Annotation" in self.data.columns:
+            tooltip_entries["annotation"] = "Annotation"
+        if "product_mz" in self.data.columns:
+            tooltip_entries["product m/z"] = "product_mz"
+        tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
 
         if tile_by:
             # Group the data by the tile_by column.
@@ -612,55 +620,40 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             num_groups = len(grouped)
             
             # Use tiling options from the configuration and set instance properties.
-            self.tile_columns = self._config.tile_columns  # e.g. default value set in _config
+            self.tile_columns = self._config.tile_columns
             self.tile_rows = int(ceil(num_groups / self.tile_columns))
 
             # Create a figure with a grid of subplots.
-            fig, axes = plt.subplots(self.tile_rows, self.tile_columns, squeeze=False)
-            axes = axes.flatten()  # Flatten for easier indexing.
+            fig, axes = self._create_subplots(self.tile_rows, self.tile_columns)
 
             # Loop through each group and generate the corresponding subplot.
             for i, (group_val, group_df) in enumerate(grouped):
                 ax = axes[i]
+                # Construct the title for this subplot.
+                title = f"{tile_by}: {group_val}"
                 
-                # Prepare tooltips for this group (if applicable).
-                tooltip_entries = {"retention time": self.x, "intensity": self.y}
-                if "Annotation" in group_df.columns:
-                    tooltip_entries["annotation"] = "Annotation"
-                if "product_mz" in group_df.columns:
-                    tooltip_entries["product m/z"] = "product_mz"
-                tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
-                
-                # Get a line renderer instance and generate the plot for the current group.
-                linePlot = self.get_line_renderer(data=group_df, config=self._config)
-                linePlot.canvas = ax
+                # Get a line renderer instance and generate the plot for the current group,
+                # passing the current axis (canvas) and title directly.
+                linePlot = self.get_line_renderer(data=group_df, config=self._config, canvas=ax, title=title)
                 linePlot.generate(tooltips, custom_hover_data)
 
-                # Set the title of the subplot based on the group value.
-                ax.set_title(f"{tile_by}: {group_val}", fontsize=14)
-                # Adjust the y-axis limits for the subplot.
-                ax.set_ylim(0, group_df[self.y].max())
+                # Use the abstracted function to modify the y-axis range.
+                self._modify_y_range((0, group_df[self.y].max()), (0, 0.1))
                 
-                # Add annotations if available.
+                # Add annotations for the current group if available.
                 if self.annotation_data is not None and tile_by in self.annotation_data.columns:
                     group_annotations = self.annotation_data[self.annotation_data[tile_by] == group_val]
                     self._add_peak_boundaries(group_annotations)
             
             # Remove any extra axes if the grid size is larger than the number of groups.
-            for j in range(i + 1, len(axes)):
-                fig.delaxes(axes[j])
+            self._delete_extra_axes(axes, start_index=i + 1)
             
             fig.tight_layout()
             self.canvas = fig
         else:
-            # Fallback: plot on a single canvas if tiling is not specified.
-            tooltip_entries = {"retention time": self.x, "intensity": self.y}
-            if "Annotation" in self.data.columns:
-                tooltip_entries["annotation"] = "Annotation"
-            if "product_mz" in self.data.columns:
-                tooltip_entries["product m/z"] = "product_mz"
-            tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
+            # For the non-tiled case, create the plot for the entire dataset.
             linePlot = self.get_line_renderer(data=self.data, config=self._config)
+            # Here, spectrumPlot.generate returns an Axes, not a Figure.
             self.canvas = linePlot.generate(tooltips, custom_hover_data)
             self._modify_y_range((0, self.data[self.y].max()), (0, 0.1))
             
@@ -672,8 +665,13 @@ class ChromatogramPlot(BaseMSPlot, ABC):
     def _add_peak_boundaries(self, annotation_data):
         """
         Prepare data for adding peak boundaries to the plot.
-        (Override this method if needed.)
+        This is not a complete method should be overridden by subclasses.
+        Args:
+            annotation_data (DataFrame): The feature data containing the peak boundaries.
+        Returns:
+            None
         """
+        # compute the apex intensity
         self.compute_apex_intensity(annotation_data)
 
     def compute_apex_intensity(self, annotation_data):
@@ -819,28 +817,24 @@ class SpectrumPlot(BaseMSPlot, ABC):
         else:
             return self.num_x_bins
 
+    
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
         
-        # Since tile_by was validated in __init__, we can assume that if set, the column exists.
-        tile_by = self._config.tile_by if hasattr(self._config, "tile_by") else None
+        tile_by = self._config.tile_by
         if tile_by:
-            # Group data by tile_by column
+            # Group data by tile_by column and assign tiling properties
             grouped = self.data.groupby(tile_by)
             num_groups = len(grouped)
-            
-            # Assign tiling properties to the instance
             self.tile_columns = self._config.tile_columns
             self.tile_rows = ceil(num_groups / self.tile_columns)
 
-            # Create a figure with a grid of subplots
-            fig, axes = plt.subplots(self.tile_rows, self.tile_columns, squeeze=False)
-            axes = axes.flatten()
+            # Create a figure with a grid of subplots using the backend-specific helper
+            fig, axes = self._create_subplots(self.tile_rows, self.tile_columns)
 
             for i, (group_val, group_df) in enumerate(grouped):
-                # Prepare group-specific spectrum data
+                # Prepare group-specific spectrum and reference data
                 group_spectrum = self._prepare_data(group_df)
-                # Filter reference spectrum for current group if applicable.
                 if self.reference_spectrum is not None and tile_by in self.reference_spectrum.columns:
                     group_reference = self._prepare_data(
                         self.reference_spectrum[self.reference_spectrum[tile_by] == group_val]
@@ -861,56 +855,61 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 elif self.ion_annotation is not None and self.ion_annotation in group_df.columns:
                     self.by = self.ion_annotation
 
-                # Get annotations for this group and convert data for line plot
+                # Get annotations and convert data for line plots
                 ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_spectrum, self.x, self.y)
                 group_spectrum = self.convert_for_line_plots(group_spectrum, self.x, self.y)
                 self.color = self._get_colors(group_spectrum, kind="peak")
-                spectrumPlot = self.get_line_renderer(data=group_spectrum, by=self.by, color=self.color, config=self._config)
+
+                # Pass title directly into the renderer for backend abstraction
+                title = f"{tile_by}: {group_val}"
+                spectrumPlot = self.get_line_renderer(
+                    data=group_spectrum, by=self.by, color=self.color, config=self._config, title=title
+                )
                 spectrumPlot.canvas = axes[i]
                 spectrumPlot.generate(tooltips, custom_hover_data)
                 spectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
-                axes[i].set_title(f"{tile_by}: {group_val}", fontsize=14)
-                
+
                 # Handle mirror spectrum if applicable
                 if self.mirror_spectrum and group_reference is not None:
                     group_reference[self.y] = group_reference[self.y] * -1
                     color_mirror = self._get_colors(group_reference, kind="peak")
                     group_reference = self.convert_for_line_plots(group_reference, self.x, self.y)
                     _, reference_custom_hover_data = self.get_spectrum_tooltip_data(group_reference, self.x, self.y)
-                    mirrorSpectrumPlot = self.get_line_renderer(data=group_reference, color=color_mirror, config=self._config)
+                    mirrorSpectrumPlot = self.get_line_renderer(
+                        data=group_reference, color=color_mirror, config=self._config
+                    )
                     mirrorSpectrumPlot.canvas = axes[i]
                     mirrorSpectrumPlot.generate(None, None)
                     ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(group_reference, self.x, self.y)
                     mirrorSpectrumPlot._add_annotations(axes[i], ann_texts, ann_xs, ann_ys, ann_colors)
-            
-            # Remove any extra axes if present and finalize layout
-            for j in range(i + 1, len(axes)):
-                fig.delaxes(axes[j])
+                
+            # Delete extra axes if present and finalize layout
+            self._delete_extra_axes(axes, start_index=i + 1)
             fig.tight_layout()
             self.canvas = fig
+
         else:
-            # Fallback: single plot behavior if tiling is not requested
+            # Single-plot behavior when tiling is not requested
             spectrum = self._prepare_data(self.data)
-            if self.reference_spectrum is not None:
-                reference_spectrum = self._prepare_data(self.reference_spectrum)
-            else:
-                reference_spectrum = None
+            reference_spectrum = self._prepare_data(self.reference_spectrum) if self.reference_spectrum is not None else None
             entries = {"m/z": self.x, "intensity": self.y}
             for optional in ("native_id", self.ion_annotation, self.sequence_annotation):
                 if optional in self.data.columns:
                     entries[optional.replace("_", " ")] = optional
             tooltips, custom_hover_data = self._create_tooltips(entries=entries, index=False)
-            
+
             if self.peak_color is not None and self.peak_color in self.data.columns:
                 self.by = self.peak_color
             elif self.ion_annotation is not None and self.ion_annotation in self.data.columns:
                 self.by = self.ion_annotation
+
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(spectrum, self.x, self.y)
             spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
             self.color = self._get_colors(spectrum, kind="peak")
             spectrumPlot = self.get_line_renderer(data=spectrum, by=self.by, color=self.color, config=self._config)
             self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
             spectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
+
             if self.mirror_spectrum and self.reference_spectrum is not None:
                 reference_spectrum[self.y] = reference_spectrum[self.y] * -1
                 color_mirror = self._get_colors(reference_spectrum, kind="peak")
@@ -920,6 +919,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 mirrorSpectrumPlot.generate(None, None)
                 ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(reference_spectrum, self.x, self.y)
                 mirrorSpectrumPlot._add_annotations(self.canvas, ann_texts, ann_xs, ann_ys, ann_colors)
+            
             self.plot_x_axis_line(self.canvas, line_width=2)
             min_values = [spectrum[self.x].min()]
             max_values = [spectrum[self.x].max()]
@@ -927,15 +927,11 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 min_values.append(reference_spectrum[self.x].min())
                 max_values.append(reference_spectrum[self.x].max())
             self._modify_x_range((min(min_values), max(max_values)), padding=(0.20, 0.20))
-            max_value = spectrum[self.y].max()
-            min_value = 0
-            min_padding = 0
-            max_padding = 0.15
-            if reference_spectrum is not None and self.mirror_spectrum:
-                min_value = reference_spectrum[self.y].min()
-                min_padding = -0.2
-                max_padding = 0.4
-            self._modify_y_range((min_value, max_value), padding=(min_padding, max_padding))
+            
+            # Use the helper to compute y-range and padding, then apply
+            y_range, y_padding = self._compute_y_range_and_padding(spectrum, reference_spectrum)
+            self._modify_y_range(y_range, padding=y_padding)
+
 
     def _bin_peaks(self, df: DataFrame) -> DataFrame:
         """
