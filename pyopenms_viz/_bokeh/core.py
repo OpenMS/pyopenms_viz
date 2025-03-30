@@ -544,22 +544,7 @@ class BOKEHSpectrumPlot(BOKEH_MSPlot, SpectrumPlot):
     """
     Class for assembling a Bokeh spectrum plot
     """
-    def _compute_y_range_and_padding(self, spectrum, reference_spectrum=None) -> tuple[tuple[float, float], float]:
-        # Extract y-values from the spectrum data.
-        y_values = [val for val in spectrum if val is not None]
-        if not y_values:
-            return (0, 0), 0
-        y_min = min(y_values)
-        y_max = max(y_values)
-        # Example padding of 10% of the range
-        padding = (y_max - y_min) * 0.1
-        return (y_min - padding, y_max + padding), padding
 
-    def plot(self):
-        # Now you can use the computed y_range
-        y_range, y_padding = self._compute_y_range_and_padding(self.data[self.y])
-        self._modify_y_range(y_range)
-        # Continue with the rest of your plotting logic...
     pass
 
 
