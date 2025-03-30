@@ -50,13 +50,13 @@ chrom_df = pd.read_csv("spyogenes/chroms_AADGQTVSGGSILYR3.tsv", sep="\t")
 
 ##### Plotting Using Tile By #####
 # Instead of pre-creating subplots and looping over RUN_NAMES,
-# we call the plot method once and provide a tile_by parameter.
+# we call the plot method once and provide a facet_column parameter.
 fig = chrom_df.plot(
     kind="chromatogram",
     x="rt",
     y="int",
-    tile_by="run_name",         # Automatically groups data by run_name and creates subplots
-    tile_columns=1,             # Layout: 1 column (one subplot per row)
+    facet_column="run_name",         # Automatically groups data by run_name and creates subplots
+    facet_col_wrap=1,             # Layout: 1 column (one subplot per row)
     grid=False,
     by="ion_annotation",
     title_font_size=16,

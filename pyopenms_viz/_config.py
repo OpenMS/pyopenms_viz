@@ -205,8 +205,8 @@ class BasePlotConfig(BaseConfig):
     legend_config: LegendConfig | dict = field(default_factory=default_legend_factory)
     opacity: float = 1.0
 
-    tile_by: str | None = None  # Name of the column to tile the plot by.
-    tile_columns: int = 1       # How many columns in the subplot grid.
+    facet_column: str | None = None  # Name of the column to tile the plot by.
+    facet_col_wrap: int = 1       # How many columns in the subplot grid.
 
     def __post_init__(self):
         # if legend_config is a dictionary, update it to LegendConfig object

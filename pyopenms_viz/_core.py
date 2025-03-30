@@ -583,26 +583,26 @@ class ChromatogramPlot(BaseMSPlot, ABC):
         """
         Validate plot configuration options (e.g., tiling parameters) before plotting.
         """
-        # Validate the tile_by option: check if the specified column exists in the data.
-        if hasattr(self._config, "tile_by"):
-            tile_by = self._config.tile_by
-            if tile_by not in self.data.columns:
+        # Validate the facet_column option: check if the specified column exists in the data.
+        if hasattr(self._config, "facet_column"):
+            facet_column = self._config.facet_column
+            if facet_column not in self.data.columns:
                 warnings.warn(
-                    f"tile_by column '{tile_by}' not found in data. Plot will be generated without tiling."
+                    f"facet_column column '{facet_column}' not found in data. Plot will be generated without tiling."
                 )
-                self._config.tile_by = None
+                self._config.facet_column = None
 
-        # Validate tile_columns: ensure it is a positive integer.
-        if hasattr(self._config, "tile_columns"):
-            if not isinstance(self._config.tile_columns, int) or self._config.tile_columns < 1:
-                warnings.warn("tile_columns must be a positive integer. Defaulting to 1.")
-                self._config.tile_columns = 1
+        # Validate facet_col_wrap: ensure it is a positive integer.
+        if hasattr(self._config, "facet_col_wrap"):
+            if not isinstance(self._config.facet_col_wrap, int) or self._config.facet_col_wrap < 1:
+                warnings.warn("facet_col_wrap must be a positive integer. Defaulting to 1.")
+                self._config.facet_col_wrap = 1
 
     def plot(self):
         """
         Create the plot using the validated configuration.
         """
-        tile_by = self._config.tile_by
+        facet_column = self._config.facet_column
 
         # Define tooltips based on the overall data columns.
         tooltip_entries = {"retention time": self.x, "intensity": self.y}
@@ -612,23 +612,23 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             tooltip_entries["product m/z"] = "product_mz"
         tooltips, custom_hover_data = self._create_tooltips(tooltip_entries, index=False)
 
-        if tile_by:
-            # Group the data by the tile_by column.
-            grouped = self.data.groupby(tile_by)
+        if facet_column:
+            # Group the data by the facet_column column.
+            grouped = self.data.groupby(facet_column)
             num_groups = len(grouped)
             
             # Use tiling options from the configuration and set instance properties.
-            self.tile_columns = self._config.tile_columns
-            self.tile_rows = int(ceil(num_groups / self.tile_columns))
+            self.facet_col_wrap = self._config.facet_col_wrap
+            self.tile_rows = int(ceil(num_groups / self.facet_col_wrap))
 
             # Create a figure with a grid of subplots.
-            fig, axes = self._create_subplots(self.tile_rows, self.tile_columns)
+            fig, axes = self._create_subplots(self.tile_rows, self.facet_col_wrap)
 
             # Loop through each group and generate the corresponding subplot.
             for i, (group_val, group_df) in enumerate(grouped):
                 ax = axes[i]
                 # Construct the title for this subplot.
-                title = f"{tile_by}: {group_val}"
+                title = f"{facet_column}: {group_val}"
                 
                 # Get a line renderer instance and generate the plot for the current group,
                 # passing the current axis (canvas) and title directly.
@@ -639,8 +639,8 @@ class ChromatogramPlot(BaseMSPlot, ABC):
                 self._modify_y_range((0, group_df[self.y].max()), (0, 0.1))
                 
                 # Add annotations for the current group if available.
-                if self.annotation_data is not None and tile_by in self.annotation_data.columns:
-                    group_annotations = self.annotation_data[self.annotation_data[tile_by] == group_val]
+                if self.annotation_data is not None and facet_column in self.annotation_data.columns:
+                    group_annotations = self.annotation_data[self.annotation_data[facet_column] == group_val]
                     self._add_peak_boundaries(group_annotations)
             
             # Remove any extra axes if the grid size is larger than the number of groups.
@@ -747,13 +747,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
             self.data[self.y] = self.data[self.y] / self.data[self.y].max() * 100
 
         # Validate tiling configuration in the constructor
-        if hasattr(self._config, "tile_by"):
-            tile_by = self._config.tile_by
-            if tile_by not in self.data.columns:
+        if hasattr(self._config, "facet_column"):
+            facet_column = self._config.facet_column
+            if facet_column not in self.data.columns:
                 warnings.warn(
-                    f"tile_by column '{tile_by}' not found in data. Plot will be generated without tiling."
+                    f"facet_column column '{facet_column}' not found in data. Plot will be generated without tiling."
                 )
-                self._config.tile_by = None
+                self._config.facet_column = None
         # (Other configuration validations can be added here as needed.)
 
         # Proceed to generate the plot
@@ -819,23 +819,23 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
         
-        tile_by = self._config.tile_by
-        if tile_by:
-            # Group data by tile_by column and assign tiling properties
-            grouped = self.data.groupby(tile_by)
+        facet_column = self._config.facet_column
+        if facet_column:
+            # Group data by facet_column column and assign tiling properties
+            grouped = self.data.groupby(facet_column)
             num_groups = len(grouped)
-            self.tile_columns = self._config.tile_columns
-            self.tile_rows = ceil(num_groups / self.tile_columns)
+            self.facet_col_wrap = self._config.facet_col_wrap
+            self.tile_rows = ceil(num_groups / self.facet_col_wrap)
 
             # Create a figure with a grid of subplots using the backend-specific helper
-            fig, axes = self._create_subplots(self.tile_rows, self.tile_columns)
+            fig, axes = self._create_subplots(self.tile_rows, self.facet_col_wrap)
 
             for i, (group_val, group_df) in enumerate(grouped):
                 # Prepare group-specific spectrum and reference data
                 group_spectrum = self._prepare_data(group_df)
-                if self.reference_spectrum is not None and tile_by in self.reference_spectrum.columns:
+                if self.reference_spectrum is not None and facet_column in self.reference_spectrum.columns:
                     group_reference = self._prepare_data(
-                        self.reference_spectrum[self.reference_spectrum[tile_by] == group_val]
+                        self.reference_spectrum[self.reference_spectrum[facet_column] == group_val]
                     )
                 else:
                     group_reference = None
@@ -859,7 +859,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 self.color = self._get_colors(group_spectrum, kind="peak")
 
                 # Pass title directly into the renderer for backend abstraction
-                title = f"{tile_by}: {group_val}"
+                title = f"{facet_column}: {group_val}"
                 spectrumPlot = self.get_line_renderer(
                     data=group_spectrum, by=self.by, color=self.color, config=self._config, title=title
                 )
