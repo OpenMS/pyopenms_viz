@@ -14,8 +14,6 @@ from pandas.core.dtypes.common import is_integer
 from pandas.util._decorators import Appender
 import re
 
-import matplotlib.pyplot as plt
-from math import ceil
 
 from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
 from ._config import (
