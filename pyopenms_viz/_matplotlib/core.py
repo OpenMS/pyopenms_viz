@@ -4,6 +4,8 @@ from abc import ABC
 from typing import Tuple
 import re
 from numpy import nan
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -52,7 +54,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             padding = (-0.2, 0.4)
         else:
             min_value = 0
-            padding = (0, 0.15)
+            padding = (0, 0.15)  # Ensure this is a tuple
         return (min_value, max_value), padding
 
 
