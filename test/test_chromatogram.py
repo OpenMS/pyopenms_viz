@@ -5,9 +5,6 @@ test/plotting/test_matplotlib
 
 import pytest
 import pandas as pd
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 
 @pytest.mark.parametrize(
