@@ -86,7 +86,8 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             start_index (int): The index in the axes list from which to start deleting.
         """
         for j in range(start_index, len(axes)):
-            self.canvas.delaxes(axes[j])
+            self.fig.delaxes(axes[j])
+
 
     # In matplotlib the canvas is referred to as a Axes, the figure object is the encompassing object
     @property
