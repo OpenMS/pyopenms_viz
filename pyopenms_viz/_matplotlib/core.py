@@ -38,16 +38,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
     """
 
     def _compute_y_range_and_padding(self, spectrum, reference_spectrum=None):
-        """
-        Compute the y-axis range and padding based on the spectrum data.
         
-        Args:
-            spectrum (DataFrame): The primary spectrum data.
-            reference_spectrum (DataFrame, optional): The reference spectrum data.
-            
-        Returns:
-            Tuple[Tuple[float, float], Tuple[float, float]]: The y-axis range and padding.
-        """
         max_value = spectrum[self.y].max()
         if reference_spectrum is not None and self.mirror_spectrum:
             min_value = reference_spectrum[self.y].min()

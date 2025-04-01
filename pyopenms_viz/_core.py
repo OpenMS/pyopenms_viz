@@ -646,7 +646,7 @@ class ChromatogramPlot(BaseMSPlot, ABC):
             # Remove any extra axes if the grid size is larger than the number of groups.
             self._delete_extra_axes(axes, start_index=i + 1)
             
-            fig.tight_layout()
+            # fig.tight_layout()
             self.canvas = fig
         else:
             # For the non-tiled case, create the plot for the entire dataset.
@@ -883,7 +883,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 
             # Delete extra axes if present and finalize layout
             self._delete_extra_axes(axes, start_index=i + 1)
-            fig.tight_layout()
+            # fig.tight_layout()
             self.canvas = fig
 
         else:
