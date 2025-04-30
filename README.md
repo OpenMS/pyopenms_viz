@@ -7,6 +7,7 @@
 [![pypiv](https://img.shields.io/pypi/v/pyopenms_viz.svg)](https://img.shields.io/pypi/v/pyopenms_viz
 )
 [![pypidownload](https://img.shields.io/pypi/dm/pyopenms_viz?color=orange)](https://pypistats.org/packages/pyopenms_viz)
+[![continuous-integration](https://github.com/OpenMS/pyopenms_viz/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenMS/pyopenms_viz/actions/workflows/ci.yml)
 [![readthedocs](https://img.shields.io/readthedocs/pyopenms_viz)](https://pyopenms-viz.readthedocs.io/en/latest/index.html)
 
 
