@@ -1,11 +1,12 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
-
+# Workflow for deploying static content to GitHub Pages with PR previews
+name: Deploy Documentation
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
+  # Runs on pull requests for preview builds
+  pull_request:
+    branches: ["main"]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -14,50 +15,192 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment per branch/PR
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Build job - runs for both main branch and PRs
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
       - name: Set up python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+          
       - name: Install dependencies
         run: |
           sudo apt install pandoc
           pip install -r requirements.txt 
           pip install ipykernel rdkit cairosvg pymzml
           pip install .
+          
       - name: Build Documentation
         run: sphinx-build -b html ./docs ./_build
+        
+      - name: Copy binder files
+        run: cp -r ./.binder ./_build
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: _build/
+          retention-days: 30
+
+  # Deploy to main GitHub Pages (only for main branch)
+  deploy-main:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: _build/
+          
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Push _build to gh_pages branch
+        
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _build/
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Deploy PR preview to separate branch
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: _build/
+          
+      - name: Deploy PR preview
         run: |
-          cp -r ./.binder ./_build
+          # Create a unique branch name for this PR
+          PR_BRANCH="pr-preview-${{ github.event.number }}"
+          
           cd _build
           # Initialize a new Git repository in the _build directory
           git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          
           # Add all files and commit changes
           git add .
-          git branch -M gh_pages
-          git commit -m "Deploy documentation [skip ci]"
+          git checkout -b $PR_BRANCH
+          git commit -m "Deploy PR #${{ github.event.number }} preview [skip ci]"
           
-          # Force push to the gh-pages branch
-          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh_pages
+          # Force push to the PR preview branch
+          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" $PR_BRANCH
+          
+      - name: Comment on PR with preview link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.number;
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            const previewUrl = `https://${repoOwner}.github.io/${repoName}/pr-preview-${prNumber}/`;
+            
+            // Check if we already commented
+            const comments = await github.rest.issues.listComments({
+              owner: repoOwner,
+              repo: repoName,
+              issue_number: prNumber,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('📖 Documentation Preview')
+            );
+            
+            const commentBody = `📖 **Documentation Preview**
+            
+            The documentation for this PR has been built and is available at:
+            🔗 **[View Preview](${previewUrl})**
+            
+            This preview will be updated automatically when you push new commits to this PR.
+            
+            ---
+            *Preview built from commit: \`${context.sha.substring(0, 7)}\`*`;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: repoOwner,
+                repo: repoName,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: repoOwner,
+                repo: repoName,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+  # Cleanup old PR preview branches
+  cleanup-previews:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          
+      - name: Delete PR preview branch
+        run: |
+          PR_BRANCH="pr-preview-${{ github.event.number }}"
+          
+          # Check if the branch exists and delete it
+          if git ls-remote --heads origin $PR_BRANCH | grep $PR_BRANCH; then
+            git push origin --delete $PR_BRANCH
+            echo "Deleted preview branch: $PR_BRANCH"
+          else
+            echo "Preview branch $PR_BRANCH not found"
+          fi
+          
+      - name: Comment cleanup notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.number;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🧹 **Preview Cleanup**
+              
+              The documentation preview for this PR has been cleaned up and is no longer available.`
+            });
