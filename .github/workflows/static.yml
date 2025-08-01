@@ -87,16 +87,16 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Deploy PR preview using subdirectories in gh-pages
+  # Deploy PR preview using subdirectories in gh_pages
   deploy-preview:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number != '')
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages branch
+      - name: Checkout gh_pages branch
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          ref: gh_pages
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Download build artifacts
@@ -137,8 +137,8 @@ jobs:
           git add "$PR_DIR"
           git commit -m "Deploy PR #${PR_NUMBER} preview [skip ci]" || echo "No changes to commit"
           
-          # Push to gh-pages
-          git push origin gh-pages
+          # Push to gh_pages
+          git push origin gh_pages
           
       - name: Comment on PR with preview link
         if: github.event_name == 'pull_request' || github.event.inputs.pr_number != ''
@@ -206,15 +206,15 @@ jobs:
           PR_NUMBER="${{ github.event.number }}"
           PR_DIR="pr-${PR_NUMBER}"
           
-          # Checkout gh-pages branch
-          git checkout gh-pages
+          # Checkout gh_pages branch
+          git checkout gh_pages
           
           # Remove PR directory if it exists
           if [ -d "$PR_DIR" ]; then
             rm -rf "$PR_DIR"
             git add "$PR_DIR"
             git commit -m "Remove PR #${PR_NUMBER} preview [skip ci]"
-            git push origin gh-pages
+            git push origin gh_pages
             echo "Deleted preview directory: $PR_DIR"
           else
             echo "Preview directory $PR_DIR not found"
