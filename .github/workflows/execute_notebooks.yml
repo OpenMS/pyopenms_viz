@@ -1,0 +1,91 @@
+# .github/workflows/execute-notebooks.yml
+name: Execute Notebooks
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/Data Formatting/*ipynb'
+      - 'docs/*ipynb'
+      - '.github/workflows/execute_notebooks.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/Data Formatting/*ipynb'
+      - 'docs/*ipynb'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  execute-notebooks:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        # Install system dependencies
+        sudo apt update
+        sudo apt install pandoc
+        
+        # Install Python dependencies
+        python -m pip install --upgrade pip
+        pip install jupyter nbconvert nbformat
+        pip install -r requirements.txt
+        pip install ipykernel rdkit cairosvg pymzml
+        pip install .
+
+    - name: Configure git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - name: Find and execute notebooks
+      run: |
+        # Find all notebooks that need to execute (adjust paths as needed)
+        find docs/Data Formatting/*ipynb -name "*.ipynb" > notebooks_to_execute.txt
+        docs/Getting\ Started.ipynb > notebooks_to_execute.txt
+
+        echo "Found notebooks:"
+        cat notebooks_to_execute.txt
+        
+        # Execute each notebook
+        while IFS= read -r notebook; do
+          echo "Executing: $notebook"
+          # Clear outputs first (optional)
+          jupyter nbconvert --clear-output --inplace "$notebook"
+          # Execute notebook
+          jupyter nbconvert --execute --to notebook --inplace "$notebook" \
+            --ExecutePreprocessor.timeout=300 \
+            --ExecutePreprocessor.kernel_name=python3
+          
+          # Check if execution was successful
+          if [ $? -eq 0 ]; then
+            echo "✓ Successfully executed: $notebook"
+          else
+            echo "✗ Failed to execute: $notebook"
+            exit 1
+          fi
+        done < notebooks_to_execute.txt
+    - name: Push changes
+      if: steps.verify-changed-files.outputs.changed == 'true' && github.event_name != 'pull_request'
+      run: |
+        git push origin ${{ github.ref_name }}
+
+    - name: Summary
+      run: |
+        if [ "${{ steps.verify-changed-files.outputs.changed }}" == "true" ]; then
+          echo "✅ Notebooks executed successfully and changes committed"
+        else
+          echo "✅ Notebooks executed successfully, no changes to commit"
+        fi
