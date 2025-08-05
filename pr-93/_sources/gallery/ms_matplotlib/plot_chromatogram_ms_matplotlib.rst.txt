@@ -77,7 +77,7 @@ This example shows a chromatogram colored by mass trace. Since all fragment ion 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.199 seconds)
+   **Total running time of the script:** (0 minutes 0.200 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_chromatogram_ms_matplotlib.py:
