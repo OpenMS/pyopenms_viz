@@ -55,7 +55,7 @@ jobs:
         run: |
           # Find all notebooks that need to execute (adjust paths as needed)
           find "docs/Data Formatting/" -name "*.ipynb" > notebooks_to_execute.txt
-          "docs/Getting Started.ipynb" >> notebooks_to_execute.txt
+          echo "docs/Getting Started.ipynb" >> notebooks_to_execute.txt
 
           echo "Found notebooks:"
           cat notebooks_to_execute.txt
