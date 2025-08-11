@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9b4a1398" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -559,57 +559,70 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pyopenms_viz._bokeh.BOKEHVLinePlot.plot">
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyopenms_viz._bokeh.BOKEHVLinePlot.plot" title="Link to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Plot a set of vertical lines</p>
-</div></blockquote>
-<p>Plot method for creating plots from a Pandas DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>pandas.DataFrame</em><em> or </em><em>numpy.ndarray</em>) – The data to be plotted.</p></li>
-<li><p><strong>x</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The column name for the x-axis data.</p></li>
-<li><p><strong>y</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The column name for the y-axis data.</p></li>
-<li><p><strong>z</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The column name for the z-axis data (for 3D plots).</p></li>
-<li><p><strong>kind</strong> (<em>str</em><em>, </em><em>optional</em>) – The kind of plot to create. One of: (‘line’, ‘vline’, ‘scatter’, ‘chromatogram’, ‘mobilogram’, ‘spectrum’, ‘peakmap’)</p></li>
-<li><p><strong>by</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Column in the DataFrame to group by.</p></li>
-<li><p><strong>relative_intensity</strong> (<em>bool</em><em>, </em><em>default False</em>) – Whether to use relative intensity for the y-axis.</p></li>
-<li><p><strong>subplots</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to create separate subplots for each column.</p></li>
-<li><p><strong>sharex</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to share x or y axes among subplots.</p></li>
-<li><p><strong>sharey</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to share x or y axes among subplots.</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The height and width of the figure in pixels.</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The height and width of the figure in pixels.</p></li>
-<li><p><strong>grid</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to show the grid on the plot.</p></li>
-<li><p><strong>toolbar_location</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The location of the toolbar (e.g., ‘above’, ‘below’, ‘left’, ‘right’).</p></li>
-<li><p><strong>fig</strong> (<em>figure</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – An existing figure object to plot on.</p></li>
-<li><p><strong>title</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The title of the plot.</p></li>
-<li><p><strong>xlabel</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Labels for the x and y axes.</p></li>
-<li><p><strong>ylabel</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Labels for the x and y axes.</p></li>
-<li><p><strong>x_axis_location</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The location of the x and y axes (e.g., ‘bottom’, ‘top’, ‘left’, ‘right’).</p></li>
-<li><p><strong>y_axis_location</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The location of the x and y axes (e.g., ‘bottom’, ‘top’, ‘left’, ‘right’).</p></li>
-<li><p><strong>line_type</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The type of line to use (e.g., ‘solid’, ‘dashed’, ‘dotted’).</p></li>
-<li><p><strong>line_width</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The width of the lines in the plot.</p></li>
-<li><p><strong>min_border</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The minimum border size around the plot.</p></li>
-<li><p><strong>show_plot</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to display the plot immediately after creation.</p></li>
-<li><p><strong>legend</strong> (<a class="reference internal" href="pyopenms_viz._config.LegendConfig.html#pyopenms_viz._config.LegendConfig" title="pyopenms_viz._config.LegendConfig"><em>LegendConfig</em></a><em> or </em><em>dict</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Configuration for the plot legend.</p></li>
-<li><p><strong>feature_config</strong> (<em>FeatureConfig</em><em> or </em><em>dict</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Configuration for additional plot features.</p></li>
-<li><p><strong>backend</strong> (<em>str</em><em>, </em><em>default None</em>) – Backend to use instead of the backend specified in the option
+<dd><p>Plot a set of vertical lines</p>
+<blockquote>
+<div><p>Plot method for creating plots from a Pandas DataFrame.</p>
+<dl class="simple">
+<dt>data<span class="classifier">pandas.DataFrame or numpy.ndarray</span></dt><dd><p>The data to be plotted.</p>
+</dd>
+<dt>x<span class="classifier">str or None, optional</span></dt><dd><p>The column name for the x-axis data.</p>
+</dd>
+<dt>y<span class="classifier">str or None, optional</span></dt><dd><p>The column name for the y-axis data.</p>
+</dd>
+<dt>z<span class="classifier">str or None, optional</span></dt><dd><p>The column name for the z-axis data (for 3D plots).</p>
+</dd>
+<dt>kind<span class="classifier">str, optional</span></dt><dd><p>The kind of plot to create. One of: (‘line’, ‘vline’, ‘scatter’, ‘chromatogram’, ‘mobilogram’, ‘spectrum’, ‘peakmap’)</p>
+</dd>
+<dt>by<span class="classifier">str or None, optional</span></dt><dd><p>Column in the DataFrame to group by.</p>
+</dd>
+<dt>relative_intensity<span class="classifier">bool, default False</span></dt><dd><p>Whether to use relative intensity for the y-axis.</p>
+</dd>
+<dt>subplots<span class="classifier">bool or None, optional</span></dt><dd><p>Whether to create separate subplots for each column.</p>
+</dd>
+<dt>sharex, sharey<span class="classifier">bool or None, optional</span></dt><dd><p>Whether to share x or y axes among subplots.</p>
+</dd>
+<dt>height, width<span class="classifier">int or None, optional</span></dt><dd><p>The height and width of the figure in pixels.</p>
+</dd>
+<dt>grid<span class="classifier">bool or None, optional</span></dt><dd><p>Whether to show the grid on the plot.</p>
+</dd>
+<dt>toolbar_location<span class="classifier">str or None, optional</span></dt><dd><p>The location of the toolbar (e.g., ‘above’, ‘below’, ‘left’, ‘right’).</p>
+</dd>
+<dt>fig<span class="classifier">figure or None, optional</span></dt><dd><p>An existing figure object to plot on.</p>
+</dd>
+<dt>title<span class="classifier">str or None, optional</span></dt><dd><p>The title of the plot.</p>
+</dd>
+<dt>xlabel, ylabel<span class="classifier">str or None, optional</span></dt><dd><p>Labels for the x and y axes.</p>
+</dd>
+<dt>x_axis_location, y_axis_location<span class="classifier">str or None, optional</span></dt><dd><p>The location of the x and y axes (e.g., ‘bottom’, ‘top’, ‘left’, ‘right’).</p>
+</dd>
+<dt>line_type<span class="classifier">str or None, optional</span></dt><dd><p>The type of line to use (e.g., ‘solid’, ‘dashed’, ‘dotted’).</p>
+</dd>
+<dt>line_width<span class="classifier">float or None, optional</span></dt><dd><p>The width of the lines in the plot.</p>
+</dd>
+<dt>min_border<span class="classifier">int or None, optional</span></dt><dd><p>The minimum border size around the plot.</p>
+</dd>
+<dt>show_plot<span class="classifier">bool or None, optional</span></dt><dd><p>Whether to display the plot immediately after creation.</p>
+</dd>
+<dt>legend<span class="classifier">LegendConfig or dict or None, optional</span></dt><dd><p>Configuration for the plot legend.</p>
+</dd>
+<dt>feature_config<span class="classifier">FeatureConfig or dict or None, optional</span></dt><dd><p>Configuration for additional plot features.</p>
+</dd>
+<dt>backend<span class="classifier">str, default None</span></dt><dd><p>Backend to use instead of the backend specified in the option
 <code class="docutils literal notranslate"><span class="pre">plotting.backend</span></code>. For pyopenms_viz, options are one of (‘ms_matplotlib’, ‘ms_bokeh’, ‘ms_plotly’) Alternatively, to
 specify the <code class="docutils literal notranslate"><span class="pre">plotting.backend</span></code> for the whole session, set
-<code class="docutils literal notranslate"><span class="pre">pd.options.plotting.backend</span></code>.</p></li>
-<li><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to the plotting function.</p></li>
-</ul>
+<code class="docutils literal notranslate"><span class="pre">pd.options.plotting.backend</span></code>.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs</dt><dd><p>Additional keyword arguments to be passed to the plotting function.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<p>None</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;spectrum&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;pomsvim&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>

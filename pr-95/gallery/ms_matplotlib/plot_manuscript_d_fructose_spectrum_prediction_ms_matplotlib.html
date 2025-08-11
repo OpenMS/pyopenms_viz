@@ -30,7 +30,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=9b4a1398" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
@@ -563,17 +563,17 @@ The mzML file is from the the <a class="reference external" href="https://hmdb.c
 <p>To generate a prediction using <a class="reference external" href="https://cfmid.wishartlab.com/">CFM-ID</a>, you can use the SMILE or InChi key. This example used the SMILE.</p>
 <p>SMILE: OC[C&#64;H]1OC&#64;(CO)C&#64;&#64;H[C&#64;&#64;H]1O InChi: InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1</p>
 <p>For this tutorial CFM-ID and .mzML file are downloaded  from the pyopenms_viz repository</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;ms_matplotlib&quot;</span>
 </pre></div>
 </div>
 <section id="download-example">
 <h2>Download example<a class="headerlink" href="#download-example" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">zipfile</span>
-<span class="kn">import</span> <span class="nn">io</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 
 <span class="c1"># URL of the ZIP file</span>
 <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip&quot;</span>
@@ -602,25 +602,25 @@ The mzML file is from the the <a class="reference external" href="https://hmdb.c
 pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> </span>--quiet
 </pre></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageOps</span>
-<span class="kn">import</span> <span class="nn">rdkit.RDLogger</span> <span class="k">as</span> <span class="nn">RDLogger</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem.Draw</span> <span class="kn">import</span> <span class="n">rdMolDraw2D</span>
-<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">rdMolDescriptors</span>
-<span class="kn">import</span> <span class="nn">cairosvg</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageOps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rdkit.RDLogger</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">RDLogger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem.Draw</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdMolDraw2D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdMolDescriptors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cairosvg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
 
-<span class="k">def</span> <span class="nf">rdkit_import</span><span class="p">(</span><span class="o">*</span><span class="n">module_strs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rdkit_import</span><span class="p">(</span><span class="o">*</span><span class="n">module_strs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Utility function to import RDKit modules and disable RDKit logging.&quot;&quot;&quot;</span>
     <span class="n">RDLogger</span><span class="o">.</span><span class="n">DisableLog</span><span class="p">(</span><span class="s2">&quot;rdApp.*&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span> <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">module_strs</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">trim_img_by_white</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">trim_img_by_white</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Crops the image to remove excess white space and adds padding.&quot;&quot;&quot;</span>
     <span class="n">as_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">as_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span>
@@ -638,7 +638,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
     <span class="k">return</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">img_cropped</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">mol_from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">standardize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mol_from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">standardize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a SMILES string to an RDKit molecule.&quot;&quot;&quot;</span>
     <span class="n">Chem</span> <span class="o">=</span> <span class="n">rdkit_import</span><span class="p">(</span><span class="s2">&quot;rdkit.Chem&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">try</span><span class="p">:</span>
@@ -651,7 +651,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
         <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">get_mol_im</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mol_im</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates an image of the molecule from its SMILES string.&quot;&quot;&quot;</span>
     <span class="n">mol</span> <span class="o">=</span> <span class="n">mol_from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mol</span><span class="p">:</span>
@@ -667,7 +667,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
         <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">parse_cfm_data</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_cfm_data</span><span class="p">(</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">energy_section</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses CFM data for a specific energy section.&quot;&quot;&quot;</span>
@@ -715,7 +715,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
     <span class="k">return</span> <span class="n">mz_df</span><span class="p">,</span> <span class="n">annotation_df</span>
 
 
-<span class="k">def</span> <span class="nf">explode_frag_ids_probabilities</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">explode_frag_ids_probabilities</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Explodes the &#39;frag_id&#39; and &#39;probabilities&#39; columns into multiple rows.&quot;&quot;&quot;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">df</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
@@ -726,7 +726,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">explode</span><span class="p">([</span><span class="s2">&quot;frag_id&quot;</span><span class="p">,</span> <span class="s2">&quot;probabilities&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;frag_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
 
 
-<span class="k">def</span> <span class="nf">smiles_to_formula</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">smiles_to_formula</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a SMILES string to a molecular formula.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
@@ -736,11 +736,11 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
         <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">format_formula</span><span class="p">(</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_formula</span><span class="p">(</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Formats a molecular formula by replacing numbers with subscripts and handling charges.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="c1"># Function to replace numbers with their subscript version</span>
-        <span class="k">def</span> <span class="nf">replace_with_subscript</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">replace_with_subscript</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="se">{{</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
 
         <span class="c1"># Replace numbers with their subscript versions</span>
@@ -759,7 +759,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
 <h2>Load and Format Data<a class="headerlink" href="#load-and-format-data" title="Link to this heading">#</a></h2>
 <section id="load-mzml-using-pymzml">
 <h3>Load .mzML using pymzml<a class="headerlink" href="#load-mzml-using-pymzml" title="Link to this heading">#</a></h3>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pymzml</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymzml</span>
 
 <span class="c1"># Load the known annotated SMILES and formula into a dataframe</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
@@ -921,9 +921,9 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </section>
 <section id="create-figure">
 <h2>Create Figure<a class="headerlink" href="#create-figure" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">patches</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1.inset_locator</span> <span class="kn">import</span> <span class="n">inset_axes</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">patches</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1.inset_locator</span><span class="w"> </span><span class="kn">import</span> <span class="n">inset_axes</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 
@@ -1102,6 +1102,10 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 
 This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
 
+/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:113: DeprecationWarning:
+
+&#39;mode&#39; parameter is deprecated and will be removed in Pillow 13 (2026-10-15)
+
 /home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:488: UserWarning:
 
 This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
@@ -1110,7 +1114,7 @@ This figure includes Axes that are not compatible with tight_layout, so results 
 &lt;Figure size 5700x2700 with 16 Axes&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.194 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.804 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-matplotlib-plot-manuscript-d-fructose-spectrum-prediction-ms-matplotlib-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />

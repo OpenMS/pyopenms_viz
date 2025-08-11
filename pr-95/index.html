@@ -30,7 +30,7 @@
   <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=9b4a1398" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
@@ -466,7 +466,7 @@
 </section>
 <section id="plotting-a-spectrum">
 <h3>Plotting a Spectrum<a class="headerlink" href="#plotting-a-spectrum" title="Link to this heading">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="n">ms_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;path/to/ms_data.csv&quot;</span><span class="p">)</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;plotting.backend&quot;</span><span class="p">,</span> <span class="s2">&quot;ms_bokeh&quot;</span><span class="p">)</span>  <span class="c1"># try changing backend to &quot;ms_plotly&quot; or &quot;ms_matplotlib&quot;</span>
 <span class="n">ms_data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;m/z&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;intensity&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">)</span>
@@ -475,7 +475,7 @@
 </section>
 <section id="plotting-a-chromatogram">
 <h3>Plotting a Chromatogram<a class="headerlink" href="#plotting-a-chromatogram" title="Link to this heading">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="n">ms_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;path/to/ms_data.csv&quot;</span><span class="p">)</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;plotting.backend&quot;</span><span class="p">,</span> <span class="s2">&quot;ms_bokeh&quot;</span><span class="p">)</span>  <span class="c1"># try changing backend to &quot;ms_plotly&quot; or &quot;ms_matplotlib&quot;</span>
 <span class="n">ms_data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;intensity&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;chromatogram&quot;</span><span class="p">)</span>
