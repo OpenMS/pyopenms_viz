@@ -39,7 +39,7 @@ The recommended way of installing pyopenms_viz is through the Python Package Ind
 First create a new environemnt:
 
 ```bash
-conda create --name=pyopenms_viz python=3.12
+conda create --name=pyopenms_viz python=3.13
 conda activate pyopenms_viz 
 ```
 Then in the new environment install pyopenms_viz.
