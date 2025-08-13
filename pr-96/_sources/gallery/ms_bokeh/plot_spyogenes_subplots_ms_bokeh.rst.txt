@@ -237,7 +237,7 @@ Here we show how we can plot multiple chromatograms across runs together
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.074 seconds)
+   **Total running time of the script:** (0 minutes 1.103 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_bokeh_plot_spyogenes_subplots_ms_bokeh.py:
