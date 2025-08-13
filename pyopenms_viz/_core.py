@@ -1000,7 +1000,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
 
-        data["color"] = ["black" for _ in range(len(data))]
+        if self.peak_color is None:
+            data["color"] = "black" 
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
