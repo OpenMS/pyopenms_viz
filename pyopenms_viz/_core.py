@@ -1001,9 +1001,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
 
         if self.annotation_color is None:
-            data["color"] = "black" 
+            data["annotation_color"] = "black" 
         print(f"Annotation color: {self.annotation_color}")
-        annotation_color_column = "color" if self.annotation_color is None else self.annotation_color
+        annotation_color_column = "annotation_color" if self.annotation_color is None else self.annotation_color
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
