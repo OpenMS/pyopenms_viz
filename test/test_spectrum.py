@@ -28,6 +28,24 @@ def test_spectrum_plot(spectrum_data, snapshot, kwargs):
 
     assert snapshot == out
 
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        dict(peak_color='color', annotation_color='color', annotate_top_n_peaks=1),
+        dict(peak_color='color', annotation_color='color', annotate_top_n_peaks=0),
+    ],
+)
+def test_spectrum_plot_with_peak_color(spectrum_data2, snapshot, kwargs):
+    out = spectrum_data2.plot(
+        x="mz", y="intensity", kind="spectrum", show_plot=False, **kwargs
+    )
+
+    # apply tight layout to matplotlib to ensure not cut off
+    if pd.options.plotting.backend == "ms_matplotlib":
+        fig = out.get_figure()
+        fig.tight_layout()
+
+    assert snapshot == out
 
 @pytest.mark.parametrize(
     "kwargs",
