@@ -1000,9 +1000,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def _get_annotations(self, data: DataFrame, x: str, y: str):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
 
-        if self.peak_color is None:
+        if self.annotation_color is None:
             data["color"] = "black" 
-        peak_color_column = "color" if self.peak_color is None else self.peak_color
+        print(f"Annotation color: {self.annotation_color}")
+        annotation_color_column = "color" if self.annotation_color is None else self.annotation_color
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
@@ -1030,7 +1031,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 if self.custom_annotation and self.custom_annotation in data.columns:
                     texts.append(str(row[self.custom_annotation]))
             ann_texts.append("\n".join(texts))
-        return ann_texts, data[x].tolist(), data[y].tolist(), data[peak_color_column].tolist()
+        return ann_texts, data[x].tolist(), data[y].tolist(), data[annotation_color_column].tolist()
 
     def _get_ion_color_annotation(self, ion_annotations: str) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
