@@ -1,5 +1,15 @@
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
 from docutils import nodes
+
+
+DEFAULT_DOCSTRING = """
+Default configuration for pyopenms_viz
+
+Attributes:
+    x (str): The column name for the X-axis data. Required.
+    y (str): The column name for the Y-axis data. Required.
+    by (str): The column name for the grouping variable.
+"""
 
 
 class DocstringToTableDirective(Directive):
@@ -10,6 +20,7 @@ class DocstringToTableDirective(Directive):
         "docstring": str,
         "title": str,
         "parent_depth": int,  # Number of parent classes to include
+        "default_docstring": directives.flag,  # Flag, no argument required
     }
 
     def run(self):
@@ -67,6 +78,17 @@ class DocstringToTableDirective(Directive):
 
         # Parse all collected docstrings
         params = []
+        # If :default_docstring: is present (flag), prepend its params
+        if "default_docstring" in self.options:
+            default_parsed = docstring_parser.parse(DEFAULT_DOCSTRING)
+            for param in default_parsed.params:
+                name = param.arg_name or ""
+                default = param.default or ""
+                typ = param.type_name or ""
+                desc = param.description or ""
+                if not default:
+                    name = f"{name}*"
+                params.append((name, typ, desc, default))
         for docstring in reversed(docstrings):  # Start from base class
             parsed = docstring_parser.parse(docstring)
             for param in parsed.params:
