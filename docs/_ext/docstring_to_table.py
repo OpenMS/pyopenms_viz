@@ -9,6 +9,7 @@ class DocstringToTableDirective(Directive):
     option_spec = {
         "docstring": str,
         "title": str,
+        "parent_depth": int,  # Number of parent classes to include
     }
 
     def run(self):
@@ -18,6 +19,12 @@ class DocstringToTableDirective(Directive):
 
         docstring_path = self.options.get("docstring")
         table_title = self.options.get("title")
+        # If parent_depth is not specified, only include the base class (depth=0)
+        parent_depth = self.options.get("parent_depth")
+        if parent_depth is None:
+            parent_depth = 0
+        else:
+            parent_depth = int(parent_depth)
         if not docstring_path:
             error = self.state_machine.reporter.error(
                 "No :docstring: option provided to docstring_to_table directive.",
@@ -45,26 +52,32 @@ class DocstringToTableDirective(Directive):
             )
             return [error]
 
-        # Get docstring
-        docstring = inspect.getdoc(obj)
-        if not docstring:
-            error = self.state_machine.reporter.error(
-                f"No docstring found for '{docstring_path}'", line=self.lineno
-            )
-            return [error]
+        # Collect docstrings from parent classes up to parent_depth
+        docstrings = []
+        current_obj = obj
+        for i in range(parent_depth + 1):
+            docstring = inspect.getdoc(current_obj)
+            if docstring:
+                docstrings.append(docstring)
+            bases = getattr(current_obj, "__bases__", ())
+            if bases and i < parent_depth:
+                current_obj = bases[0]
+            else:
+                break
 
-        # Parse docstring using docstring_parser
-        parsed = docstring_parser.parse(docstring)
+        # Parse all collected docstrings
         params = []
-        for param in parsed.params:
-            name = param.arg_name or ""
-            default = param.default or ""
-            typ = param.type_name or ""
-            desc = param.description or ""
-            # Mark required parameters (no default) with '*'
-            if not default:
-                name = f"{name}*"
-            params.append((name, typ, desc, default))
+        for docstring in reversed(docstrings):  # Start from base class
+            parsed = docstring_parser.parse(docstring)
+            for param in parsed.params:
+                name = param.arg_name or ""
+                default = param.default or ""
+                typ = param.type_name or ""
+                desc = param.description or ""
+                # Mark required parameters (no default) with '*'
+                if not default:
+                    name = f"{name}*"
+                params.append((name, typ, desc, default))
 
         # Build table
         table = nodes.table()
