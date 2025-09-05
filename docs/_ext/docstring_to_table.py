@@ -9,6 +9,8 @@ Attributes:
     x (str): The column name for the X-axis data. Required.
     y (str): The column name for the Y-axis data. Required.
     by (str): The column name for the grouping variable.
+    canvas (Any): Canvas for the plot. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is an Axes object, and for Plotly, this is a plotly.graph_objects.Figure object. If none, axis will be created Defaults to None.
+    show_plot (bool): Whether to display the plot. Defaults to True.
 """
 
 
