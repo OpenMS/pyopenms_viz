@@ -134,41 +134,40 @@ class BasePlotConfig(BaseConfig):
     Base configuration for a plot.
 
     Attributes:
-        kind (Literal["line", "vline", "scatter", "chromatogram", "mobilogram", "spectrum", "peakmap", "complex"] | None): Type of plot. Defaults to None.
-        x (str | None): X-axis data. Defaults to None.
-        y (str | None): Y-axis data. Defaults to None.
-        z (str | None): Z-axis data. Defaults to None.
-        by (str | None): Grouping variable. Defaults to None.
+        kind (Literal["chromatogram", "mobilogram", "spectrum", "peakmap"]): Type of plot. Required.
+        x (str): The column name for the x-axis data. Required.
+        y (str): The column name for the y-axis data. Required.
+        z (str): The column name for the z-axis data. Required.
         canvas (Any): Canvas for the plot. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is an Axes object, and for Plotly, this is a plotly.graph_objects.Figure object. If none, axis will be created Defaults to None.
-        height (int): Height of the plot. Defaults to 500.
-        width (int): Width of the plot. Defaults to 500.
-        grid (bool): Whether to show grid. Defaults to True.
-        toolbar_location (str): Location of the toolbar. Defaults to "above".
-        title (str): Title of the plot. Defaults to an empty string.
-        xlabel (str): Label for the X-axis. Defaults to an empty string.
-        ylabel (str): Label for the Y-axis. Defaults to an empty string.
-        zlabel (str): Label for the Z-axis. Defaults to an empty string.
-        title_font_size (int): Font size of the title. Defaults to 18.
-        xaxis_label_font_size (int): Font size of the X-axis label. Defaults to 16.
-        yaxis_label_font_size (int): Font size of the Y-axis label. Defaults to 16.
-        zaxis_label_font_size (int): Font size of the Z-axis label. Defaults to 16.
-        xaxis_labelpad (int): Padding for the X-axis label. Defaults to 16.
-        yaxis_labelpad (int): Padding for the Y-axis label. Defaults to 16.
-        zaxis_labelpad (int): Padding for the Z-axis label. Defaults to 9.
-        xaxis_tick_font_size (int): Font size for X-axis tick labels. Defaults to 14.
-        yaxis_tick_font_size (int): Font size for Y-axis tick labels. Defaults to 14.
-        zaxis_tick_font_size (int): Font size for Z-axis tick labels. Defaults to 14.
-        y_axis_location (Literal["left", "right"]): Location of the Y-axis. Defaults to "left".
-        x_axis_location (Literal["above", "below"]): Location of the X-axis. Defaults to "below".
-        annotation_font_size (int): Font size for annotations. Defaults to 12.
-        color (str | Iterator[str]): Color or color iterator for plot elements. Defaults to ColorGenerator.
-        plot_3d (bool): Whether to plot in 3D. Defaults to False.
-        min_border (int): Minimum border size in pixels. Defaults to 0.
-        show_plot (bool): Whether to display the plot. Defaults to True.
-        relative_intensity (bool): Whether to normalize intensity values. Defaults to False.
-        aggregate_duplicates (bool): Whether to aggregate duplicate data points. Defaults to False.
-        legend_config (LegendConfig | dict): Configuration for the legend. Defaults to LegendConfig(title="Trace").
-        opacity (float): Opacity of plot. Defaults to 1.0.
+        height (int, optional): Height of the plot. Defaults to 500.
+        width (int, optional): Width of the plot. Defaults to 500.
+        grid (bool, optional): Whether to show grid. Defaults to True.
+        toolbar_location (str, optional): Location of the toolbar. Defaults to "above".
+        title (str, optional): Title of the plot. Defaults to an empty string.
+        xlabel (str, optional): Label for the X-axis. Defaults to an empty string.
+        ylabel (str, optional): Label for the Y-axis. Defaults to an empty string.
+        zlabel (str, optional): Label for the Z-axis, only applicable if 3D plot. Defaults to an empty string.
+        title_font_size (int, optional): Font size of the title. Defaults to 18.
+        xaxis_label_font_size (int, optional): Font size of the X-axis label. Defaults to 16.
+        yaxis_label_font_size (int, optional): Font size of the Y-axis label. Defaults to 16.
+        zaxis_label_font_size (int, optional): Font size of the Z-axis label. Defaults to 16.
+        xaxis_labelpad (int, optional): Padding for the X-axis label. Defaults to 16.
+        yaxis_labelpad (int, optional): Padding for the Y-axis label. Defaults to 16.
+        zaxis_labelpad (int, optional): Padding for the Z-axis label, only applicable if 3D plot. Defaults to 9.
+        xaxis_tick_font_size (int, optional): Font size for X-axis tick labels. Defaults to 14.
+        yaxis_tick_font_size (int, optional): Font size for Y-axis tick labels. Defaults to 14.
+        zaxis_tick_font_size (int, optional): Font size for Z-axis tick labels. Defaults to 14.
+        y_axis_location (Literal["left", "right"], optional): Location of the Y-axis. Defaults to "left".
+        x_axis_location (Literal["above", "below"], optional): Location of the X-axis. Defaults to "below".
+        annotation_font_size (int, optional): Font size for annotations. Defaults to 12.
+        color (str | Iterator[str], optional): Color or color iterator for plot elements. Defaults to ColorGenerator.
+        plot_3d (bool, optional): Whether to plot in 3D. Defaults to False.
+        min_border (int, optional): Minimum border size in pixels. Defaults to 0.
+        show_plot (bool, optional): Whether to display the plot. Defaults to True.
+        relative_intensity (bool, optional): Whether to normalize intensity values. Defaults to False.
+        aggregate_duplicates (bool, optional): Whether to aggregate duplicate data points. Defaults to False.
+        legend_config (LegendConfig | dict, optional): Configuration for the legend, see legend configuration options for more details.
+        opacity (float, optional): Opacity of plot. Defaults to 1.0.
 
     Methods:
         default_legend_factory(): Returns a default LegendConfig instance with the title "Trace".
@@ -235,9 +234,6 @@ class BasePlotConfig(BaseConfig):
 
     def copy(self):
         return deepcopy(self)
-
-
-## Additional parameters specific to each plot type
 
 
 @dataclass(kw_only=True)
@@ -367,7 +363,7 @@ class SpectrumConfig(VLineConfig):
         peak_color (str | None): Color of the peaks. Defaults to None.
         bin_peaks (Union[Literal["auto"], bool]): Whether to bin peaks. Defaults to False.
         bin_method (Literal["none", "sturges", "freedman-diaconis", "mz-tol-bin"]): Method for binning peaks. Defaults to "mz-tol-bin".
-        num_x_bins (int): Number of bins along the X-axis. Defaults to 50. Ignored if bin_peaks is False or "auto".
+        num_x_bins (int): Number of bins along the X-axis, ignored if bin_peaks is False or "auto". Defaults to 50.
         mz_tol (Union[float, Literal["freedman-diaconis", "1pct-diff"]]): Tolerance for m/z binning. Defaults to "1pct-diff".
         annotate_top_n_peaks (int | None | Literal["all"]): Number of top peaks to annotate. Defaults to 5.
         annotate_mz (bool): Whether to annotate m/z values. Defaults to True.
@@ -424,8 +420,8 @@ class PeakMapConfig(ScatterConfig):
 
     Attributes:
         add_marginals (bool): Whether to add marginal plots. Defaults to False.
-        y_kind (str): Type of plot for the Y-axis marginal. Defaults to "spectrum". [See note below]
-        x_kind (str): Type of plot for the X-axis marginal. Defaults to "chromatogram". [See note below]
+        y_kind (str): Type of plot for the Y-axis marginal. Defaults to "spectrum".
+        x_kind (str): Type of plot for the X-axis marginal. Defaults to "chromatogram".
         aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Defaults to "mean".
         annotation_data (pd.DataFrame | None): Data for annotations. Defaults to None.
         xlabel (str): Label for the X-axis. Defaults to "Retention Time".
