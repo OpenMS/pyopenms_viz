@@ -13,7 +13,7 @@ General Options include (mandatory fields are starred)
    :docstring: pyopenms_viz._config.LegendConfig
    :title: Legend Options
 
-Please click on a kind of plot below for more details on their specific parameters: A
+Please click on a kind of plot below for more details on their specific parameters:
 
 .. toctree::
    :maxdepth: 1

@@ -428,8 +428,8 @@ class PeakMapConfig(ScatterConfig):
         ylabel (str): Label for the Y-axis. Defaults to "mass-to-charge".
         zlabel (str): Label for the Z-axis. Defaults to "Intensity".
         title (str): Title of the plot. Defaults to "PeakMap".
-        x_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the X-axis marginal plot. Set in post-init.
-        y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Set in post-init.
+        x_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the X-axis marginal plot. Defaults to (set internally).
+        y_plot_config (ChromatogramConfig | SpectrumConfig): Configuration for the Y-axis marginal plot. Defaults to (set internally).
 
     Note:
         y_kind / x_kind is only relevant if add_marginals is set to True.
