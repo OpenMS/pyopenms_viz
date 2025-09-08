@@ -8,11 +8,10 @@ Note: y_kind / x_kind is only relevant if add_marginals is set to True.
 Parameters
 ----------
 
-.. csv-table:: 
-   :file: peakMapPlot.tsv
-   :header-rows: 1
-   :delim: tab
-
+.. docstring_to_table:: 
+   :docstring: pyopenms_viz._config.PeakMapConfig
+   :parent_depth: 1
+   :default_docstring:
 
 Example Usage
 -------------

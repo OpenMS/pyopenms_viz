@@ -8,11 +8,8 @@ Parameters
 
 .. docstring_to_table:: 
    :docstring: pyopenms_viz._config.MobilogramConfig
-
-.. csv-table:: 
-   :file: mobilogramPlot.tsv
-   :header-rows: 1
-   :delim: tab
+   :parent_depth: 1
+   :default_docstring:
 
 Example Usage
 -------------
