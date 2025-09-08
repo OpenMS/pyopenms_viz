@@ -1,5 +1,8 @@
 from docutils.parsers.rst import Directive, directives
 from docutils import nodes
+import importlib
+import inspect
+import docstring_parser
 
 
 DEFAULT_DOCSTRING = """
@@ -26,10 +29,6 @@ class DocstringToTableDirective(Directive):
     }
 
     def run(self):
-        import importlib
-        import inspect
-        import docstring_parser
-
         docstring_path = self.options.get("docstring")
         table_title = self.options.get("title")
         # If parent_depth is not specified, only include the base class (depth=0)
