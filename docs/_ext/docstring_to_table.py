@@ -80,6 +80,7 @@ class DocstringToTableDirective(Directive):
 
         # Parse all collected docstrings
         params = []
+        param_names = []
         # If :default_docstring: is present (flag), prepend its params
         if "default_docstring" in self.options:
             default_parsed = docstring_parser.parse(DEFAULT_DOCSTRING)
@@ -100,8 +101,20 @@ class DocstringToTableDirective(Directive):
                 desc = param.description or ""
                 # Mark required parameters (no default) with '*'
                 if not default:
-                    name = f"{name}*"
-                params.append((name, typ, desc, default))
+                    name_out = f"{name}*"
+                else:
+                    name_out = name
+                # Only keep the most "child" definition of each parameter
+                if name in param_names:
+                    # Find and remove the old parameter from the list
+                    # It could be with or without a star
+                    for i, (p_name, _, _, _) in enumerate(params):
+                        if p_name.strip("*") == name:
+                            params.pop(i)
+                            break
+                params.append((name_out, typ, desc, default))
+                if name not in param_names:
+                    param_names.append(name)
 
         # Build table
         table = nodes.table()
