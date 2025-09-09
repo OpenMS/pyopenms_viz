@@ -41,6 +41,8 @@ docutils==0.21.2
     #   nbsphinx
     #   pydata-sphinx-theme
     #   sphinx
+docstring-parser==0.17.0
+    # via pyopenms_viz (pyproject.toml)
 fastjsonschema==2.21.1
     # via nbformat
 fonttools==4.54.1
