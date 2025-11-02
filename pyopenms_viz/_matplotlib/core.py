@@ -737,6 +737,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
         legend_items = []
+        custom_lines_list = []
 
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             x0 = feature[self.annotation_x_lb]
@@ -769,19 +770,21 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
-                legend_labels = f"{use_name} (q-value: {feature['q_value']:.4f})"
+                legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
-                legend_labels = f"{use_name}"
+                legend_label = use_name
+
+            legend_items.append(legend_label)
+            custom_lines_list.append(custom_lines)
 
         # Add legend
         if self.annotation_legend_config.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
                 self.annotation_legend_config.loc
             )
-            print(f"legend_labels: {legend_labels}")
             self.ax.legend(
-                [custom_lines],
-                [legend_labels],
+                custom_lines_list,
+                legend_items,
                 loc=matplotlibLegendLoc,
                 title=self.annotation_legend_config.title,
                 prop={"size": self.annotation_legend_config.fontsize},
