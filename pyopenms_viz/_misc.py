@@ -1,10 +1,11 @@
-from enum import Enum, auto
 import re
-import matplotlib.pyplot as plt
-import numpy as np
+import warnings
+from enum import Enum, auto
 from itertools import cycle
 from typing import Literal
-import warnings
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class ColorGenerator:

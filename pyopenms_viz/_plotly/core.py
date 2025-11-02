@@ -1,33 +1,27 @@
 from __future__ import annotations
 
 from abc import ABC
-
-from typing import List, Tuple, Union
+from typing import Tuple
 
 import plotly.graph_objects as go
+from numpy import column_stack, nan
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
-from pandas.core.frame import DataFrame
-
-from numpy import column_stack, log, nan
-
-from .._core import (
-    BasePlot,
-    LinePlot,
-    VLinePlot,
-    ScatterPlot,
-    BaseMSPlot,
-    ChromatogramPlot,
-    MobilogramPlot,
-    SpectrumPlot,
-    PeakMapPlot,
-    APPEND_PLOT_DOC,
-)
-
 from .._config import bokeh_line_dash_mapper
+from .._core import (
+    APPEND_PLOT_DOC,
+    BaseMSPlot,
+    BasePlot,
+    ChromatogramPlot,
+    LinePlot,
+    MobilogramPlot,
+    PeakMapPlot,
+    ScatterPlot,
+    SpectrumPlot,
+    VLinePlot,
+)
 from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
-from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
 class PLOTLYPlot(BasePlot, ABC):
@@ -57,7 +51,7 @@ class PLOTLYPlot(BasePlot, ABC):
             import plotly.graph_objects
         except ImportError:
             raise ImportError(
-                f"plotly is not installed. Please install using `pip install plotly` to use this plotting library in pyopenms-viz"
+                "plotly is not installed. Please install using `pip install plotly` to use this plotting library in pyopenms-viz"
             )
 
     def _create_figure(self):

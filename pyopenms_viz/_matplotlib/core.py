@@ -2,29 +2,26 @@ from __future__ import annotations
 
 from abc import ABC
 from typing import Tuple
-import re
-from numpy import nan
+
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
+from numpy import nan
 
 from .._config import LegendConfig
-
-from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from .._core import (
-    BasePlot,
-    LinePlot,
-    VLinePlot,
-    ScatterPlot,
-    BaseMSPlot,
-    ChromatogramPlot,
-    MobilogramPlot,
-    SpectrumPlot,
-    PeakMapPlot,
     APPEND_PLOT_DOC,
+    BaseMSPlot,
+    BasePlot,
+    ChromatogramPlot,
+    LinePlot,
+    MobilogramPlot,
+    PeakMapPlot,
+    ScatterPlot,
+    SpectrumPlot,
+    VLinePlot,
 )
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 
 # pylint: disable = E1101  # Disables the "no member" error specifically
 # pylint: disable = W0212  # Disables the "access to a protected member" error specifically
@@ -60,7 +57,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             from matplotlib import pyplot
         except ImportError:
             raise ImportError(
-                f"matplotlib is not installed. Please install using `pip install matplotlib` to use this plotting library in pyopenms-viz"
+                "matplotlib is not installed. Please install using `pip install matplotlib` to use this plotting library in pyopenms-viz"
             )
 
     def _create_figure(self):

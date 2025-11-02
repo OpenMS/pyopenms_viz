@@ -1,9 +1,11 @@
-from abc import ABC, ABCMeta
-from dataclasses import dataclass, field, asdict, fields
-from typing import Tuple, Literal, Dict, Any, Union, Iterator
+from abc import ABC
 from copy import deepcopy
-from ._misc import ColorGenerator, MarkerShapeGenerator
+from dataclasses import asdict, dataclass, field, fields
+from typing import Any, Dict, Iterator, Literal, Tuple, Union
+
 import pandas as pd
+
+from ._misc import ColorGenerator, MarkerShapeGenerator
 
 
 @dataclass(kw_only=True)

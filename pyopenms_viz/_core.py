@@ -1,40 +1,39 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Tuple, Literal, Union, List, Dict, Optional, Iterator
-import numpy as np
 import importlib
-import types
-from dataclasses import dataclass, asdict, fields
-
-from pandas import cut, merge, Interval, concat
-from pandas.core.frame import DataFrame
-from pandas.core.dtypes.generic import ABCDataFrame
-from pandas.core.dtypes.common import is_integer
-from pandas.util._decorators import Appender
 import re
+import types
+import warnings
+from abc import ABC, abstractmethod
+from dataclasses import fields
+from typing import Any, List, Literal, Tuple
+
+import numpy as np
 import pandas as pd
-from numpy import ceil, log1p, log2, nan, mean, repeat, concatenate
+from numpy import log1p, mean, nan, repeat
+from pandas import Interval, concat, cut
+from pandas.core.dtypes.common import is_integer
+from pandas.core.dtypes.generic import ABCDataFrame
+from pandas.core.frame import DataFrame
+from pandas.util._decorators import Appender
+
 from ._config import (
-    LegendConfig,
     BasePlotConfig,
-    SpectrumConfig,
     ChromatogramConfig,
+    LineConfig,
     MobilogramConfig,
     PeakMapConfig,
-    LineConfig,
-    VLineConfig,
     ScatterConfig,
+    SpectrumConfig,
+    VLineConfig,
 )
 from ._misc import (
     ColorGenerator,
-    sturges_rule,
     freedman_diaconis_rule,
     mz_tolerance_binning,
+    sturges_rule,
 )
-from .constants import IS_SPHINX_BUILD, IS_NOTEBOOK
-import warnings
-
+from .constants import IS_NOTEBOOK, IS_SPHINX_BUILD
 
 _common_kinds = ("line", "vline", "scatter")
 _msdata_kinds = ("chromatogram", "mobilogram", "spectrum", "peakmap")
@@ -125,11 +124,12 @@ class BasePlot(ABC):
     @canvas.setter
     def canvas(self, value):
         self._config.canvas = value
+
     def __init__(self, data: DataFrame, config: BasePlotConfig = None, **kwargs):
-         # New empty DataFrame check
+        # New empty DataFrame check
         if data.empty:
             raise ValueError("Cannot plot - DataFrame is empty")
-            
+
         self.data = data.copy()
         if config is None:
             self._config = self._configClass(**kwargs)
@@ -222,35 +222,32 @@ class BasePlot(ABC):
         Check if duplicate data is present and aggregate if specified.
         Properly handles data types and only aggregates relevent columns
         """
-         # Determine intensity column and relevant grouping columns
+        # Determine intensity column and relevant grouping columns
         intensity_col = self.z if self._kind == "peakmap" else self.y
         group_cols = [col for col in self.known_columns if col != intensity_col]
 
         # Check for duplicates in non-intensity columns
         has_duplicates = self.data.duplicated(subset=group_cols).any()
-        
+
         if has_duplicates:
             if self.aggregate_duplicates:
                 # Ensure numeric type for intensity column before aggregation
-                self.data[intensity_col] = self.data[intensity_col].astype(
-                    float
-                )
+                self.data[intensity_col] = self.data[intensity_col].astype(float)
 
                 # Group by non-intensity columns and sum intensities
                 self.data = (
-                    self.data
-                    .groupby(group_cols , observed=True , dropna=False)
-                    [intensity_col]
+                    self.data.groupby(group_cols, observed=True, dropna=False)[
+                        intensity_col
+                    ]
                     .sum()
-                    .reset_index() 
+                    .reset_index()
                 )
             else:
                 warnings.warn(
                     "Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`.",
                     UserWarning,
-                    stacklevel=2
+                    stacklevel=2,
                 )
-            
 
     def __repr__(self):
         return f"{self.__class__.__name__}(kind={self._kind}, data=DataFrame({self.data.shape[0]} rows {self.data.shape[1]} columns), x={self.x}, y={self.y}, by={self.by})"
@@ -435,7 +432,6 @@ class BasePlot(ABC):
 
 
 class LinePlot(BasePlot, ABC):
-
     @property
     def _kind(self):
         return "line"
@@ -549,7 +545,6 @@ class BaseMSPlot(BasePlot, ABC):
 
 
 class ChromatogramPlot(BaseMSPlot, ABC):
-
     _config: ChromatogramConfig = None
 
     @property
@@ -637,7 +632,6 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
 
 class MobilogramPlot(ChromatogramPlot, ABC):
-
     @property
     def _kind(self):
         return "mobilogram"
@@ -660,7 +654,6 @@ class MobilogramPlot(ChromatogramPlot, ABC):
 
 
 class SpectrumPlot(BaseMSPlot, ABC):
-
     @property
     def _kind(self):
         return "spectrum"
@@ -1001,9 +994,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
         """Create annotations for each peak. Return lists of texts, x and y locations and colors."""
 
         if self.annotation_color is None:
-            data["annotation_color"] = "black" 
+            data["annotation_color"] = "black"
         print(f"Annotation color: {self.annotation_color}")
-        annotation_color_column = "annotation_color" if self.annotation_color is None else self.annotation_color
+        annotation_color_column = (
+            "annotation_color"
+            if self.annotation_color is None
+            else self.annotation_color
+        )
 
         ann_texts = []
         top_n = self.annotate_top_n_peaks
@@ -1031,7 +1028,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 if self.custom_annotation and self.custom_annotation in data.columns:
                     texts.append(str(row[self.custom_annotation]))
             ann_texts.append("\n".join(texts))
-        return ann_texts, data[x].tolist(), data[y].tolist(), data[annotation_color_column].tolist()
+        return (
+            ann_texts,
+            data[x].tolist(),
+            data[y].tolist(),
+            data[annotation_color_column].tolist(),
+        )
 
     def _get_ion_color_annotation(self, ion_annotations: str) -> str:
         """Retrieve the color associated with a specific ion annotation from a predefined colormap."""
@@ -1181,7 +1183,6 @@ class PeakMapPlot(BaseMSPlot, ABC):
             self.data = self.data.sort_values(self.z)
 
     def plot(self):
-
         if self.add_marginals:
             main_plot = self.create_main_plot_marginals()
             x_fig = self.create_x_axis_plot()
@@ -1373,8 +1374,7 @@ class PlotAccessor:
 
         if kind not in self._all_kinds:
             raise ValueError(
-                f"{kind} is not a valid plot kind "
-                f"Valid plot kinds: {self._all_kinds}"
+                f"{kind} is not a valid plot kind Valid plot kinds: {self._all_kinds}"
             )
 
         # Call the plot method of the selected backend
@@ -1502,8 +1502,8 @@ def _load_backend(backend: str) -> types.ModuleType:
         f"Could not find plotting backend '{backend}'. Needs to be one of 'bokeh', 'matplotlib', or 'plotly'."
     )
 
-def _get_plot_backend(backend: str | None = None):
 
+def _get_plot_backend(backend: str | None = None):
     backend_str: str = backend or "matplotlib"
 
     if backend_str in _backends:
@@ -1519,7 +1519,7 @@ def plot_chromatogram(
     x: str,
     y: str,
     backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a chromatogram using a seaborn-like API.
@@ -1538,7 +1538,7 @@ def plot_chromatogram(
         - "ms_bokeh": Interactive Bokeh visualizations
         - "ms_plotly": Interactive Plotly visualizations
     **kwargs
-        Additional keyword arguments for plot customization. 
+        Additional keyword arguments for plot customization.
         See :ref:`plotting-parameters` for available options.
 
     Returns
@@ -1564,20 +1564,15 @@ def plot_chromatogram(
     ... )
     >>> fig.show()
     """
-    return data.plot(
-        x=x,
-        y=y,
-        kind="chromatogram",
-        backend=backend,
-        **kwargs
-    )
+    return data.plot(x=x, y=y, kind="chromatogram", backend=backend, **kwargs)
+
 
 def plot_spectrum(
     data: pd.DataFrame,
     x: str,
     y: str,
     backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a mass spectrum using a seaborn-like API.
@@ -1596,7 +1591,7 @@ def plot_spectrum(
         - "ms_bokeh": Interactive Bokeh visualizations
         - "ms_plotly": Interactive Plotly visualizations
     **kwargs
-        Additional keyword arguments for plot customization. 
+        Additional keyword arguments for plot customization.
         See :ref:`plotting-parameters` for available options.
 
     Returns
@@ -1623,20 +1618,15 @@ def plot_spectrum(
     ... )
     >>> fig.show()
     """
-    return data.plot(
-        x=x,
-        y=y,
-        kind="spectrum",
-        backend=backend,
-        **kwargs
-    )
+    return data.plot(x=x, y=y, kind="spectrum", backend=backend, **kwargs)
+
 
 def plot_mobilogram(
     data: pd.DataFrame,
     x: str,
     y: str,
     backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a mobilogram (ion mobility spectrum) using a seaborn-like API.
@@ -1682,13 +1672,8 @@ def plot_mobilogram(
     ... )
     >>> fig.show()
     """
-    return data.plot(
-        x=x,
-        y=y,
-        kind="mobilogram",
-        backend=backend,
-        **kwargs
-    )
+    return data.plot(x=x, y=y, kind="mobilogram", backend=backend, **kwargs)
+
 
 def plot_peakmap(
     data: pd.DataFrame,
@@ -1696,7 +1681,7 @@ def plot_peakmap(
     y: str,
     z: str,
     backend: Literal["ms_matplotlib", "ms_bokeh", "ms_plotly"],
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a peakmap (2D intensity map) using a seaborn-like API.
@@ -1745,11 +1730,4 @@ def plot_peakmap(
     ... )
     >>> fig.show()
     """
-    return data.plot(
-        x=x,
-        y=y,
-        z=z,
-        kind="peakmap",
-        backend=backend,
-        **kwargs
-    )
+    return data.plot(x=x, y=y, z=z, kind="peakmap", backend=backend, **kwargs)
