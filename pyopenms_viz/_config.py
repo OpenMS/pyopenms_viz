@@ -86,6 +86,7 @@ class LegendConfig(BaseConfig):
         1.2,
         0.5,
     )  # for fine control legend positioning in matplotlib
+    ncol: int = 1  # number of columns in legend
 
     @staticmethod
     def _matplotlibLegendLocationMapper(loc):

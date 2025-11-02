@@ -789,6 +789,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 title=self.annotation_legend_config.title,
                 prop={"size": self.annotation_legend_config.fontsize},
                 bbox_to_anchor=self.annotation_legend_config.bbox_to_anchor,
+                ncol=self.annotation_legend_config.ncol,
             )
 
     # since matplotlib is not interactive cannot implement the following methods
