@@ -206,8 +206,10 @@ class MarkerShapeGenerator:
             n (int or None, optional): The number of shapes to generate. Defaults to None.
         """
 
+        self._engine = engine or "MATPLOTLIB"
+        self._n = n
         self.shape_cycle = None
-        # If both are passed, shapes takes presedence
+        # If both are passed, shapes takes precedence
         if shapes is not None:
             if engine is not None:
                 warnings.warn(
@@ -222,9 +224,12 @@ class MarkerShapeGenerator:
         elif engine is not None:
             self.initialize_shape_cycle_from_engine(engine, n)
         else:
+            # Defer initialization until the iterator is first used.
             pass
 
     def initialize_shape_cycle_from_shapes(self, shapes: list):
+        self._engine = None
+        self._n = None
         self.shape_cycle = cycle(shapes)
         return
 
@@ -233,15 +238,23 @@ class MarkerShapeGenerator:
         engine: Literal["MATPLOTLIB", "PLOTLY", "BOKEH"] | None = None,
         n: int | None = None,
     ):
-        if engine == "MATPLOTLIB":
-            shapes = list(self.matplotlib_map.values())
-        elif engine == "PLOTLY":
-            shapes = list(self.plotly_map.values())
-        else:  # engine == "BOKEH"
-            shapes = list(self.bokeh_map.values())
+        target_engine = engine or self._engine or "MATPLOTLIB"
 
-        if n is not None:
-            shapes = shapes[:n]
+        if target_engine == "MATPLOTLIB":
+            shapes = list(self.matplotlib_map.values())
+        elif target_engine == "PLOTLY":
+            shapes = list(self.plotly_map.values())
+        elif target_engine == "BOKEH":
+            shapes = list(self.bokeh_map.values())
+        else:
+            raise ValueError(f"Invalid engine '{target_engine}' supplied.")
+
+        use_n = n if n is not None else self._n
+        if use_n is not None:
+            shapes = shapes[:use_n]
+
+        self._engine = target_engine
+        self._n = use_n
         self.shape_cycle = cycle(shapes)
         return
 
@@ -252,12 +265,16 @@ class MarkerShapeGenerator:
         """
         Returns the MarkerShapeGenerator object itself.
         """
+        if not self.is_initialized():
+            self.initialize_shape_cycle_from_engine()
         return self.shape_cycle
 
     def __next__(self):
         """
         Returns the next shape in the shape cycle.
         """
+        if not self.is_initialized():
+            self.initialize_shape_cycle_from_engine()
         return next(self.shape_cycle)
 
 
