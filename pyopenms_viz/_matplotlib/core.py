@@ -2,29 +2,29 @@ from __future__ import annotations
 
 from abc import ABC
 from typing import Tuple
-import re
-from numpy import nan
+
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
+from numpy import nan
 
 from .._config import LegendConfig
-
-from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
 from .._core import (
-    BasePlot,
-    LinePlot,
-    VLinePlot,
-    ScatterPlot,
-    BaseMSPlot,
-    ChromatogramPlot,
-    MobilogramPlot,
-    SpectrumPlot,
-    PeakMapPlot,
     APPEND_PLOT_DOC,
+    BaseMSPlot,
+    BasePlot,
+    ChromatogramPlot,
+    LinePlot,
+    MobilogramPlot,
+    PeakMapPlot,
+    ScatterPlot,
+    SpectrumPlot,
+    VLinePlot,
 )
+from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
+
+# pylint: disable = E1101  # Disables the "no member" error specifically
+# pylint: disable = W0212  # Disables the "access to a protected member" error specifically
 
 
 class MATPLOTLIBPlot(BasePlot, ABC):
@@ -57,7 +57,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             from matplotlib import pyplot
         except ImportError:
             raise ImportError(
-                f"matplotlib is not installed. Please install using `pip install matplotlib` to use this plotting library in pyopenms-viz"
+                "matplotlib is not installed. Please install using `pip install matplotlib` to use this plotting library in pyopenms-viz"
             )
 
     def _create_figure(self):
@@ -470,7 +470,6 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
 
 
 class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
-
     def get_line_renderer(self, **kwargs) -> None:
         return MATPLOTLIBLinePlot(**kwargs)
 
@@ -732,9 +731,10 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
         legend_items = []
+        custom_lines_list = []
 
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             x0 = feature[self.annotation_x_lb]
@@ -756,8 +756,8 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 height,
                 fill=False,
                 edgecolor=color,
-                linestyle=self.feature_config.line_type,
-                linewidth=self.feature_config.line_width,
+                linestyle=self.annotation_line_type,
+                linewidth=self.annotation_line_width,
                 zorder=5,
             )
             self.ax.add_patch(custom_lines)
@@ -767,22 +767,26 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             else:
                 use_name = f"Feature {idx}"
             if "q_value" in annotation_data.columns:
-                legend_labels = f"{use_name} (q-value: {feature['q_value']:.4f})"
+                legend_label = f"{use_name} (q-value: {feature['q_value']:.4f})"
             else:
-                legend_labels = f"{use_name}"
+                legend_label = use_name
+
+            legend_items.append(legend_label)
+            custom_lines_list.append(custom_lines)
 
         # Add legend
-        if self.feature_config.legend.show:
+        if self.annotation_legend_config.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
-                self.feature_config.legend.loc
+                self.annotation_legend_config.loc
             )
             self.ax.legend(
-                [custom_lines],
-                [legend_labels],
+                custom_lines_list,
+                legend_items,
                 loc=matplotlibLegendLoc,
-                title=self.feature_config.legend.title,
-                prop={"size": self.feature_config.legend.fontsize},
-                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
+                title=self.annotation_legend_config.title,
+                prop={"size": self.annotation_legend_config.fontsize},
+                bbox_to_anchor=self.annotation_legend_config.bbox_to_anchor,
+                ncol=self.annotation_legend_config.ncol,
             )
 
     # since matplotlib is not interactive cannot implement the following methods
