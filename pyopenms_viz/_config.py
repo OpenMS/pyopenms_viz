@@ -8,7 +8,6 @@ import pandas as pd
 
 @dataclass(kw_only=True)
 class BaseConfig(ABC):
-
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> "BaseConfig":
         """
@@ -288,7 +287,6 @@ class ScatterConfig(BasePlotConfig):
     )
 
     def __post_init__(self):
-
         super().__post_init__()
         if not isinstance(self.marker, MarkerShapeGenerator):
             self.marker = MarkerShapeGenerator(shapes=self.marker)
@@ -424,6 +422,10 @@ class PeakMapConfig(ScatterConfig):
         x_kind (str): Type of plot for the X-axis marginal. Defaults to "chromatogram".
         aggregation_method (Literal["mean", "sum", "max"]): Method for aggregating data. Defaults to "mean".
         annotation_data (pd.DataFrame | None): Data for annotations. Defaults to None.
+        annotation_colormap (str): Colormap for annotations. Defaults to "Dark2".
+        annotation_line_width (float): Width of the annotation lines. Defaults to 3.
+        annotation_line_type (str): Type of the annotation lines (e.g., "solid", "dashed"). Defaults to "solid".
+        annotation_legend_config (Dict | LegendConfig): Configuration for the annotation legend. Defaults to a LegendConfig instance with title "Features".
         xlabel (str): Label for the X-axis. Defaults to "Retention Time".
         ylabel (str): Label for the Y-axis. Defaults to "mass-to-charge".
         zlabel (str): Label for the Z-axis. Defaults to "Intensity".
@@ -448,6 +450,18 @@ class PeakMapConfig(ScatterConfig):
 
     aggregation_method: Literal["mean", "sum", "max"] = "mean"
     annotation_data: pd.DataFrame | None = None
+    annotation_x_lb: str = "leftWidth"
+    annotation_x_ub: str = "rightWidth"
+    annotation_y_lb: str = "IM_leftWidth"
+    annotation_y_ub: str = "IM_rightWidth"
+    annotation_colors: str = "color"
+    annotation_names: str = "name"
+    annotation_colormap: str = "Dark2"
+    annotation_line_width: float = 3
+    annotation_line_type: str = "solid"
+    annotation_legend_config: Dict | LegendConfig = field(
+        default_factory=ScatterConfig.default_legend_factory
+    )
 
     ### override axes and title labels
     xlabel: str = "Retention Time"
@@ -498,6 +512,10 @@ class PeakMapConfig(ScatterConfig):
         self.annotation_data = (
             None if self.annotation_data is None else self.annotation_data.copy()
         )
+        if not isinstance(self.annotation_legend_config, LegendConfig):
+            self.annotation_legend_config = LegendConfig.from_dict(
+                self.annotation_legend_config
+            )
 
 
 def bokeh_line_dash_mapper(bokeh_dash, target_library="plotly"):

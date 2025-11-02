@@ -26,6 +26,9 @@ from .._core import (
     APPEND_PLOT_DOC,
 )
 
+# pylint: disable = E1101  # Disables the "no member" error specifically
+# pylint: disable = W0212  # Disables the "access to a protected member" error specifically
+
 
 class MATPLOTLIBPlot(BasePlot, ABC):
     """
@@ -470,7 +473,6 @@ class MATPLOTLIBScatterPlot(MATPLOTLIBPlot, ScatterPlot):
 
 
 class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
-
     def get_line_renderer(self, **kwargs) -> None:
         return MATPLOTLIBLinePlot(**kwargs)
 
@@ -732,7 +734,7 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
             self.ax.add_artist(legend)
 
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
         legend_items = []
 
@@ -756,8 +758,8 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 height,
                 fill=False,
                 edgecolor=color,
-                linestyle=self.feature_config.line_type,
-                linewidth=self.feature_config.line_width,
+                linestyle=self.annotation_line_type,
+                linewidth=self.annotation_line_width,
                 zorder=5,
             )
             self.ax.add_patch(custom_lines)
@@ -772,17 +774,18 @@ class MATPLOTLIBPeakMapPlot(MATPLOTLIB_MSPlot, PeakMapPlot):
                 legend_labels = f"{use_name}"
 
         # Add legend
-        if self.feature_config.legend.show:
+        if self.annotation_legend_config.show:
             matplotlibLegendLoc = LegendConfig._matplotlibLegendLocationMapper(
-                self.feature_config.legend.loc
+                self.annotation_legend_config.loc
             )
+            print(f"legend_labels: {legend_labels}")
             self.ax.legend(
                 [custom_lines],
                 [legend_labels],
                 loc=matplotlibLegendLoc,
-                title=self.feature_config.legend.title,
-                prop={"size": self.feature_config.legend.fontsize},
-                bbox_to_anchor=self.feature_config.legend.bbox_to_anchor,
+                title=self.annotation_legend_config.title,
+                prop={"size": self.annotation_legend_config.fontsize},
+                bbox_to_anchor=self.annotation_legend_config.bbox_to_anchor,
             )
 
     # since matplotlib is not interactive cannot implement the following methods
