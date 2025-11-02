@@ -282,7 +282,6 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 
     @APPEND_PLOT_DOC
     def plot(self):
-
         traces = []
         if self.by is None:
             trace = go.Scatter(
@@ -307,10 +306,8 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 
 
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
-
     @APPEND_PLOT_DOC
     def plot(self):
-
         if not self.plot_3d:
             traces = []
             use_color = self.current_color
@@ -462,7 +459,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
-
     def __init__(self, data, **kwargs):
         super().__init__(data, **kwargs)
         if (
@@ -473,7 +469,6 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
     @APPEND_PLOT_DOC
     def plot(self):
-
         marker_dict = dict()
         # Check for z-dimension and plot heatmap
         # Plotting heatmaps with z dimension overwrites marker_dict.
@@ -529,7 +524,6 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
 
 class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
-
     def get_line_renderer(self, **kwargs) -> None:
         return PLOTLYLinePlot(**kwargs)
 
@@ -569,7 +563,6 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
 
 class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
-
     def _add_peak_boundaries(self, annotation_data):
         super()._add_peak_boundaries(annotation_data)
         color_gen = ColorGenerator(
@@ -622,7 +615,6 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
 
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
-
     # NOTE: canvas is only used in matplotlib backend
     def create_main_plot(self, canvas=None) -> Figure:
         if not self.plot_3d:
@@ -630,7 +622,6 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             self.fig = scatterPlot.generate(None, None)
 
             if self.z is not None:
-
                 tooltips, custom_hover_data = self._create_tooltips(
                     {self.xlabel: self.x, self.ylabel: self.y, self.zlabel: self.z}
                 )
@@ -781,7 +772,7 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
     def _add_box_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             x0 = feature[self.annotation_x_lb]
@@ -811,10 +802,8 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 y1=y1,
                 line=dict(
                     color=color,
-                    width=self.feature_config.line_width,
-                    dash=bokeh_line_dash_mapper(
-                        self.feature_config.line_type, "plotly"
-                    ),
+                    width=self.annotation_line_width,
+                    dash=bokeh_line_dash_mapper(self.annotation_line_type, "plotly"),
                 ),
                 fillcolor="rgba(0,0,0,0)",
                 opacity=0.5,
@@ -828,9 +817,9 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                     mode="lines",
                     line=dict(
                         color=color,
-                        width=self.feature_config.line_width,
+                        width=self.annotation_line_width,
                         dash=bokeh_line_dash_mapper(
-                            self.feature_config.line_type, "plotly"
+                            self.annotation_line_type, "plotly"
                         ),
                     ),
                     showlegend=True,
