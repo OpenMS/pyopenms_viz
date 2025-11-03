@@ -9,6 +9,14 @@ from pyopenms_viz.testing import (
 )
 matplotlib.use('Agg')
 
+# Set matplotlib to use deterministic settings for consistent rendering across systems
+import matplotlib.pyplot as plt
+plt.rcParams['svg.hashsalt'] = 'pyopenms_viz_test'  # For SVG determinism
+plt.rcParams['font.family'] = 'DejaVu Sans'  # Use consistent font across systems
+plt.rcParams['font.size'] = 10
+plt.rcParams['figure.max_open_warning'] = 0  # Disable max figure warning
+# Note: Not setting DPI explicitly to preserve existing snapshot dimensions
+
 def find_git_directory(start_path):
     """Find the full path to the nearest '.git' directory by climbing up the directory tree.
 
@@ -91,3 +99,44 @@ def close_plots():
     import matplotlib.pyplot as plt
     yield
     plt.close('all')
+
+@pytest.fixture(autouse=True)
+def reset_random_state():
+    """Reset random state before each test for deterministic behavior"""
+    import random
+    import numpy as np
+    
+    # Set seeds for all random number generators
+    random.seed(42)
+    np.random.seed(42)
+    
+    # Monkey patch uuid.uuid4 for deterministic UUIDs (used by Bokeh)
+    try:
+        import uuid
+        _original_uuid4 = uuid.uuid4
+        counter = [0]
+        
+        def deterministic_uuid4():
+            counter[0] += 1
+            # Generate deterministic UUID from counter
+            return uuid.UUID(f'00000000-0000-4000-8000-{counter[0]:012d}')
+        
+        uuid.uuid4 = deterministic_uuid4
+    except ImportError:
+        pass
+    
+    # Reset bokeh ID counter if available
+    try:
+        from bokeh.core.ids import ID
+        ID._counter = 1000
+    except (ImportError, AttributeError):
+        pass
+    
+    yield
+    
+    # Restore original uuid4
+    try:
+        import uuid
+        uuid.uuid4 = _original_uuid4
+    except:
+        pass
