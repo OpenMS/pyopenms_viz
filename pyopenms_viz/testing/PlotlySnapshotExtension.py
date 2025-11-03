@@ -41,6 +41,67 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                 print(f'Key mismatch at {_parent_key}: {keys1 ^ keys2}')
                 return False
             
+            # Special handling for traces with both y (bdata) and customdata
+            # Need to sort them together to maintain correspondence
+            if ('y' in keys1 and 'customdata' in keys1 and
+                isinstance(json1['y'], dict) and 'bdata' in json1['y'] and
+                isinstance(json1['customdata'], list) and
+                isinstance(json2['y'], dict) and 'bdata' in json2['y'] and
+                isinstance(json2['customdata'], list)):
+                
+                # Decode y arrays
+                dtype = json1['y'].get('dtype', 'f8')
+                y1 = PlotlySnapshotExtension._decode_bdata(json1['y']['bdata'], dtype)
+                y2 = PlotlySnapshotExtension._decode_bdata(json2['y']['bdata'], dtype)
+                
+                if y1 is not None and y2 is not None and len(y1) == len(json1['customdata']) and len(y2) == len(json2['customdata']):
+                    # Sort by customdata, keeping y values aligned
+                    def make_sort_key(item):
+                        result = []
+                        for val in item:
+                            if isinstance(val, str):
+                                result.append((1, val))
+                            elif isinstance(val, (int, float)):
+                                result.append((0, val))
+                            else:
+                                result.append((2, str(val)))
+                        return tuple(result)
+                    
+                    # Create (y_value, customdata_row) pairs and sort them
+                    pairs1 = list(zip(y1, json1['customdata']))
+                    pairs2 = list(zip(y2, json2['customdata']))
+                    
+                    try:
+                        pairs1_sorted = sorted(pairs1, key=lambda p: make_sort_key(p[1]))
+                        pairs2_sorted = sorted(pairs2, key=lambda p: make_sort_key(p[1]))
+                        
+                        # Extract sorted y values and customdata
+                        y1_sorted = _np.array([p[0] for p in pairs1_sorted])
+                        y2_sorted = _np.array([p[0] for p in pairs2_sorted])
+                        cd1_sorted = [p[1] for p in pairs1_sorted]
+                        cd2_sorted = [p[1] for p in pairs2_sorted]
+                        
+                        # Compare sorted y values
+                        if not _np.allclose(y1_sorted, y2_sorted, rtol=1e-6, atol=1e-9):
+                            print(f'Sorted y values differ at {_parent_key}')
+                            return False
+                        
+                        # Compare sorted customdata
+                        if not PlotlySnapshotExtension.compare_json(cd1_sorted, cd2_sorted, 'customdata'):
+                            return False
+                        
+                        # Compare all other keys except y and customdata
+                        remaining_keys = keys1 - {'y', 'customdata'}
+                        for key in remaining_keys:
+                            if not PlotlySnapshotExtension.compare_json(json1[key], json2[key], key):
+                                print(f'Values for key {key} not equal')
+                                return False
+                        
+                        return True
+                    except (TypeError, ValueError) as e:
+                        print(f'Error sorting y/customdata together: {e}')
+                        # Fall through to regular comparison
+            
             for key in keys1:
                 # Special handling for 'bdata' - decode and compare numerically
                 if key == 'bdata' and isinstance(json1[key], str) and isinstance(json2[key], str):
