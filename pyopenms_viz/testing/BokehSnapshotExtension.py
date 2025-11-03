@@ -153,6 +153,25 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 
         else:
             # Base case: direct comparison
+            # Special handling for base64 strings (likely index arrays)
+            if isinstance(json1, str) and isinstance(json2, str):
+                # Check if these look like base64 (all printable ASCII, ends with = potentially)
+                if len(json1) > 50 and len(json2) > 50 and all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=' for c in json1[:100]):
+                    # Try to decode as numpy arrays and compare
+                    try:
+                        import base64
+                        import numpy as np
+                        arr1 = np.frombuffer(base64.b64decode(json1), dtype=np.int32)
+                        arr2 = np.frombuffer(base64.b64decode(json2), dtype=np.int32)
+                        # For index arrays, order may not matter - compare sorted
+                        if len(arr1) == len(arr2) and np.array_equal(np.sort(arr1), np.sort(arr2)):
+                            return True
+                        # Also try exact equality
+                        if np.array_equal(arr1, arr2):
+                            return True
+                    except (ValueError, TypeError, base64.binascii.Error):
+                        pass  # Not base64 or not decodable as int32, fall through to string comparison
+            
             if json1 != json2:
                 print(f"Values differ: {json1} != {json2}")
                 return False

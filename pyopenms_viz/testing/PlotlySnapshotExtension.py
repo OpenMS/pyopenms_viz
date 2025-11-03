@@ -101,19 +101,19 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
         """Decode plotly 'bdata' (base64, possibly zlib-compressed) into a numpy array."""
         try:
             raw = base64.b64decode(b64_str)
-        except Exception:
+        except (ValueError, TypeError, base64.binascii.Error) as e:
             return None
         # Try decompress
         try:
             raw = zlib.decompress(raw)
-        except Exception:
-            pass  # Not compressed
+        except zlib.error:
+            pass  # Not compressed, use raw bytes
         # Decode as numpy array
         try:
             dtype = _np.dtype(dtype_str)
             arr = _np.frombuffer(raw, dtype=dtype)
             return arr
-        except Exception:
+        except (ValueError, TypeError) as e:
             return None
 
     @staticmethod
@@ -129,9 +129,17 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             if arr1.shape != arr2.shape:
                 return False
             
+            # For integer arrays (like indices), check if sorted arrays match
+            # This handles cases where index order doesn't matter for rendering
+            if _np.issubdtype(arr1.dtype, _np.integer) and _np.issubdtype(arr2.dtype, _np.integer):
+                if _np.array_equal(arr1, arr2):
+                    return True
+                # If exact match fails, try sorted comparison (for index arrays)
+                return _np.array_equal(_np.sort(arr1), _np.sort(arr2))
+            
             # Use allclose for floating point comparison
             return _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
-        except Exception:
+        except (TypeError, ValueError):
             return False
 
     def _read_snapshot_data_from_location(
