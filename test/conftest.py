@@ -104,16 +104,10 @@ def close_plots():
     yield
     plt.close('all')
 
-@pytest.fixture(autouse=True)
-def reset_random_state():
-    """Reset random state before each test for deterministic behavior"""
-    import random
-    import numpy as np
+@pytest.fixture(scope="session", autouse=True)
+def setup_deterministic_ids():
+    """Set up deterministic IDs once for the entire test session"""
     import uuid
-    
-    # Set seeds for all random number generators
-    random.seed(42)
-    np.random.seed(42)
     
     # Store original uuid4 before patching
     _original_uuid4 = uuid.uuid4
@@ -128,7 +122,7 @@ def reset_random_state():
     
     uuid.uuid4 = deterministic_uuid4
     
-    # Reset bokeh ID counter if available
+    # Reset bokeh ID counter if available (only once at session start)
     try:
         from bokeh.core.ids import ID
         ID._counter = 1000
@@ -139,3 +133,16 @@ def reset_random_state():
     
     # Restore original uuid4
     uuid.uuid4 = _original_uuid4
+
+
+@pytest.fixture(autouse=True)
+def reset_random_state():
+    """Reset random state before each test for deterministic behavior"""
+    import random
+    import numpy as np
+    
+    # Set seeds for all random number generators before each test
+    random.seed(42)
+    np.random.seed(42)
+    
+    yield
