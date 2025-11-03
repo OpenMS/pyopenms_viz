@@ -122,14 +122,25 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 all(isinstance(i, dict) for i in json1) and 
                 all(isinstance(i, dict) for i in json2)):
                 
-                # Try to sort by type and a stable hash
+                # Normalize attributes by removing ignored keys recursively
+                def _normalize(value):
+                    if isinstance(value, dict):
+                        return {
+                            k: _normalize(v)
+                            for k, v in value.items()
+                            if k not in _ignore_keys
+                        }
+                    if isinstance(value, list):
+                        return [_normalize(v) for v in value]
+                    return value
+                
+                # Try to sort by type, name, and complete attribute content
                 def sort_key(item):
                     item_type = item.get("type", "")
                     item_name = item.get("name", "")
-                    # Use attributes as secondary sort if present
-                    attrs = item.get("attributes", {})
-                    attr_keys = sorted(k for k in attrs.keys() if k not in _ignore_keys)
-                    return (item_type, item_name, tuple(attr_keys))
+                    attrs = _normalize(item.get("attributes", {}))
+                    attrs_repr = _json.dumps(attrs, sort_keys=True)
+                    return (item_type, item_name, attrs_repr)
                 
                 try:
                     sorted1 = sorted(json1, key=sort_key)
