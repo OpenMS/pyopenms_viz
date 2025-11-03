@@ -6,94 +6,14 @@
       },
       "mode": "lines",
       "name": "black",
-      "x": [
-        19988.959742,
-        19988.959742,
-        19988.959742,
-        19989.963097,
-        19989.963097,
-        19989.963097,
-        19990.966452,
-        19990.966452,
-        19990.966452,
-        19991.969806,
-        19991.969806,
-        19991.969806,
-        19992.973161,
-        19992.973161,
-        19992.973161,
-        19993.976516,
-        19993.976516,
-        19993.976516,
-        19994.979871,
-        19994.979871,
-        19994.979871,
-        19995.983226,
-        19995.983226,
-        19995.983226,
-        19996.986581,
-        19996.986581,
-        19996.986581,
-        19997.989935,
-        19997.989935,
-        19997.989935,
-        19998.99329,
-        19998.99329,
-        19998.99329,
-        19999.996645,
-        19999.996645,
-        19999.996645,
-        20002.003355,
-        20002.003355,
-        20002.003355,
-        20003.00671,
-        20003.00671,
-        20003.00671
-      ],
-      "y": [
-        0.0,
-        8e-06,
-        0.0,
-        0.0,
-        9.1e-05,
-        0.0,
-        0.0,
-        0.000502,
-        0.0,
-        0.0,
-        0.001865,
-        0.0,
-        0.0,
-        0.005267,
-        0.0,
-        0.0,
-        0.012056,
-        0.0,
-        0.0,
-        0.023279,
-        0.0,
-        0.0,
-        0.03898,
-        0.0,
-        0.0,
-        0.057763,
-        0.0,
-        0.0,
-        0.076919,
-        0.0,
-        0.0,
-        0.09316,
-        0.0,
-        0.0,
-        0.103618,
-        0.0,
-        0.0,
-        0.102367,
-        0.0,
-        0.0,
-        0.092046,
-        0.0
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "prVpbD2F00CmtWlsPYXTQKa1aWw9hdNAeJlho32F00B4mWGjfYXTQHiZYaN9hdNASn1Z2r2F00BKfVnavYXTQEp9Wdq9hdNAXi9NEf6F00BeL00R\u002foXTQF4vTRH+hdNAMBNFSD6G00AwE0VIPobTQDATRUg+htNAAfc8f36G00AB9zx\u002ffobTQAH3PH9+htNA09o0tr6G00DT2jS2vobTQNPaNLa+htNApb4s7f6G00Clvizt\u002fobTQKW+LO3+htNAd6IkJD+H00B3oiQkP4fTQHeiJCQ\u002fh9NAi1QYW3+H00CLVBhbf4fTQItUGFt\u002fh9NAXDgQkr+H00BcOBCSv4fTQFw4EJK\u002fh9NALhwIyf+H00AuHAjJ\u002f4fTQC4cCMn\u002fh9NA0uP3NoCI00DS4\u002fc2gIjTQNLj9zaAiNNApMfvbcCI00Ckx+9twIjTQKTH723AiNNA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "AAAAAAAAAACN7bWg98bgPgAAAAAAAAAAAAAAAAAAAADFrYIY6NoXPwAAAAAAAAAAAAAAAAAAAADpX5LKFHNAPwAAAAAAAAAAAAAAAAAAAADmV3OAYI5ePwAAAAAAAAAAAAAAAAAAAABn8PeL2ZJ1PwAAAAAAAAAAAAAAAAAAAABavcPt0LCIPwAAAAAAAAAAAAAAAAAAAABy\u002fbs+c9aXPwAAAAAAAAAAAAAAAAAAAAC+amXCL\u002fWjPwAAAAAAAAAAAAAAAAAAAAA\u002fc9anHJOtPwAAAAAAAAAAAAAAAAAAAADz5nCt9rCzPwAAAAAAAAAAAAAAAAAAAAC3nEtxVdm3PwAAAAAAAAAAAAAAAAAAAADB5EaRtYa6PwAAAAAAAAAAAAAAAAAAAAC5izBFuTS6PwAAAAAAAAAAAAAAAAAAAAALRbqfU5C3PwAAAAAAAAAA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -273,16 +193,14 @@
       },
       "mode": "lines",
       "name": "red",
-      "x": [
-        20001.0,
-        20001.0,
-        20001.0
-      ],
-      "y": [
-        0.0,
-        0.106688,
-        0.0
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "AAAAAECI00AAAAAAQIjTQAAAAABAiNNA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "AAAAAAAAAAB4KuCe50+7PwAAAAAAAAAA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -431,58 +349,6 @@
               ]
             ],
             "type": "contour"
-          }
-        ],
-        "heatmapgl": [
-          {
-            "colorbar": {
-              "outlinewidth": 1,
-              "tickcolor": "rgb(36,36,36)",
-              "ticks": "outside"
-            },
-            "colorscale": [
-              [
-                0.0,
-                "#440154"
-              ],
-              [
-                0.1111111111111111,
-                "#482878"
-              ],
-              [
-                0.2222222222222222,
-                "#3e4989"
-              ],
-              [
-                0.3333333333333333,
-                "#31688e"
-              ],
-              [
-                0.4444444444444444,
-                "#26828e"
-              ],
-              [
-                0.5555555555555556,
-                "#1f9e89"
-              ],
-              [
-                0.6666666666666666,
-                "#35b779"
-              ],
-              [
-                0.7777777777777778,
-                "#6ece58"
-              ],
-              [
-                0.8888888888888888,
-                "#b5de2b"
-              ],
-              [
-                1.0,
-                "#fde725"
-              ]
-            ],
-            "type": "heatmapgl"
           }
         ],
         "heatmap": [
@@ -745,6 +611,18 @@
               }
             },
             "type": "scattermapbox"
+          }
+        ],
+        "scattermap": [
+          {
+            "marker": {
+              "colorbar": {
+                "outlinewidth": 1,
+                "tickcolor": "rgb(36,36,36)",
+                "ticks": "outside"
+              }
+            },
+            "type": "scattermap"
           }
         ],
         "scatterpolargl": [
