@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:17.163** total execution time for 28 files **from all galleries**:
+**00:16.431** total execution time for 28 files **from all galleries**:
 
 .. container::
 
@@ -33,86 +33,86 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_3D_highlight_peptide_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_3D_highlight_peptide_ms_matplotlib.py``)
-     - 00:03.126
+     - 00:03.096
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py``)
-     - 00:02.556
+     - 00:01.960
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_marginals_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_marginals_ms_plotly.py``)
-     - 00:01.480
+     - 00:01.495
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spyogenes_subplots_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_spyogenes_subplots_ms_matplotlib.py``)
-     - 00:01.174
+     - 00:01.163
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spyogenes_subplots_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_spyogenes_subplots_ms_bokeh.py``)
-     - 00:01.064
+     - 00:01.124
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_3D_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_3D_ms_matplotlib.py``)
-     - 00:00.981
+     - 00:00.961
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_investigate_spectrum_binning_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.py``)
-     - 00:00.823
+     - 00:00.756
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spyogenes_subplots_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_spyogenes_subplots_ms_plotly.py``)
-     - 00:00.608
+     - 00:00.659
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_marginals_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_marginals_ms_matplotlib.py``)
-     - 00:00.521
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_dia_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_spectrum_dia_ms_bokeh.py``)
-     - 00:00.378
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_dia_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_spectrum_dia_ms_plotly.py``)
-     - 00:00.367
+     - 00:00.476
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spectrum_dia_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_spectrum_dia_ms_matplotlib.py``)
-     - 00:00.367
+     - 00:00.348
      - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_binning_demonstration_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_binning_demonstration_ms_matplotlib.py``)
-     - 00:00.337
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_peakmap_ms_bokeh.py``)
-     - 00:00.315
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_chromatogram_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_chromatogram_ms_bokeh.py``)
-     - 00:00.310
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_marginals_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_peakmap_marginals_ms_bokeh.py``)
-     - 00:00.290
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_dia_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_spectrum_dia_ms_bokeh.py``)
+     - 00:00.346
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_highlight_peptide_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_3D_highlight_peptide_ms_plotly.py``)
+     - 00:00.336
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_binning_demonstration_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_binning_demonstration_ms_matplotlib.py``)
+     - 00:00.331
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_dia_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_spectrum_dia_ms_plotly.py``)
+     - 00:00.329
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_peakmap_ms_bokeh.py``)
+     - 00:00.318
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_chromatogram_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_chromatogram_ms_bokeh.py``)
      - 00:00.289
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_spectrum_ms_bokeh.py``)
-     - 00:00.233
+     - 00:00.275
      - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_mobilogram_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_mobilogram_ms_bokeh.py``)
-     - 00:00.228
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_ms_plotly.py``)
-     - 00:00.227
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spectrum_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_spectrum_ms_matplotlib.py``)
-     - 00:00.217
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_mobilogram_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_mobilogram_ms_matplotlib.py``)
-     - 00:00.215
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_ms_matplotlib.py``)
-     - 00:00.209
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_chromatogram_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_chromatogram_ms_matplotlib.py``)
-     - 00:00.203
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_3D_ms_plotly.py``)
-     - 00:00.187
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_marginals_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_peakmap_marginals_ms_bokeh.py``)
+     - 00:00.259
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_mobilogram_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_mobilogram_ms_plotly.py``)
-     - 00:00.166
+     - 00:00.221
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_ms_plotly.py``)
+     - 00:00.217
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_chromatogram_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_chromatogram_ms_plotly.py``)
-     - 00:00.146
+     - 00:00.211
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_mobilogram_ms_bokeh.py` (``gallery_scripts/ms_bokeh/plot_mobilogram_ms_bokeh.py``)
+     - 00:00.200
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_mobilogram_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_mobilogram_ms_matplotlib.py``)
+     - 00:00.194
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_spectrum_ms_plotly.py``)
-     - 00:00.145
+     - 00:00.192
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_peakmap_ms_matplotlib.py``)
+     - 00:00.175
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_chromatogram_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_chromatogram_ms_matplotlib.py``)
+     - 00:00.170
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``gallery_scripts/ms_plotly/plot_peakmap_3D_ms_plotly.py``)
+     - 00:00.166
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spectrum_ms_matplotlib.py` (``gallery_scripts/ms_matplotlib/plot_spectrum_ms_matplotlib.py``)
+     - 00:00.166
      - 0.0
