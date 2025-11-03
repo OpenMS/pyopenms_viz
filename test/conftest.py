@@ -77,6 +77,9 @@ def chromatogram_data(test_path):
 def spectrum_data(test_path):
     return pd.read_csv(test_path / "TestSpectrumDf.tsv", sep="\t")
 
+@pytest.fixture
+def spectrum_data2(test_path):
+    return pd.read_csv(test_path / "TestSpectrumDf2.tsv", sep="\t")
 
 @pytest.fixture
 def chromatogram_features(test_path):

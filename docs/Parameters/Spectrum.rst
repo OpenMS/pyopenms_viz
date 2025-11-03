@@ -7,11 +7,10 @@ A spectrum can be plot using kind = "spectrum". In this plot, mass-to-charge rat
 Parameters
 ----------
 
-.. csv-table:: Chromatogram Options
-   :file: spectrumPlot.tsv
-   :header-rows: 1
-   :delim: tab
-
+.. docstring_to_table:: 
+   :docstring: pyopenms_viz._config.SpectrumConfig
+   :parent_depth: 1
+   :default_docstring:
 
 Example Usage
 -------------

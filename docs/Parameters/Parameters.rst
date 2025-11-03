@@ -5,11 +5,13 @@ Pyopenms-viz plotting occurs by calling the `.plot()` method on a pandas datafra
 
 General Options include (mandatory fields are starred)
 
-.. csv-table:: General Options
-   :file: basePlot.tsv
-   :header-rows: 1
-   :delim: tab
+.. docstring_to_table:: 
+   :docstring: pyopenms_viz._config.BasePlotConfig
+   :title: Core Options
 
+.. docstring_to_table:: 
+   :docstring: pyopenms_viz._config.LegendConfig
+   :title: Legend Options
 
 Please click on a kind of plot below for more details on their specific parameters:
 

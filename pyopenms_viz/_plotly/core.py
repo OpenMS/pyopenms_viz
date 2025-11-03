@@ -1,33 +1,27 @@
 from __future__ import annotations
 
 from abc import ABC
-
-from typing import List, Tuple, Union
+from typing import Tuple
 
 import plotly.graph_objects as go
+from numpy import column_stack, nan
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
-from pandas.core.frame import DataFrame
-
-from numpy import column_stack, log, nan
-
-from .._core import (
-    BasePlot,
-    LinePlot,
-    VLinePlot,
-    ScatterPlot,
-    BaseMSPlot,
-    ChromatogramPlot,
-    MobilogramPlot,
-    SpectrumPlot,
-    PeakMapPlot,
-    APPEND_PLOT_DOC,
-)
-
 from .._config import bokeh_line_dash_mapper
+from .._core import (
+    APPEND_PLOT_DOC,
+    BaseMSPlot,
+    BasePlot,
+    ChromatogramPlot,
+    LinePlot,
+    MobilogramPlot,
+    PeakMapPlot,
+    ScatterPlot,
+    SpectrumPlot,
+    VLinePlot,
+)
 from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
-from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
 
 
 class PLOTLYPlot(BasePlot, ABC):
@@ -57,7 +51,7 @@ class PLOTLYPlot(BasePlot, ABC):
             import plotly.graph_objects
         except ImportError:
             raise ImportError(
-                f"plotly is not installed. Please install using `pip install plotly` to use this plotting library in pyopenms-viz"
+                "plotly is not installed. Please install using `pip install plotly` to use this plotting library in pyopenms-viz"
             )
 
     def _create_figure(self):
@@ -282,7 +276,6 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 
     @APPEND_PLOT_DOC
     def plot(self):
-
         traces = []
         if self.by is None:
             trace = go.Scatter(
@@ -307,10 +300,8 @@ class PLOTLYLinePlot(PLOTLYPlot, LinePlot):
 
 
 class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
-
     @APPEND_PLOT_DOC
     def plot(self):
-
         if not self.plot_3d:
             traces = []
             use_color = self.current_color
@@ -462,7 +453,6 @@ class PLOTLYVLinePlot(PLOTLYPlot, VLinePlot):
 
 
 class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
-
     def __init__(self, data, **kwargs):
         super().__init__(data, **kwargs)
         if (
@@ -473,7 +463,6 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
     @APPEND_PLOT_DOC
     def plot(self):
-
         marker_dict = dict()
         # Check for z-dimension and plot heatmap
         # Plotting heatmaps with z dimension overwrites marker_dict.
@@ -529,7 +518,6 @@ class PLOTLYScatterPlot(PLOTLYPlot, ScatterPlot):
 
 
 class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
-
     def get_line_renderer(self, **kwargs) -> None:
         return PLOTLYLinePlot(**kwargs)
 
@@ -569,7 +557,6 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
 
 
 class PLOTLYChromatogramPlot(PLOTLY_MSPlot, ChromatogramPlot):
-
     def _add_peak_boundaries(self, annotation_data):
         super()._add_peak_boundaries(annotation_data)
         color_gen = ColorGenerator(
@@ -622,7 +609,6 @@ class PLOTLYSpectrumPlot(PLOTLY_MSPlot, SpectrumPlot):
 
 
 class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
-
     # NOTE: canvas is only used in matplotlib backend
     def create_main_plot(self, canvas=None) -> Figure:
         if not self.plot_3d:
@@ -630,7 +616,6 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
             self.fig = scatterPlot.generate(None, None)
 
             if self.z is not None:
-
                 tooltips, custom_hover_data = self._create_tooltips(
                     {self.xlabel: self.x, self.ylabel: self.y, self.zlabel: self.z}
                 )
@@ -781,7 +766,7 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
 
     def _add_box_boundaries(self, annotation_data):
         color_gen = ColorGenerator(
-            colormap=self.feature_config.colormap, n=annotation_data.shape[0]
+            colormap=self.annotation_colormap, n=annotation_data.shape[0]
         )
         for idx, (_, feature) in enumerate(annotation_data.iterrows()):
             x0 = feature[self.annotation_x_lb]
@@ -811,10 +796,8 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                 y1=y1,
                 line=dict(
                     color=color,
-                    width=self.feature_config.line_width,
-                    dash=bokeh_line_dash_mapper(
-                        self.feature_config.line_type, "plotly"
-                    ),
+                    width=self.annotation_line_width,
+                    dash=bokeh_line_dash_mapper(self.annotation_line_type, "plotly"),
                 ),
                 fillcolor="rgba(0,0,0,0)",
                 opacity=0.5,
@@ -828,9 +811,9 @@ class PLOTLYPeakMapPlot(PLOTLY_MSPlot, PeakMapPlot):
                     mode="lines",
                     line=dict(
                         color=color,
-                        width=self.feature_config.line_width,
+                        width=self.annotation_line_width,
                         dash=bokeh_line_dash_mapper(
-                            self.feature_config.line_type, "plotly"
+                            self.annotation_line_type, "plotly"
                         ),
                     ),
                     showlegend=True,

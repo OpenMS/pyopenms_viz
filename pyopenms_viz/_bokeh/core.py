@@ -1,42 +1,39 @@
 from __future__ import annotations
 
 from abc import ABC
+from typing import Tuple
 
-from typing import Tuple, Iterator
-from dataclasses import dataclass
-
-from bokeh.plotting import figure
-from bokeh.palettes import Plasma256
-from bokeh.transform import linear_cmap
 from bokeh.models import (
-    ColumnDataSource,
-    Legend,
-    Range1d,
     BoxEditTool,
-    Span,
-    VStrip,
+    ColumnDataSource,
     GlyphRenderer,
     Label,
+    Legend,
+    Range1d,
+    Span,
+    VStrip,
 )
-
-from pandas.core.frame import DataFrame
+from bokeh.palettes import Plasma256
+from bokeh.plotting import figure
+from bokeh.transform import linear_cmap
 from numpy import nan
+from pandas.core.frame import DataFrame
 
 # pyopenms_viz imports
 from .._core import (
-    BasePlot,
-    LinePlot,
-    VLinePlot,
-    ScatterPlot,
+    APPEND_PLOT_DOC,
     BaseMSPlot,
+    BasePlot,
     ChromatogramPlot,
+    LinePlot,
     MobilogramPlot,
     PeakMapPlot,
+    ScatterPlot,
     SpectrumPlot,
-    APPEND_PLOT_DOC,
+    VLinePlot,
 )
 from .._misc import ColorGenerator, MarkerShapeGenerator, is_latex_formatted
-from ..constants import PEAK_BOUNDARY_ICON, FEATURE_BOUNDARY_ICON
+from ..constants import FEATURE_BOUNDARY_ICON, PEAK_BOUNDARY_ICON
 
 
 class BOKEHPlot(BasePlot, ABC):
@@ -60,11 +57,11 @@ class BOKEHPlot(BasePlot, ABC):
 
     def _load_extension(self) -> None:
         try:
-            from bokeh.plotting import figure, show
             from bokeh.models import ColumnDataSource, Legend
+            from bokeh.plotting import figure, show
         except ImportError:
             raise ImportError(
-                f"bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
+                "bokeh is not installed. Please install using `pip install bokeh` to use this plotting library in pyopenms-viz"
             )
 
     def _create_figure(self):
@@ -303,7 +300,6 @@ class BOKEHLinePlot(BOKEHPlot, LinePlot):
                 line_width=self.line_width,
             )
         else:
-
             legend_items = []
             for group, df in self.data.groupby(self.by, sort=False):
                 source = ColumnDataSource(df)
@@ -439,7 +435,6 @@ class BOKEHScatterPlot(BOKEHPlot, ScatterPlot):
 
 
 class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
-
     def get_line_renderer(self, **kwargs) -> None:
         return BOKEHLinePlot(**kwargs)
 
@@ -555,9 +550,7 @@ class BOKEHPeakMapPlot(BOKEH_MSPlot, PeakMapPlot):
 
     # NOTE: canvas is only used in matplotlib backend
     def create_main_plot(self, canvas=None):
-
         if not self.plot_3d:
-
             scatterPlot = self.get_scatter_renderer(data=self.data, config=self._config)
 
             tooltips, custom_hover_data = self._create_tooltips(

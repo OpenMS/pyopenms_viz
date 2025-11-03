@@ -6,10 +6,10 @@ Chromatograms can be plotted using kind = chromatogram. In this plot, retention 
 Parameters
 ----------
 
-.. csv-table:: 
-   :file: chromatogramPlot.tsv
-   :header-rows: 1
-   :delim: tab
+.. docstring_to_table:: 
+   :docstring: pyopenms_viz._config.ChromatogramConfig
+   :parent_depth: 1
+   :default_docstring:
 
 Example Usage
 -------------
