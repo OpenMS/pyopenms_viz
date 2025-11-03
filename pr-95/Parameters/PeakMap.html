@@ -492,131 +492,146 @@
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
-<th class="head"><p>Default</p></th>
 <th class="head"><p>Type</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>x*</p></td>
-<td></td>
 <td><p>str</p></td>
-<td><p>The column name for x-axis data</p></td>
+<td><p>The column name for the X-axis data. Required.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>y*</p></td>
-<td></td>
 <td><p>str</p></td>
-<td><p>The column name for y-axis data</p></td>
+<td><p>The column name for the Y-axis data. Required.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>z*</p></td>
-<td></td>
+<tr class="row-even"><td><p>by*</p></td>
 <td><p>str</p></td>
-<td><p>The column name for z-axis data</p></td>
+<td><p>The column name for the grouping variable.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>backend</p></td>
-<td></td>
-<td><p>Literal[“ms_matplotlib”, “ms_bokeh”, “ms_plotly”]</p></td>
-<td><p>‘Backend to use. Must be specified if not set globally</p></td>
+<tr class="row-odd"><td><p>canvas*</p></td>
+<td><p>Any</p></td>
+<td><p>Canvas for the plot. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is an Axes object, and for Plotly, this is a plotly.graph_objects.Figure object. If none, axis will be created Defaults to None.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>by</p></td>
-<td></td>
-<td><p>str</p></td>
-<td><p>The column name to group by</p></td>
-</tr>
-<tr class="row-odd"><td><p>add_marginals</p></td>
-<td><p>False</p></td>
+<tr class="row-even"><td><p>show_plot</p></td>
 <td><p>bool</p></td>
-<td><p>Whether to add marginal plots, ( x vs z and y vs z plots)</p></td>
-</tr>
-<tr class="row-even"><td><p>x_kind</p></td>
-<td><p>chromatogram</p></td>
-<td><p>str</p></td>
-<td><p>Marginal plot for x-axis [Note: x_kind is only relevant if add_marginals is True]</p></td>
-</tr>
-<tr class="row-odd"><td><p>y_kind</p></td>
-<td><p>spectrum</p></td>
-<td><p>str</p></td>
-<td><p>Marginal plot for y-axis [Note: y_kind is only relevant if add_marginals is True]</p></td>
-</tr>
-<tr class="row-even"><td><p>relative_intensity</p></td>
-<td><p>False</p></td>
-<td><p>bool</p></td>
-<td><p>Convert y-axis values to relative intensity</p></td>
-</tr>
-<tr class="row-odd"><td><p>height</p></td>
-<td></td>
-<td><p>int</p></td>
-<td><p>Height of plot, units dependent on backend.</p></td>
-</tr>
-<tr class="row-even"><td><p>width</p></td>
-<td></td>
-<td><p>int</p></td>
-<td><p>Width of plot in pixels, units dependent on backend.</p></td>
-</tr>
-<tr class="row-odd"><td><p>grid</p></td>
-<td><p>False</p></td>
-<td><p>bool</p></td>
-<td><p>Whether to show grid on the plot</p></td>
-</tr>
-<tr class="row-even"><td><p>toolbar_location</p></td>
-<td><p>“above”</p></td>
-<td></td>
-<td><p>Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]</p></td>
-</tr>
-<tr class="row-odd"><td><p>fig</p></td>
-<td><p>None</p></td>
-<td><p>fig</p></td>
-<td><p>Existing Figure object to plot on. Useful for matplotlib backend where need to specify the figure object before plotting. If not supplied will create a figure object</p></td>
-</tr>
-<tr class="row-even"><td><p>xlabel</p></td>
-<td><p>“”</p></td>
-<td><p>str</p></td>
-<td><p>Label for x axis</p></td>
-</tr>
-<tr class="row-odd"><td><p>ylabel</p></td>
-<td><p>“”</p></td>
-<td><p>str</p></td>
-<td><p>Label for y axis</p></td>
-</tr>
-<tr class="row-even"><td><p>zlabel</p></td>
-<td><p>‘’</p></td>
-<td><p>str</p></td>
-<td><p>Label for z-axis</p></td>
-</tr>
-<tr class="row-odd"><td><p>show_plot</p></td>
+<td><p>Whether to display the plot. Defaults to True.</p></td>
 <td><p>True</p></td>
-<td><p>bool</p></td>
-<td><p>Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None</p></td>
 </tr>
-<tr class="row-even"><td><p>bin_peaks</p></td>
-<td><p>auto</p></td>
-<td><p>bool | “auto”</p></td>
-<td><p>If True, will bin peaks based on specified number of bins in <cite>num_x_bins</cite>. If “auto”, will automatically determine the number of bins based on the data using the strategy specified in <cite>bin_method</cite>.</p></td>
-</tr>
-<tr class="row-odd"><td><p>aggregation_method</p></td>
-<td><p>“mean”</p></td>
-<td><p>Literal[“mean”, “sum”, “max”]</p></td>
-<td><p>How to aggregate duplicate entries</p></td>
+<tr class="row-odd"><td><p>bin_peaks</p></td>
+<td><p>Union[Literal[“auto”], bool]</p></td>
+<td><p>Whether to bin peaks. Defaults to “auto”, can also be set to True or False.</p></td>
+<td><p>“auto”, can also be set to True or False</p></td>
 </tr>
 <tr class="row-even"><td><p>num_x_bins</p></td>
-<td><p>50</p></td>
 <td><p>int</p></td>
-<td><p>Number of x-bins in heatmap</p></td>
+<td><p>Number of bins along the X-axis. Defaults to 50. Ignored if bin_peaks is False or “auto”.</p></td>
+<td><p>50. Ignored if bin_peaks is False or “auto”</p></td>
 </tr>
 <tr class="row-odd"><td><p>num_y_bins</p></td>
-<td><p>50</p></td>
 <td><p>int</p></td>
-<td><p>Number of y-bins in heatmap</p></td>
+<td><p>Number of bins along the Y-axis. Defaults to 50. Ignored if bin_peaks is False or “auto”.</p></td>
+<td><p>50. Ignored if bin_peaks is False or “auto”</p></td>
 </tr>
 <tr class="row-even"><td><p>z_log_scale</p></td>
-<td><p>False</p></td>
 <td><p>bool</p></td>
-<td><p>Whether to log-transform z-axis</p></td>
+<td><p>Whether to use logarithmic scale for Z-axis. Defaults to False.</p></td>
+<td><p>False</p></td>
 </tr>
 <tr class="row-odd"><td><p>fill_by_z</p></td>
-<td><p>True</p></td>
 <td><p>bool</p></td>
-<td><p>Whether heatmap coloring should be based on z-axis values</p></td>
+<td><p>Whether to fill markers by Z value. Defaults to True.</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>marker_size</p></td>
+<td><p>int</p></td>
+<td><p>Size of the markers. Defaults to 30.</p></td>
+<td><p>30</p></td>
+</tr>
+<tr class="row-odd"><td><p>marker</p></td>
+<td><p>Iterator[str] | MarkerShapeGenerator</p></td>
+<td><p>Marker shapes. Defaults to a MarkerShapeGenerator instance.</p></td>
+<td><p>a MarkerShapeGenerator instance</p></td>
+</tr>
+<tr class="row-even"><td><p>add_marginals</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to add marginal plots. Defaults to False.</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>y_kind</p></td>
+<td><p>str</p></td>
+<td><p>Type of plot for the Y-axis marginal. Defaults to “spectrum”.</p></td>
+<td><p>“spectrum”</p></td>
+</tr>
+<tr class="row-even"><td><p>x_kind</p></td>
+<td><p>str</p></td>
+<td><p>Type of plot for the X-axis marginal. Defaults to “chromatogram”.</p></td>
+<td><p>“chromatogram”</p></td>
+</tr>
+<tr class="row-odd"><td><p>aggregation_method</p></td>
+<td><p>Literal[“mean”, “sum”, “max”]</p></td>
+<td><p>Method for aggregating data. Defaults to “mean”.</p></td>
+<td><p>“mean”</p></td>
+</tr>
+<tr class="row-even"><td><p>annotation_data</p></td>
+<td><p>pd.DataFrame | None</p></td>
+<td><p>Data for annotations. Defaults to None.</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>annotation_colormap</p></td>
+<td><p>str</p></td>
+<td><p>Colormap for annotations. Defaults to “Dark2”.</p></td>
+<td><p>“Dark2”</p></td>
+</tr>
+<tr class="row-even"><td><p>annotation_line_width</p></td>
+<td><p>float</p></td>
+<td><p>Width of the annotation lines. Defaults to 3.</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>annotation_line_type</p></td>
+<td><p>str</p></td>
+<td><p>Type of the annotation lines (e.g., “solid”, “dashed”). Defaults to “solid”.</p></td>
+<td><p>“solid”</p></td>
+</tr>
+<tr class="row-even"><td><p>annotation_legend_config</p></td>
+<td><p>Dict | LegendConfig</p></td>
+<td><p>Configuration for the annotation legend. Defaults to a LegendConfig instance with title “Features”.</p></td>
+<td><p>a LegendConfig instance with title “Features”</p></td>
+</tr>
+<tr class="row-odd"><td><p>xlabel</p></td>
+<td><p>str</p></td>
+<td><p>Label for the X-axis. Defaults to “Retention Time”.</p></td>
+<td><p>“Retention Time”</p></td>
+</tr>
+<tr class="row-even"><td><p>ylabel</p></td>
+<td><p>str</p></td>
+<td><p>Label for the Y-axis. Defaults to “mass-to-charge”.</p></td>
+<td><p>“mass-to-charge”</p></td>
+</tr>
+<tr class="row-odd"><td><p>zlabel</p></td>
+<td><p>str</p></td>
+<td><p>Label for the Z-axis. Defaults to “Intensity”.</p></td>
+<td><p>“Intensity”</p></td>
+</tr>
+<tr class="row-even"><td><p>title</p></td>
+<td><p>str</p></td>
+<td><p>Title of the plot. Defaults to “PeakMap”.</p></td>
+<td><p>“PeakMap”</p></td>
+</tr>
+<tr class="row-odd"><td><p>x_plot_config</p></td>
+<td><p>ChromatogramConfig | SpectrumConfig</p></td>
+<td><p>Configuration for the X-axis marginal plot. Defaults to (set internally).</p></td>
+<td><p>(set internally)</p></td>
+</tr>
+<tr class="row-even"><td><p>y_plot_config</p></td>
+<td><p>ChromatogramConfig | SpectrumConfig</p></td>
+<td><p>Configuration for the Y-axis marginal plot. Defaults to (set internally).</p></td>
+<td><p>(set internally)</p></td>
 </tr>
 </tbody>
 </table>

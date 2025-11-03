@@ -559,10 +559,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.kind">
 <span class="sig-name descname"><span class="pre">kind</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.kind" title="Link to this definition">#</a></dt>
-<dd><p>Type of plot. Default is None.</p>
+<dd><p>Type of plot. Required.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Literal[“line”, “vline”, “scatter”, “chromatogram”, “mobilogram”, “spectrum”, “peakmap”, “complex”] | None</p>
+<dd class="field-odd"><p>Literal[“chromatogram”, “mobilogram”, “spectrum”, “peakmap”]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -570,10 +570,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.x">
 <span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.x" title="Link to this definition">#</a></dt>
-<dd><p>X-axis data. Default is None.</p>
+<dd><p>The column name for the x-axis data. Required.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -581,10 +581,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.y">
 <span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.y" title="Link to this definition">#</a></dt>
-<dd><p>Y-axis data. Default is None.</p>
+<dd><p>The column name for the y-axis data. Required.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -592,21 +592,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.z">
 <span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.z" title="Link to this definition">#</a></dt>
-<dd><p>Z-axis data. Default is None.</p>
+<dd><p>The column name for the z-axis data. Required.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.by">
-<span class="sig-name descname"><span class="pre">by</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.by" title="Link to this definition">#</a></dt>
-<dd><p>Grouping variable. Default is None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -614,7 +603,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.canvas">
 <span class="sig-name descname"><span class="pre">canvas</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.canvas" title="Link to this definition">#</a></dt>
-<dd><p>Canvas for the plot. Default is None. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is a Axes object, and for Plotly, this is a plotly.graph_objects.Figure object.</p>
+<dd><p>Canvas for the plot. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is an Axes object, and for Plotly, this is a plotly.graph_objects.Figure object. If none, axis will be created Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Any</p>
@@ -625,10 +614,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.height">
 <span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.height" title="Link to this definition">#</a></dt>
-<dd><p>Height of the plot. Default is 500.</p>
+<dd><p>Height of the plot. Defaults to 500.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -636,10 +625,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.width">
 <span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.width" title="Link to this definition">#</a></dt>
-<dd><p>Width of the plot. Default is 500.</p>
+<dd><p>Width of the plot. Defaults to 500.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -647,10 +636,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.grid">
 <span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.grid" title="Link to this definition">#</a></dt>
-<dd><p>Whether to show grid. Default is True.</p>
+<dd><p>Whether to show grid. Defaults to True.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p>bool, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -658,10 +647,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.toolbar_location">
 <span class="sig-name descname"><span class="pre">toolbar_location</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.toolbar_location" title="Link to this definition">#</a></dt>
-<dd><p>Location of the toolbar. Default is “above”.</p>
+<dd><p>Location of the toolbar. Defaults to “above”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p>str, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -669,10 +658,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.title">
 <span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.title" title="Link to this definition">#</a></dt>
-<dd><p>Title of the plot. Default is an empty string.</p>
+<dd><p>Title of the plot. Defaults to an empty string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p>str, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -680,10 +669,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.xlabel">
 <span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.xlabel" title="Link to this definition">#</a></dt>
-<dd><p>Label for the X-axis. Default is an empty string.</p>
+<dd><p>Label for the X-axis. Defaults to an empty string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p>str, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -691,10 +680,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.ylabel">
 <span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.ylabel" title="Link to this definition">#</a></dt>
-<dd><p>Label for the Y-axis. Default is an empty string.</p>
+<dd><p>Label for the Y-axis. Defaults to an empty string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p>str, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -702,32 +691,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.zlabel">
 <span class="sig-name descname"><span class="pre">zlabel</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.zlabel" title="Link to this definition">#</a></dt>
-<dd><p>Label for the Z-axis. Default is an empty string.</p>
+<dd><p>Label for the Z-axis, only applicable if 3D plot. Defaults to an empty string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.x_axis_location">
-<span class="sig-name descname"><span class="pre">x_axis_location</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.x_axis_location" title="Link to this definition">#</a></dt>
-<dd><p>Location of the X-axis. Default is “below”.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.y_axis_location">
-<span class="sig-name descname"><span class="pre">y_axis_location</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.y_axis_location" title="Link to this definition">#</a></dt>
-<dd><p>Location of the Y-axis. Default is “left”.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p>str, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -735,10 +702,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.title_font_size">
 <span class="sig-name descname"><span class="pre">title_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.title_font_size" title="Link to this definition">#</a></dt>
-<dd><p>Font size of the title. Default is 18.</p>
+<dd><p>Font size of the title. Defaults to 18.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -746,10 +713,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.xaxis_label_font_size">
 <span class="sig-name descname"><span class="pre">xaxis_label_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.xaxis_label_font_size" title="Link to this definition">#</a></dt>
-<dd><p>Font size of the X-axis label. Default is 16.</p>
+<dd><p>Font size of the X-axis label. Defaults to 16.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -757,10 +724,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.yaxis_label_font_size">
 <span class="sig-name descname"><span class="pre">yaxis_label_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.yaxis_label_font_size" title="Link to this definition">#</a></dt>
-<dd><p>Font size of the Y-axis label. Default is 16.</p>
+<dd><p>Font size of the Y-axis label. Defaults to 16.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -768,10 +735,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.zaxis_label_font_size">
 <span class="sig-name descname"><span class="pre">zaxis_label_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.zaxis_label_font_size" title="Link to this definition">#</a></dt>
-<dd><p>Font size of the Z-axis label. Default is 16.</p>
+<dd><p>Font size of the Z-axis label. Defaults to 16.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -779,10 +746,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.xaxis_labelpad">
 <span class="sig-name descname"><span class="pre">xaxis_labelpad</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.xaxis_labelpad" title="Link to this definition">#</a></dt>
-<dd><p>Padding for the X-axis label. Default is 16.</p>
+<dd><p>Padding for the X-axis label. Defaults to 16.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -790,10 +757,10 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.yaxis_labelpad">
 <span class="sig-name descname"><span class="pre">yaxis_labelpad</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.yaxis_labelpad" title="Link to this definition">#</a></dt>
-<dd><p>Padding for the Y-axis label. Default is 16.</p>
+<dd><p>Padding for the Y-axis label. Defaults to 16.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -801,10 +768,164 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.zaxis_labelpad">
 <span class="sig-name descname"><span class="pre">zaxis_labelpad</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.zaxis_labelpad" title="Link to this definition">#</a></dt>
-<dd><p>Padding for the Z-axis label. Default is 9.</p>
+<dd><p>Padding for the Z-axis label, only applicable if 3D plot. Defaults to 9.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.xaxis_tick_font_size">
+<span class="sig-name descname"><span class="pre">xaxis_tick_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.xaxis_tick_font_size" title="Link to this definition">#</a></dt>
+<dd><p>Font size for X-axis tick labels. Defaults to 14.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.yaxis_tick_font_size">
+<span class="sig-name descname"><span class="pre">yaxis_tick_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.yaxis_tick_font_size" title="Link to this definition">#</a></dt>
+<dd><p>Font size for Y-axis tick labels. Defaults to 14.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.zaxis_tick_font_size">
+<span class="sig-name descname"><span class="pre">zaxis_tick_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.zaxis_tick_font_size" title="Link to this definition">#</a></dt>
+<dd><p>Font size for Z-axis tick labels. Defaults to 14.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.y_axis_location">
+<span class="sig-name descname"><span class="pre">y_axis_location</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.y_axis_location" title="Link to this definition">#</a></dt>
+<dd><p>Location of the Y-axis. Defaults to “left”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“left”, “right”], optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.x_axis_location">
+<span class="sig-name descname"><span class="pre">x_axis_location</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.x_axis_location" title="Link to this definition">#</a></dt>
+<dd><p>Location of the X-axis. Defaults to “below”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“above”, “below”], optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.annotation_font_size">
+<span class="sig-name descname"><span class="pre">annotation_font_size</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.annotation_font_size" title="Link to this definition">#</a></dt>
+<dd><p>Font size for annotations. Defaults to 12.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.color">
+<span class="sig-name descname"><span class="pre">color</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.color" title="Link to this definition">#</a></dt>
+<dd><p>Color or color iterator for plot elements. Defaults to ColorGenerator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | Iterator[str], optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.plot_3d">
+<span class="sig-name descname"><span class="pre">plot_3d</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.plot_3d" title="Link to this definition">#</a></dt>
+<dd><p>Whether to plot in 3D. Defaults to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.min_border">
+<span class="sig-name descname"><span class="pre">min_border</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.min_border" title="Link to this definition">#</a></dt>
+<dd><p>Minimum border size in pixels. Defaults to 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.show_plot">
+<span class="sig-name descname"><span class="pre">show_plot</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.show_plot" title="Link to this definition">#</a></dt>
+<dd><p>Whether to display the plot. Defaults to True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.relative_intensity">
+<span class="sig-name descname"><span class="pre">relative_intensity</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.relative_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Whether to normalize intensity values. Defaults to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.aggregate_duplicates">
+<span class="sig-name descname"><span class="pre">aggregate_duplicates</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.aggregate_duplicates" title="Link to this definition">#</a></dt>
+<dd><p>Whether to aggregate duplicate data points. Defaults to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.legend_config">
+<span class="sig-name descname"><span class="pre">legend_config</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.legend_config" title="Link to this definition">#</a></dt>
+<dd><p>Configuration for the legend, see legend configuration options for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pyopenms_viz._config.LegendConfig.html#pyopenms_viz._config.LegendConfig" title="pyopenms_viz._config.LegendConfig">LegendConfig</a> | dict, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyopenms_viz._config.BasePlotConfig.opacity">
+<span class="sig-name descname"><span class="pre">opacity</span></span><a class="headerlink" href="#pyopenms_viz._config.BasePlotConfig.opacity" title="Link to this definition">#</a></dt>
+<dd><p>Opacity of plot. Defaults to 1.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -888,7 +1009,6 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.x"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.x</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.y"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.y</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.z"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.z</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.by"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.by</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.canvas"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.canvas</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.height"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.height</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.width"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.width</span></code></a></li>
@@ -898,8 +1018,6 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.xlabel"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.xlabel</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.ylabel"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.ylabel</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.zlabel"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.zlabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.x_axis_location"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.x_axis_location</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.y_axis_location"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.y_axis_location</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.title_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.title_font_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.xaxis_label_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.xaxis_label_font_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.yaxis_label_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.yaxis_label_font_size</span></code></a></li>
@@ -907,6 +1025,20 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.xaxis_labelpad"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.xaxis_labelpad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.yaxis_labelpad"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.yaxis_labelpad</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.zaxis_labelpad"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.zaxis_labelpad</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.xaxis_tick_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.xaxis_tick_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.yaxis_tick_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.yaxis_tick_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.zaxis_tick_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.zaxis_tick_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.y_axis_location"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.y_axis_location</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.x_axis_location"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.x_axis_location</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.annotation_font_size"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.annotation_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.color"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.plot_3d"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.plot_3d</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.min_border"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.min_border</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.show_plot"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.show_plot</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.relative_intensity"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.relative_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.aggregate_duplicates"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.aggregate_duplicates</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.legend_config"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.legend_config</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.opacity"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.opacity</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.default_legend_factory"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.default_legend_factory()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.__eq__"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.__eq__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyopenms_viz._config.BasePlotConfig.__init__"><code class="docutils literal notranslate"><span class="pre">BasePlotConfig.__init__()</span></code></a></li>

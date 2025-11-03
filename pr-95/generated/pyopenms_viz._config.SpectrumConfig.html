@@ -559,7 +559,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.reference_spectrum">
 <span class="sig-name descname"><span class="pre">reference_spectrum</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.reference_spectrum" title="Link to this definition">#</a></dt>
-<dd><p>Reference spectrum data. Default is None.</p>
+<dd><p>Reference spectrum data. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame | None</p>
@@ -570,7 +570,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.mirror_spectrum">
 <span class="sig-name descname"><span class="pre">mirror_spectrum</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.mirror_spectrum" title="Link to this definition">#</a></dt>
-<dd><p>Whether to mirror the spectrum. Default is False.</p>
+<dd><p>Whether to mirror the spectrum. Defaults to False.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -581,7 +581,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.peak_color">
 <span class="sig-name descname"><span class="pre">peak_color</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.peak_color" title="Link to this definition">#</a></dt>
-<dd><p>Color of the peaks. Default is None.</p>
+<dd><p>Color of the peaks. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str | None</p>
@@ -592,7 +592,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.bin_peaks">
 <span class="sig-name descname"><span class="pre">bin_peaks</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.bin_peaks" title="Link to this definition">#</a></dt>
-<dd><p>Whether to bin peaks. Default is False.</p>
+<dd><p>Whether to bin peaks. Defaults to False.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Union[Literal[“auto”], bool]</p>
@@ -603,7 +603,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.bin_method">
 <span class="sig-name descname"><span class="pre">bin_method</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.bin_method" title="Link to this definition">#</a></dt>
-<dd><p>Method for binning peaks. Default is “mz-tol-bin”.</p>
+<dd><p>Method for binning peaks. Defaults to “mz-tol-bin”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Literal[“none”, “sturges”, “freedman-diaconis”, “mz-tol-bin”]</p>
@@ -614,7 +614,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.num_x_bins">
 <span class="sig-name descname"><span class="pre">num_x_bins</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.num_x_bins" title="Link to this definition">#</a></dt>
-<dd><p>Number of bins along the X-axis. Default is 50. Ignored if bin_peaks is False or “auto”.</p>
+<dd><p>Number of bins along the X-axis, ignored if bin_peaks is False or “auto”. Defaults to 50.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -625,7 +625,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.mz_tol">
 <span class="sig-name descname"><span class="pre">mz_tol</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.mz_tol" title="Link to this definition">#</a></dt>
-<dd><p>Tolerance for m/z binning. Default is “1pct-diff”.</p>
+<dd><p>Tolerance for m/z binning. Defaults to “1pct-diff”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Union[float, Literal[“freedman-diaconis”, “1pct-diff”]]</p>
@@ -636,7 +636,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.annotate_top_n_peaks">
 <span class="sig-name descname"><span class="pre">annotate_top_n_peaks</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.annotate_top_n_peaks" title="Link to this definition">#</a></dt>
-<dd><p>Number of top peaks to annotate. Default is 5.</p>
+<dd><p>Number of top peaks to annotate. Defaults to 5.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int | None | Literal[“all”]</p>
@@ -647,7 +647,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.annotate_mz">
 <span class="sig-name descname"><span class="pre">annotate_mz</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.annotate_mz" title="Link to this definition">#</a></dt>
-<dd><p>Whether to annotate m/z values. Default is True.</p>
+<dd><p>Whether to annotate m/z values. Defaults to True.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -658,7 +658,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.ion_annotation">
 <span class="sig-name descname"><span class="pre">ion_annotation</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.ion_annotation" title="Link to this definition">#</a></dt>
-<dd><p>Column for ion annotations. Default is None.</p>
+<dd><p>Column for ion annotations. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str | None</p>
@@ -669,7 +669,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.sequence_annotation">
 <span class="sig-name descname"><span class="pre">sequence_annotation</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.sequence_annotation" title="Link to this definition">#</a></dt>
-<dd><p>Column for sequence annotations. Default is None.</p>
+<dd><p>Column for sequence annotations. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str | None</p>
@@ -680,7 +680,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.custom_annotation">
 <span class="sig-name descname"><span class="pre">custom_annotation</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.custom_annotation" title="Link to this definition">#</a></dt>
-<dd><p>Column for custom annotations. Default is None.</p>
+<dd><p>Column for custom annotations. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str | None</p>
@@ -691,7 +691,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.annotation_color">
 <span class="sig-name descname"><span class="pre">annotation_color</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.annotation_color" title="Link to this definition">#</a></dt>
-<dd><p>Color for annotations. Default is None.</p>
+<dd><p>Color for annotations. Defaults to None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str | None</p>
@@ -702,7 +702,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.aggregation_method">
 <span class="sig-name descname"><span class="pre">aggregation_method</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.aggregation_method" title="Link to this definition">#</a></dt>
-<dd><p>Method for aggregating data. Default is “max”.</p>
+<dd><p>Method for aggregating data. Defaults to “max”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Literal[“mean”, “sum”, “max”]</p>
@@ -713,7 +713,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.xlabel">
 <span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.xlabel" title="Link to this definition">#</a></dt>
-<dd><p>Label for the X-axis. Default is “mass-to-charge”.</p>
+<dd><p>Label for the X-axis. Defaults to “mass-to-charge”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
@@ -724,7 +724,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.ylabel">
 <span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.ylabel" title="Link to this definition">#</a></dt>
-<dd><p>Label for the Y-axis. Default is “Intensity”.</p>
+<dd><p>Label for the Y-axis. Defaults to “Intensity”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
@@ -735,7 +735,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyopenms_viz._config.SpectrumConfig.title">
 <span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#pyopenms_viz._config.SpectrumConfig.title" title="Link to this definition">#</a></dt>
-<dd><p>Title of the plot. Default is “Mass Spectrum”.</p>
+<dd><p>Title of the plot. Defaults to “Mass Spectrum”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>

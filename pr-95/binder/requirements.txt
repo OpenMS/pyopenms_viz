@@ -54,6 +54,8 @@ defusedxml==0.7.1
     # via
     #   cairosvg
     #   nbconvert
+docstring-parser==0.17.0
+    # via pyopenms_viz (pyproject.toml)
 docutils==0.21.2
     # via
     #   nbsphinx

@@ -488,145 +488,129 @@
 <p>A spectrum can be plot using kind = “spectrum”. In this plot, mass-to-charge ratio is on the x-axis and intensity is on the y-axis.</p>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
-<div class="pst-scrollable-table-container"><table class="table" id="id1">
-<caption><span class="caption-number">Table 2 </span><span class="caption-text">Chromatogram Options</span><a class="headerlink" href="#id1" title="Link to this table">#</a></caption>
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
-<th class="head"><p>Default</p></th>
 <th class="head"><p>Type</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>x*</p></td>
-<td></td>
 <td><p>str</p></td>
-<td><p>The column name for x-axis data</p></td>
+<td><p>The column name for the X-axis data. Required.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>y*</p></td>
-<td></td>
 <td><p>str</p></td>
-<td><p>The column name for y-axis data</p></td>
+<td><p>The column name for the Y-axis data. Required.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>by</p></td>
-<td></td>
+<tr class="row-even"><td><p>by*</p></td>
 <td><p>str</p></td>
-<td><p>The column name to group by</p></td>
+<td><p>The column name for the grouping variable.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>backend</p></td>
-<td></td>
-<td><p>str</p></td>
-<td><p>‘Backend to use. One of: [ “ms_matplotlib”, “ms_bokeh”, “ms_plotly” ]. Must be specified if not set globally</p></td>
-</tr>
-<tr class="row-even"><td><p>reference_spectrum</p></td>
-<td></td>
-<td><p>DataFrame</p></td>
-<td><p>alternative dataframe to plot as the reference spectrum.</p></td>
-</tr>
-<tr class="row-odd"><td><p>mirror_spectrum</p></td>
-<td><p>False</p></td>
-<td><p>bool</p></td>
-<td><p>Whether to plot a mirror spectrum</p></td>
-</tr>
-<tr class="row-even"><td><p>relative_intensity</p></td>
-<td><p>False</p></td>
-<td><p>bool</p></td>
-<td><p>Convert y-axis values to relative intensity</p></td>
-</tr>
-<tr class="row-odd"><td><p>height</p></td>
-<td></td>
-<td><p>int</p></td>
-<td><p>Height of plot, units dependent on backend.</p></td>
-</tr>
-<tr class="row-even"><td><p>width</p></td>
-<td></td>
-<td><p>int</p></td>
-<td><p>Width of plot in pixels, units dependent on backend.</p></td>
-</tr>
-<tr class="row-odd"><td><p>grid</p></td>
-<td><p>False</p></td>
-<td><p>bool</p></td>
-<td><p>Whether to show grid on the plot</p></td>
-</tr>
-<tr class="row-even"><td><p>toolbar_location</p></td>
-<td><p>“above”</p></td>
-<td></td>
-<td><p>Location of toolbar for interactive plots. One of: [“above”, “below”, “left”]</p></td>
-</tr>
-<tr class="row-odd"><td><p>fig</p></td>
-<td><p>None</p></td>
-<td><p>fig</p></td>
-<td><p>Existing Figure object to plot on</p></td>
-</tr>
-<tr class="row-even"><td><p>xlabel</p></td>
-<td><p>None</p></td>
-<td><p>str</p></td>
-<td><p>Label for x axis</p></td>
-</tr>
-<tr class="row-odd"><td><p>ylabel</p></td>
-<td><p>None</p></td>
-<td><p>str</p></td>
-<td><p>Label for y axis</p></td>
+<tr class="row-odd"><td><p>canvas*</p></td>
+<td><p>Any</p></td>
+<td><p>Canvas for the plot. For Bokeh, this is a bokeh.plotting.Figure object. For Matplotlib, this is an Axes object, and for Plotly, this is a plotly.graph_objects.Figure object. If none, axis will be created Defaults to None.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>show_plot</p></td>
-<td><p>True</p></td>
 <td><p>bool</p></td>
-<td><p>Whether to display the plot. If plot is not shown, will return the plot object corresponding with the backend. If plot is displayed the method returns None</p></td>
+<td><p>Whether to display the plot. Defaults to True.</p></td>
+<td><p>True</p></td>
 </tr>
-<tr class="row-odd"><td><p>bin_peaks</p></td>
+<tr class="row-odd"><td><p>direction</p></td>
+<td><p>Literal[“horizontal”, “vertical”]</p></td>
+<td><p>Direction of the line. Defaults to “vertical”.</p></td>
+<td><p>“vertical”</p></td>
+</tr>
+<tr class="row-even"><td><p>reference_spectrum</p></td>
+<td><p>pd.DataFrame | None</p></td>
+<td><p>Reference spectrum data. Defaults to None.</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>mirror_spectrum</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to mirror the spectrum. Defaults to False.</p></td>
 <td><p>False</p></td>
-<td><p>bool | “auto”</p></td>
-<td><p>If True, will bin peaks based on specified number of bins in <cite>num_x_bins</cite>. If “auto”, will automatically determine the number of bins based on the data using the strategy specified in <cite>bin_method</cite>.</p></td>
-</tr>
-<tr class="row-even"><td><p>bin_method</p></td>
-<td></td>
-<td><p>“mz-tol-bin”</p></td>
-<td><p>Binning method, one of [ “none”, “sturges”, “freedman-diaconis”, “mz-tol-bin”]</p></td>
-</tr>
-<tr class="row-odd"><td><p>num_x_bins</p></td>
-<td><p>50</p></td>
-<td><p>int</p></td>
-<td><p>Number of bins, will be adjusted if bin_peaks is “auto”</p></td>
-</tr>
-<tr class="row-even"><td><p>aggregation_method</p></td>
-<td></td>
-<td><p>“mean</p></td>
-<td><p>How to aggregate duplicate dataframe entries, one of [ “mean”, “sum”, “max” ]</p></td>
-</tr>
-<tr class="row-odd"><td><p>mz_tol</p></td>
-<td><p>“1pct-diff”</p></td>
-<td></td>
-<td><p>mass-to-charge tolerance for “mz_tol_bin” <cite>bin_method</cite>. Can be one of [float, ‘freedman-diaconis’, ‘1pct-diff’]</p></td>
 </tr>
 <tr class="row-even"><td><p>peak_color</p></td>
+<td><p>str | None</p></td>
+<td><p>Color of the peaks. Defaults to None.</p></td>
 <td><p>None</p></td>
-<td><p>None | str</p></td>
-<td><p>Peak color for the plot. If not specified will be automatically generated. Overridden by annotation_color. E.g. if a color is specified in the annotation_color column than this will be overridden.</p></td>
+</tr>
+<tr class="row-odd"><td><p>bin_peaks</p></td>
+<td><p>Union[Literal[“auto”], bool]</p></td>
+<td><p>Whether to bin peaks. Defaults to False.</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>bin_method</p></td>
+<td><p>Literal[“none”, “sturges”, “freedman-diaconis”, “mz-tol-bin”]</p></td>
+<td><p>Method for binning peaks. Defaults to “mz-tol-bin”.</p></td>
+<td><p>“mz-tol-bin”</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_x_bins</p></td>
+<td><p>int</p></td>
+<td><p>Number of bins along the X-axis, ignored if bin_peaks is False or “auto”. Defaults to 50.</p></td>
+<td><p>50</p></td>
+</tr>
+<tr class="row-even"><td><p>mz_tol</p></td>
+<td><p>Union[float, Literal[“freedman-diaconis”, “1pct-diff”]]</p></td>
+<td><p>Tolerance for m/z binning. Defaults to “1pct-diff”.</p></td>
+<td><p>“1pct-diff”</p></td>
 </tr>
 <tr class="row-odd"><td><p>annotate_top_n_peaks</p></td>
+<td><p>int | None | Literal[“all”]</p></td>
+<td><p>Number of top peaks to annotate. Defaults to 5.</p></td>
 <td><p>5</p></td>
-<td><p>int</p></td>
-<td><p>Number of peaks to annotate</p></td>
 </tr>
 <tr class="row-even"><td><p>annotate_mz</p></td>
-<td><p>True</p></td>
 <td><p>bool</p></td>
-<td><p>whether to annotate the top n peaks with their mz values</p></td>
+<td><p>Whether to annotate m/z values. Defaults to True.</p></td>
+<td><p>True</p></td>
 </tr>
-<tr class="row-odd"><td><p>sequence_annotation</p></td>
-<td></td>
-<td><p>str</p></td>
-<td><p>column containing sequence_annotation information.</p></td>
+<tr class="row-odd"><td><p>ion_annotation</p></td>
+<td><p>str | None</p></td>
+<td><p>Column for ion annotations. Defaults to None.</p></td>
+<td><p>None</p></td>
 </tr>
-<tr class="row-even"><td><p>custom_annotation</p></td>
-<td></td>
-<td><p>str</p></td>
-<td><p>column containing custom annotation</p></td>
+<tr class="row-even"><td><p>sequence_annotation</p></td>
+<td><p>str | None</p></td>
+<td><p>Column for sequence annotations. Defaults to None.</p></td>
+<td><p>None</p></td>
 </tr>
-<tr class="row-odd"><td><p>annotation_color</p></td>
-<td></td>
+<tr class="row-odd"><td><p>custom_annotation</p></td>
+<td><p>str | None</p></td>
+<td><p>Column for custom annotations. Defaults to None.</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>annotation_color</p></td>
+<td><p>str | None</p></td>
+<td><p>Color for annotations. Defaults to None.</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>aggregation_method</p></td>
+<td><p>Literal[“mean”, “sum”, “max”]</p></td>
+<td><p>Method for aggregating data. Defaults to “max”.</p></td>
+<td><p>“max”</p></td>
+</tr>
+<tr class="row-even"><td><p>xlabel</p></td>
 <td><p>str</p></td>
-<td><p>column containing the annotation color. If not specified will be automatically generated</p></td>
+<td><p>Label for the X-axis. Defaults to “mass-to-charge”.</p></td>
+<td><p>“mass-to-charge”</p></td>
+</tr>
+<tr class="row-odd"><td><p>ylabel</p></td>
+<td><p>str</p></td>
+<td><p>Label for the Y-axis. Defaults to “Intensity”.</p></td>
+<td><p>“Intensity”</p></td>
+</tr>
+<tr class="row-even"><td><p>title</p></td>
+<td><p>str</p></td>
+<td><p>Title of the plot. Defaults to “Mass Spectrum”.</p></td>
+<td><p>“Mass Spectrum”</p></td>
 </tr>
 </tbody>
 </table>
