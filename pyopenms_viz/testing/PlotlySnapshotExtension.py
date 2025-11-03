@@ -127,6 +127,7 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             arr2 = _np.asarray(arr2)
             
             if arr1.shape != arr2.shape:
+                print(f"Array shape mismatch: {arr1.shape} vs {arr2.shape}")
                 return False
             
             # For integer arrays (like indices), check if sorted arrays match
@@ -135,11 +136,19 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                 if _np.array_equal(arr1, arr2):
                     return True
                 # If exact match fails, try sorted comparison (for index arrays)
-                return _np.array_equal(_np.sort(arr1), _np.sort(arr2))
+                sorted_equal = _np.array_equal(_np.sort(arr1), _np.sort(arr2))
+                if not sorted_equal:
+                    print(f"Integer arrays differ even when sorted (lengths: {len(arr1)}, {len(arr2)})")
+                return sorted_equal
             
             # Use allclose for floating point comparison
-            return _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
-        except (TypeError, ValueError):
+            close = _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
+            if not close:
+                diff_count = _np.sum(~_np.isclose(arr1, arr2, rtol=1e-6, atol=1e-9))
+                print(f"Float arrays differ: {diff_count}/{len(arr1)} elements exceed tolerance")
+            return close
+        except (TypeError, ValueError) as e:
+            print(f"Array comparison error: {e}")
             return False
 
     def _read_snapshot_data_from_location(
