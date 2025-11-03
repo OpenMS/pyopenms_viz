@@ -21,95 +21,118 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
         return PlotlySnapshotExtension.compare_json(json1, json2)
 
     @staticmethod
-    def compare_json(json1, json2) -> bool:
+    def compare_json(json1, json2, _parent_key=None) -> bool:
         """
-        Compare two plotly json objects. This function acts recursively
+        Compare two plotly json objects recursively with special handling for binary data.
 
         Args:
             json1: first json
             json2: second json
+            _parent_key: key from parent dict (for context)
 
         Returns:
             bool: True if the objects are equal, False otherwise
         """
-        # Canonicalize both sides and compare deterministically.
-        norm1 = PlotlySnapshotExtension._canonicalize(json1)
-        norm2 = PlotlySnapshotExtension._canonicalize(json2)
-
-        if norm1 != norm2:
-            print('Canonicalized Plotly JSON objects differ')
-            try:
-                s1 = json.dumps(norm1, sort_keys=True)[:1000]
-                s2 = json.dumps(norm2, sort_keys=True)[:1000]
-                print('sample1:', s1)
-                print('sample2:', s2)
-            except Exception:
-                pass
-            return False
-        return True
+        if isinstance(json1, dict) and isinstance(json2, dict):
+            keys1 = set(json1.keys())
+            keys2 = set(json2.keys())
+            
+            if keys1 != keys2:
+                print(f'Key mismatch at {_parent_key}: {keys1 ^ keys2}')
+                return False
+            
+            for key in keys1:
+                # Special handling for 'bdata' - decode and compare numerically
+                if key == 'bdata' and isinstance(json1[key], str) and isinstance(json2[key], str):
+                    dtype = json1.get('dtype', 'f8')
+                    decoded1 = PlotlySnapshotExtension._decode_bdata(json1[key], dtype)
+                    decoded2 = PlotlySnapshotExtension._decode_bdata(json2[key], dtype)
+                    if not PlotlySnapshotExtension._compare_arrays(decoded1, decoded2):
+                        print(f'Binary data (bdata) differs at {_parent_key}')
+                        return False
+                    continue
+                
+                if not PlotlySnapshotExtension.compare_json(json1[key], json2[key], key):
+                    print(f'Values for key {key} not equal')
+                    return False
+            return True
+            
+        elif isinstance(json1, list) and isinstance(json2, list):
+            if len(json1) != len(json2):
+                print(f'List length mismatch at {_parent_key}: {len(json1)} vs {len(json2)}')
+                return False
+            
+            # If list of numeric tuples/lists (like coordinates), sort before comparing
+            if (len(json1) > 0 and 
+                all(isinstance(i, (list, tuple)) for i in json1) and
+                all(isinstance(i, (list, tuple)) for i in json2)):
+                try:
+                    # Sort by first elements, then second, etc.
+                    sorted1 = sorted(json1, key=lambda x: tuple(x) if isinstance(x, (list, tuple)) else x)
+                    sorted2 = sorted(json2, key=lambda x: tuple(x) if isinstance(x, (list, tuple)) else x)
+                    for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
+                        if not PlotlySnapshotExtension.compare_json(item1, item2, f"{_parent_key}[{i}]"):
+                            return False
+                    return True
+                except (TypeError, ValueError):
+                    pass  # Fall through to element-by-element comparison
+            
+            # Element-by-element comparison
+            for i, (item1, item2) in enumerate(zip(json1, json2)):
+                if not PlotlySnapshotExtension.compare_json(item1, item2, f"{_parent_key}[{i}]"):
+                    return False
+            return True
+            
+        else:
+            # Base case: compare values with tolerance for floats
+            if isinstance(json1, float) and isinstance(json2, float):
+                if not math.isclose(json1, json2, rel_tol=1e-6, abs_tol=1e-9):
+                    print(f'Float values differ at {_parent_key}: {json1} != {json2}')
+                    return False
+                return True
+            else:
+                if json1 != json2:
+                    print(f'Values differ at {_parent_key}: {json1} != {json2}')
+                    return False
+                return True
 
     @staticmethod
     def _decode_bdata(b64_str, dtype_str):
-        """Decode plotly 'bdata' (base64, possibly zlib-compressed) into a list of rounded floats."""
+        """Decode plotly 'bdata' (base64, possibly zlib-compressed) into a numpy array."""
         try:
             raw = base64.b64decode(b64_str)
         except Exception:
-            return b64_str
-        # try decompress
+            return None
+        # Try decompress
         try:
             raw = zlib.decompress(raw)
         except Exception:
-            # not compressed, keep raw
-            pass
-        # map dtype string like 'f8' to numpy dtype
+            pass  # Not compressed
+        # Decode as numpy array
         try:
             dtype = _np.dtype(dtype_str)
             arr = _np.frombuffer(raw, dtype=dtype)
-            # round to reduce tiny platform differences
-            rounded = [float(_np.round(x, 6)) for x in arr]
-            return rounded
+            return arr
         except Exception:
-            # fallback: return raw bytes hex
-            return raw.hex()
+            return None
 
     @staticmethod
-    def _canonicalize(obj):
-        """Return a canonicalized, comparable form of Plotly JSON.
-
-        - Convert bdata blobs to decoded rounded-number lists.
-        - Round floats to fixed precision.
-        - Sort lists of dicts deterministically by serialized content.
-        """
-        if isinstance(obj, dict):
-            out = {}
-            for k in sorted(obj.keys()):
-                v = obj[k]
-                if k == "bdata" and isinstance(v, str):
-                    # try to find dtype in same dict
-                    dtype = obj.get("dtype", "f8")
-                    out["bdata_decoded"] = PlotlySnapshotExtension._decode_bdata(v, dtype)
-                    continue
-                out[k] = PlotlySnapshotExtension._canonicalize(v)
-            return out
-        elif isinstance(obj, list):
-            # If list of dicts, try to sort by serialized canonical form
-            if len(obj) > 0 and all(isinstance(i, dict) for i in obj):
-                def kf(i):
-                    try:
-                        return json.dumps(PlotlySnapshotExtension._canonicalize(i), sort_keys=True)
-                    except Exception:
-                        return str(i)
-
-                sorted_list = [PlotlySnapshotExtension._canonicalize(i) for i in sorted(obj, key=kf)]
-                return sorted_list
-            # If list of floats, round them
-            if len(obj) > 0 and all(isinstance(i, (int, float)) for i in obj):
-                return [round(float(i), 6) for i in obj]
-            return [PlotlySnapshotExtension._canonicalize(i) for i in obj]
-        else:
-            if isinstance(obj, float):
-                return round(obj, 6)
-            return obj
+    def _compare_arrays(arr1, arr2):
+        """Compare two numpy arrays or lists with tolerance."""
+        if arr1 is None or arr2 is None:
+            return arr1 == arr2
+        
+        try:
+            arr1 = _np.asarray(arr1)
+            arr2 = _np.asarray(arr2)
+            
+            if arr1.shape != arr2.shape:
+                return False
+            
+            # Use allclose for floating point comparison
+            return _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
+        except Exception:
+            return False
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str

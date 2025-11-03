@@ -82,67 +82,81 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         return json.loads(parser.bokehJson)
 
     @staticmethod
-    def compare_json(json1, json2):
+    def compare_json(json1, json2, _ignore_keys=None):
         """
-        Compare two bokeh json objects. This function acts recursively
+        Compare two bokeh json objects recursively, ignoring ephemeral keys.
 
         Args:
             json1: first object
             json2: second object
+            _ignore_keys: set of keys to ignore during comparison
 
         Returns:
            bool: True if the objects are equal, False otherwise
         """
-        # Canonicalize both JSON objects then do a straightforward equality check
-        norm1 = BokehSnapshotExtension._canonicalize(json1)
-        norm2 = BokehSnapshotExtension._canonicalize(json2)
+        if _ignore_keys is None:
+            _ignore_keys = {"id", "root_ids"}
 
-        if norm1 != norm2:
-            # Provide a helpful debug output
-            print("Canonicalized JSON objects differ")
-            # Optionally print a summarized diff for debugging
-            try:
-                s1 = _json.dumps(norm1, sort_keys=True)[:1000]
-                s2 = _json.dumps(norm2, sort_keys=True)[:1000]
-                print("sample1:", s1)
-                print("sample2:", s2)
-            except Exception:
-                pass
-            return False
-        return True
-
-    @staticmethod
-    def _canonicalize(obj):
-        """
-        Produce a canonical form of the Bokeh JSON suitable for deterministic comparison.
-
-        - Removes ephemeral keys like 'id' and 'root_ids'.
-        - Sorts lists of dicts by (type, serialized content) when possible so ordering differences don't matter.
-        - Recursively canonicalizes nested structures.
-        """
-        if isinstance(obj, dict):
-            out = {}
-            for k in sorted(obj.keys()):
-                if k in ("id", "root_ids"):
-                    continue
-                out[k] = BokehSnapshotExtension._canonicalize(obj[k])
-            return out
-        elif isinstance(obj, list):
-            # If list of dicts, try to sort deterministically by ('type', json)
-            if len(obj) > 0 and all(isinstance(i, dict) for i in obj):
-                def keyfunc(i):
-                    t = i.get("type", "")
-                    try:
-                        s = _json.dumps(BokehSnapshotExtension._canonicalize(i), sort_keys=True)
-                    except Exception:
-                        s = str(i)
-                    return (t, s)
-
-                return [BokehSnapshotExtension._canonicalize(i) for i in sorted(obj, key=keyfunc)]
-            # Otherwise canonicalize each element but keep order
-            return [BokehSnapshotExtension._canonicalize(i) for i in obj]
+        if isinstance(json1, dict) and isinstance(json2, dict):
+            # Get keys excluding ignored ones
+            keys1 = set(json1.keys()) - _ignore_keys
+            keys2 = set(json2.keys()) - _ignore_keys
+            
+            if keys1 != keys2:
+                print(f"Key mismatch: {keys1 ^ keys2}")
+                return False
+            
+            for key in keys1:
+                if not BokehSnapshotExtension.compare_json(json1[key], json2[key], _ignore_keys):
+                    print(f"Values for key '{key}' not equal")
+                    return False
+            return True
+            
+        elif isinstance(json1, list) and isinstance(json2, list):
+            if len(json1) != len(json2):
+                print(f"List length mismatch: {len(json1)} vs {len(json2)}")
+                return False
+            
+            # If list of dicts with 'type' field, sort by type+attributes for deterministic comparison
+            if (len(json1) > 0 and 
+                all(isinstance(i, dict) for i in json1) and 
+                all(isinstance(i, dict) for i in json2)):
+                
+                # Try to sort by type and a stable hash
+                def sort_key(item):
+                    item_type = item.get("type", "")
+                    item_name = item.get("name", "")
+                    # Use attributes as secondary sort if present
+                    attrs = item.get("attributes", {})
+                    attr_keys = sorted(k for k in attrs.keys() if k not in _ignore_keys)
+                    return (item_type, item_name, tuple(attr_keys))
+                
+                try:
+                    sorted1 = sorted(json1, key=sort_key)
+                    sorted2 = sorted(json2, key=sort_key)
+                except (TypeError, KeyError):
+                    # If sorting fails, compare in order
+                    sorted1, sorted2 = json1, json2
+                
+                for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys):
+                        print(f"List item {i} differs")
+                        return False
+                return True
+            else:
+                # For non-dict lists, compare element by element
+                for i, (item1, item2) in enumerate(zip(json1, json2)):
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys):
+                        print(f"List element {i} differs")
+                        return False
+                return True
+                
         else:
-            return obj
+            # Base case: direct comparison
+            if json1 != json2:
+                print(f"Values differ: {json1} != {json2}")
+                return False
+            return True
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
