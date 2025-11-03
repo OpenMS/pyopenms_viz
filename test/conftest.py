@@ -137,6 +137,7 @@ def reset_random_state():
     # Restore original uuid4
     try:
         import uuid
-        uuid.uuid4 = _original_uuid4
-    except:
+        if '_original_uuid4' in locals():
+            uuid.uuid4 = _original_uuid4
+    except (AttributeError, NameError):
         pass
