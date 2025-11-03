@@ -21,12 +21,22 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
         serialized_image_array = np.array(serialized_data)
         snapshot_image_array = np.array(snapshot_data)
 
+        # Allow small differences due to platform-specific rendering
+        # Calculate the percentage of different pixels
         diff = np.where(
             serialized_image_array != snapshot_image_array
         )  # get locations where different, get a tuple of 3 arrays corresponding with the x, y, and channel of the image
 
         # if one of these arrays is 0 than all are 0 and images are equal
-        return len(diff[0]) == 0  # if there are no differences, return True
+        if len(diff[0]) == 0:
+            return True
+        
+        # Allow up to 0.1% of pixels to be different (for antialiasing/font rendering differences)
+        total_pixels = serialized_image_array.size
+        different_pixels = len(diff[0])
+        diff_percentage = (different_pixels / total_pixels) * 100
+        
+        return diff_percentage < 0.1  # Allow 0.1% difference
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str

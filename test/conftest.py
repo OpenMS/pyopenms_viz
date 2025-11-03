@@ -11,11 +11,15 @@ matplotlib.use('Agg')
 
 # Set matplotlib to use deterministic settings for consistent rendering across systems
 import matplotlib.pyplot as plt
+import matplotlib
 plt.rcParams['svg.hashsalt'] = 'pyopenms_viz_test'  # For SVG determinism
 plt.rcParams['font.family'] = 'DejaVu Sans'  # Use consistent font across systems
 plt.rcParams['font.size'] = 10
 plt.rcParams['figure.max_open_warning'] = 0  # Disable max figure warning
 # Note: Not setting DPI explicitly to preserve existing snapshot dimensions
+# Ensure consistent rendering across platforms
+matplotlib.rcParams['text.antialiased'] = True
+matplotlib.rcParams['path.simplify'] = False  # Don't simplify paths for consistency
 
 def find_git_directory(start_path):
     """Find the full path to the nearest '.git' directory by climbing up the directory tree.
