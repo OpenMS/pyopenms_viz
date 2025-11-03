@@ -98,6 +98,42 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             _ignore_keys = {"id", "root_ids"}
 
         if isinstance(json1, dict) and isinstance(json2, dict):
+            # Special handling for Bokeh's __ndarray__ format
+            if '__ndarray__' in json1 and '__ndarray__' in json2:
+                # This is a serialized numpy array: {"__ndarray__": "base64", "dtype": "...", "shape": [...]}
+                try:
+                    import base64
+                    import numpy as np
+                    
+                    b64_1 = json1['__ndarray__']
+                    b64_2 = json2['__ndarray__']
+                    dtype_1 = json1.get('dtype', 'float64')
+                    dtype_2 = json2.get('dtype', 'float64')
+                    
+                    if dtype_1 != dtype_2:
+                        print(f"Dtype mismatch in __ndarray__: {dtype_1} vs {dtype_2}")
+                        return False
+                    
+                    arr1 = np.frombuffer(base64.b64decode(b64_1), dtype=np.dtype(dtype_1))
+                    arr2 = np.frombuffer(base64.b64decode(b64_2), dtype=np.dtype(dtype_2))
+                    
+                    # For integer arrays, use sorted comparison
+                    if np.issubdtype(arr1.dtype, np.integer):
+                        if not (np.array_equal(arr1, arr2) or np.array_equal(np.sort(arr1), np.sort(arr2))):
+                            print(f"Integer __ndarray__ arrays differ")
+                            return False
+                    else:
+                        # For float arrays, use tolerance
+                        if not np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9):
+                            print(f"Float __ndarray__ arrays differ (tolerance exceeded)")
+                            return False
+                    
+                    # Arrays match, skip other keys in this dict
+                    return True
+                except (ValueError, TypeError, KeyError, base64.binascii.Error) as e:
+                    print(f"Error comparing __ndarray__: {e}")
+                    return False
+            
             # Get keys excluding ignored ones
             keys1 = set(json1.keys()) - _ignore_keys
             keys2 = set(json2.keys()) - _ignore_keys
