@@ -84,7 +84,7 @@ This example demonstrates how different binning levels affect peak map visualiza
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.344 seconds)
+   **Total running time of the script:** (0 minutes 0.439 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_peakmap_binning_demonstration_ms_matplotlib.py:
