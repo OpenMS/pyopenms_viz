@@ -82,7 +82,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         return json.loads(parser.bokehJson)
 
     @staticmethod
-    def compare_json(json1, json2, _ignore_keys=None):
+    def compare_json(json1, json2, _ignore_keys=None, path=""):
         """
         Compare two bokeh json objects recursively, ignoring ephemeral keys.
 
@@ -143,7 +143,8 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 return False
             
             for key in keys1:
-                if not BokehSnapshotExtension.compare_json(json1[key], json2[key], _ignore_keys):
+                new_path = f"{path}.{key}" if path else key
+                if not BokehSnapshotExtension.compare_json(json1[key], json2[key], _ignore_keys, new_path):
                     print(f"Values for key '{key}' not equal")
                     return False
             return True
@@ -193,14 +194,16 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                     sorted1, sorted2 = json1, json2
                 
                 for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
-                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys, new_path):
                         print(f"List item {i} differs")
                         return False
                 return True
             else:
                 # For non-dict lists, compare element by element
                 for i, (item1, item2) in enumerate(zip(json1, json2)):
-                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys, new_path):
                         print(f"List element {i} differs")
                         return False
                 return True
@@ -215,16 +218,37 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                     try:
                         import base64
                         import numpy as np
-                        arr1 = np.frombuffer(base64.b64decode(json1), dtype=np.int32)
-                        arr2 = np.frombuffer(base64.b64decode(json2), dtype=np.int32)
-                        # For index arrays, order may not matter - compare sorted
-                        if len(arr1) == len(arr2) and np.array_equal(np.sort(arr1), np.sort(arr2)):
-                            return True
-                        # Also try exact equality
-                        if np.array_equal(arr1, arr2):
-                            return True
+
+                        # Decode raw bytes first
+                        raw1 = base64.b64decode(json1)
+                        raw2 = base64.b64decode(json2)
+
+                        # Try interpreting as int32 but require exact (order-sensitive) equality
+                        try:
+                            arr1 = np.frombuffer(raw1, dtype=np.int32)
+                            arr2 = np.frombuffer(raw2, dtype=np.int32)
+                            if np.array_equal(arr1, arr2):
+                                return True
+                        except Exception:
+                            pass
+
+                        # Try interpreting as float64 with tolerance (order-sensitive)
+                        try:
+                            arr1f = np.frombuffer(raw1, dtype=np.float64)
+                            arr2f = np.frombuffer(raw2, dtype=np.float64)
+                            if np.allclose(arr1f, arr2f, rtol=1e-6, atol=1e-9):
+                                return True
+                        except Exception:
+                            pass
+
+                        # NOTE: We intentionally do NOT perform an order-insensitive (sorted)
+                        # comparison here for arbitrary base64 strings. The sorted comparison
+                        # is only allowed when we can prove the payload is an index set
+                        # (for example when the surrounding key path is 'selected.indices'
+                        # and a declared dtype indicates an integer type). Plain base64
+                        # strings without such context must be treated as order-sensitive.
                     except (ValueError, TypeError, base64.binascii.Error):
-                        pass  # Not base64 or not decodable as int32, fall through to string comparison
+                        pass  # Not base64 or not decodable, fall through to string comparison
             
             if json1 != json2:
                 print(f"Values differ: {json1} != {json2}")

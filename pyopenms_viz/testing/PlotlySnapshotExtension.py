@@ -108,7 +108,7 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                     dtype = json1.get('dtype', 'f8')
                     decoded1 = PlotlySnapshotExtension._decode_bdata(json1[key], dtype)
                     decoded2 = PlotlySnapshotExtension._decode_bdata(json2[key], dtype)
-                    if not PlotlySnapshotExtension._compare_arrays(decoded1, decoded2):
+                    if not PlotlySnapshotExtension._compare_arrays(decoded1, decoded2, _parent_key):
                         print(f'Binary data (bdata) differs at {_parent_key}')
                         return False
                     continue
@@ -198,8 +198,14 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             return None
 
     @staticmethod
-    def _compare_arrays(arr1, arr2):
-        """Compare two numpy arrays or lists with tolerance."""
+    def _compare_arrays(arr1, arr2, parent_key=None):
+        """Compare two numpy arrays or lists with tolerance.
+        
+        Args:
+            arr1: First array
+            arr2: Second array
+            parent_key: Parent key for context (used to determine if order-insensitive comparison is appropriate)
+        """
         if arr1 is None or arr2 is None:
             return arr1 == arr2
         
@@ -211,16 +217,28 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                 print(f"Array shape mismatch: {arr1.shape} vs {arr2.shape}")
                 return False
             
-            # For integer arrays (like indices), check if sorted arrays match
-            # This handles cases where index order doesn't matter for rendering
+            # For integer arrays, default to order-sensitive comparison
             if _np.issubdtype(arr1.dtype, _np.integer) and _np.issubdtype(arr2.dtype, _np.integer):
                 if _np.array_equal(arr1, arr2):
                     return True
-                # If exact match fails, try sorted comparison (for index arrays)
-                sorted_equal = _np.array_equal(_np.sort(arr1), _np.sort(arr2))
-                if not sorted_equal:
-                    print(f"Integer arrays differ even when sorted (lengths: {len(arr1)}, {len(arr2)})")
-                return sorted_equal
+                
+                # Only allow order-insensitive (sorted) comparison for explicit index keys
+                # These are keys where the ordering genuinely doesn't matter for the data semantics
+                is_index_key = parent_key and any(
+                    parent_key.endswith(suffix) 
+                    for suffix in ['indices', 'indptr', 'selected.indices']
+                )
+                
+                if is_index_key:
+                    # For known index arrays, order may not matter - compare sorted
+                    sorted_equal = _np.array_equal(_np.sort(arr1), _np.sort(arr2))
+                    if not sorted_equal:
+                        print(f"Index array differs even when sorted at {parent_key} (lengths: {len(arr1)}, {len(arr2)})")
+                    return sorted_equal
+                else:
+                    # For all other integer arrays (RGBA, coords, topology), order matters
+                    print(f"Integer arrays differ at {parent_key} (lengths: {len(arr1)}, {len(arr2)})")
+                    return False
             
             # Use allclose for floating point comparison
             close = _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
