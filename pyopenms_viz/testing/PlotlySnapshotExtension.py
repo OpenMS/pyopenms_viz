@@ -62,19 +62,39 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                 print(f'List length mismatch at {_parent_key}: {len(json1)} vs {len(json2)}')
                 return False
             
-            # If list of numeric tuples/lists (like coordinates), sort before comparing
+            # If list of simple strings (like annotation labels), sort before comparing
+            if (len(json1) > 0 and 
+                all(isinstance(i, str) for i in json1) and 
+                all(isinstance(i, str) for i in json2)):
+                return sorted(json1) == sorted(json2)
+            
+            # If list of tuples/lists (like coordinates with annotations), sort before comparing
+            # Handle mixed types by converting to comparable tuples
             if (len(json1) > 0 and 
                 all(isinstance(i, (list, tuple)) for i in json1) and
                 all(isinstance(i, (list, tuple)) for i in json2)):
                 try:
-                    # Sort by first elements, then second, etc.
-                    sorted1 = sorted(json1, key=lambda x: tuple(x) if isinstance(x, (list, tuple)) else x)
-                    sorted2 = sorted(json2, key=lambda x: tuple(x) if isinstance(x, (list, tuple)) else x)
+                    def make_sort_key(item):
+                        # Convert item to tuple, with strings converted for sorting
+                        result = []
+                        for val in item:
+                            if isinstance(val, str):
+                                # Put strings last in sort order by prefixing with high value
+                                result.append((1, val))
+                            elif isinstance(val, (int, float)):
+                                result.append((0, val))
+                            else:
+                                result.append((2, str(val)))
+                        return tuple(result)
+                    
+                    # Sort by first numeric elements, handling mixed types
+                    sorted1 = sorted(json1, key=make_sort_key)
+                    sorted2 = sorted(json2, key=make_sort_key)
                     for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
                         if not PlotlySnapshotExtension.compare_json(item1, item2, f"{_parent_key}[{i}]"):
                             return False
                     return True
-                except (TypeError, ValueError):
+                except (TypeError, ValueError) as e:
                     pass  # Fall through to element-by-element comparison
             
             # Element-by-element comparison
