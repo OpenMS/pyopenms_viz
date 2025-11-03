@@ -5,6 +5,9 @@ from syrupy.types import SerializableData
 from plotly.io import to_json
 import json
 import math
+import base64
+import zlib
+import numpy as _np
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     """
@@ -29,33 +32,84 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
         Returns:
             bool: True if the objects are equal, False otherwise
         """
-        if isinstance(json1, dict) and isinstance(json2, dict):
-            for key in json1.keys():
-                if key not in json2:
-                    print(f'Key {key} not in second json')
-                    return False
-                if not PlotlySnapshotExtension.compare_json(json1[key], json2[key]):
-                    print(f'Values for key {key} not equal')
-                    return False
-            return True
-        elif isinstance(json1, list) and isinstance(json2, list):
-            if len(json1) != len(json2):
-                print('Lists have different lengths')
-                return False
-            for i, j in zip(json1, json2):
-                if not PlotlySnapshotExtension.compare_json(i, j):
-                    return False
-            return True
+        # Canonicalize both sides and compare deterministically.
+        norm1 = PlotlySnapshotExtension._canonicalize(json1)
+        norm2 = PlotlySnapshotExtension._canonicalize(json2)
+
+        if norm1 != norm2:
+            print('Canonicalized Plotly JSON objects differ')
+            try:
+                s1 = json.dumps(norm1, sort_keys=True)[:1000]
+                s2 = json.dumps(norm2, sort_keys=True)[:1000]
+                print('sample1:', s1)
+                print('sample2:', s2)
+            except Exception:
+                pass
+            return False
+        return True
+
+    @staticmethod
+    def _decode_bdata(b64_str, dtype_str):
+        """Decode plotly 'bdata' (base64, possibly zlib-compressed) into a list of rounded floats."""
+        try:
+            raw = base64.b64decode(b64_str)
+        except Exception:
+            return b64_str
+        # try decompress
+        try:
+            raw = zlib.decompress(raw)
+        except Exception:
+            # not compressed, keep raw
+            pass
+        # map dtype string like 'f8' to numpy dtype
+        try:
+            dtype = _np.dtype(dtype_str)
+            arr = _np.frombuffer(raw, dtype=dtype)
+            # round to reduce tiny platform differences
+            rounded = [float(_np.round(x, 6)) for x in arr]
+            return rounded
+        except Exception:
+            # fallback: return raw bytes hex
+            return raw.hex()
+
+    @staticmethod
+    def _canonicalize(obj):
+        """Return a canonicalized, comparable form of Plotly JSON.
+
+        - Convert bdata blobs to decoded rounded-number lists.
+        - Round floats to fixed precision.
+        - Sort lists of dicts deterministically by serialized content.
+        """
+        if isinstance(obj, dict):
+            out = {}
+            for k in sorted(obj.keys()):
+                v = obj[k]
+                if k == "bdata" and isinstance(v, str):
+                    # try to find dtype in same dict
+                    dtype = obj.get("dtype", "f8")
+                    out["bdata_decoded"] = PlotlySnapshotExtension._decode_bdata(v, dtype)
+                    continue
+                out[k] = PlotlySnapshotExtension._canonicalize(v)
+            return out
+        elif isinstance(obj, list):
+            # If list of dicts, try to sort by serialized canonical form
+            if len(obj) > 0 and all(isinstance(i, dict) for i in obj):
+                def kf(i):
+                    try:
+                        return json.dumps(PlotlySnapshotExtension._canonicalize(i), sort_keys=True)
+                    except Exception:
+                        return str(i)
+
+                sorted_list = [PlotlySnapshotExtension._canonicalize(i) for i in sorted(obj, key=kf)]
+                return sorted_list
+            # If list of floats, round them
+            if len(obj) > 0 and all(isinstance(i, (int, float)) for i in obj):
+                return [round(float(i), 6) for i in obj]
+            return [PlotlySnapshotExtension._canonicalize(i) for i in obj]
         else:
-            if isinstance(json1, float):
-                if not math.isclose(json1, json2):
-                    print(f'Values not equal: {json1} != {json2}')
-                    return False
-            else:
-                if json1 != json2:
-                    print(f'Values not equal: {json1} != {json2}')
-                    return False
-            return True
+            if isinstance(obj, float):
+                return round(obj, 6)
+            return obj
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
