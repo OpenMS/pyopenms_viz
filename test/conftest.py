@@ -109,25 +109,24 @@ def reset_random_state():
     """Reset random state before each test for deterministic behavior"""
     import random
     import numpy as np
+    import uuid
     
     # Set seeds for all random number generators
     random.seed(42)
     np.random.seed(42)
     
+    # Store original uuid4 before patching
+    _original_uuid4 = uuid.uuid4
+    
     # Monkey patch uuid.uuid4 for deterministic UUIDs (used by Bokeh)
-    try:
-        import uuid
-        _original_uuid4 = uuid.uuid4
-        counter = [0]
-        
-        def deterministic_uuid4():
-            counter[0] += 1
-            # Generate deterministic UUID from counter
-            return uuid.UUID(f'00000000-0000-4000-8000-{counter[0]:012d}')
-        
-        uuid.uuid4 = deterministic_uuid4
-    except ImportError:
-        pass
+    counter = [0]
+    
+    def deterministic_uuid4():
+        counter[0] += 1
+        # Generate deterministic UUID from counter
+        return uuid.UUID(f'00000000-0000-4000-8000-{counter[0]:012d}')
+    
+    uuid.uuid4 = deterministic_uuid4
     
     # Reset bokeh ID counter if available
     try:
@@ -139,9 +138,4 @@ def reset_random_state():
     yield
     
     # Restore original uuid4
-    try:
-        import uuid
-        if '_original_uuid4' in locals():
-            uuid.uuid4 = _original_uuid4
-    except (AttributeError, NameError):
-        pass
+    uuid.uuid4 = _original_uuid4
