@@ -153,6 +153,13 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 print(f"List length mismatch: {len(json1)} vs {len(json2)}")
                 return False
             
+            # If list of simple strings (like annotation labels), sort before comparing
+            if (len(json1) > 0 and 
+                all(isinstance(i, str) for i in json1) and 
+                all(isinstance(i, str) for i in json2)):
+                # Sort string lists for deterministic comparison
+                return sorted(json1) == sorted(json2)
+            
             # If list of dicts with 'type' field, sort by type+attributes for deterministic comparison
             if (len(json1) > 0 and 
                 all(isinstance(i, dict) for i in json1) and 
