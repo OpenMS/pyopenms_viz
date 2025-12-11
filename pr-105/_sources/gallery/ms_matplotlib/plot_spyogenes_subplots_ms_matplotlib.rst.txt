@@ -23,7 +23,7 @@ Plot Spyogenes subplots ms_matplotlib
 
 Here we show how we can plot multiple chromatograms across runs together
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-76
+.. GENERATED FROM PYTHON SOURCE LINES 7-73
 
 
 
@@ -70,9 +70,6 @@ Here we show how we can plot multiple chromatograms across runs together
     annotation_bounds = pd.read_csv(
         "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
     )  # contain annotations across all runs
-    chrom_df = pd.read_csv(
-        "spyogenes/chroms_AADGQTVSGGSILYR3.tsv", sep="\t"
-    )  # contains chromatogram for precursor across all runs
 
     ##### Set Plotting Variables #####
     RUN_NAMES = [
@@ -121,7 +118,7 @@ Here we show how we can plot multiple chromatograms across runs together
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.840 seconds)
+   **Total running time of the script:** (0 minutes 2.475 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_spyogenes_subplots_ms_matplotlib.py:

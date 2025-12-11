@@ -26,9 +26,6 @@ chrom_df = pd.read_csv(
 annotation_bounds = pd.read_csv(
     "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
 )  # contain annotations across all runs
-chrom_df = pd.read_csv(
-    "spyogenes/chroms_AADGQTVSGGSILYR3.tsv", sep="\t"
-)  # contains chromatogram for precursor across all runs
 
 ##### Set Plotting Variables #####
 RUN_NAMES = [
