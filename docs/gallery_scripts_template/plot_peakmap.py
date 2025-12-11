@@ -5,8 +5,6 @@ PeakMap TEMPLATE
 This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
 """
 
-pd.options.plotting.backend = "TEMPLATE"
-
 import os
 import pandas as pd
 

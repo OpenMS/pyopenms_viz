@@ -6,8 +6,6 @@ This example plots a peakmap with marginals by setting `add_marginals=True`
 A chromatogram is shown along the x-axis and a spectrum is shown along the y-axis.
 """
 
-pd.options.plotting.backend = "TEMPLATE"
-
 import os
 import pandas as pd
 
