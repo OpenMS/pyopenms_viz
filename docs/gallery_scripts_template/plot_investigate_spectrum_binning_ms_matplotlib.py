@@ -5,30 +5,15 @@ Investigate Spctrum Binning ms_matplotlib
 Here we use a dummy spectrum example to investigate spectrum binning.
 """
 
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_matplotlib"
 
+url = "https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1"
 local_path = "TestSpectrumDf.tsv"
-url = (
-    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
-)
-if not os.path.exists(local_path):
-    import requests
-
-    response = requests.get(
-        url,
-        headers={
-            "User-Agent": "pyopenms_viz-docs/0.1.5 (+https://github.com/OpenMS/pyopenms_viz)"
-        },
-        timeout=30,
-    )
-
-    response.raise_for_status()
-    with open(local_path, "w") as f:
-        f.write(response.text)
+download_file(url, local_path)
 df = pd.read_csv(local_path, sep="\t")
 
 # Let's assess the peak binning and create a 4 by 2 subplot to visualize the different methods of binning

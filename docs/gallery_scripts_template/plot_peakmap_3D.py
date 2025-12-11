@@ -5,21 +5,14 @@ Extracted PeakMap 3D TEMPLATE
 This shows a peakmap across m/z and retention time, plotted in 3D.
 """
 
-import os
 import pandas as pd
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "TEMPLATE"
 
+url = "https://zenodo.org/records/17904352/files/ionMobilityTestFeatureDf.tsv?download=1"
 local_path = "ionMobilityTestFeatureDf.tsv"
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-if not os.path.exists(local_path):
-    import requests
-
-    headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    with open(local_path, "w") as f:
-        f.write(response.text)
+download_file(url, local_path)
 df = pd.read_csv(local_path, sep="\t")
 
 # Code to plot a peakmap

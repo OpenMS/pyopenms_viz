@@ -7,22 +7,14 @@ We can add the ion_annotation and sequence annotation by specifying these column
 """
 
 import pandas as pd
-from io import StringIO
-import requests
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "TEMPLATE"
 
-# download the file for example plotting
-url = (
-    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
-)
-headers = {"User-Agent": "Mozilla/5.0"}  # pretend to be a browser
-try:
-    response = requests.get(url, headers=headers, timeout=30)
-    response.raise_for_status()  # Check for any HTTP errors
-    df = pd.read_csv(StringIO(response.text), sep="\t")
-except requests.RequestException as e:
-    raise RuntimeError(f"Error downloading the file: {e}")
+url = "https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1"
+local_path = "TestSpectrumDf.tsv"
+download_file(url, local_path)
+df = pd.read_csv(local_path, sep="\t")
 
 # mirror a reference spectrum with ion and sequence annoations
 df.plot(
