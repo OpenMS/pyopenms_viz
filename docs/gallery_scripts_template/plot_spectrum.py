@@ -2,7 +2,7 @@
 Spectrum TEMPLATE
 =======================================
 
-This example shows a spectrum. 
+This example shows a spectrum.
 We can add the ion_annotation and sequence annotation by specifying these columns.
 """
 
@@ -16,7 +16,8 @@ pd.options.plotting.backend = "TEMPLATE"
 url = (
     "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 )
-response = requests.get(url)
+headers = {"User-Agent": "Mozilla/5.0"}  # pretend to be a browser
+response = requests.get(url, headers=headers)
 response.raise_for_status()  # Check for any HTTP errors
 df = pd.read_csv(StringIO(response.text), sep="\t")
 
