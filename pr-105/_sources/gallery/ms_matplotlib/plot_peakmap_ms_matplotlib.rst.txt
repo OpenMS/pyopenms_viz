@@ -23,7 +23,7 @@ PeakMap ms_matplotlib
 
 This shows a peakmap across m/z and retention time. This peakmap is quite clean because signals are extracted across the m/z dimension.
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-22
+.. GENERATED FROM PYTHON SOURCE LINES 7-27
 
 
 
@@ -49,17 +49,22 @@ This shows a peakmap across m/z and retention time. This peakmap is quite clean 
 .. code-block:: Python
 
 
+    import os
     import pandas as pd
-    from io import StringIO
-    import requests
 
     pd.options.plotting.backend = "ms_matplotlib"
 
-    # download the file for example plotting
+    local_path = "ionMobilityTestFeatureDf.tsv"
     url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-    response = requests.get(url)
-    response.raise_for_status()  # Check for any HTTP errors
-    df = pd.read_csv(StringIO(response.text), sep="\t")
+    if not os.path.exists(local_path):
+        import requests
+
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        with open(local_path, "w") as f:
+            f.write(response.text)
+    df = pd.read_csv(local_path, sep="\t")
 
     # Code to plot a peakmap
     df.plot(kind="peakmap", x="rt", y="mz", z="int", aggregate_duplicates=True)
@@ -67,7 +72,7 @@ This shows a peakmap across m/z and retention time. This peakmap is quite clean 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.286 seconds)
+   **Total running time of the script:** (0 minutes 0.265 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_peakmap_ms_matplotlib.py:

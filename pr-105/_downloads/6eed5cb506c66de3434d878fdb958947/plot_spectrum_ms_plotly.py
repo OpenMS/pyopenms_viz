@@ -2,7 +2,7 @@
 Spectrum ms_plotly
 =======================================
 
-This example shows a spectrum. 
+This example shows a spectrum.
 We can add the ion_annotation and sequence annotation by specifying these columns.
 """
 
@@ -16,9 +16,13 @@ pd.options.plotting.backend = "ms_plotly"
 url = (
     "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 )
-response = requests.get(url)
-response.raise_for_status()  # Check for any HTTP errors
-df = pd.read_csv(StringIO(response.text), sep="\t")
+headers = {"User-Agent": "Mozilla/5.0"}  # pretend to be a browser
+try:
+    response = requests.get(url, headers=headers, timeout=30)
+    response.raise_for_status()  # Check for any HTTP errors
+    df = pd.read_csv(StringIO(response.text), sep="\t")
+except requests.RequestException as e:
+    raise RuntimeError(f"Error downloading the file: {e}")
 
 # mirror a reference spectrum with ion and sequence annoations
 df.plot(

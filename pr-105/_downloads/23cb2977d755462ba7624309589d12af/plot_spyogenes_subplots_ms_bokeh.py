@@ -5,48 +5,34 @@ Plot Spyogenes subplots ms_bokeh
 Here we show how we can plot multiple chromatograms across runs together
 """
 
+import os
 import pandas as pd
-import requests
+import numpy as np
+from bokeh.layouts import column
+from bokeh.io import show
+
 import zipfile
-import numpy as np
-from bokeh.layouts import column
-from bokeh.io import show
 
-import pandas as pd
-import requests
-import numpy as np
-from bokeh.layouts import column
-from bokeh.io import show
-
-###### Load Data #######
-
-# URL of the zip file
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip"
 zip_filename = "spyogenes.zip"
+zip_dir = "spyogenes"
+url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip"
 
-# Download the zip file
-try:
+if not os.path.exists(zip_dir):
+    import requests
+
     print(f"Downloading {zip_filename}...")
-    response = requests.get(url)
-    response.raise_for_status()  # Check for any HTTP errors
-
-    # Save the zip file to the current directory
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+    response.raise_for_status()
     with open(zip_filename, "wb") as out:
         out.write(response.content)
     print(f"Downloaded {zip_filename} successfully.")
-except requests.RequestException as e:
-    print(f"Error downloading zip file: {e}")
-except IOError as e:
-    print(f"Error writing zip file: {e}")
-
-# Unzipping the file
-try:
-    with zipfile.ZipFile(zip_filename, "r") as zip_ref:
-        # Extract all files to the current directory
-        zip_ref.extractall()
-        print("Unzipped files successfully.")
-except zipfile.BadZipFile as e:
-    print(f"Error unzipping file: {e}")
+    try:
+        with zipfile.ZipFile(zip_filename, "r") as zip_ref:
+            zip_ref.extractall()
+            print("Unzipped files successfully.")
+    except zipfile.BadZipFile as e:
+        print(f"Error unzipping file: {e}")
+        raise
 
 annotation_bounds = pd.read_csv(
     "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"

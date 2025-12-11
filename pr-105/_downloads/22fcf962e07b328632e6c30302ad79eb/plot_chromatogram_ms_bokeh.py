@@ -5,19 +5,22 @@ Chromatogram ms_bokeh
 This example shows a chromatogram colored by mass trace. Since all fragment ion spectra coelute this provides strong evidence that the peptide is present.
 """
 
+import os
 import pandas as pd
-import requests
-from io import StringIO
 
 pd.options.plotting.backend = "ms_bokeh"
 
-
-# download the file for example plotting
+local_path = "ionMobilityTestChromatogramDf.tsv"
 url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestChromatogramDf.tsv"
-headers = {"User-Agent": "Mozilla/5.0"}  # pretend to be a browser
-response = requests.get(url, headers=headers)
-response.raise_for_status()  # Check for any HTTP errors
-df = pd.read_csv(StringIO(response.text), sep="\t")
+if not os.path.exists(local_path):
+    import requests
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    with open(local_path, "w") as f:
+        f.write(response.text)
+df = pd.read_csv(local_path, sep="\t")
 
 df.plot(
     kind="chromatogram",
