@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 
 
 def download_file(url, local_path):
@@ -14,5 +13,27 @@ def download_file(url, local_path):
 
         response = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
         response.raise_for_status()
-        with open(local_path, "w") as f:
-            f.write(response.text)
+
+        # Detect if file is binary (e.g., .zip files)
+        is_binary = local_path.endswith((".zip", ".gz", ".tar"))
+        mode = "wb" if is_binary else "w"
+
+        with open(local_path, mode) as f:
+            f.write(response.content if is_binary else response.text)
+
+
+def unzip_file(zip_path, extract_to):
+    """
+    Unzip a zip file to a specified directory.
+
+    zip_path (str): The path to the zip file.
+    extract_to (str): The directory to extract the contents to.
+    """
+    import zipfile
+
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(extract_to)
+    except zipfile.BadZipFile as e:
+        print(f"Error unzipping file: {e}")
+        raise
