@@ -11,12 +11,20 @@ import matplotlib.pyplot as plt
 
 pd.options.plotting.backend = "ms_matplotlib"
 
-local_path = "TestSpectrumDf.tsv"
+local_path = os.path.join(os.path.dirname(__file__), "TestSpectrumDf.tsv")
 url = (
     "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 )
 if not os.path.exists(local_path):
     import requests
+
+    response = requests.get(
+        url,
+        headers={
+            "User-Agent": "pyopenms_viz-docs/0.1.5 (+https://github.com/OpenMS/pyopenms_viz)"
+        },
+        timeout=30,
+    )
 
     response = requests.get(url)
     response.raise_for_status()

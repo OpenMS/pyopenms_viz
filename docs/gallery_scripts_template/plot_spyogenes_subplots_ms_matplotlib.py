@@ -7,7 +7,6 @@ Here we show how we can plot multiple chromatograms across runs together
 
 import os
 import pandas as pd
-import requests
 import zipfile
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,7 +25,7 @@ if not os.path.exists(zip_dir):
     import requests
 
     print(f"Downloading {zip_filename}...")
-    response = requests.get(url)
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
     response.raise_for_status()
     with open(zip_filename, "wb") as out:
         out.write(response.content)
@@ -42,19 +41,11 @@ try:
         print("Unzipped files successfully.")
 except zipfile.BadZipFile as e:
     print(f"Error unzipping file: {e}")
+    raise
 
 chrom_df = pd.read_csv(
     "spyogenes/chroms_AADGQTVSGGSILYR3.tsv", sep="\t"
 )  # contains chromatogram for precursor across all runs
-
-# Unzipping the file
-try:
-    with zipfile.ZipFile(zip_filename, "r") as zip_ref:
-        # Extract all files to the current directory
-        zip_ref.extractall()
-        print("Unzipped files successfully.")
-except zipfile.BadZipFile as e:
-    print(f"Error unzipping file: {e}")
 
 annotation_bounds = pd.read_csv(
     "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
@@ -64,7 +55,6 @@ chrom_df = pd.read_csv(
 )  # contains chromatogram for precursor across all runs
 
 ##### Set Plotting Variables #####
-pd.options.plotting.backend = "ms_matplotlib"
 RUN_NAMES = [
     "Run #0 Spyogenes 0% human plasma",
     "Run #1 Spyogenes 0% human plasma",

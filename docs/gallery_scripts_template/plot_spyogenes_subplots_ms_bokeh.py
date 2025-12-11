@@ -21,7 +21,7 @@ if not os.path.exists(zip_dir):
     import requests
 
     print(f"Downloading {zip_filename}...")
-    response = requests.get(url)
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
     response.raise_for_status()
     with open(zip_filename, "wb") as out:
         out.write(response.content)
@@ -32,6 +32,7 @@ if not os.path.exists(zip_dir):
             print("Unzipped files successfully.")
     except zipfile.BadZipFile as e:
         print(f"Error unzipping file: {e}")
+        raise
 
 annotation_bounds = pd.read_csv(
     "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
