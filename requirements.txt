@@ -137,7 +137,7 @@ nbsphinx==0.9.8
     # via pyopenms_viz (pyproject.toml)
 nest-asyncio==1.6.0
     # via ipykernel
-numpy==2.2.5
+numpy==2.1.2
     # via
     #   bokeh
     #   contourpy
