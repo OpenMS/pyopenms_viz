@@ -41,7 +41,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     Handles Bokeh Snapshots. Snapshots are stored as html files and the bokeh .json output from the html files are compared.
     """
 
-    _file_extension = "html"
+    file_extension = "html"
 
     def matches(self, *, serialized_data, snapshot_data):
         """
@@ -136,7 +136,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 print(f"Values not equal: {json1} != {json2}")
             return json1 == json2
 
-    def _read_snapshot_data_from_location(
+    def read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
@@ -148,7 +148,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             return None
 
     @classmethod
-    def _write_snapshot_collection(
+    def write_snapshot_collection(
         cls, *, snapshot_collection: SnapshotCollection
     ) -> None:
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L161
