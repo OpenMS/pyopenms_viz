@@ -24,7 +24,7 @@ beautifulsoup4==4.14.3
     #   pydata-sphinx-theme
 bleach[css]==6.3.0
     # via nbconvert
-bokeh==3.8.1
+bokeh==3.6.0
     # via pyopenms_viz (pyproject.toml)
 cairocffi==1.7.1
     # via cairosvg
@@ -173,7 +173,7 @@ pillow==12.0.0
     #   sphinx-gallery
 platformdirs==4.5.1
     # via jupyter-core
-plotly==6.5.0
+plotly==5.24.1
     # via pyopenms_viz (pyproject.toml)
 pluggy==1.6.0
     # via pytest
