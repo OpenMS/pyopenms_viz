@@ -2,23 +2,19 @@
 Investigate Spctrum Binning ms_matplotlib
 =======================================
 
-Here we use a dummy spectrum example to investigate spectrum binning. 
+Here we use a dummy spectrum example to investigate spectrum binning.
 """
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import requests
-from io import StringIO
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_matplotlib"
 
-# download the file for example plotting
-url = (
-    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
-)
-response = requests.get(url)
-response.raise_for_status()  # Check for any HTTP errors
-df = pd.read_csv(StringIO(response.text), sep="\t")
+url = "https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1"
+local_path = "TestSpectrumDf.tsv"
+download_file(url, local_path)
+df = pd.read_csv(local_path, sep="\t")
 
 # Let's assess the peak binning and create a 4 by 2 subplot to visualize the different methods of binning
 params_list = [
@@ -78,7 +74,13 @@ fig, axs = plt.subplots(4, 2, figsize=(14, 14))
 i = j = 0
 for params in params_list:
     p = df.plot(
-        kind="spectrum", x="mz", y="intensity", canvas=axs[i][j], grid=False, show_plot=False, **params
+        kind="spectrum",
+        x="mz",
+        y="intensity",
+        canvas=axs[i][j],
+        grid=False,
+        show_plot=False,
+        **params,
     )
     j += 1
     if j >= 2:  # If we've filled two columns, move to the next row
