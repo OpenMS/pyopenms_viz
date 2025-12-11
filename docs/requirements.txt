@@ -42,7 +42,7 @@ contourpy==1.3.1
     # via
     #   bokeh
     #   matplotlib
-cssselect2==0.7.0
+cssselect2==0.8.0
     # via cairosvg
 cycler==0.12.1
     # via matplotlib
