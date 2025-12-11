@@ -5,22 +5,15 @@ Plot Peakmap Binning Demonstration
 This example demonstrates how different binning levels affect peak map visualization
 """
 
-import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_matplotlib"
 
+url = "https://zenodo.org/records/17904352/files/TestMSExperimentDf.tsv?download=1"
 local_path = "TestMSExperimentDf.tsv"
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestMSExperimentDf.tsv"
-if not os.path.exists(local_path):
-    import requests
-
-    response = requests.get(url)
-    response.raise_for_status()
-    with open(local_path, "w") as f:
-        f.write(response.text)
+download_file(url, local_path)
 df = pd.read_csv(local_path, sep="\t")
 
 

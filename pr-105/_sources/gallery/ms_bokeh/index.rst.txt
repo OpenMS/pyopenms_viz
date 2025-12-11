@@ -85,23 +85,6 @@ These examples are generated if `backend='ms_bokheh'`. Interactive plots are sup
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a spectrum from extracted data. No binning is applied.">
-
-.. only:: html
-
-  .. image:: /gallery/ms_bokeh/images/thumb/sphx_glr_plot_spectrum_dia_ms_bokeh_thumb.png
-    :alt:
-
-  :doc:`/gallery/ms_bokeh/plot_spectrum_dia_ms_bokeh`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Spectrum of Extracted DIA Data ms_bokeh</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="This example shows a spectrum. We can add the ion_annotation and sequence annotation by specifying these columns.">
 
 .. only:: html
@@ -114,6 +97,23 @@ These examples are generated if `backend='ms_bokheh'`. Interactive plots are sup
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Spectrum ms_bokeh</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a spectrum from extracted data. No binning is applied.">
+
+.. only:: html
+
+  .. image:: /gallery/ms_bokeh/images/thumb/sphx_glr_plot_spectrum_dia_ms_bokeh_thumb.png
+    :alt:
+
+  :doc:`/gallery/ms_bokeh/plot_spectrum_dia_ms_bokeh`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Spectrum of Extracted DIA Data ms_bokeh</div>
     </div>
 
 
@@ -148,7 +148,7 @@ These examples are generated if `backend='ms_bokheh'`. Interactive plots are sup
    /gallery/ms_bokeh/plot_peakmap_marginals_ms_bokeh
    /gallery/ms_bokeh/plot_chromatogram_ms_bokeh
    /gallery/ms_bokeh/plot_mobilogram_ms_bokeh
-   /gallery/ms_bokeh/plot_spectrum_dia_ms_bokeh
    /gallery/ms_bokeh/plot_spectrum_ms_bokeh
+   /gallery/ms_bokeh/plot_spectrum_dia_ms_bokeh
    /gallery/ms_bokeh/plot_spyogenes_subplots_ms_bokeh
 

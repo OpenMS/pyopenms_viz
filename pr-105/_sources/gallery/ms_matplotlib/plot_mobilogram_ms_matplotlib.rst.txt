@@ -24,7 +24,7 @@ Mobilogram ms_matplotlib
 This example makes a simple plot
 This example shows how to use different approaches.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-34
+.. GENERATED FROM PYTHON SOURCE LINES 8-28
 
 
 
@@ -52,19 +52,13 @@ This example shows how to use different approaches.
 
     import os
     import pandas as pd
+    from pyopenms_viz.util import download_file
 
     pd.options.plotting.backend = "ms_matplotlib"
 
     local_path = "ionMobilityTestFeatureDf.tsv"
-    url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-    if not os.path.exists(local_path):
-        import requests
-
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        with open(local_path, "w") as f:
-            f.write(response.text)
+    url = "https://zenodo.org/records/17904352/files/ionMobilityTestFeatureDf.tsv?download=1"
+    download_file(url, local_path)
     df = pd.read_csv(local_path, sep="\t")
 
     df.plot(
@@ -79,7 +73,7 @@ This example shows how to use different approaches.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.120 seconds)
+   **Total running time of the script:** (0 minutes 0.122 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_mobilogram_ms_matplotlib.py:

@@ -227,7 +227,7 @@ rpds-py==0.22.3
     #   referencing
 six==1.17.0
     # via python-dateutil
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
     # via sphinx
 soupsieve==2.6
     # via beautifulsoup4
