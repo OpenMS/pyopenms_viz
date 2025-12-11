@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 pd.options.plotting.backend = "ms_matplotlib"
 
-local_path = os.path.join(os.path.dirname(__file__), "TestSpectrumDf.tsv")
+local_path = "TestSpectrumDf.tsv"
 url = (
     "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
 )
