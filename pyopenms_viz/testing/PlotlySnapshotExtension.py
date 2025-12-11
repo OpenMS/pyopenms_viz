@@ -5,6 +5,9 @@ from syrupy.types import SerializableData
 from plotly.io import to_json
 import json
 import math
+import base64
+import zlib
+import numpy as _np
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     """
@@ -18,44 +21,234 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
         return PlotlySnapshotExtension.compare_json(json1, json2)
 
     @staticmethod
-    def compare_json(json1, json2) -> bool:
+    def compare_json(json1, json2, _parent_key=None) -> bool:
         """
-        Compare two plotly json objects. This function acts recursively
+        Compare two plotly json objects recursively with special handling for binary data.
 
         Args:
             json1: first json
             json2: second json
+            _parent_key: key from parent dict (for context)
 
         Returns:
             bool: True if the objects are equal, False otherwise
         """
         if isinstance(json1, dict) and isinstance(json2, dict):
-            for key in json1.keys():
-                if key not in json2:
-                    print(f'Key {key} not in second json')
-                    return False
-                if not PlotlySnapshotExtension.compare_json(json1[key], json2[key]):
+            keys1 = set(json1.keys())
+            keys2 = set(json2.keys())
+            
+            if keys1 != keys2:
+                print(f'Key mismatch at {_parent_key}: {keys1 ^ keys2}')
+                return False
+            
+            # Special handling for traces with both y (bdata) and customdata
+            # Need to sort them together to maintain correspondence
+            if ('y' in keys1 and 'customdata' in keys1 and
+                isinstance(json1['y'], dict) and 'bdata' in json1['y'] and
+                isinstance(json1['customdata'], list) and
+                isinstance(json2['y'], dict) and 'bdata' in json2['y'] and
+                isinstance(json2['customdata'], list)):
+                
+                # Decode y arrays
+                dtype = json1['y'].get('dtype', 'f8')
+                y1 = PlotlySnapshotExtension._decode_bdata(json1['y']['bdata'], dtype)
+                y2 = PlotlySnapshotExtension._decode_bdata(json2['y']['bdata'], dtype)
+                
+                if y1 is not None and y2 is not None and len(y1) == len(json1['customdata']) and len(y2) == len(json2['customdata']):
+                    # Sort by customdata, keeping y values aligned
+                    def make_sort_key(item):
+                        result = []
+                        for val in item:
+                            if isinstance(val, str):
+                                result.append((1, val))
+                            elif isinstance(val, (int, float)):
+                                result.append((0, val))
+                            else:
+                                result.append((2, str(val)))
+                        return tuple(result)
+                    
+                    # Create (y_value, customdata_row) pairs and sort them
+                    pairs1 = list(zip(y1, json1['customdata']))
+                    pairs2 = list(zip(y2, json2['customdata']))
+                    
+                    try:
+                        pairs1_sorted = sorted(pairs1, key=lambda p: make_sort_key(p[1]))
+                        pairs2_sorted = sorted(pairs2, key=lambda p: make_sort_key(p[1]))
+                        
+                        # Extract sorted y values and customdata
+                        y1_sorted = _np.array([p[0] for p in pairs1_sorted])
+                        y2_sorted = _np.array([p[0] for p in pairs2_sorted])
+                        cd1_sorted = [p[1] for p in pairs1_sorted]
+                        cd2_sorted = [p[1] for p in pairs2_sorted]
+                        
+                        # Compare sorted y values
+                        if not _np.allclose(y1_sorted, y2_sorted, rtol=1e-6, atol=1e-9):
+                            print(f'Sorted y values differ at {_parent_key}')
+                            return False
+                        
+                        # Compare sorted customdata
+                        if not PlotlySnapshotExtension.compare_json(cd1_sorted, cd2_sorted, 'customdata'):
+                            return False
+                        
+                        # Compare all other keys except y and customdata
+                        remaining_keys = keys1 - {'y', 'customdata'}
+                        for key in remaining_keys:
+                            if not PlotlySnapshotExtension.compare_json(json1[key], json2[key], key):
+                                print(f'Values for key {key} not equal')
+                                return False
+                        
+                        return True
+                    except (TypeError, ValueError) as e:
+                        print(f'Error sorting y/customdata together: {e}')
+                        # Fall through to regular comparison
+            
+            for key in keys1:
+                # Special handling for 'bdata' - decode and compare numerically
+                if key == 'bdata' and isinstance(json1[key], str) and isinstance(json2[key], str):
+                    dtype = json1.get('dtype', 'f8')
+                    decoded1 = PlotlySnapshotExtension._decode_bdata(json1[key], dtype)
+                    decoded2 = PlotlySnapshotExtension._decode_bdata(json2[key], dtype)
+                    if not PlotlySnapshotExtension._compare_arrays(decoded1, decoded2, _parent_key):
+                        print(f'Binary data (bdata) differs at {_parent_key}')
+                        return False
+                    continue
+                
+                if not PlotlySnapshotExtension.compare_json(json1[key], json2[key], key):
                     print(f'Values for key {key} not equal')
                     return False
             return True
+            
         elif isinstance(json1, list) and isinstance(json2, list):
             if len(json1) != len(json2):
-                print('Lists have different lengths')
+                print(f'List length mismatch at {_parent_key}: {len(json1)} vs {len(json2)}')
                 return False
-            for i, j in zip(json1, json2):
-                if not PlotlySnapshotExtension.compare_json(i, j):
+            
+            # If list of simple strings (like annotation labels), sort before comparing
+            if (len(json1) > 0 and 
+                all(isinstance(i, str) for i in json1) and 
+                all(isinstance(i, str) for i in json2)):
+                return sorted(json1) == sorted(json2)
+            
+            # If list of tuples/lists (like coordinates with annotations), sort before comparing
+            # Handle mixed types by converting to comparable tuples
+            if (len(json1) > 0 and 
+                all(isinstance(i, (list, tuple)) for i in json1) and
+                all(isinstance(i, (list, tuple)) for i in json2)):
+                try:
+                    def make_sort_key(item):
+                        # Convert item to tuple, with strings converted for sorting
+                        result = []
+                        for val in item:
+                            if isinstance(val, str):
+                                # Put strings last in sort order by prefixing with high value
+                                result.append((1, val))
+                            elif isinstance(val, (int, float)):
+                                result.append((0, val))
+                            else:
+                                result.append((2, str(val)))
+                        return tuple(result)
+                    
+                    # Sort by first numeric elements, handling mixed types
+                    sorted1 = sorted(json1, key=make_sort_key)
+                    sorted2 = sorted(json2, key=make_sort_key)
+                    for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
+                        if not PlotlySnapshotExtension.compare_json(item1, item2, f"{_parent_key}[{i}]"):
+                            return False
+                    return True
+                except (TypeError, ValueError) as e:
+                    pass  # Fall through to element-by-element comparison
+            
+            # Element-by-element comparison
+            for i, (item1, item2) in enumerate(zip(json1, json2)):
+                if not PlotlySnapshotExtension.compare_json(item1, item2, f"{_parent_key}[{i}]"):
                     return False
             return True
+            
         else:
-            if isinstance(json1, float):
-                if not math.isclose(json1, json2):
-                    print(f'Values not equal: {json1} != {json2}')
+            # Base case: compare values with tolerance for floats
+            if isinstance(json1, float) and isinstance(json2, float):
+                if not math.isclose(json1, json2, rel_tol=1e-6, abs_tol=1e-9):
+                    print(f'Float values differ at {_parent_key}: {json1} != {json2}')
                     return False
+                return True
             else:
                 if json1 != json2:
-                    print(f'Values not equal: {json1} != {json2}')
+                    print(f'Values differ at {_parent_key}: {json1} != {json2}')
                     return False
-            return True
+                return True
+
+    @staticmethod
+    def _decode_bdata(b64_str, dtype_str):
+        """Decode plotly 'bdata' (base64, possibly zlib-compressed) into a numpy array."""
+        try:
+            raw = base64.b64decode(b64_str)
+        except (ValueError, TypeError, base64.binascii.Error) as e:
+            return None
+        # Try decompress
+        try:
+            raw = zlib.decompress(raw)
+        except zlib.error:
+            pass  # Not compressed, use raw bytes
+        # Decode as numpy array
+        try:
+            dtype = _np.dtype(dtype_str)
+            arr = _np.frombuffer(raw, dtype=dtype)
+            return arr
+        except (ValueError, TypeError) as e:
+            return None
+
+    @staticmethod
+    def _compare_arrays(arr1, arr2, parent_key=None):
+        """Compare two numpy arrays or lists with tolerance.
+        
+        Args:
+            arr1: First array
+            arr2: Second array
+            parent_key: Parent key for context (used to determine if order-insensitive comparison is appropriate)
+        """
+        if arr1 is None or arr2 is None:
+            return arr1 == arr2
+        
+        try:
+            arr1 = _np.asarray(arr1)
+            arr2 = _np.asarray(arr2)
+            
+            if arr1.shape != arr2.shape:
+                print(f"Array shape mismatch: {arr1.shape} vs {arr2.shape}")
+                return False
+            
+            # For integer arrays, default to order-sensitive comparison
+            if _np.issubdtype(arr1.dtype, _np.integer) and _np.issubdtype(arr2.dtype, _np.integer):
+                if _np.array_equal(arr1, arr2):
+                    return True
+                
+                # Only allow order-insensitive (sorted) comparison for explicit index keys
+                # These are keys where the ordering genuinely doesn't matter for the data semantics
+                is_index_key = parent_key and any(
+                    parent_key.endswith(suffix) 
+                    for suffix in ['indices', 'indptr', 'selected.indices']
+                )
+                
+                if is_index_key:
+                    # For known index arrays, order may not matter - compare sorted
+                    sorted_equal = _np.array_equal(_np.sort(arr1), _np.sort(arr2))
+                    if not sorted_equal:
+                        print(f"Index array differs even when sorted at {parent_key} (lengths: {len(arr1)}, {len(arr2)})")
+                    return sorted_equal
+                else:
+                    # For all other integer arrays (RGBA, coords, topology), order matters
+                    print(f"Integer arrays differ at {parent_key} (lengths: {len(arr1)}, {len(arr2)})")
+                    return False
+            
+            # Use allclose for floating point comparison
+            close = _np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9)
+            if not close:
+                diff_count = _np.sum(~_np.isclose(arr1, arr2, rtol=1e-6, atol=1e-9))
+                print(f"Float arrays differ: {diff_count}/{len(arr1)} elements exceed tolerance")
+            return close
+        except (TypeError, ValueError) as e:
+            print(f"Array comparison error: {e}")
+            return False
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str

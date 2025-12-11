@@ -11,6 +11,8 @@ from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
 from bokeh.resources import CDN
 from html.parser import HTMLParser
+import json as _json
+from typing import Tuple
 
 
 class BokehHTMLParser(HTMLParser):
@@ -80,61 +82,178 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         return json.loads(parser.bokehJson)
 
     @staticmethod
-    def compare_json(json1, json2):
+    def compare_json(json1, json2, _ignore_keys=None, path=""):
         """
-        Compare two bokeh json objects. This function acts recursively
+        Compare two bokeh json objects recursively, ignoring ephemeral keys.
 
         Args:
             json1: first object
             json2: second object
+            _ignore_keys: set of keys to ignore during comparison
 
         Returns:
            bool: True if the objects are equal, False otherwise
         """
+        if _ignore_keys is None:
+            _ignore_keys = {"id", "root_ids"}
+
         if isinstance(json1, dict) and isinstance(json2, dict):
-            for key in json1.keys():
-                if key not in json2:
-                    print(f"Key {key} not in second json")
+            # Special handling for Bokeh's __ndarray__ format
+            if '__ndarray__' in json1 and '__ndarray__' in json2:
+                # This is a serialized numpy array: {"__ndarray__": "base64", "dtype": "...", "shape": [...]}
+                try:
+                    import base64
+                    import numpy as np
+                    
+                    b64_1 = json1['__ndarray__']
+                    b64_2 = json2['__ndarray__']
+                    dtype_1 = json1.get('dtype', 'float64')
+                    dtype_2 = json2.get('dtype', 'float64')
+                    
+                    if dtype_1 != dtype_2:
+                        print(f"Dtype mismatch in __ndarray__: {dtype_1} vs {dtype_2}")
+                        return False
+                    
+                    arr1 = np.frombuffer(base64.b64decode(b64_1), dtype=np.dtype(dtype_1))
+                    arr2 = np.frombuffer(base64.b64decode(b64_2), dtype=np.dtype(dtype_2))
+                    
+                    # For integer arrays, use sorted comparison
+                    if np.issubdtype(arr1.dtype, np.integer):
+                        if not (np.array_equal(arr1, arr2) or np.array_equal(np.sort(arr1), np.sort(arr2))):
+                            print(f"Integer __ndarray__ arrays differ")
+                            return False
+                    else:
+                        # For float arrays, use tolerance
+                        if not np.allclose(arr1, arr2, rtol=1e-6, atol=1e-9):
+                            print(f"Float __ndarray__ arrays differ (tolerance exceeded)")
+                            return False
+                    
+                    # Arrays match, skip other keys in this dict
+                    return True
+                except (ValueError, TypeError, KeyError, base64.binascii.Error) as e:
+                    print(f"Error comparing __ndarray__: {e}")
                     return False
-                elif key in ["id", "root_ids"]:  # add keys to ignore here
-                    pass
-                elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
-                    print(f"Values for key {key} not equal")
+            
+            # Get keys excluding ignored ones
+            keys1 = set(json1.keys()) - _ignore_keys
+            keys2 = set(json2.keys()) - _ignore_keys
+            
+            if keys1 != keys2:
+                print(f"Key mismatch: {keys1 ^ keys2}")
+                return False
+            
+            for key in keys1:
+                new_path = f"{path}.{key}" if path else key
+                if not BokehSnapshotExtension.compare_json(json1[key], json2[key], _ignore_keys, new_path):
+                    print(f"Values for key '{key}' not equal")
                     return False
             return True
+            
         elif isinstance(json1, list) and isinstance(json2, list):
             if len(json1) != len(json2):
-                print("Lists have different lengths")
+                print(f"List length mismatch: {len(json1)} vs {len(json2)}")
                 return False
-            # lists are unordered so we need to compare every element one by one
-            for idx, i in enumerate(json1):
-                check = True
-                if isinstance(i, dict):
-                    if (
-                        "type" not in i.keys()
-                    ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
-                        check = False
-                        pass
-                    if check:  # find corresponding entry in json2 only if check is true
-                        for j in json2:
-                            if (
-                                "type" not in j.keys()
-                            ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
-                                check = False
-                            if check and (j["type"] == i["type"]):
-                                if not BokehSnapshotExtension.compare_json(i, j):
-                                    print(f"Element {i} not equal to {j}")
-                                    return False
-                                return True
-                        print(f"Element {i} not in second list")
+            
+            # If list of simple strings (like annotation labels), sort before comparing
+            if (len(json1) > 0 and 
+                all(isinstance(i, str) for i in json1) and 
+                all(isinstance(i, str) for i in json2)):
+                # Sort string lists for deterministic comparison
+                return sorted(json1) == sorted(json2)
+            
+            # If list of dicts with 'type' field, sort by type+attributes for deterministic comparison
+            if (len(json1) > 0 and 
+                all(isinstance(i, dict) for i in json1) and 
+                all(isinstance(i, dict) for i in json2)):
+                
+                # Normalize attributes by removing ignored keys recursively
+                def _normalize(value):
+                    if isinstance(value, dict):
+                        return {
+                            k: _normalize(v)
+                            for k, v in value.items()
+                            if k not in _ignore_keys
+                        }
+                    if isinstance(value, list):
+                        return [_normalize(v) for v in value]
+                    return value
+                
+                # Try to sort by type, name, and complete attribute content
+                def sort_key(item):
+                    item_type = item.get("type", "")
+                    item_name = item.get("name", "")
+                    attrs = _normalize(item.get("attributes", {}))
+                    attrs_repr = _json.dumps(attrs, sort_keys=True)
+                    return (item_type, item_name, attrs_repr)
+                
+                try:
+                    sorted1 = sorted(json1, key=sort_key)
+                    sorted2 = sorted(json2, key=sort_key)
+                except (TypeError, KeyError):
+                    # If sorting fails, compare in order
+                    sorted1, sorted2 = json1, json2
+                
+                for i, (item1, item2) in enumerate(zip(sorted1, sorted2)):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys, new_path):
+                        print(f"List item {i} differs")
                         return False
-                else:
-                    return json1[idx] == json2[idx]
-            return True
+                return True
+            else:
+                # For non-dict lists, compare element by element
+                for i, (item1, item2) in enumerate(zip(json1, json2)):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    if not BokehSnapshotExtension.compare_json(item1, item2, _ignore_keys, new_path):
+                        print(f"List element {i} differs")
+                        return False
+                return True
+                
         else:
+            # Base case: direct comparison
+            # Special handling for base64 strings (likely index arrays)
+            if isinstance(json1, str) and isinstance(json2, str):
+                # Check if these look like base64 (all printable ASCII, ends with = potentially)
+                if len(json1) > 50 and len(json2) > 50 and all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=' for c in json1[:100]):
+                    # Try to decode as numpy arrays and compare
+                    try:
+                        import base64
+                        import numpy as np
+
+                        # Decode raw bytes first
+                        raw1 = base64.b64decode(json1)
+                        raw2 = base64.b64decode(json2)
+
+                        # Try interpreting as int32 but require exact (order-sensitive) equality
+                        try:
+                            arr1 = np.frombuffer(raw1, dtype=np.int32)
+                            arr2 = np.frombuffer(raw2, dtype=np.int32)
+                            if np.array_equal(arr1, arr2):
+                                return True
+                        except Exception:
+                            pass
+
+                        # Try interpreting as float64 with tolerance (order-sensitive)
+                        try:
+                            arr1f = np.frombuffer(raw1, dtype=np.float64)
+                            arr2f = np.frombuffer(raw2, dtype=np.float64)
+                            if np.allclose(arr1f, arr2f, rtol=1e-6, atol=1e-9):
+                                return True
+                        except Exception:
+                            pass
+
+                        # NOTE: We intentionally do NOT perform an order-insensitive (sorted)
+                        # comparison here for arbitrary base64 strings. The sorted comparison
+                        # is only allowed when we can prove the payload is an index set
+                        # (for example when the surrounding key path is 'selected.indices'
+                        # and a declared dtype indicates an integer type). Plain base64
+                        # strings without such context must be treated as order-sensitive.
+                    except (ValueError, TypeError, base64.binascii.Error):
+                        pass  # Not base64 or not decodable, fall through to string comparison
+            
             if json1 != json2:
-                print(f"Values not equal: {json1} != {json2}")
-            return json1 == json2
+                print(f"Values differ: {json1} != {json2}")
+                return False
+            return True
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str

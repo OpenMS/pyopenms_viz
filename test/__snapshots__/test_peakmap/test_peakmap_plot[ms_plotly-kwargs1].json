@@ -4,32 +4,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          19.333138,
-          26.00163,
-          75.750331125,
-          83.66679190476191,
-          84.54867735,
-          86.99933500000002,
-          87.60901338888888,
-          91.77868444444444,
-          97.3798687857143,
-          111.35595075,
-          111.57108060714286,
-          111.99926980000001,
-          114.50587,
-          120.10744184210527,
-          132.417937,
-          160.31379042105263,
-          183.52582433333333,
-          197.77245387096775,
-          295.3780885833333,
-          378.56103197777776,
-          1786.9925373863634,
-          2395.5256964285713,
-          5246.188215067797,
-          5391.9276203750005
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "Cw4viEhVM0BGsdzSagA6QPDC1mwF8FJAKAz0t6zqVECVk5qHHSNVQOOvyRr1v1VApgZLE\u002frmVUC9skf31fFWQIHaKsVPWFhAJo+n5cfWW0C9w6yVjORbQFq4UQn0\u002f1tAw4GQLGCgXEAbhL9T4AZeQDpZar1fjWBAA4c1kgoKZEByY42N0\u002fBmQDQvLvG3uGhAhUadpgx2ckANyar8+ah3QPR5uFv465tArRAVKA23okDN2NwuMH60QLtlh3jtD7VA"
+        },
         "colorscale": [
           [
             0.0,
@@ -79,58 +57,14 @@
       },
       "mode": "markers",
       "name": "prec",
-      "x": [
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586,
-        644.586
-      ],
-      "y": [
-        6228.741,
-        6227.081,
-        6233.722,
-        6264.44,
-        6262.779,
-        6235.383,
-        6266.1,
-        6230.4015,
-        6255.3075,
-        6259.4585,
-        6256.968,
-        6261.119,
-        6225.3994999999995,
-        6253.647,
-        6232.062,
-        6251.987,
-        6250.326,
-        6248.666,
-        6237.873,
-        6246.175,
-        6239.534,
-        6244.515,
-        6241.194,
-        6242.8545
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "ppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRAppvEILAkhECmm8QgsCSEQKabxCCwJIRA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "Vg4tsr1UuED6fmq8FFO4QLbz\u002fdS4WbhAPQrXo3B4uECWQ4tsx3a4QF66SQxiW7hAmpmZmRl6uEBYObTIZla4QIXrUbhOb7hAN4lBYHVzuECHFtnO93C4QDm0yHYedbhAwMqhRWZRuECDwMqhpW24QFpkO98PWLhAJzEIrPxruEB\u002farx0U2q4QCPb+X6qaLhAaJHtfN9duEDNzMzMLGa4QBBYObSIX7hAcT0K14NkuEBt5\u002fupMWG4QG8Sg8DaYrhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -284,32 +218,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          23.999842,
-          50.667543333333334,
-          63.665213666666666,
-          68.66609883333334,
-          69.38427561538461,
-          72.499794,
-          73.1248735,
-          74.998381,
-          75.6885121875,
-          76.66563644444444,
-          77.832583,
-          78.17654805882353,
-          83.93367333333335,
-          86.00033333333334,
-          90.28468414285715,
-          92.26737166666666,
-          107.00000347368422,
-          109.833941,
-          114.749886,
-          115.09719567741935,
-          233.44523959701493,
-          242.46358576923078,
-          444.3144701794872,
-          444.5437588636364
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "0CozpfX\u002fN0AtqlgPclVJQMGXr7gl1U9AgkQAXaEqUUCKLsD4l1hRQCsv+Z\u002f8H1JAxqhr7f1HUkCo\u002fGt55b9SQG8NbJUQ7FJAifqZyZkqU0AoDTUKSXVTQHC0OpBMi1NAGfTLTcH7VED88Bl2BYBVQLjQ1kM4klZAdg0NnhwRV0AM15EOAMBaQMlyEkpfdVtAnG7ZIf6vXEAJ9Td0OMZcQAeCHGc\u002fLm1Al7fSsdVObkBwB+IRCMV7QKiDfjyzyHtA"
+        },
         "colorscale": [
           [
             0.0,
@@ -359,58 +271,14 @@
       },
       "mode": "markers",
       "name": "y4^1",
-      "x": [
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004,
-        509.59450000000004
-      ],
-      "y": [
-        6227.081,
-        6225.3994999999995,
-        6259.4585,
-        6266.1,
-        6251.987,
-        6228.741,
-        6264.44,
-        6230.4015,
-        6261.119,
-        6253.647,
-        6250.326,
-        6257.798,
-        6255.3075,
-        6232.062,
-        6236.213,
-        6248.666,
-        6247.0055,
-        6262.779,
-        6233.722,
-        6237.873,
-        6239.534,
-        6244.515,
-        6241.194,
-        6242.8545
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "jpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9AjpduEoPZf0COl24Sg9l\u002fQI6XbhKD2X9A"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "+n5qvBRTuEDAyqFFZlG4QDeJQWB1c7hAmpmZmRl6uEAnMQis\u002fGu4QFYOLbK9VLhAPQrXo3B4uEBYObTIZla4QDm0yHYedbhAg8DKoaVtuEB\u002farx0U2q4QDVeuknMcbhAhetRuE5vuEBaZDvfD1i4QAwCK4c2XLhAI9v5fqpouEAhsHJoAWe4QJZDi2zHdrhAtvP91LhZuEBoke183124QBBYObSIX7hAcT0K14NkuEBt5\u002fupMWG4QG8Sg8DaYrhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -564,32 +432,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          69.77860772222223,
-          78.49993683333334,
-          81.60165045,
-          82.86846808695653,
-          84.45440554545455,
-          91.00123433333334,
-          91.33437319047619,
-          92.91720472222222,
-          95.48051556,
-          96.30399260869565,
-          97.99933342857142,
-          100.76741953846155,
-          101.13853683333333,
-          104.62442300000001,
-          106.24910673214286,
-          115.3976668,
-          126.9129334347826,
-          137.6223792,
-          166.46425789041098,
-          167.50531,
-          597.1239364181819,
-          630.4696570288462,
-          1222.971141246988,
-          1455.719136218543
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "4tZ7tdRxUUDhTg\u002f3\u002fp9TQOqX43CBZlRARcYr+5S3VEBLNv\u002f6FB1VQCRTKzkUwFZASHDPXmbVVkCZa297szpXQNPaVcTA3ldAtSRqnXQTWEDiYDIU9X9YQD4A12YdMVlAUR2Yyd1IWUCy9+KL9idaQBfxXF3xj1pAHi1zX3PZXEA9dFuAbbpfQL62yIfqM2FANAddM9vOZEDwiuB\u002fK\u002fBkQP92YNL9qIJA2VmL28Gzg0Bx3tly4huTQAywPmXgvpZA"
+        },
         "colorscale": [
           [
             0.0,
@@ -639,58 +485,14 @@
       },
       "mode": "markers",
       "name": "y5^1",
-      "x": [
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999,
-        588.4559999999999
-      ],
-      "y": [
-        6230.4015,
-        6228.741,
-        6264.44,
-        6261.119,
-        6236.213,
-        6225.3994999999995,
-        6253.647,
-        6255.3075,
-        6262.779,
-        6257.798,
-        6266.1,
-        6232.062,
-        6251.987,
-        6250.326,
-        6259.4585,
-        6233.722,
-        6248.666,
-        6237.873,
-        6247.0055,
-        6227.081,
-        6239.534,
-        6244.515,
-        6242.8545,
-        6241.194
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "zvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JAzvdT46VjgkDO91PjpWOCQM73U+OlY4JA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "WDm0yGZWuEBWDi2yvVS4QD0K16NweLhAObTIdh51uEAMAiuHNly4QMDKoUVmUbhAg8DKoaVtuECF61G4Tm+4QJZDi2zHdrhANV66ScxxuECamZmZGXq4QFpkO98PWLhAJzEIrPxruEB\u002farx0U2q4QDeJQWB1c7hAtvP91LhZuEAj2\u002fl+qmi4QGiR7XzfXbhAIbByaAFnuED6fmq8FFO4QBBYObSIX7hAcT0K14NkuEBvEoPA2mK4QG3n+6kxYbhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -844,32 +646,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          20.5004865,
-          66.3993246,
-          68.13595504545455,
-          69.09306334375,
-          69.41160994117647,
-          72.332831,
-          77.3760475,
-          78.9991996,
-          81.5888654117647,
-          81.76286838095237,
-          82.33327933333334,
-          83.11926240000001,
-          85.40957368181817,
-          88.2006339,
-          90.03155971875,
-          97.56480853846153,
-          101.59623908771931,
-          106.6029244,
-          125.55783376923077,
-          125.82538857971014,
-          502.46323747169816,
-          517.4846624782609,
-          1009.9240378658537,
-          1142.1498975153374
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "6pYd4h+ANEBAX8SIjplQQAZ9ynyzCFFANnf0v\u002fRFUUDuAznRV1pRQBQGZRpNFVJAho+IKRFYU0BIC+Hi8r9TQJlRjfivZVRA8tXm1dJwVEBcRtdyVJVUQB\u002fpwv6hx1RAhy2IdDZaVUADvpEv1wxWQL75DRMFglZAaEy20iVkWEB8lv3HKGZZQHj9OFCWplpA1txojLNjX0A0Fp8q03RfQJvzsWtpZ39A1a24luArgEDc8PZtZI+PQIH4u36Z2JFA"
+        },
         "colorscale": [
           [
             0.0,
@@ -919,58 +699,14 @@
       },
       "mode": "markers",
       "name": "y6^1",
-      "x": [
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999,
-        700.7149999999999
-      ],
-      "y": [
-        6225.3994999999995,
-        6236.213,
-        6261.119,
-        6259.4585,
-        6266.1,
-        6227.081,
-        6228.741,
-        6232.062,
-        6264.44,
-        6262.779,
-        6233.722,
-        6257.798,
-        6255.3075,
-        6253.647,
-        6251.987,
-        6250.326,
-        6248.666,
-        6230.4015,
-        6237.873,
-        6247.0055,
-        6244.515,
-        6239.534,
-        6242.8545,
-        6241.194
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "HoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVAHoXrUbjlhUAehetRuOWFQB6F61G45YVA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "wMqhRWZRuEAMAiuHNly4QDm0yHYedbhAN4lBYHVzuECamZmZGXq4QPp+arwUU7hAVg4tsr1UuEBaZDvfD1i4QD0K16NweLhAlkOLbMd2uEC28\u002f3UuFm4QDVeuknMcbhAhetRuE5vuECDwMqhpW24QCcxCKz8a7hAf2q8dFNquEAj2\u002fl+qmi4QFg5tMhmVrhAaJHtfN9duEAhsHJoAWe4QHE9CteDZLhAEFg5tIhfuEBvEoPA2mK4QG3n+6kxYbhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -1124,32 +860,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          51.000386625,
-          53.49989766666667,
-          65.6992924,
-          66.62464425,
-          66.9994325,
-          71.4997454090909,
-          74.80011902857143,
-          77.2775145,
-          81.45371781818181,
-          83.08880202941177,
-          83.49961069999999,
-          83.78530239285715,
-          84.02623684210526,
-          85.55114903448276,
-          86.06597906666666,
-          86.47661028571429,
-          89.33121233333334,
-          89.9012231830986,
-          102.34085980487805,
-          112.14425083333333,
-          373.55520968376067,
-          415.30258056637166,
-          961.7196504207317,
-          1072.3123426296297
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "i90+qwyASUAM15Cl\u002fL9KQNkV6TTBbFBAm1jgK\u002fqnUEDPg7uz9r9QQMgXK9T731FAyCdxJjWzUkCcai3MwlFTQAStdbYJXVRAFgm17q7FVEDTTiif+d9UQLCy92RC8lRAt7JK3a0BVUDUlJkGRmNVQHNjQwA5hFVAIIVtyICeVUC17DaVMlVWQI1zAKSteVZAOJ6kpdCVWUCY5dhnOwlcQMuijCPiWHdAi0+4Xtf0eUDDbBTYwQ2OQKANv9Y\u002fwZBA"
+        },
         "colorscale": [
           [
             0.0,
@@ -1199,58 +913,14 @@
       },
       "mode": "markers",
       "name": "y7^1",
-      "x": [
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999,
-        846.6514999999999
-      ],
-      "y": [
-        6228.741,
-        6236.213,
-        6266.1,
-        6233.722,
-        6225.3994999999995,
-        6259.4585,
-        6250.326,
-        6257.798,
-        6232.062,
-        6264.44,
-        6230.4015,
-        6253.647,
-        6251.987,
-        6255.3075,
-        6261.119,
-        6262.779,
-        6227.081,
-        6248.666,
-        6237.873,
-        6247.0055,
-        6244.515,
-        6239.534,
-        6242.8545,
-        6241.194
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "wMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpAwMqhRTZ1ikDAyqFFNnWKQMDKoUU2dYpA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "Vg4tsr1UuEAMAiuHNly4QJqZmZkZerhAtvP91LhZuEDAyqFFZlG4QDeJQWB1c7hAf2q8dFNquEA1XrpJzHG4QFpkO98PWLhAPQrXo3B4uEBYObTIZla4QIPAyqGlbbhAJzEIrPxruECF61G4Tm+4QDm0yHYedbhAlkOLbMd2uED6fmq8FFO4QCPb+X6qaLhAaJHtfN9duEAhsHJoAWe4QHE9CteDZLhAEFg5tIhfuEBvEoPA2mK4QG3n+6kxYbhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -1404,32 +1074,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          57.73080276923077,
-          58.66479233333333,
-          60.79937285,
-          62.28702042857143,
-          71.54476249999999,
-          71.72270794444445,
-          74.21068915789475,
-          75.498535,
-          77.94438024074073,
-          78.61979752,
-          80.336542,
-          81.94333295505618,
-          84.14490457142857,
-          86.33374666666667,
-          86.50371949999999,
-          88.07642219230769,
-          91.93851896875,
-          98.03002272727272,
-          115.05571083333332,
-          142.07552272826086,
-          531.7885202885906,
-          576.7341669205298,
-          1590.1766805665025,
-          1693.9055517761904
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "Edb08YrdTEArJknqF1VNQLgHfNlRZk5Axf\u002fcFb0kT0CUZYhj3eJRQLF80thA7lFA57Fg7nuNUkBUOlj\u002f599SQBU+0rlwfFNAr6I3w6qnU0C\u002f7nTniRVUQCTNL5FffFRA59TSHUYJVUDfnvoaXJVVQOC2tvA8oFVAnCnoGeQEVkA+Xd2xEPxWQHrxceTrgVhAxcwrxJDDXECG\u002f6OuasJhQNWdueNOnoBA2Avokt8FgkDeG8DrtNiYQEr+9kifd5pA"
+        },
         "colorscale": [
           [
             0.0,
@@ -1479,58 +1127,14 @@
       },
       "mode": "markers",
       "name": "y8^1",
-      "x": [
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136,
-        970.136
-      ],
-      "y": [
-        6261.119,
-        6232.062,
-        6266.1,
-        6262.779,
-        6264.44,
-        6236.213,
-        6250.326,
-        6227.081,
-        6251.987,
-        6257.798,
-        6230.4015,
-        6259.4585,
-        6233.722,
-        6225.3994999999995,
-        6228.741,
-        6253.647,
-        6255.3075,
-        6248.666,
-        6237.873,
-        6247.0055,
-        6244.515,
-        6239.534,
-        6242.8545,
-        6241.194
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "DAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5ADAIrhxZRjkAMAiuHFlGOQAwCK4cWUY5A"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "ObTIdh51uEBaZDvfD1i4QJqZmZkZerhAlkOLbMd2uEA9CtejcHi4QAwCK4c2XLhAf2q8dFNquED6fmq8FFO4QCcxCKz8a7hANV66ScxxuEBYObTIZla4QDeJQWB1c7hAtvP91LhZuEDAyqFFZlG4QFYOLbK9VLhAg8DKoaVtuECF61G4Tm+4QCPb+X6qaLhAaJHtfN9duEAhsHJoAWe4QHE9CteDZLhAEFg5tIhfuEBvEoPA2mK4QG3n+6kxYbhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -1684,32 +1288,10 @@
       "marker": {
         "cmax": 5391.9276203750005,
         "cmin": 19.333138,
-        "color": [
-          42.499303499999996,
-          49.501261500000005,
-          51.749400625,
-          53.09226690909091,
-          54.99888,
-          55.001625,
-          58.8572200952381,
-          62.260722869565214,
-          64.053273,
-          64.5391643076923,
-          67.332928,
-          67.68494942105262,
-          69.29074987096774,
-          73.55067118367347,
-          79.199787,
-          80.51053206666667,
-          84.004074,
-          85.36869376086956,
-          89.44827699999999,
-          91.24886625,
-          242.2682775890411,
-          293.27019188513515,
-          717.1758939902438,
-          777.4041125990339
-        ],
+        "color": {
+          "dtype": "f8",
+          "bdata": "oKNVLek\u002fRUA5nzpWKcBIQA39E1zs30lANIbuZs+LSkByUMJM239LQJHtfD81gEtAxUJZY7ltTUAKDfNdXyFPQKEwKNNoA1BAXy0Dq4EiUEAN+z2xTtVQQHO1GDbW61BA2sdYpZtSUUCKLlkyPmNSQJ\u002fKaU\u002fJzFNAIXmwjqwgVEDkMJi\u002fQgBVQCNLt62YV1VAIqMDkrBcVkABNbVs7c9WQM3l4bqVSG5AzeS5tFJUckBIvRs7aGmGQATmYp87S4hA"
+        },
         "colorscale": [
           [
             0.0,
@@ -1759,58 +1341,14 @@
       },
       "mode": "markers",
       "name": "y9^1",
-      "x": [
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943,
-        1059.943
-      ],
-      "y": [
-        6228.741,
-        6225.3994999999995,
-        6264.44,
-        6261.119,
-        6230.4015,
-        6232.062,
-        6255.3075,
-        6253.647,
-        6266.1,
-        6257.798,
-        6233.722,
-        6262.779,
-        6250.326,
-        6248.666,
-        6259.4585,
-        6247.0055,
-        6227.081,
-        6237.873,
-        6251.987,
-        6236.213,
-        6244.515,
-        6239.534,
-        6242.8545,
-        6241.194
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "g8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BAg8DKocWPkECDwMqhxY+QQIPAyqHFj5BA"
+      },
+      "y": {
+        "dtype": "f8",
+        "bdata": "Vg4tsr1UuEDAyqFFZlG4QD0K16NweLhAObTIdh51uEBYObTIZla4QFpkO98PWLhAhetRuE5vuECDwMqhpW24QJqZmZkZerhANV66ScxxuEC28\u002f3UuFm4QJZDi2zHdrhAf2q8dFNquEAj2\u002fl+qmi4QDeJQWB1c7hAIbByaAFnuED6fmq8FFO4QGiR7XzfXbhAJzEIrPxruEAMAiuHNly4QHE9CteDZLhAEFg5tIhfuEBvEoPA2mK4QG3n+6kxYbhA"
+      },
       "type": "scatter",
       "customdata": [
         [
@@ -2093,58 +1631,6 @@
             "type": "contour"
           }
         ],
-        "heatmapgl": [
-          {
-            "colorbar": {
-              "outlinewidth": 1,
-              "tickcolor": "rgb(36,36,36)",
-              "ticks": "outside"
-            },
-            "colorscale": [
-              [
-                0.0,
-                "#440154"
-              ],
-              [
-                0.1111111111111111,
-                "#482878"
-              ],
-              [
-                0.2222222222222222,
-                "#3e4989"
-              ],
-              [
-                0.3333333333333333,
-                "#31688e"
-              ],
-              [
-                0.4444444444444444,
-                "#26828e"
-              ],
-              [
-                0.5555555555555556,
-                "#1f9e89"
-              ],
-              [
-                0.6666666666666666,
-                "#35b779"
-              ],
-              [
-                0.7777777777777778,
-                "#6ece58"
-              ],
-              [
-                0.8888888888888888,
-                "#b5de2b"
-              ],
-              [
-                1.0,
-                "#fde725"
-              ]
-            ],
-            "type": "heatmapgl"
-          }
-        ],
         "heatmap": [
           {
             "colorbar": {
@@ -2405,6 +1891,18 @@
               }
             },
             "type": "scattermapbox"
+          }
+        ],
+        "scattermap": [
+          {
+            "marker": {
+              "colorbar": {
+                "outlinewidth": 1,
+                "tickcolor": "rgb(36,36,36)",
+                "ticks": "outside"
+              }
+            },
+            "type": "scattermap"
           }
         ],
         "scatterpolargl": [
