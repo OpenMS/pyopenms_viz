@@ -55,7 +55,7 @@ import io
 url = "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip"
 
 # Download the ZIP file
-response = requests.get(url)
+response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
 response.raise_for_status()  # Check for request errors
 
 # Unzip the content
