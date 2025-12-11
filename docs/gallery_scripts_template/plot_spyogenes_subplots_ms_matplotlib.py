@@ -31,10 +31,6 @@ if not os.path.exists(zip_dir):
         out.write(response.content)
     print(f"Downloaded {zip_filename} successfully.")
 
-annotation_bounds = pd.read_csv(
-    "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
-)  # contain annotations across all runs
-
 try:
     with zipfile.ZipFile(zip_filename, "r") as zip_ref:
         zip_ref.extractall()

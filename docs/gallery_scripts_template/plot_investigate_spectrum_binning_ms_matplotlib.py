@@ -26,7 +26,6 @@ if not os.path.exists(local_path):
         timeout=30,
     )
 
-    response = requests.get(url)
     response.raise_for_status()
     with open(local_path, "w") as f:
         f.write(response.text)

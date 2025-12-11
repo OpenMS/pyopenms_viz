@@ -16,7 +16,7 @@ if not os.path.exists(local_path):
     import requests
 
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     with open(local_path, "w") as f:
         f.write(response.text)
