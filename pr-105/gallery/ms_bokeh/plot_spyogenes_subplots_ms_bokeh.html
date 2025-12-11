@@ -439,8 +439,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.html">Manuscript d Fructose Example ms_matplotlib</a></li>
 </ul>
 </details></li>
@@ -527,42 +527,18 @@ to download the full example code or to run this example in your browser via Bin
 <section class="sphx-glr-example-title" id="plot-spyogenes-subplots-ms-bokeh">
 <span id="sphx-glr-gallery-ms-bokeh-plot-spyogenes-subplots-ms-bokeh-py"></span><h1>Plot Spyogenes subplots ms_bokeh<a class="headerlink" href="#plot-spyogenes-subplots-ms-bokeh" title="Link to this heading">#</a></h1>
 <p>Here we show how we can plot multiple chromatograms across runs together</p>
-<div style="height:3000px;"><script src="bokeh-content-cd44425aecd64f26ab48bde7367bece2-gallery-ms_bokeh-plot_spyogenes_subplots_ms_bokeh.js" id="c1423da3-21ec-4323-8162-17f0279feb4d"></script></div><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading spyogenes.zip...
-Downloaded spyogenes.zip successfully.
-Unzipped files successfully.
-</pre></div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<div style="height:3000px;"><script src="bokeh-content-5147beb574524ec29b9a54da4f3abbcb-gallery-ms_bokeh-plot_spyogenes_subplots_ms_bokeh.js" id="b4aab2e1-d760-4ee2-a6c5-e6663d2584df"></script></div><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">show</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span><span class="p">,</span> <span class="n">unzip_file</span>
 
 <span class="n">zip_filename</span> <span class="o">=</span> <span class="s2">&quot;spyogenes.zip&quot;</span>
 <span class="n">zip_dir</span> <span class="o">=</span> <span class="s2">&quot;spyogenes&quot;</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904512/files/spyogenes.zip?download=1&quot;</span>
 
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">zip_dir</span><span class="p">):</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading </span><span class="si">{</span><span class="n">zip_filename</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0&quot;</span><span class="p">},</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">zip_filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded </span><span class="si">{</span><span class="n">zip_filename</span><span class="si">}</span><span class="s2"> successfully.&quot;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
-            <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unzipped files successfully.&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error unzipping file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">raise</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">zip_filename</span><span class="p">)</span>
+<span class="n">unzip_file</span><span class="p">(</span><span class="n">zip_filename</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># Extract to current directory</span>
 
 <span class="n">annotation_bounds</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
     <span class="s2">&quot;spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
@@ -614,7 +590,7 @@ Unzipped files successfully.
 <span class="n">show</span><span class="p">(</span><span class="n">column</span><span class="p">(</span><span class="n">plot_list</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.262 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.590 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-bokeh-plot-spyogenes-subplots-ms-bokeh-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_bokeh/plot_spyogenes_subplots_ms_bokeh.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" style="width: 150px;" />

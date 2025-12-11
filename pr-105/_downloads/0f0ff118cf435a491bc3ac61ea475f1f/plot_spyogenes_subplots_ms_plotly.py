@@ -5,33 +5,17 @@ Plot Spyogenes subplots ms_plotly
 Here we show how we can plot multiple chromatograms across runs together. In this rendering the plot is slightly cut off
 """
 
-import os
 import pandas as pd
 import numpy as np
 from plotly.subplots import make_subplots
-
-import zipfile
+from pyopenms_viz.util import download_file, unzip_file
 
 zip_filename = "spyogenes.zip"
 zip_dir = "spyogenes"
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.3/spyogenes.zip"
+url = "https://zenodo.org/records/17904512/files/spyogenes.zip?download=1"
 
-if not os.path.exists(zip_dir):
-    import requests
-
-    print(f"Downloading {zip_filename}...")
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
-    response.raise_for_status()
-    with open(zip_filename, "wb") as out:
-        out.write(response.content)
-    print(f"Downloaded {zip_filename} successfully.")
-    try:
-        with zipfile.ZipFile(zip_filename, "r") as zip_ref:
-            zip_ref.extractall()
-            print("Unzipped files successfully.")
-    except zipfile.BadZipFile as e:
-        print(f"Error unzipping file: {e}")
-        raise
+download_file(url, zip_filename)
+unzip_file(zip_filename, ".")  # Extract to current directory
 
 annotation_bounds = pd.read_csv(
     "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
