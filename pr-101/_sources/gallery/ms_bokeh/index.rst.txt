@@ -85,7 +85,7 @@ These examples are generated if `backend='ms_bokheh'`. Interactive plots are sup
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a spectrum.  We can add the ion_annotation and sequence annotation by specifying these columns.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a spectrum. We can add the ion_annotation and sequence annotation by specifying these columns.">
 
 .. only:: html
 

@@ -47,21 +47,15 @@ pd.options.plotting.backend = "ms_matplotlib"
 # Download example
 # ----------------
 
-import requests
-import zipfile
-import io
+from pyopenms_viz.util import download_file, unzip_file
 
 # URL of the ZIP file
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip"
+url = "https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1"
 
-# Download the ZIP file
-response = requests.get(url)
-response.raise_for_status()  # Check for request errors
-
-# Unzip the content
-with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-    zip_file.extractall("d_fructose_example")  # Extract to a directory
-    print("Files extracted to 'd_fructose_example'")
+# Download and extract the ZIP file
+zip_filename = "d_fructose_example.zip"
+download_file(url, zip_filename)
+unzip_file(zip_filename, ".")  # Extract to current directory
 
 
 # %%
@@ -247,7 +241,7 @@ ann_df = pd.DataFrame(data)
 
 # We can use pymzml to load the spectrum data from the mzML file
 
-input_file = "./d_fructose_example/d_fructose_example/D-Fructose_lc_msms.mzML"
+input_file = "./d_fructose_example/D-Fructose_lc_msms.mzML"
 
 run = pymzml.run.Reader(input_file)
 # Get the first spec
@@ -279,7 +273,7 @@ df.head()
 # For CFM-ID, you need to save the predictions out to a txt file using their export option. In this case, the prediction is saved to "cfm_d_fructose_inchi_prediction.txt". The energy2 prediction corresponds to the 40V collision energy of our downloaded real spectrum.
 
 pred_df, annotation_df = parse_cfm_data(
-    "./d_fructose_example/d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt",
+    "./d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt",
     "energy2",
 )
 pred_df["rel_int"] = pred_df["int"] / pred_df["int"].max() * 100

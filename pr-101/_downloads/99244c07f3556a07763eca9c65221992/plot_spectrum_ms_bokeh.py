@@ -2,23 +2,19 @@
 Spectrum ms_bokeh
 =======================================
 
-This example shows a spectrum. 
+This example shows a spectrum.
 We can add the ion_annotation and sequence annotation by specifying these columns.
 """
 
 import pandas as pd
-from io import StringIO
-import requests
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_bokeh"
 
-# download the file for example plotting
-url = (
-    "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv"
-)
-response = requests.get(url)
-response.raise_for_status()  # Check for any HTTP errors
-df = pd.read_csv(StringIO(response.text), sep="\t")
+url = "https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1"
+local_path = "TestSpectrumDf.tsv"
+download_file(url, local_path)
+df = pd.read_csv(local_path, sep="\t")
 
 # mirror a reference spectrum with ion and sequence annoations
 df.plot(

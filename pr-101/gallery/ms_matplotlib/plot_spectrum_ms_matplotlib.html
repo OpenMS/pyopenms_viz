@@ -61,8 +61,8 @@
     <link rel="icon" href="../../_static/pyOpenMSviz_logo_color.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Color Targeted Peptide PeakMap 3D ms_matplotlib" href="plot_peakmap_3D_highlight_peptide_ms_matplotlib.html" />
-    <link rel="prev" title="Spectrum of Extracted DIA Data ms_matplotlib" href="plot_spectrum_dia_ms_matplotlib.html" />
+    <link rel="next" title="Spectrum of Extracted DIA Data ms_matplotlib" href="plot_spectrum_dia_ms_matplotlib.html" />
+    <link rel="prev" title="Mobilogram ms_matplotlib" href="plot_mobilogram_ms_matplotlib.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.0.1" />
@@ -435,12 +435,12 @@
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_marginals_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_chromatogram_ms_matplotlib.html">Chromatogram ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_mobilogram_ms_matplotlib.html">Mobilogram ms_matplotlib</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Spectrum ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.html">Manuscript d Fructose Example ms_matplotlib</a></li>
 </ul>
 </details></li>
@@ -537,18 +537,14 @@ We can add the ion_annotation and sequence annotation by specifying these column
 <div class="line"><br /></div>
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
 
 <span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;ms_matplotlib&quot;</span>
 
-<span class="c1"># download the file for example plotting</span>
-<span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv&quot;</span>
-<span class="p">)</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>  <span class="c1"># Check for any HTTP errors</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1&quot;</span>
+<span class="n">local_path</span> <span class="o">=</span> <span class="s2">&quot;TestSpectrumDf.tsv&quot;</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># mirror a reference spectrum with ion and sequence annoations</span>
 <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -560,7 +556,7 @@ We can add the ion_annotation and sequence annotation by specifying these column
 <span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.244 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.632 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-matplotlib-plot-spectrum-ms-matplotlib-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_matplotlib/plot_spectrum_ms_matplotlib.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />
@@ -590,20 +586,20 @@ We can add the ion_annotation and sequence annotation by specifying these column
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_spectrum_dia_ms_matplotlib.html"
+       href="plot_mobilogram_ms_matplotlib.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Spectrum of Extracted DIA Data ms_matplotlib</p>
+        <p class="prev-next-title">Mobilogram ms_matplotlib</p>
       </div>
     </a>
     <a class="right-next"
-       href="plot_peakmap_3D_highlight_peptide_ms_matplotlib.html"
+       href="plot_spectrum_dia_ms_matplotlib.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Color Targeted Peptide PeakMap 3D ms_matplotlib</p>
+        <p class="prev-next-title">Spectrum of Extracted DIA Data ms_matplotlib</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

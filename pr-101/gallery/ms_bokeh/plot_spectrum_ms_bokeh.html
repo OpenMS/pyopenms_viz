@@ -435,12 +435,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_marginals_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_chromatogram_ms_matplotlib.html">Chromatogram ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_mobilogram_ms_matplotlib.html">Mobilogram ms_matplotlib</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_ms_matplotlib.html">Spectrum ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.html">Manuscript d Fructose Example ms_matplotlib</a></li>
 </ul>
 </details></li>
@@ -528,7 +528,7 @@ to download the full example code or to run this example in your browser via Bin
 <span id="sphx-glr-gallery-ms-bokeh-plot-spectrum-ms-bokeh-py"></span><h1>Spectrum ms_bokeh<a class="headerlink" href="#spectrum-ms-bokeh" title="Link to this heading">#</a></h1>
 <p>This example shows a spectrum.
 We can add the ion_annotation and sequence annotation by specifying these columns.</p>
-<div style="height:500px;"><script src="bokeh-content-110811fdf33745bcad44a3bfebe6a039-gallery-ms_bokeh-plot_spectrum_ms_bokeh.js" id="bd69afa2-dc02-4253-b0c9-e26a25816e3d"></script></div><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Annotation color: None
+<div style="height:500px;"><script src="bokeh-content-5ae7ba20566b4fa98d5e47794c589dcb-gallery-ms_bokeh-plot_spectrum_ms_bokeh.js" id="e597f2c7-9c54-4634-b154-6378bd542392"></script></div><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Annotation color: None
 </pre></div>
 </div>
 <div class="output_subarea output_html rendered_html output_result">
@@ -555,18 +555,14 @@ We can add the ion_annotation and sequence annotation by specifying these column
 <div class="line"><br /></div>
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
 
 <span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;ms_bokeh&quot;</span>
 
-<span class="c1"># download the file for example plotting</span>
-<span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/TestSpectrumDf.tsv&quot;</span>
-<span class="p">)</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>  <span class="c1"># Check for any HTTP errors</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904352/files/TestSpectrumDf.tsv?download=1&quot;</span>
+<span class="n">local_path</span> <span class="o">=</span> <span class="s2">&quot;TestSpectrumDf.tsv&quot;</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># mirror a reference spectrum with ion and sequence annoations</span>
 <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -578,7 +574,7 @@ We can add the ion_annotation and sequence annotation by specifying these column
 <span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.213 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.605 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-bokeh-plot-spectrum-ms-bokeh-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_bokeh/plot_spectrum_ms_bokeh.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" style="width: 150px;" />
