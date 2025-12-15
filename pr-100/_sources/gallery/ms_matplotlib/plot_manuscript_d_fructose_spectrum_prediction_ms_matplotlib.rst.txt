@@ -77,48 +77,36 @@ For this tutorial CFM-ID and .mzML file are downloaded  from the pyopenms_viz re
 Download example
 ----------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-67
+.. GENERATED FROM PYTHON SOURCE LINES 49-61
 
 .. code-block:: Python
 
 
-    import requests
-    import zipfile
-    import io
+    from pyopenms_viz.util import download_file, unzip_file
 
     # URL of the ZIP file
-    url = "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip"
+    url = "https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1"
 
-    # Download the ZIP file
-    response = requests.get(url)
-    response.raise_for_status()  # Check for request errors
-
-    # Unzip the content
-    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-        zip_file.extractall("d_fructose_example")  # Extract to a directory
-        print("Files extracted to 'd_fructose_example'")
+    # Download and extract the ZIP file
+    zip_filename = "d_fructose_example.zip"
+    download_file(url, zip_filename)
+    unzip_file(zip_filename, ".")  # Extract to current directory
 
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Files extracted to 'd_fructose_example'
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 68-71
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 Helper Functions
 ----------------
 We will need to define the following helper methods below to help format/extract data and generate the molecular chemical drawings.
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-74
+.. GENERATED FROM PYTHON SOURCE LINES 65-68
 
 .. code-block:: Python
 
@@ -132,14 +120,14 @@ We will need to define the following helper methods below to help format/extract
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-79
+.. GENERATED FROM PYTHON SOURCE LINES 69-73
 
 .. code-block:: bash
 
   %%bash
   pip install rdkit --quiet
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-233
+.. GENERATED FROM PYTHON SOURCE LINES 73-227
 
 .. code-block:: Python
 
@@ -304,14 +292,14 @@ We will need to define the following helper methods below to help format/extract
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 234-238
+.. GENERATED FROM PYTHON SOURCE LINES 228-232
 
 Load and Format Data
 --------------------
 Load .mzML using pymzml
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 238-276
+.. GENERATED FROM PYTHON SOURCE LINES 232-270
 
 .. code-block:: Python
 
@@ -327,7 +315,7 @@ Load .mzML using pymzml
 
     # We can use pymzml to load the spectrum data from the mzML file
 
-    input_file = "./d_fructose_example/d_fructose_example/D-Fructose_lc_msms.mzML"
+    input_file = "./d_fructose_example/D-Fructose_lc_msms.mzML"
 
     run = pymzml.run.Reader(input_file)
     # Get the first spec
@@ -442,19 +430,19 @@ Load .mzML using pymzml
     <br />
     <br />
 
-.. GENERATED FROM PYTHON SOURCE LINES 277-280
+.. GENERATED FROM PYTHON SOURCE LINES 271-274
 
 Load CFM-ID
 ~~~~~~~~~~~
 For CFM-ID, you need to save the predictions out to a txt file using their export option. In this case, the prediction is saved to "cfm_d_fructose_inchi_prediction.txt". The energy2 prediction corresponds to the 40V collision energy of our downloaded real spectrum.
 
-.. GENERATED FROM PYTHON SOURCE LINES 280-311
+.. GENERATED FROM PYTHON SOURCE LINES 274-305
 
 .. code-block:: Python
 
 
     pred_df, annotation_df = parse_cfm_data(
-        "./d_fructose_example/d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt",
+        "./d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt",
         "energy2",
     )
     pred_df["rel_int"] = pred_df["int"] / pred_df["int"].max() * 100
@@ -491,7 +479,7 @@ For CFM-ID, you need to save the predictions out to a txt file using their expor
 
  .. code-block:: none
 
-    /home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:300: SettingWithCopyWarning:
+    /home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:294: SettingWithCopyWarning:
 
 
     A value is trying to be set on a copy of a slice from a DataFrame.
@@ -503,12 +491,12 @@ For CFM-ID, you need to save the predictions out to a txt file using their expor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 312-314
+.. GENERATED FROM PYTHON SOURCE LINES 306-308
 
 Create Figure
 -------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 314-490
+.. GENERATED FROM PYTHON SOURCE LINES 308-484
 
 .. code-block:: Python
 
@@ -707,7 +695,7 @@ Create Figure
 
     This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
 
-    /home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:488: UserWarning:
+    /home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:482: UserWarning:
 
     This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
 
@@ -719,7 +707,7 @@ Create Figure
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.308 seconds)
+   **Total running time of the script:** (0 minutes 2.342 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:

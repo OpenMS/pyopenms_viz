@@ -6,17 +6,16 @@ This example makes a simple plot
 This example shows how to use different approaches.
 """
 
+import os
 import pandas as pd
-import requests
-from io import StringIO
+from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_plotly"
 
-# download the file for example plotting
-url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-response = requests.get(url)
-response.raise_for_status()  # Check for any HTTP errors
-df = pd.read_csv(StringIO(response.text), sep="\t")
+local_path = "ionMobilityTestFeatureDf.tsv"
+url = "https://zenodo.org/records/17904352/files/ionMobilityTestFeatureDf.tsv?download=1"
+download_file(url, local_path)
+df = pd.read_csv(local_path, sep="\t")
 
 df.plot(
     kind="mobilogram",

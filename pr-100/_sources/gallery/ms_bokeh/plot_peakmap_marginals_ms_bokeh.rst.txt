@@ -24,7 +24,7 @@ PeakMap ms_bokeh
 This example plots a peakmap with marginals by setting `add_marginals=True`
 A chromatogram is shown along the x-axis and a spectrum is shown along the y-axis.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-29
+.. GENERATED FROM PYTHON SOURCE LINES 8-27
 
 
 .. bokeh-plot::
@@ -33,16 +33,14 @@ A chromatogram is shown along the x-axis and a spectrum is shown along the y-axi
     from bokeh.plotting import show
     
     import pandas as pd
-    import requests
-    from io import StringIO
+    from pyopenms_viz.util import download_file
     
     pd.options.plotting.backend = "ms_bokeh"
     
-    # download the file for example plotting
-    url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-    response = requests.get(url)
-    response.raise_for_status()  # Check for any HTTP errors
-    df = pd.read_csv(StringIO(response.text), sep="\t")
+    url = "https://zenodo.org/records/17904352/files/ionMobilityTestFeatureDf.tsv?download=1"
+    local_path = "ionMobilityTestFeatureDf.tsv"
+    download_file(url, local_path)
+    df = pd.read_csv(local_path, sep="\t")
     
     df.plot(
         kind="peakmap",
@@ -100,16 +98,14 @@ A chromatogram is shown along the x-axis and a spectrum is shown along the y-axi
 
 
     import pandas as pd
-    import requests
-    from io import StringIO
+    from pyopenms_viz.util import download_file
 
     pd.options.plotting.backend = "ms_bokeh"
 
-    # download the file for example plotting
-    url = "https://github.com/OpenMS/pyopenms_viz/releases/download/v0.1.5/ionMobilityTestFeatureDf.tsv"
-    response = requests.get(url)
-    response.raise_for_status()  # Check for any HTTP errors
-    df = pd.read_csv(StringIO(response.text), sep="\t")
+    url = "https://zenodo.org/records/17904352/files/ionMobilityTestFeatureDf.tsv?download=1"
+    local_path = "ionMobilityTestFeatureDf.tsv"
+    download_file(url, local_path)
+    df = pd.read_csv(local_path, sep="\t")
 
     df.plot(
         kind="peakmap",
@@ -123,7 +119,7 @@ A chromatogram is shown along the x-axis and a spectrum is shown along the y-axi
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.490 seconds)
+   **Total running time of the script:** (0 minutes 0.182 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_bokeh_plot_peakmap_marginals_ms_bokeh.py:

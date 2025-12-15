@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="PLOTLY Plots" href="../ms_plotly/index.html" />
-    <link rel="prev" title="Plot Spyogenes subplots ms_matplotlib" href="plot_spyogenes_subplots_ms_matplotlib.html" />
+    <link rel="prev" title="Investigate Spctrum Binning ms_matplotlib" href="plot_investigate_spectrum_binning_ms_matplotlib.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.0.1" />
@@ -435,12 +435,12 @@
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_marginals_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_chromatogram_ms_matplotlib.html">Chromatogram ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_mobilogram_ms_matplotlib.html">Mobilogram ms_matplotlib</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spectrum_ms_matplotlib.html">Spectrum ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Manuscript d Fructose Example ms_matplotlib</a></li>
 </ul>
 </details></li>
@@ -571,24 +571,15 @@ The mzML file is from the the <a class="reference external" href="https://hmdb.c
 </div>
 <section id="download-example">
 <h2>Download example<a class="headerlink" href="#download-example" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span><span class="p">,</span> <span class="n">unzip_file</span>
 
 <span class="c1"># URL of the ZIP file</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1&quot;</span>
 
-<span class="c1"># Download the ZIP file</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>  <span class="c1"># Check for request errors</span>
-
-<span class="c1"># Unzip the content</span>
-<span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span> <span class="k">as</span> <span class="n">zip_file</span><span class="p">:</span>
-    <span class="n">zip_file</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">&quot;d_fructose_example&quot;</span><span class="p">)</span>  <span class="c1"># Extract to a directory</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Files extracted to &#39;d_fructose_example&#39;&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Files extracted to &#39;d_fructose_example&#39;
+<span class="c1"># Download and extract the ZIP file</span>
+<span class="n">zip_filename</span> <span class="o">=</span> <span class="s2">&quot;d_fructose_example.zip&quot;</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">zip_filename</span><span class="p">)</span>
+<span class="n">unzip_file</span><span class="p">(</span><span class="n">zip_filename</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># Extract to current directory</span>
 </pre></div>
 </div>
 </section>
@@ -771,7 +762,7 @@ pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> 
 
 <span class="c1"># We can use pymzml to load the spectrum data from the mzML file</span>
 
-<span class="n">input_file</span> <span class="o">=</span> <span class="s2">&quot;./d_fructose_example/d_fructose_example/D-Fructose_lc_msms.mzML&quot;</span>
+<span class="n">input_file</span> <span class="o">=</span> <span class="s2">&quot;./d_fructose_example/D-Fructose_lc_msms.mzML&quot;</span>
 
 <span class="n">run</span> <span class="o">=</span> <span class="n">pymzml</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
 <span class="c1"># Get the first spec</span>
@@ -879,7 +870,7 @@ term not found (MS:1000031)
 <h3>Load CFM-ID<a class="headerlink" href="#load-cfm-id" title="Link to this heading">#</a></h3>
 <p>For CFM-ID, you need to save the predictions out to a txt file using their export option. In this case, the prediction is saved to “cfm_d_fructose_inchi_prediction.txt”. The energy2 prediction corresponds to the 40V collision energy of our downloaded real spectrum.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pred_df</span><span class="p">,</span> <span class="n">annotation_df</span> <span class="o">=</span> <span class="n">parse_cfm_data</span><span class="p">(</span>
-    <span class="s2">&quot;./d_fructose_example/d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;./d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt&quot;</span><span class="p">,</span>
     <span class="s2">&quot;energy2&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;rel_int&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
@@ -908,7 +899,7 @@ term not found (MS:1000031)
 <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;formatted_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;formula&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">format_formula</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:300: SettingWithCopyWarning:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:294: SettingWithCopyWarning:
 
 
 A value is trying to be set on a copy of a slice from a DataFrame.
@@ -1104,7 +1095,7 @@ Annotation color: None
 
 This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
 
-/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:488: UserWarning:
+/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:482: UserWarning:
 
 This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
 
@@ -1112,7 +1103,7 @@ This figure includes Axes that are not compatible with tight_layout, so results 
 &lt;Figure size 5700x2700 with 16 Axes&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.308 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.342 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-matplotlib-plot-manuscript-d-fructose-spectrum-prediction-ms-matplotlib-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />
@@ -1143,12 +1134,12 @@ This figure includes Axes that are not compatible with tight_layout, so results 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_spyogenes_subplots_ms_matplotlib.html"
+       href="plot_investigate_spectrum_binning_ms_matplotlib.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Plot Spyogenes subplots ms_matplotlib</p>
+        <p class="prev-next-title">Investigate Spctrum Binning ms_matplotlib</p>
       </div>
     </a>
     <a class="right-next"
