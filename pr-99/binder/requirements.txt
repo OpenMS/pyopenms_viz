@@ -221,7 +221,7 @@ regex==2024.11.6
     # via pymzml
 requests==2.32.3
     # via sphinx
-rpds-py==0.22.3
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
