@@ -119,7 +119,7 @@ A chromatogram is shown along the x-axis and a spectrum is shown along the y-axi
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.182 seconds)
+   **Total running time of the script:** (0 minutes 0.175 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_bokeh_plot_peakmap_marginals_ms_bokeh.py:
