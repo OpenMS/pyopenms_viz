@@ -282,7 +282,7 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-typing-extensions==4.12.2
+typing-extensions==4.15.0
     # via pydata-sphinx-theme
 tzdata==2024.2
     # via pandas
