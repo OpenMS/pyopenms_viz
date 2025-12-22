@@ -1,0 +1,702 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Chromatogram ms_plotly &#8212; pyopenms_viz 1.0.1local documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=9b4a1398" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=9b4a1398" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=29deb60e"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'gallery/ms_plotly/plot_chromatogram_ms_plotly';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/OpenMS/pyopenms-docs/master/docs/source/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1local';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../_static/pyOpenMSviz_logo_color.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Mobilogram ms_plotly" href="plot_mobilogram_ms_plotly.html" />
+    <link rel="prev" title="PeakMap ms_plotly" href="plot_peakmap_marginals_ms_plotly.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/pyOpenMSviz_logo_color.png" class="logo__image only-light" alt="pyOpenMS Documentation - Home"/>
+    <img src="../../_static/pyOpenMSviz_logo_color.png" class="logo__image only-dark pst-js-only" alt="pyOpenMS Documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Getting%20Started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Parameters/Parameters.html">
+    Parameters
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Plot Gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Data%20Formatting/Data%20Formatting.html">
+    Data Formatting
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../API.html">
+    API
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/OpenMS/pyopenms_viz" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pyopenms-viz" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="pypi fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+            
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.openms.de" title="OpenMS project" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/OpenMS.svg" class="icon-link-image" alt="OpenMS project"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Getting%20Started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Parameters/Parameters.html">
+    Parameters
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Plot Gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Data%20Formatting/Data%20Formatting.html">
+    Data Formatting
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../API.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/OpenMS/pyopenms_viz" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pyopenms-viz" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="pypi fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+            
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.openms.de" title="OpenMS project" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/OpenMS.svg" class="icon-link-image" alt="OpenMS project"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ms_bokeh/index.html">BOKEH Plots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_peakmap_ms_bokeh.html">PeakMap ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_peakmap_marginals_ms_bokeh.html">PeakMap ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_chromatogram_ms_bokeh.html">Chromatogram ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_mobilogram_ms_bokeh.html">Mobilogram ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spectrum_ms_bokeh.html">Spectrum ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spectrum_dia_ms_bokeh.html">Spectrum of Extracted DIA Data ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spyogenes_subplots_ms_bokeh.html">Plot Spyogenes subplots ms_bokeh</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ms_matplotlib/index.html">MATPLOTLIB Plots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_3D_ms_matplotlib.html">Extracted PeakMap 3D ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_marginals_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_chromatogram_ms_matplotlib.html">Chromatogram ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_mobilogram_ms_matplotlib.html">Mobilogram ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_ms_matplotlib.html">Spectrum ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.html">Manuscript d Fructose Example ms_matplotlib</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">PLOTLY Plots</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_ms_plotly.html">PeakMap ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_ms_plotly.html">Extracted PeakMap 3D ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_marginals_ms_plotly.html">PeakMap ms_plotly</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Chromatogram ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_mobilogram_ms_plotly.html">Mobilogram ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_ms_plotly.html">Spectrum ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_plotly.html">Spectrum of Extracted DIA Data ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_highlight_peptide_ms_plotly.html">Color Targeted Peptide PeakMap 3D ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spyogenes_subplots_ms_plotly.html">Plot Spyogenes subplots ms_plotly</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Plot Gallery</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">PLOTLY Plots</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Chromatogram ms_plotly</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gallery-ms-plotly-plot-chromatogram-ms-plotly-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code or to run this example in your browser via Binder.</p>
+</div>
+<section class="sphx-glr-example-title" id="chromatogram-ms-plotly">
+<span id="sphx-glr-gallery-ms-plotly-plot-chromatogram-ms-plotly-py"></span><h1>Chromatogram ms_plotly<a class="headerlink" href="#chromatogram-ms-plotly" title="Link to this heading">#</a></h1>
+<p>This example shows a chromatogram colored by mass trace. Since all fragment ion spectra coelute this provides strong evidence that the peptide is present.</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_core.py:571: UserWarning:
+
+Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`.
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script type="text/javascript">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>                <div id="85da7feb-a624-4e7b-9825-b616fad9af89" class="plotly-graph-div" style="height:500px; width:500px;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("85da7feb-a624-4e7b-9825-b616fad9af89")) {                    Plotly.newPlot(                        "85da7feb-a624-4e7b-9825-b616fad9af89",                        [{"line":{"color":"#4575B4"},"mode":"lines","name":"prec","x":[6225.00510572313,6226.79294987215,6228.58093243442,6230.36718893648,6230.36718893648,6230.36718893648,6232.1564362792,6232.1564362792,6232.1564362792,6233.94503700916,6233.94503700916,6233.94503700916,6235.73636055073,6235.73636055073,6235.73636055073,6237.52955912273,6237.52955912273,6237.52955912273,6239.32257001573,6239.32257001573,6239.32257001573,6241.11678498677,6241.11678498677,6241.11678498677,6242.92556384755,6242.92556384755,6242.92556384755,6244.71471500479,6244.71471500479,6244.71471500479,6246.50698309954,6246.50698309954,6246.50698309954,6248.30696890632,6248.30696890632,6248.30696890632,6250.1057072343,6250.1057072343,6250.1057072343,6251.9098395738,6251.9098395738,6251.9098395738,6253.71197694426,6253.71197694426,6253.71197694426,6255.51902593258,6255.51902593258,6255.51902593258,6257.32368641249,6257.32368641249,6257.32368641249,6259.12679414199,6259.12679414199,6259.12679414199,6260.96995080879,6260.96995080879,6260.96995080879,6262.77919124259,6262.77919124259,6262.77919124259,6264.58638509563,6264.58638509563,6264.58638509563,6266.39037990162,6266.39037990162,6266.39037990162],"y":[229.01174,26.00163,57.999414,826.0081600000001,826.0081600000001,826.0081600000001,1589.015244,1589.015244,1589.015244,606.002649,606.002649,606.002649,521.99601,521.99601,521.99601,7089.074126,7089.074126,7089.074126,78627.671645,78627.671645,78627.671645,309525.10468900006,309525.10468900006,309525.10468900006,345083.367704,345083.367704,345083.367704,117380.759125,117380.759125,117380.759125,17035.246439000002,17035.246439000002,17035.246439000002,6130.94607,6130.94607,6130.94607,3854.042311,3854.042311,3854.042311,3045.962018,3045.962018,3045.962018,2282.041395,2282.041395,2282.041395,2044.9772445000003,2044.9772445000003,2044.9772445000003,3123.9902570000004,3123.9902570000004,3123.9902570000004,3117.966621,3117.966621,3117.966621,1119.992698,1119.992698,1119.992698,1690.973547,1690.973547,1690.973547,1757.0026300000002,1757.0026300000002,1757.0026300000002,1576.9622410000002,1576.9622410000002,1576.9622410000002],"type":"scatter","customdata":[[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295],[6225.00510572313,229.01174,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#D73027"},"mode":"lines","name":"y4^1","x":[6225.11081679484,6226.89773809107,6228.68570364494,6230.47519995558,6230.47519995558,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899],"y":[152.00263,23.999842,144.999588,224.995143,224.995143,258.00100000000003,917.999088,917.999088,917.999088,526.9923395000001,526.9923395000001,526.9923395000001,2391.341383666667,2391.341383666667,2391.341383666667,5307.931428083333,5307.931428083333,5307.931428083333,14841.521146,14841.521146,14841.521146,13963.09417775,13963.09417775,13963.09417775,5272.762889333333,5272.762889333333,5272.762889333333,2216.07926525,2216.07926525,2216.07926525,1012.505551,1012.505551,1012.505551,399.995778,399.995778,399.995778,901.995583,901.995583,901.995583,689.990728,689.990728,689.990728,1141.007155,1141.007155,1141.007155,1329.001317,1329.001317,1329.001317,190.995641,1141.0120325,1141.0120325,1141.0120325,577.9994160000001,577.9994160000001,584.998988,584.998988,411.996593,411.996593,411.996593],"type":"scatter","customdata":[[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295],[6226.79294987215,26.00163,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#91BFDB"},"mode":"lines","name":"y5^1","x":[6225.11081679484,6226.89773809107,6228.68570364494,6228.68570364494,6230.47519995558,6230.47519995558,6230.47519995558,6232.26158460719,6232.26158460719,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6259.2927545687,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899],"y":[273.00370300000003,335.01062,470.9996210000001,470.9996210000001,628.0074695000001,628.0074695000001,628.0074695000001,1129.4779695,1129.4779695,1129.4779695,438.494687,438.494687,438.494687,928.998461,928.998461,928.998461,3026.757908833333,3026.757908833333,3026.757908833333,19193.875037166665,19193.875037166665,19193.875037166665,58112.384483500005,58112.384483500005,58112.384483500005,54235.549299000006,54235.549299000006,54235.549299000006,19336.737749333333,19336.737749333333,19336.737749333333,6000.18740975,6000.18740975,6000.18740975,3215.993785333333,3215.993785333333,3215.993785333333,2161.227839416667,2161.227839416667,2161.227839416667,2904.4865435,2904.4865435,2904.4865435,1400.1870696666665,1400.1870696666665,1400.1870696666665,2306.176144333333,2306.176144333333,2306.176144333333,1649.3326475,1649.3326475,1649.3326475,4042.308396666667,4042.308396666667,4042.308396666667,1545.9783291666668,1545.9783291666668,1545.9783291666668,2067.6841846666666,2067.6841846666666,2067.6841846666666,1406.023011,1406.023011,1406.023011,1045.989528,1045.989528,1045.989528],"type":"scatter","customdata":[[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295],[6228.58093243442,57.999414,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#FC8D59"},"mode":"lines","name":"y6^1","x":[6225.11081679484,6225.11081679484,6226.89773809107,6226.89773809107,6228.68570364494,6228.68570364494,6228.68570364494,6228.68570364494,6230.47519995558,6230.47519995558,6230.47519995558,6232.26158460719,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6259.2927545687,6259.2927545687,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899,6266.51513569899],"y":[41.000973,41.000973,216.998493,216.998493,619.00838,619.00838,619.00838,619.00838,533.014622,533.014622,533.014622,394.995998,394.995998,493.999676,493.999676,493.999676,493.999676,582.4964759999999,582.4964759999999,582.4964759999999,582.4964759999999,3254.99725075,3254.99725075,3254.99725075,3254.99725075,15512.738991166663,15512.738991166663,15512.738991166663,15512.738991166663,48049.8644735,48049.8644735,48049.8644735,48049.8644735,43433.208968,43433.208968,43433.208968,43433.208968,14474.395813333333,14474.395813333333,14474.395813333333,14474.395813333333,4089.999658333333,4089.999658333333,4089.999658333333,4089.999658333333,2976.654746416667,2976.654746416667,2976.654746416667,2976.654746416667,2095.6828014166667,2095.6828014166667,2095.6828014166667,2095.6828014166667,1599.0033513333333,1599.0033513333333,1599.0033513333333,1599.0033513333333,1159.255138,1159.255138,1159.255138,1159.255138,1486.1620955,1486.1620955,1486.1620955,1486.1620955,1559.658402,1559.658402,1559.658402,1559.658402,1697.3168848333332,1697.3168848333332,1697.3168848333332,1697.3168848333332,2472.3032741666666,2472.3032741666666,2472.3032741666666,2472.3032741666666,1487.5117185,1487.5117185,1487.5117185,1487.5117185,1291.013574,1291.013574,1291.013574,1291.013574,1179.997369,1179.997369,1179.997369,1179.997369],"type":"scatter","customdata":[[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#7B2C65"},"mode":"lines","name":"y7^1","x":[6225.11081679484,6225.11081679484,6226.89773809107,6226.89773809107,6228.68570364494,6228.68570364494,6228.68570364494,6228.68570364494,6230.47519995558,6230.47519995558,6230.47519995558,6230.47519995558,6232.26158460719,6232.26158460719,6232.26158460719,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6259.2927545687,6259.2927545687,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899,6266.51513569899],"y":[133.998865,133.998865,434.489812,434.489812,334.002208,334.002208,334.002208,334.002208,634.5020515,634.5020515,634.5020515,634.5020515,830.4919935,830.4919935,830.4919935,830.4919935,532.997154,532.997154,532.997154,532.997154,556.496667,556.496667,556.496667,556.496667,2355.650834333333,2355.650834333333,2355.650834333333,2355.650834333333,14081.818261916666,14081.818261916666,14081.818261916666,14081.818261916666,46167.55335183333,46167.55335183333,46167.55335183333,46167.55335183333,42035.6770435,42035.6770435,42035.6770435,42035.6770435,12686.272192333334,12686.272192333334,12686.272192333334,12686.272192333334,4442.0603745,4442.0603745,4442.0603745,4442.0603745,3797.7971351333335,3797.7971351333335,3797.7971351333335,3797.7971351333335,1551.1636575,1551.1636575,1551.1636575,1551.1636575,2209.669942666667,2209.669942666667,2209.669942666667,2209.669942666667,1649.8278293333333,1649.8278293333333,1649.8278293333333,1649.8278293333333,1802.491528,1802.491528,1802.491528,1802.491528,1143.4931540000002,1143.4931540000002,1143.4931540000002,1143.4931540000002,1227.1634368333334,1227.1634368333334,1227.1634368333334,1227.1634368333334,1248.489791,1248.489791,1248.489791,1504.5050015000002,1504.5050015000002,1504.5050015000002,1504.5050015000002,3232.6761415,3232.6761415,3232.6761415,3232.6761415,1211.4875235,1211.4875235,1211.4875235,1211.4875235],"type":"scatter","customdata":[[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#FCCF53"},"mode":"lines","name":"y8^1","x":[6225.11081679484,6225.11081679484,6226.89773809107,6226.89773809107,6228.68570364494,6228.68570364494,6230.47519995558,6230.47519995558,6232.26158460719,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6259.2927545687,6259.2927545687,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899,6266.51513569899],"y":[259.00124000000005,259.00124000000005,150.99707,150.99707,173.00743899999998,173.00743899999998,241.009626,241.009626,175.994377,175.994377,589.014332,589.014332,589.014332,1052.0087708333333,1052.0087708333333,1052.0087708333333,1052.0087708333333,3659.288980483334,3659.288980483334,3659.288980483334,3659.288980483334,24204.34849233333,24204.34849233333,24204.34849233333,24204.34849233333,90857.27402841666,90857.27402841666,90857.27402841666,90857.27402841666,82467.05108283334,82467.05108283334,82467.05108283334,82467.05108283334,22250.86442458333,22250.86442458333,22250.86442458333,22250.86442458333,4723.992175833333,4723.992175833333,4723.992175833333,4723.992175833333,3130.4448245000003,3130.4448245000003,3130.4448245000003,3130.4448245000003,1717.1840855833334,1717.1840855833334,1717.1840855833334,1717.1840855833334,1957.431629033333,1957.431629033333,1957.431629033333,1957.431629033333,1766.9905425,1766.9905425,1766.9905425,1766.9905425,1895.5241105,1895.5241105,1895.5241105,1895.5241105,2843.3227915,2843.3227915,2843.3227915,2843.3227915,4197.386263750001,4197.386263750001,4197.386263750001,4197.386263750001,1142.5090295,1142.5090295,1142.5090295,1142.5090295,1125.5216260000002,1125.5216260000002,1125.5216260000002,1125.5216260000002,1301.4910295,1301.4910295,1301.4910295,1301.4910295,889.9902749999999,889.9902749999999,889.9902749999999,889.9902749999999],"type":"scatter","customdata":[[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295],[6230.36718893648,826.0081600000001,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"line":{"color":"#555555"},"mode":"lines","name":"y9^1","x":[6225.11081679484,6225.11081679484,6226.89773809107,6228.68570364494,6230.47519995558,6230.47519995558,6232.26158460719,6234.0534788102,6234.0534788102,6234.0534788102,6235.84861018256,6235.84861018256,6235.84861018256,6237.64613563505,6237.64613563505,6237.64613563505,6237.64613563505,6237.64613563505,6239.43720522349,6239.43720522349,6239.43720522349,6239.43720522349,6239.43720522349,6241.24574655304,6241.24574655304,6241.24574655304,6241.24574655304,6241.24574655304,6243.03476926748,6243.03476926748,6243.03476926748,6243.03476926748,6243.03476926748,6244.82797253146,6244.82797253146,6244.82797253146,6244.82797253146,6244.82797253146,6246.62867474413,6246.62867474413,6246.62867474413,6246.62867474413,6246.62867474413,6248.42832918019,6248.42832918019,6248.42832918019,6248.42832918019,6248.42832918019,6250.22954838984,6250.22954838984,6250.22954838984,6250.22954838984,6250.22954838984,6252.03127198678,6252.03127198678,6252.03127198678,6252.03127198678,6252.03127198678,6253.83602161421,6253.83602161421,6253.83602161421,6253.83602161421,6253.83602161421,6255.64580924956,6255.64580924956,6255.64580924956,6255.64580924956,6255.64580924956,6257.45004012053,6257.45004012053,6257.45004012053,6257.45004012053,6257.45004012053,6259.2927545687,6259.2927545687,6259.2927545687,6259.2927545687,6259.2927545687,6261.10140645291,6261.10140645291,6261.10140645291,6261.10140645291,6262.90909501605,6262.90909501605,6262.90909501605,6262.90909501605,6262.90909501605,6264.71157343443,6264.71157343443,6264.71157343443,6264.71157343443,6266.51513569899,6266.51513569899,6266.51513569899,6266.51513569899,6266.51513569899],"y":[99.002523,99.002523,84.004074,84.99860699999999,109.99776,109.99776,55.001625,201.998784,201.998784,201.998784,364.9954650000001,364.9954650000001,364.9954650000001,2209.1468912,2209.1468912,2209.1468912,2209.1468912,2209.1468912,12251.292659183337,12251.292659183337,12251.292659183337,12251.292659183337,12251.292659183337,40930.55056273333,40930.55056273333,40930.55056273333,40930.55056273333,40930.55056273333,37714.98367773334,37714.98367773334,37714.98367773334,37714.98367773334,37714.98367773334,9748.7315509,9748.7315509,9748.7315509,9748.7315509,9748.7315509,3178.31429825,3178.31429825,3178.31429825,3178.31429825,3178.31429825,2284.320931166667,2284.320931166667,2284.320931166667,2284.320931166667,2284.320931166667,1404.335359833333,1404.335359833333,1404.335359833333,1404.335359833333,1404.335359833333,1748.6643536666666,1748.6643536666666,1748.6643536666666,1748.6643536666666,1748.6643536666666,1131.4984105,1131.4984105,1131.4984105,1131.4984105,1131.4984105,950.8372091666668,950.8372091666668,950.8372091666668,950.8372091666668,950.8372091666668,666.506618,666.506618,666.506618,666.506618,666.506618,3280.6490595000005,3280.6490595000005,3280.6490595000005,3280.6490595000005,3280.6490595000005,1105.0282595,1105.0282595,1105.0282595,1105.0282595,1076.5145815,1076.5145815,1076.5145815,1076.5145815,1076.5145815,413.995205,413.995205,413.995205,413.995205,1137.512577,1137.512577,1137.512577,1137.512577,1137.512577],"type":"scatter","customdata":[[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295],[6232.1564362792,1589.015244,"prec",642.3295]],"hovertemplate":"retention time: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003eannotation: %{customdata[2]}\u003cbr\u003eproduct m\u002fz: %{customdata[3]}"},{"mode":"lines","x":[],"y":[],"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"rgb(36,36,36)"},"error_y":{"color":"rgb(36,36,36)"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"baxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"histogram2d"}],"histogram":[{"marker":{"line":{"color":"white","width":0.6}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"rgb(237,237,237)"},"line":{"color":"white"}},"header":{"fill":{"color":"rgb(217,217,217)"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"colorscale":{"diverging":[[0.0,"rgb(103,0,31)"],[0.1,"rgb(178,24,43)"],[0.2,"rgb(214,96,77)"],[0.3,"rgb(244,165,130)"],[0.4,"rgb(253,219,199)"],[0.5,"rgb(247,247,247)"],[0.6,"rgb(209,229,240)"],[0.7,"rgb(146,197,222)"],[0.8,"rgb(67,147,195)"],[0.9,"rgb(33,102,172)"],[1.0,"rgb(5,48,97)"]],"sequential":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"sequentialminus":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]},"colorway":["#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF"],"font":{"color":"rgb(36,36,36)"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"white"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"bgcolor":"white","radialaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","gridwidth":2,"linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zeroline":false,"zerolinecolor":"rgb(36,36,36)"},"yaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","gridwidth":2,"linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zeroline":false,"zerolinecolor":"rgb(36,36,36)"},"zaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","gridwidth":2,"linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zeroline":false,"zerolinecolor":"rgb(36,36,36)"}},"shapedefaults":{"fillcolor":"black","line":{"width":0},"opacity":0.3},"ternary":{"aaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"baxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"bgcolor":"white","caxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zeroline":false,"zerolinecolor":"rgb(36,36,36)"},"yaxis":{"automargin":true,"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zeroline":false,"zerolinecolor":"rgb(36,36,36)"}}},"title":{"text":"Chromatogram","font":{"family":"Helvetica","size":18}},"xaxis":{"title":{"text":"Retention Time","font":{"family":"Helvetica","size":16}},"tickfont":{"size":14,"family":"Helvetica"},"gridcolor":"#CCCCCC","showgrid":true,"showline":true,"linewidth":1,"linecolor":"black","ticks":"outside","tickwidth":1,"tickcolor":"black"},"yaxis":{"title":{"text":"Intensity","font":{"family":"Helvetica","size":16}},"tickfont":{"size":14,"family":"Helvetica"},"gridcolor":"#CCCCCC","showgrid":true,"showline":true,"linewidth":1,"linecolor":"black","tickwidth":1,"tickcolor":"black","range":[0,379591.7044744]},"width":500,"height":500,"dragmode":"select","legend":{"font":{"size":10,"family":"Helvetica"},"title":{"text":"Legend"}},"showlegend":true,"font":{"family":"Helvetica"},"plot_bgcolor":"#FFFFFF","modebar":{"add":["drawrect","eraseshape"]},"newshape":{"label":{"texttemplate":"rt_0: %{x0:.2f} | rt_1: %{x1:.2f}","textposition":"top left"},"line":{"color":"#F02D1A","dash":"dash"},"showlegend":true,"drawdirection":"vertical","opacity":0.5}},                        {"responsive": true}                    )                };                            </script>        </div>
+</div>
+<br />
+<br /><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;ms_plotly&quot;</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904352/files/ionMobilityTestChromatogramDf.tsv?download=1&quot;</span>
+<span class="n">local_path</span> <span class="o">=</span> <span class="s2">&quot;ionMobilityTestChromatogramDf.tsv&quot;</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;chromatogram&quot;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span>
+    <span class="n">by</span><span class="o">=</span><span class="s2">&quot;Annotation&quot;</span><span class="p">,</span>
+    <span class="n">legend_config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.990 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-plotly-plot-chromatogram-ms-plotly-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_plotly/plot_chromatogram_ms_plotly.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" style="width: 150px;" />
+</a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e8f0e387952a8f2651b21807592d8912/plot_chromatogram_ms_plotly.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_chromatogram_ms_plotly.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6594df25d320132cf513651dc8e97280/plot_chromatogram_ms_plotly.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_chromatogram_ms_plotly.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8ca1aff8dfe9932416b18bcb642ef53a/plot_chromatogram_ms_plotly.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_chromatogram_ms_plotly.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_peakmap_marginals_ms_plotly.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">PeakMap ms_plotly</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="plot_mobilogram_ms_plotly.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Mobilogram ms_plotly</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/OpenMS/pyopenms_viz/edit/main/docs/source/gallery/ms_plotly/plot_chromatogram_ms_plotly.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/gallery/ms_plotly/plot_chromatogram_ms_plotly.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, OpenMS Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

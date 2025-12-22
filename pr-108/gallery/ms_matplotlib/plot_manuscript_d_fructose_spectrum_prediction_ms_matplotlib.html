@@ -1,0 +1,1266 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Manuscript d Fructose Example ms_matplotlib &#8212; pyopenms_viz 1.0.1local documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=9b4a1398" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=9b4a1398" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=29deb60e"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/OpenMS/pyopenms-docs/master/docs/source/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1local';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../_static/pyOpenMSviz_logo_color.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="PLOTLY Plots" href="../ms_plotly/index.html" />
+    <link rel="prev" title="Investigate Spctrum Binning ms_matplotlib" href="plot_investigate_spectrum_binning_ms_matplotlib.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/pyOpenMSviz_logo_color.png" class="logo__image only-light" alt="pyOpenMS Documentation - Home"/>
+    <img src="../../_static/pyOpenMSviz_logo_color.png" class="logo__image only-dark pst-js-only" alt="pyOpenMS Documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Getting%20Started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Parameters/Parameters.html">
+    Parameters
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Plot Gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Data%20Formatting/Data%20Formatting.html">
+    Data Formatting
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../API.html">
+    API
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/OpenMS/pyopenms_viz" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pyopenms-viz" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="pypi fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+            
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.openms.de" title="OpenMS project" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/OpenMS.svg" class="icon-link-image" alt="OpenMS project"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Getting%20Started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Parameters/Parameters.html">
+    Parameters
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Plot Gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Data%20Formatting/Data%20Formatting.html">
+    Data Formatting
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../API.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/OpenMS/pyopenms_viz" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pyopenms-viz" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="pypi fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+            
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.openms.de" title="OpenMS project" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/OpenMS.svg" class="icon-link-image" alt="OpenMS project"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ms_bokeh/index.html">BOKEH Plots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_peakmap_ms_bokeh.html">PeakMap ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_peakmap_marginals_ms_bokeh.html">PeakMap ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_chromatogram_ms_bokeh.html">Chromatogram ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_mobilogram_ms_bokeh.html">Mobilogram ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spectrum_ms_bokeh.html">Spectrum ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spectrum_dia_ms_bokeh.html">Spectrum of Extracted DIA Data ms_bokeh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_bokeh/plot_spyogenes_subplots_ms_bokeh.html">Plot Spyogenes subplots ms_bokeh</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">MATPLOTLIB Plots</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_ms_matplotlib.html">Extracted PeakMap 3D ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_marginals_ms_matplotlib.html">PeakMap ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_chromatogram_ms_matplotlib.html">Chromatogram ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_mobilogram_ms_matplotlib.html">Mobilogram ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_ms_matplotlib.html">Spectrum ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spectrum_dia_ms_matplotlib.html">Spectrum of Extracted DIA Data ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_3D_highlight_peptide_ms_matplotlib.html">Color Targeted Peptide PeakMap 3D ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_peakmap_binning_demonstration_ms_matplotlib.html">Plot Peakmap Binning Demonstration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_spyogenes_subplots_ms_matplotlib.html">Plot Spyogenes subplots ms_matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_investigate_spectrum_binning_ms_matplotlib.html">Investigate Spctrum Binning ms_matplotlib</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Manuscript d Fructose Example ms_matplotlib</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ms_plotly/index.html">PLOTLY Plots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_peakmap_ms_plotly.html">PeakMap ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_peakmap_3D_ms_plotly.html">Extracted PeakMap 3D ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_peakmap_marginals_ms_plotly.html">PeakMap ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_chromatogram_ms_plotly.html">Chromatogram ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_mobilogram_ms_plotly.html">Mobilogram ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_spectrum_ms_plotly.html">Spectrum ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_spectrum_dia_ms_plotly.html">Spectrum of Extracted DIA Data ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_peakmap_3D_highlight_peptide_ms_plotly.html">Color Targeted Peptide PeakMap 3D ms_plotly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ms_plotly/plot_spyogenes_subplots_ms_plotly.html">Plot Spyogenes subplots ms_plotly</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Plot Gallery</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">MATPLOTLIB Plots</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Manuscript d Fructose Example ms_matplotlib</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gallery-ms-matplotlib-plot-manuscript-d-fructose-spectrum-prediction-ms-matplotlib-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code or to run this example in your browser via Binder.</p>
+</div>
+<section class="sphx-glr-example-title" id="manuscript-d-fructose-example-ms-matplotlib">
+<span id="sphx-glr-gallery-ms-matplotlib-plot-manuscript-d-fructose-spectrum-prediction-ms-matplotlib-py"></span><h1>Manuscript d Fructose Example ms_matplotlib<a class="headerlink" href="#manuscript-d-fructose-example-ms-matplotlib" title="Link to this heading">#</a></h1>
+<p>This shows the code required to plot the d-fructose example in the manuscript.
+The mzML file is from the the <a class="reference external" href="https://hmdb.ca/spectra/ms_ms/902">Human Metabolome Database (ID: HMDB0000660)</a></p>
+<p>This entry contains an annotated spectrum:</p>
+<div class="pst-scrollable-table-container"><table class="table table-center">
+<thead>
+<tr class="row-odd"><th class="head"><p>mz</p></th>
+<th class="head"><p>formula</p></th>
+<th class="head"><p>SMILES</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>45.0</p></td>
+<td><p>CHO2</p></td>
+<td><p>C(=O)O</p></td>
+</tr>
+<tr class="row-odd"><td><p>61.0</p></td>
+<td><p>C2H5O2</p></td>
+<td><p>CC(=O)O</p></td>
+</tr>
+<tr class="row-even"><td><p>73.0</p></td>
+<td><p>C2HO3</p></td>
+<td><p>O=CC(=O)O</p></td>
+</tr>
+<tr class="row-odd"><td><p>75.0</p></td>
+<td><p>C2H3O3</p></td>
+<td><p>OCC(=O)O</p></td>
+</tr>
+<tr class="row-even"><td><p>87.0</p></td>
+<td><p>C3H3O3</p></td>
+<td><p>O=CC(=O)CO</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To generate a prediction using <a class="reference external" href="https://cfmid.wishartlab.com/">CFM-ID</a>, you can use the SMILE or InChi key. This example used the SMILE.</p>
+<p>SMILE: OC[C&#64;H]1OC&#64;(CO)C&#64;&#64;H[C&#64;&#64;H]1O InChi: InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1</p>
+<p>For this tutorial CFM-ID and .mzML file are downloaded  from the pyopenms_viz repository</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;ms_matplotlib&quot;</span>
+</pre></div>
+</div>
+<section id="download-example">
+<h2>Download example<a class="headerlink" href="#download-example" title="Link to this heading">#</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyopenms_viz.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span><span class="p">,</span> <span class="n">unzip_file</span>
+
+<span class="c1"># URL of the ZIP file</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1&quot;</span>
+
+<span class="c1"># Download and extract the ZIP file</span>
+<span class="n">zip_filename</span> <span class="o">=</span> <span class="s2">&quot;d_fructose_example.zip&quot;</span>
+<span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">zip_filename</span><span class="p">)</span>
+<span class="n">unzip_file</span><span class="p">(</span><span class="n">zip_filename</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># Extract to current directory</span>
+</pre></div>
+</div>
+</section>
+<section id="helper-functions">
+<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Link to this heading">#</a></h2>
+<p>We will need to define the following helper methods below to help format/extract data and generate the molecular chemical drawings.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Utility to import RDKit modules and disable logging</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>%%bash
+pip<span class="w"> </span>install<span class="w"> </span>rdkit<span class="w"> </span>--quiet
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageOps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rdkit.RDLogger</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">RDLogger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem.Draw</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdMolDraw2D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdMolDescriptors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cairosvg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rdkit_import</span><span class="p">(</span><span class="o">*</span><span class="n">module_strs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Utility function to import RDKit modules and disable RDKit logging.&quot;&quot;&quot;</span>
+    <span class="n">RDLogger</span><span class="o">.</span><span class="n">DisableLog</span><span class="p">(</span><span class="s2">&quot;rdApp.*&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span> <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">module_strs</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">trim_img_by_white</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Crops the image to remove excess white space and adds padding.&quot;&quot;&quot;</span>
+    <span class="n">as_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">as_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Find non-white regions</span>
+    <span class="n">has_content</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">as_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">255</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">has_content</span><span class="p">)</span>
+
+    <span class="c1"># Crop and pad</span>
+    <span class="n">x_range</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">y_range</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="n">as_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">cropped_img</span> <span class="o">=</span> <span class="n">as_array</span><span class="p">[</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">x_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">img_cropped</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">cropped_img</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;RGB&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">img_cropped</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mol_from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">standardize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a SMILES string to an RDKit molecule.&quot;&quot;&quot;</span>
+    <span class="n">Chem</span> <span class="o">=</span> <span class="n">rdkit_import</span><span class="p">(</span><span class="s2">&quot;rdkit.Chem&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mol</span> <span class="ow">and</span> <span class="n">standardize</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">rdkit_standardize</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mol</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error converting SMILES to Mol: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mol_im</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates an image of the molecule from its SMILES string.&quot;&quot;&quot;</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">mol_from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mol</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">rdMolDraw2D</span><span class="o">.</span><span class="n">MolDraw2DSVG</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">DrawMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">FinishDrawing</span><span class="p">()</span>
+        <span class="n">svg_buf</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">GetDrawingText</span><span class="p">()</span>
+
+        <span class="n">png_buf</span> <span class="o">=</span> <span class="n">cairosvg</span><span class="o">.</span><span class="n">svg2png</span><span class="p">(</span><span class="n">bytestring</span><span class="o">=</span><span class="n">svg_buf</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">png_buf</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">trim_img_by_white</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_cfm_data</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">energy_section</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses CFM data for a specific energy section.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="n">mz_data</span><span class="p">,</span> <span class="n">annotation_data</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">capture_data</span><span class="p">,</span> <span class="n">capture_annotations</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+
+    <span class="c1"># Regex patterns</span>
+    <span class="n">energy_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;^</span><span class="si">{</span><span class="n">energy_section</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+    <span class="n">mz_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(\d+\.\d+)\s+([\d\.]+)\s+([\d\s]+)\s+\(([\d\s\.]+)\)$&quot;</span><span class="p">)</span>
+    <span class="n">annotation_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(\d+)\s+(\d+\.\d+)\s+(\S+)(?:\s+(.+))?$&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">energy_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="n">capture_data</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">capture_data</span> <span class="ow">and</span> <span class="p">(</span><span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)):</span>
+            <span class="n">capture_data</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">capture_annotations</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">capture_data</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">mz_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">mz</span><span class="p">,</span> <span class="n">rel_int</span><span class="p">,</span> <span class="n">frag_id</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                <span class="n">mz_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mz</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">rel_int</span><span class="p">),</span> <span class="n">frag_id</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">capture_annotations</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">annotation_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">frag_id</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">smiles</span><span class="p">,</span> <span class="n">note</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                <span class="n">annotation_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">frag_id</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mz</span><span class="p">),</span> <span class="n">smiles</span><span class="p">,</span> <span class="n">note</span><span class="p">])</span>
+
+    <span class="n">mz_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">mz_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="s2">&quot;frag_id&quot;</span><span class="p">,</span> <span class="s2">&quot;probabilities&quot;</span><span class="p">])</span>
+    <span class="n">annotation_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">annotation_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">,</span> <span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span> <span class="s2">&quot;note&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mz_df</span><span class="p">,</span> <span class="n">annotation_df</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">explode_frag_ids_probabilities</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Explodes the &#39;frag_id&#39; and &#39;probabilities&#39; columns into multiple rows.&quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;probabilities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;probabilities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">explode</span><span class="p">([</span><span class="s2">&quot;frag_id&quot;</span><span class="p">,</span> <span class="s2">&quot;probabilities&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;frag_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">smiles_to_formula</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a SMILES string to a molecular formula.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rdMolDescriptors</span><span class="o">.</span><span class="n">CalcMolFormula</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="n">mol</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error converting SMILES to formula: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">format_formula</span><span class="p">(</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formats a molecular formula by replacing numbers with subscripts and handling charges.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Function to replace numbers with their subscript version</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">replace_with_subscript</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="se">{{</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Replace numbers with their subscript versions</span>
+        <span class="n">formatted</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d+&quot;</span><span class="p">,</span> <span class="n">replace_with_subscript</span><span class="p">,</span> <span class="n">formula</span><span class="p">)</span>
+
+        <span class="c1"># Replace &#39;+&#39; and &#39;-&#39; with superscript versions</span>
+        <span class="n">formatted</span> <span class="o">=</span> <span class="n">formatted</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;^+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;^-&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">formatted</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">formula</span>
+</pre></div>
+</div>
+</section>
+<section id="load-and-format-data">
+<h2>Load and Format Data<a class="headerlink" href="#load-and-format-data" title="Link to this heading">#</a></h2>
+<section id="load-mzml-using-pymzml">
+<h3>Load .mzML using pymzml<a class="headerlink" href="#load-mzml-using-pymzml" title="Link to this heading">#</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymzml</span>
+
+<span class="c1"># Load the known annotated SMILES and formula into a dataframe</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;mz&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">45.0</span><span class="p">,</span> <span class="mf">61.0</span><span class="p">,</span> <span class="mf">73.0</span><span class="p">,</span> <span class="mf">75.0</span><span class="p">,</span> <span class="mf">87.0</span><span class="p">],</span>
+    <span class="s2">&quot;formula&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CHO2&quot;</span><span class="p">,</span> <span class="s2">&quot;C2H5O2&quot;</span><span class="p">,</span> <span class="s2">&quot;C2HO3&quot;</span><span class="p">,</span> <span class="s2">&quot;C2H3O3&quot;</span><span class="p">,</span> <span class="s2">&quot;C3H3O3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;SMILES&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C(=O)O&quot;</span><span class="p">,</span> <span class="s2">&quot;CC(=O)O&quot;</span><span class="p">,</span> <span class="s2">&quot;O=CC(=O)O&quot;</span><span class="p">,</span> <span class="s2">&quot;OCC(=O)O&quot;</span><span class="p">,</span> <span class="s2">&quot;O=CC(=O)CO&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">ann_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># We can use pymzml to load the spectrum data from the mzML file</span>
+
+<span class="n">input_file</span> <span class="o">=</span> <span class="s2">&quot;./d_fructose_example/D-Fructose_lc_msms.mzML&quot;</span>
+
+<span class="n">run</span> <span class="o">=</span> <span class="n">pymzml</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+<span class="c1"># Get the first spec</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="c1"># Convert to Pandas DataFrame</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">centroidedPeaks</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">})</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;rel_int&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;color_peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#1b9e77&quot;</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">mz</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">mz</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ann_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="c1"># print(f&quot;{ann_df[[&#39;mz&#39;]].isin([mz]).values.flatten()}&quot;)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">mz</span> <span class="o">==</span> <span class="n">mz</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ann_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">ann_df</span><span class="p">[[</span><span class="s2">&quot;mz&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">mz</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="p">[</span><span class="s2">&quot;formula&quot;</span><span class="p">]</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Apply the formatting function to the &#39;formula&#39; column</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">mz</span> <span class="o">==</span> <span class="n">mz</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">mz</span> <span class="o">==</span> <span class="n">mz</span><span class="p">][</span>
+            <span class="s2">&quot;custom_annotation&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">format_formula</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="c1"># replace the NaN values with empty strings in custom_annotation column</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[Warning] Not index found and build_index_from_scratch is False
+term not found (MS:1000031)
+term not found (MS:1000031)
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mz</th>
+      <th>int</th>
+      <th>rel_int</th>
+      <th>color_peak</th>
+      <th>custom_annotation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>41.0</td>
+      <td>22.867</td>
+      <td>22.867</td>
+      <td>#1b9e77</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>45.0</td>
+      <td>47.956</td>
+      <td>47.956</td>
+      <td>#1b9e77</td>
+      <td>CHO_{2}</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>57.0</td>
+      <td>10.720</td>
+      <td>10.720</td>
+      <td>#1b9e77</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>59.0</td>
+      <td>11.557</td>
+      <td>11.557</td>
+      <td>#1b9e77</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>61.0</td>
+      <td>39.667</td>
+      <td>39.667</td>
+      <td>#1b9e77</td>
+      <td>C_{2}H_{5}O_{2}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /></section>
+<section id="load-cfm-id">
+<h3>Load CFM-ID<a class="headerlink" href="#load-cfm-id" title="Link to this heading">#</a></h3>
+<p>For CFM-ID, you need to save the predictions out to a txt file using their export option. In this case, the prediction is saved to “cfm_d_fructose_inchi_prediction.txt”. The energy2 prediction corresponds to the 40V collision energy of our downloaded real spectrum.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pred_df</span><span class="p">,</span> <span class="n">annotation_df</span> <span class="o">=</span> <span class="n">parse_cfm_data</span><span class="p">(</span>
+    <span class="s2">&quot;./d_fructose_example/cfm_prediction/cfm_d_fructose_smile_prediction.txt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;energy2&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;rel_int&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">pred_df_long</span> <span class="o">=</span> <span class="n">explode_frag_ids_probabilities</span><span class="p">(</span><span class="n">pred_df</span><span class="p">)</span>
+<span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;color_peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#d95f02&quot;</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">mz</span> <span class="ow">in</span> <span class="n">pred_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">mz</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ann_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="n">pred_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pred_df</span><span class="o">.</span><span class="n">mz</span> <span class="o">==</span> <span class="n">mz</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;f</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+<span class="c1"># We also want to create a dataframe with the predictions for each fragment ion with their corresponding probabilities.</span>
+<span class="n">pred_ann_df</span> <span class="o">=</span> <span class="n">annotation_df</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">annotation_df</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">pred_df_long</span><span class="o">.</span><span class="n">frag_id</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
+<span class="p">]</span>
+<span class="c1"># Apply the function to the SMILES column to create a new column &#39;formula&#39;</span>
+<span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">smiles_to_formula</span><span class="p">)</span>
+<span class="n">pred_ann_df</span> <span class="o">=</span> <span class="n">pred_ann_df</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">pred_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">mz</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<span class="p">]</span>
+<span class="n">pred_ann_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pred_ann_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pred_ann_df</span><span class="p">,</span> <span class="n">pred_df_long</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;frag_id&quot;</span><span class="p">,</span> <span class="s2">&quot;mz&quot;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
+<span class="n">pred_ann_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="s2">&quot;probabilities&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+<span class="c1"># Apply the formatting function to the &#39;formula&#39; column</span>
+<span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;formatted_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;formula&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">format_formula</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:294: SettingWithCopyWarning:
+
+
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+</pre></div>
+</div>
+</section>
+</section>
+<section id="create-figure">
+<h2>Create Figure<a class="headerlink" href="#create-figure" title="Link to this heading">#</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">patches</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1.inset_locator</span><span class="w"> </span><span class="kn">import</span> <span class="n">inset_axes</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+<span class="c1"># Create the gridspec layout: 1 row and 2 columns, with larger space on the left</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="c1"># Create the main spectrum subplot</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Plot Mass Spectrum</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;mz&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">&quot;rel_int&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;D-Fructose&quot;</span><span class="p">,</span>
+    <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Relative Intensity&quot;</span><span class="p">,</span>
+    <span class="n">bin_peaks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">reference_spectrum</span><span class="o">=</span><span class="n">pred_df</span><span class="p">[[</span><span class="s2">&quot;mz&quot;</span><span class="p">,</span> <span class="s2">&quot;rel_int&quot;</span><span class="p">,</span> <span class="s2">&quot;color_peak&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+        <span class="n">custom_annotation</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+    <span class="p">),</span>
+    <span class="n">mirror_spectrum</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">annotate_mz</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">annotate_top_n_peaks</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="c1">#  annotation_color=&quot;color_annotation&quot;,</span>
+    <span class="n">custom_annotation</span><span class="o">=</span><span class="s2">&quot;custom_annotation&quot;</span><span class="p">,</span>
+    <span class="n">peak_color</span><span class="o">=</span><span class="s2">&quot;color_peak&quot;</span><span class="p">,</span>
+    <span class="n">annotation_font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">xaxis_label_font_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">yaxis_label_font_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">canvas</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">39</span><span class="p">,</span> <span class="mi">183</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">105</span><span class="p">,</span> <span class="mi">105</span><span class="p">)</span>
+<span class="c1"># Customize the y-axis ticks and labels</span>
+<span class="n">y_ticks</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">get_yticks</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">y_ticks</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">y_ticks</span><span class="p">])</span>
+<span class="c1"># Update the title, xlabel, and ylabel</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;D-Fructose&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;mass-to-charge&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Relative Intensity&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="c1"># Update axis tick labels</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+<span class="n">font_size</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">leg_font_size</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">font_size</span>
+<span class="n">leg_kws</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ncol&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="n">leg_font_size</span><span class="p">,</span> <span class="s2">&quot;loc&quot;</span><span class="p">:</span> <span class="s2">&quot;upper left&quot;</span><span class="p">}</span>
+<span class="n">handles</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">patches</span><span class="o">.</span><span class="n">Patch</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;#1b9e77&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Real&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+    <span class="n">patches</span><span class="o">.</span><span class="n">Patch</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;#d95f02&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">leg</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">handles</span><span class="p">,</span> <span class="o">**</span><span class="n">leg_kws</span><span class="p">)</span>
+
+<span class="n">mol_im</span> <span class="o">=</span> <span class="n">get_mol_im</span><span class="p">(</span><span class="s2">&quot;OC[C@H]1O[C@](O)(CO)[C@@H](O)[C@@H]1O&quot;</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">mol_im_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mol_im</span><span class="p">)</span>
+<span class="c1"># Create an inset axes in the top right corner</span>
+<span class="n">axins</span> <span class="o">=</span> <span class="n">inset_axes</span><span class="p">(</span>
+    <span class="n">ax1</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="s2">&quot;40%&quot;</span><span class="p">,</span>  <span class="c1"># width = 30% of parent_bbox</span>
+    <span class="n">height</span><span class="o">=</span><span class="s2">&quot;40%&quot;</span><span class="p">,</span>  <span class="c1"># height : 30%</span>
+    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Display the molecular image in the inset</span>
+<span class="n">axins</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mol_im_arr</span><span class="p">)</span>
+<span class="n">axins</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>  <span class="c1"># Turn off axis labels</span>
+
+
+<span class="c1">## Add predicted annotations</span>
+
+<span class="c1"># Sort the DataFrame by m/z values</span>
+<span class="n">pred_df_sorted</span> <span class="o">=</span> <span class="n">pred_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;mz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="c1"># Define your custom shifts</span>
+<span class="n">x_shifts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">y_shifts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Base offsets</span>
+<span class="n">base_x_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">7</span>
+<span class="n">base_y_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">25</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pred_df_sorted</span><span class="o">.</span><span class="n">itertuples</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)):</span>
+    <span class="n">mz</span><span class="p">,</span> <span class="n">intensity</span><span class="p">,</span> <span class="n">frag_id</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color_peak</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">row</span>
+
+    <span class="c1"># Get the custom shifts for this annotation</span>
+    <span class="n">x_shift</span> <span class="o">=</span> <span class="n">x_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_shifts</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">y_shift</span> <span class="o">=</span> <span class="n">y_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_shifts</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="c1"># Calculate the final offsets</span>
+    <span class="n">x_offset</span> <span class="o">=</span> <span class="n">base_x_offset</span> <span class="o">+</span> <span class="n">x_shift</span>
+    <span class="n">y_offset</span> <span class="o">=</span> <span class="n">base_y_offset</span> <span class="o">+</span> <span class="n">y_shift</span>
+
+    <span class="c1"># Add the annotation</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">text</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">mz</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">),</span>  <span class="c1"># The point to annotate</span>
+        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_offset</span><span class="p">,</span> <span class="n">y_offset</span><span class="p">),</span>
+        <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;boxstyle&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#d95f02&quot;</span><span class="p">,</span> <span class="s2">&quot;fc&quot;</span><span class="p">:</span> <span class="s2">&quot;#e57f1d&quot;</span><span class="p">},</span>
+        <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># Right side: use gridspec with rows based on unique m/z values and 4 columns (1 for annotation, 3 for molecules)</span>
+<span class="n">unique_mz</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<span class="n">num_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_mz</span><span class="p">)</span>
+<span class="n">gs_right</span> <span class="o">=</span> <span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">subgridspec</span><span class="p">(</span>
+    <span class="n">num_rows</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">)</span>  <span class="c1"># Increased width for annotation column</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># Create subplots in the grid on the right</span>
+<span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">mz</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique_mz</span><span class="p">):</span>
+    <span class="n">mz_df</span> <span class="o">=</span> <span class="n">pred_ann_df</span><span class="p">[</span><span class="n">pred_ann_df</span><span class="p">[</span><span class="s2">&quot;mz&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">mz</span><span class="p">]</span>
+
+    <span class="c1"># Add annotation column</span>
+    <span class="n">ax_annot</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs_right</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Add circular f# annotation</span>
+    <span class="n">ax_annot</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;f</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">xycoords</span><span class="o">=</span><span class="s2">&quot;axes fraction&quot;</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;boxstyle&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#d95f02&quot;</span><span class="p">,</span> <span class="s2">&quot;fc&quot;</span><span class="p">:</span> <span class="s2">&quot;#e57f1d&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add formula annotation</span>
+    <span class="n">ax_annot</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+        <span class="mf">0.5</span><span class="p">,</span>
+        <span class="mf">0.5</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2">$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mz_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;formatted_formula&quot;</span><span class="p">]),</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ax_annot</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add molecule images</span>
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">row_data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mz_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># Limit to 3 columns</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs_right</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">mol_im</span> <span class="o">=</span> <span class="n">get_mol_im</span><span class="p">(</span><span class="n">row_data</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">],</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="n">mol_im_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mol_im</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mol_im_arr</span><span class="p">)</span>
+
+            <span class="c1"># Add probability text below the molecule</span>
+            <span class="n">prob</span> <span class="o">=</span> <span class="n">row_data</span><span class="p">[</span><span class="s2">&quot;probabilities&quot;</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="mf">0.5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Score: </span><span class="si">{</span><span class="n">prob</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">va</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">fig</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib_001.png" srcset="../../_images/sphx_glr_plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib_001.png" alt="D-Fructose" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Annotation color: None
+Annotation color: None
+/home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_matplotlib/core.py:247: UserWarning:
+
+This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+
+/home/runner/work/pyopenms_viz/pyopenms_viz/docs/gallery_scripts/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py:482: UserWarning:
+
+This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+
+
+&lt;Figure size 5700x2700 with 16 Axes&gt;
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.262 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gallery-ms-matplotlib-plot-manuscript-d-fructose-spectrum-prediction-ms-matplotlib-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://notebooks.gesis.org/binder/v2/gh/OpenMS/pyopenms_viz/gh_pages?filepath=notebooks/gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />
+</a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/09f9dd56f5c8755cebde1b45fc070778/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d8d9e4d019ac359ee4d398fb9b33e651/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/57d64af7b63193d44f0f46530eb9cef5/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_investigate_spectrum_binning_ms_matplotlib.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Investigate Spctrum Binning ms_matplotlib</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../ms_plotly/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">PLOTLY Plots</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-example">Download example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#helper-functions">Helper Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-and-format-data">Load and Format Data</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#load-mzml-using-pymzml">Load .mzML using pymzml</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#load-cfm-id">Load CFM-ID</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-figure">Create Figure</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/OpenMS/pyopenms_viz/edit/main/docs/source/gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/gallery/ms_matplotlib/plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, OpenMS Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
