@@ -95,7 +95,7 @@ jupyter-client==8.6.3
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.7.2
+jupyter-core==5.9.1
     # via
     #   ipykernel
     #   jupyter-client
@@ -282,7 +282,7 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-typing-extensions==4.12.2
+typing-extensions==4.15.0
     # via pydata-sphinx-theme
 tzdata==2024.2
     # via pandas
