@@ -73,7 +73,7 @@ We can add the ion_annotation and sequence annotation by specifying these column
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.075 seconds)
+   **Total running time of the script:** (0 minutes 0.706 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_spectrum_ms_matplotlib.py:
