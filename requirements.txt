@@ -229,7 +229,7 @@ regex==2025.11.3
     # via pymzml
 requests==2.32.5
     # via sphinx
-roman-numerals==3.1.0
+roman-numerals==4.1.0
     # via sphinx
 rpds-py==0.30.0
     # via
