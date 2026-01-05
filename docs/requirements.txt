@@ -30,7 +30,7 @@ cairocffi==1.7.1
     # via cairosvg
 cairosvg==2.7.1
     # via pyopenms_viz (pyproject.toml)
-certifi==2024.12.14
+certifi==2026.1.4
     # via requests
 cffi==1.17.1
     # via cairocffi
