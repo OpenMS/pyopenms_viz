@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:24.446** total execution time for 12 files **from gallery/ms_matplotlib**:
+**00:24.903** total execution time for 12 files **from gallery/ms_matplotlib**:
 
 .. container::
 
@@ -32,39 +32,39 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_binning_demonstration_ms_matplotlib.py` (``plot_peakmap_binning_demonstration_ms_matplotlib.py``)
-     - 00:07.181
-     - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spyogenes_subplots_ms_matplotlib.py` (``plot_spyogenes_subplots_ms_matplotlib.py``)
-     - 00:06.116
+     - 00:06.881
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_binning_demonstration_ms_matplotlib.py` (``plot_peakmap_binning_demonstration_ms_matplotlib.py``)
+     - 00:05.142
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_3D_highlight_peptide_ms_matplotlib.py` (``plot_peakmap_3D_highlight_peptide_ms_matplotlib.py``)
-     - 00:03.215
+     - 00:03.349
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py` (``plot_manuscript_d_fructose_spectrum_prediction_ms_matplotlib.py``)
-     - 00:02.452
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_ms_matplotlib.py` (``plot_peakmap_ms_matplotlib.py``)
-     - 00:01.532
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_3D_ms_matplotlib.py` (``plot_peakmap_3D_ms_matplotlib.py``)
-     - 00:00.886
+     - 00:03.266
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_chromatogram_ms_matplotlib.py` (``plot_chromatogram_ms_matplotlib.py``)
-     - 00:00.813
+     - 00:01.618
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_ms_matplotlib.py` (``plot_peakmap_ms_matplotlib.py``)
+     - 00:01.434
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_3D_ms_matplotlib.py` (``plot_peakmap_3D_ms_matplotlib.py``)
+     - 00:00.894
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spectrum_ms_matplotlib.py` (``plot_spectrum_ms_matplotlib.py``)
-     - 00:00.740
+     - 00:00.794
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_investigate_spectrum_binning_ms_matplotlib.py` (``plot_investigate_spectrum_binning_ms_matplotlib.py``)
-     - 00:00.702
+     - 00:00.712
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_peakmap_marginals_ms_matplotlib.py` (``plot_peakmap_marginals_ms_matplotlib.py``)
-     - 00:00.405
+     - 00:00.407
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_spectrum_dia_ms_matplotlib.py` (``plot_spectrum_dia_ms_matplotlib.py``)
-     - 00:00.280
+     - 00:00.283
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_matplotlib_plot_mobilogram_ms_matplotlib.py` (``plot_mobilogram_ms_matplotlib.py``)
-     - 00:00.124
+     - 00:00.123
      - 0.0
