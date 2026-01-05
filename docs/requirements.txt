@@ -183,7 +183,7 @@ pycparser==2.23
     # via cffi
 pydata-sphinx-theme==0.16.1
     # via pyopenms_viz (pyproject.toml)
-pygments==2.19.1
+pygments==2.19.2
     # via
     #   accessible-pygments
     #   ipython
