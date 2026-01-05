@@ -213,7 +213,7 @@ pyzmq==26.2.0
     #   jupyter-client
 rdkit==2024.9.4
     # via pyopenms_viz (pyproject.toml)
-referencing==0.35.1
+referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
