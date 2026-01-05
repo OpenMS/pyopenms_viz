@@ -213,13 +213,13 @@ pyzmq==26.2.0
     #   jupyter-client
 rdkit==2024.9.4
     # via pyopenms_viz (pyproject.toml)
-referencing==0.35.1
+referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
 regex==2024.11.6
     # via pymzml
-requests==2.32.3
+requests==2.32.5
     # via sphinx
 rpds-py==0.30.0
     # via
