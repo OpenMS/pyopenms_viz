@@ -1,11 +1,172 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"  # Location of your pyproject.toml or requirements.txt
+    directory: "/"
     schedule:
-      interval: "weekly"  # Checks for updates every week
+      interval: "weekly"
     commit-message:
-      prefix: "deps"  # Prefix for pull request titles
-    open-pull-requests-limit: 5  # Limit the number of open PRs at a time
+      prefix: "deps"
+    open-pull-requests-limit: 10
     allow:
       - dependency-type: "all"
+
+    groups:
+      # ===============================
+      # ABI / compiled scientific stack
+      # ===============================
+
+      numpy-updates:
+        patterns: ["numpy"]
+        update-types: ["patch", "minor"]
+
+      pandas-updates:
+        patterns: ["pandas"]
+        update-types: ["patch", "minor"]
+
+      rdkit-updates:
+        patterns: ["rdkit"]
+        update-types: ["patch", "minor"]
+
+      pymzml-updates:
+        patterns: ["pymzml"]
+        update-types: ["patch", "minor"]
+
+      # ===============================
+      # Visualization
+      # ===============================
+
+      matplotlib-updates:
+        patterns:
+          - "matplotlib*"
+          - "contourpy"
+          - "cycler"
+          - "kiwisolver"
+          - "fonttools"
+          - "pyparsing"
+
+      bokeh-updates:
+        patterns:
+          - "bokeh*"
+          - "xyzservices"
+          - "narwhals"
+
+      plotly-updates:
+        patterns: ["plotly*"]
+
+      graphics-dependencies:
+        patterns:
+          - "pillow"
+          - "cairosvg"
+          - "cairocffi"
+          - "cssselect2"
+          - "tinycss2"
+          - "defusedxml"
+        update-types: ["patch", "minor"]
+
+      # ===============================
+      # Notebook runtime
+      # ===============================
+
+      ipykernel-updates:
+        patterns:
+          - "ipykernel"
+          - "debugpy"
+          - "pyzmq"
+          - "psutil"
+          - "nest-asyncio"
+          - "tornado"
+
+      notebook-stack:
+        patterns:
+          - "ipython*"
+          - "prompt-toolkit"
+          - "jedi"
+          - "parso"
+          - "pexpect"
+          - "ptyprocess"
+          - "wcwidth"
+          - "decorator"
+          - "jupyter*"
+          - "nbclient"
+          - "nbformat"
+          - "nbconvert"
+          - "traitlets"
+          - "platformdirs"
+          - "jupyterlab-pygments"
+
+      # ===============================
+      # Docs & testing
+      # ===============================
+
+      pytest-updates:
+        patterns:
+          - "pytest*"
+          - "syrupy"
+          - "pluggy"
+          - "iniconfig"
+
+      sphinx-updates:
+        patterns:
+          - "sphinx*"
+          - "nbsphinx"
+          - "docutils"
+          - "pydata-sphinx-theme"
+          - "alabaster"
+          - "imagesize"
+          - "snowballstemmer"
+          - "roman-numerals"
+
+      # ===============================
+      # HTTP / TLS
+      # ===============================
+
+      http-stack:
+        patterns:
+          - "requests"
+          - "urllib3"
+          - "certifi"
+          - "charset-normalizer"
+          - "idna"
+
+      # ===============================
+      # Text / parsing / schema
+      # ===============================
+
+      text-and-schema:
+        patterns:
+          - "jsonschema"
+          - "jsonschema-specifications"
+          - "referencing"
+          - "rpds-py"
+          - "regex"
+          - "beautifulsoup4"
+          - "soupsieve"
+          - "bleach"
+          - "pygments"
+          - "mistune"
+          - "pandocfilters"
+
+      # ===============================
+      # Low-risk plumbing
+      # ===============================
+
+      stable-dependencies:
+        patterns:
+          - "attrs"
+          - "packaging"
+          - "pytz"
+          - "tzdata"
+          - "python-dateutil"
+          - "jinja2"
+          - "pyyaml"
+          - "six"
+          - "typing-extensions"
+          - "markupsafe"
+
+      # ===============================
+      # Everything else
+      # ===============================
+
+      other-dependencies:
+        patterns: ["*"]
+
