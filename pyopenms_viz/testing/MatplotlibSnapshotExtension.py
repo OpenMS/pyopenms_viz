@@ -2,7 +2,7 @@ from typing import Any
 from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
-from PIL import Image, ImageChops
+from PIL import Image
 from io import BytesIO
 import numpy as np
 from matplotlib.figure import Figure
@@ -17,16 +17,25 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
     file_extension = "png"
 
     def matches(self, *, serialized_data, snapshot_data):
+        # serialized_data and snapshot_data are bytes (PNG). Convert to PIL Images first.
+        try:
+            serialized_img = Image.open(BytesIO(serialized_data))
+        except Exception:
+            # If already an Image object, use it directly
+            serialized_img = serialized_data
 
-        serialized_image_array = np.array(serialized_data)
-        snapshot_image_array = np.array(snapshot_data)
+        try:
+            snapshot_img = Image.open(BytesIO(snapshot_data))
+        except Exception:
+            snapshot_img = snapshot_data
 
-        diff = np.where(
-            serialized_image_array != snapshot_image_array
-        )  # get locations where different, get a tuple of 3 arrays corresponding with the x, y, and channel of the image
+        serialized_image_array = np.array(serialized_img)
+        snapshot_image_array = np.array(snapshot_img)
 
-        # if one of these arrays is 0 than all are 0 and images are equal
-        return len(diff[0]) == 0  # if there are no differences, return True
+        diff = np.where(serialized_image_array != snapshot_image_array)
+
+        # if there are no differing pixels, images are equal
+        return len(diff[0]) == 0
 
     def read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
@@ -35,8 +44,7 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
         # return an image object from the snapshot location
         try:
             with open(snapshot_location, "rb") as f:
-                a = BytesIO(f.read())
-                return Image.open(a)
+                return f.read()
         except OSError:
             return None
 
@@ -50,8 +58,9 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        # save the PIL image to disk
-        data.save(filepath)
+        # data is expected to be raw PNG bytes
+        with open(filepath, "wb") as f:
+            f.write(data)
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
         """
@@ -73,4 +82,4 @@ class MatplotlibSnapshotExtension(SingleFileSnapshotExtension):
                 f"Data type {type(data)} not supported for MatplotlibSnapshotExtension"
             )
         buf.seek(0)
-        return Image.open(buf)
+        return buf.getvalue()

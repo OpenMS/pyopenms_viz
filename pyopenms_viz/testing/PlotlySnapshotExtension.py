@@ -15,8 +15,18 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     file_extension = "json"
 
     def matches(self, *, serialized_data, snapshot_data):
-        json1 = json.loads(serialized_data)
-        json2 = json.loads(snapshot_data)
+        # serialized_data and snapshot_data may be bytes; decode if necessary
+        if isinstance(serialized_data, (bytes, bytearray)):
+            serialized_str = serialized_data.decode("utf-8")
+        else:
+            serialized_str = serialized_data
+        if isinstance(snapshot_data, (bytes, bytearray)):
+            snapshot_str = snapshot_data.decode("utf-8")
+        else:
+            snapshot_str = snapshot_data
+
+        json1 = json.loads(serialized_str)
+        json2 = json.loads(snapshot_str)
         return PlotlySnapshotExtension.compare_json(json1, json2)
 
     @staticmethod
@@ -64,9 +74,8 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
-            with open(snapshot_location, "r") as f:
-                a = f.read()
-                return a
+            with open(snapshot_location, "rb") as f:
+                return f.read()
         except OSError:
             return None
 
@@ -80,17 +89,20 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        with open(filepath, "w") as f:
+        # Ensure we write bytes
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        with open(filepath, "wb") as f:
             f.write(data)
 
-    def serialize(self, data: SerializableData, **kwargs: Any) -> str:
+    def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
         """
-        Serialize the data to a json string
+        Serialize the data to a json bytes object (UTF-8 encoded)
 
         Args:
             data (SerializableData): plotly data to serialize
 
         Returns:
-            str: json string of plotly plot
+            bytes: JSON bytes of plotly plot (UTF-8)
         """
-        return to_json(data, pretty=True, engine="json")
+        return to_json(data, pretty=True, engine="json").encode("utf-8")

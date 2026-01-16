@@ -75,6 +75,9 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         Returns:
             json: bokeh json found in the html
         """
+        # Accept bytes or str
+        if isinstance(html, (bytes, bytearray)):
+            html = html.decode("utf-8")
         parser = BokehHTMLParser()
         parser.feed(html)
         return json.loads(parser.bokehJson)
@@ -141,9 +144,8 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
-            with open(snapshot_location, "r") as f:
-                a = f.read()
-                return a
+            with open(snapshot_location, "rb") as f:
+                return f.read()
         except OSError:
             return None
 
@@ -157,17 +159,20 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        with open(filepath, "w") as f:
+        # Ensure bytes are written
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        with open(filepath, "wb") as f:
             f.write(data)
 
-    def serialize(self, data: SerializableData, **kwargs: Any) -> str:
+    def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
         """
-        Serialize the bokeh plot as an html string (which is output to a file)
+        Serialize the bokeh plot as an html bytes object (UTF-8 encoded)
 
         Args:
             data (SerializableData): Data to serialize
 
         Returns:
-            str: html string
+            bytes: html bytes
         """
-        return file_html(data, CDN)
+        return file_html(data, CDN).encode("utf-8")
