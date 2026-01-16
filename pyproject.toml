@@ -5,8 +5,8 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "pyopenms_viz"
 authors = [
-    {name = "OpenMS Team"},
-    {email = "joshuacharkow@gmail.com"},
+    {name = "OpenMS Team", email = "webmaster@openms.de"},
+    {name = "Joshua Charkow", email = "joshuacharkow@gmail.com"},
 ]
 version = "1.0.0"
 description = "A package for visualizing mass spectrometry data using pandas dataframes"
