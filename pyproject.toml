@@ -7,7 +7,6 @@ name = "pyopenms_viz"
 authors = [
     {name = "OpenMS Team"},
     {email = "joshuacharkow@gmail.com"},
-
 ]
 version = "1.0.0"
 description = "A package for visualizing mass spectrometry data using pandas dataframes"
