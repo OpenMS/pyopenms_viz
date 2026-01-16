@@ -4,15 +4,14 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "pyopenms_viz"
-module = "pyopenms_viz"
-dist-name = "pyopenms_viz"
-author = "OpenMS Team"
+authors = [
+    {name = "OpenMS Team"},
+    {email = "joshuacharkow@gmail.com"},
+
+]
 version = "1.0.0"
-author-email = "joshuacharkow@gmail.com"
-home-page = "https://github.com/OpenMS/pyopenms_viz/"
 description = "A package for visualizing mass spectrometry data using pandas dataframes"
 readme = "README.md"
-readme-content-type = "text/markdown"
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
@@ -25,6 +24,9 @@ license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.10, <=3.13"
 dependencies = ["pandas>=0.17"]
+
+[project.urls]
+Homepage = "https://github.com/OpenMS/pyopenms_viz/"
 
 [project.optional-dependencies]
 testing = ["pytest", "syrupy"]
