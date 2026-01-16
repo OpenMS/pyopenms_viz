@@ -4,7 +4,7 @@ from abc import ABC
 from typing import Tuple
 
 import plotly.graph_objects as go
-from numpy import column_stack, nan
+from numpy import column_stack, nan, repeat
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
@@ -160,6 +160,23 @@ class PLOTLYPlot(BasePlot, ABC):
                     )
                     counter += l
                 return
+        else:
+            # If there is a single trace but the trace x-array was expanded
+            # (for example spectrum plotting repeats each mz value several times
+            # to draw stems), expand the custom_hover_data to match the trace length.
+            trace = self.fig.data[0]
+            trace_len = len(trace.x) if hasattr(trace, "x") else None
+            if (
+                trace_len is not None
+                and custom_hover_data is not None
+                and custom_hover_data.shape[0] != trace_len
+            ):
+                # If trace length is an integer multiple of custom data rows,
+                # repeat each row accordingly.
+                ratio = int(trace_len / custom_hover_data.shape[0])
+                if ratio > 1 and custom_hover_data.shape[0] * ratio == trace_len:
+                    custom_hover_data = repeat(custom_hover_data, ratio, axis=0)
+
         self.fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, **kwargs):
