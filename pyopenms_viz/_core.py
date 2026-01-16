@@ -995,7 +995,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         if self.annotation_color is None:
             data["annotation_color"] = "black"
-        print(f"Annotation color: {self.annotation_color}")
+
         annotation_color_column = (
             "annotation_color"
             if self.annotation_color is None
