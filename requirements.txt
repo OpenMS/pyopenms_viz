@@ -56,7 +56,7 @@ defusedxml==0.7.1
     #   nbconvert
 docstring-parser==0.17.0
     # via pyopenms_viz (pyproject.toml)
-docutils==0.22.4
+docutils==0.21.2
     # via
     #   nbsphinx
     #   pydata-sphinx-theme
