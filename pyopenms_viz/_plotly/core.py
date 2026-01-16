@@ -173,7 +173,7 @@ class PLOTLYPlot(BasePlot, ABC):
             ):
                 # If trace length is an integer multiple of custom data rows,
                 # repeat each row accordingly.
-                ratio = int(trace_len / custom_hover_data.shape[0])
+                ratio = trace_len // custom_hover_data.shape[0]
                 if ratio > 1 and custom_hover_data.shape[0] * ratio == trace_len:
                     custom_hover_data = repeat(custom_hover_data, ratio, axis=0)
 
