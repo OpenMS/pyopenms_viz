@@ -266,7 +266,7 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 stack-data==0.6.3
     # via ipython
-syrupy==5.0.0
+syrupy>=5.0.0
     # via pyopenms_viz (pyproject.toml)
 tinycss2==1.4.0
     # via

@@ -26,7 +26,7 @@ requires-python = ">=3.10, <=3.13"
 dependencies = ["pandas>=0.17"]
 
 [project.optional-dependencies]
-testing = ["pytest", "syrupy"]
+testing = ["pytest", "syrupy>=5.0.0"]
 all = ["bokeh>=3.4.1", "plotly", "matplotlib"]
 bokeh = ["bokeh>=3.4.1"]
 matplotlib = ["matplotlib"]
