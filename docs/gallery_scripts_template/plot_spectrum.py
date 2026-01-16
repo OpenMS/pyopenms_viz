@@ -16,7 +16,7 @@ local_path = "TestSpectrumDf.tsv"
 download_file(url, local_path)
 df = pd.read_csv(local_path, sep="\t")
 
-# mirror a reference spectrum with ion and sequence annoations
+# mirror a reference spectrum with ion and sequence annotations
 df.plot(
     x="mz",
     y="intensity",
