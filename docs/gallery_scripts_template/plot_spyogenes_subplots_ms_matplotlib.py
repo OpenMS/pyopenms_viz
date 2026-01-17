@@ -12,11 +12,15 @@ from pyopenms_viz.util import download_file, unzip_file
 
 pd.options.plotting.backend = "ms_matplotlib"
 
+# GitHub release asset (primary) with Zenodo as backup
+url = (
+    "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/spyogenes.zip"
+)
+backup_url = "https://zenodo.org/records/17904512/files/spyogenes.zip?download=1"
 zip_filename = "spyogenes.zip"
 zip_dir = "spyogenes"
-url = "https://zenodo.org/records/17904512/files/spyogenes.zip?download=1"
 
-download_file(url, zip_filename)
+download_file(url, zip_filename, backup_url=backup_url)
 unzip_file(zip_filename, ".")  # Extract to current directory
 
 chrom_df = pd.read_csv(
