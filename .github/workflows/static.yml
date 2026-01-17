@@ -24,7 +24,7 @@ permissions:
 
 # Allow only one concurrent deployment per branch/PR, cancel in-progress runs
 concurrency:
-  group: "pages-${{ github.event_name == 'pull_request' && format('pr-{0}', github. event.number) || 'pages-main' }}"
+  group: "pages-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'pages-main' }}"
   cancel-in-progress: false
 
 jobs:
