@@ -809,18 +809,26 @@ class SpectrumPlot(BaseMSPlot, ABC):
             reference_spectrum[self.y] = reference_spectrum[self.y] * -1
 
             color_mirror = self._get_colors(reference_spectrum, kind="peak")
-            reference_spectrum = self.convert_for_line_plots(
-                reference_spectrum, self.x, self.y
-            )
 
             _, reference_custom_hover_data = self.get_spectrum_tooltip_data(
                 reference_spectrum, self.x, self.y
             )
+            reference_spectrum, reference_custom_hover_data = (
+                self.convert_for_line_plots(
+                    reference_spectrum, self.x, self.y, reference_custom_hover_data
+                )
+            )
+
             mirrorSpectrumPlot = self.get_line_renderer(
                 data=reference_spectrum, color=color_mirror, config=self._config
             )
 
-            mirrorSpectrumPlot.generate(None, None)
+            # Stack reference custom hover data to custom hover data
+            custom_hover_data = np.vstack(
+                [custom_hover_data, reference_custom_hover_data]
+            )
+
+            mirrorSpectrumPlot.generate(tooltips, custom_hover_data)
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(
@@ -1127,8 +1135,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         tooltips, custom_hover_data = self._create_tooltips(
             entries=entries, index=False
         )
-        # Repeat data each time (since each peak is represented by three points in line plot)
-        custom_hover_data = repeat(custom_hover_data, 3, axis=0)
 
         return tooltips, custom_hover_data
 
