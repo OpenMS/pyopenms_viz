@@ -120,7 +120,9 @@ class PLOTLYPlot(BasePlot, ABC):
             tickcolor="black",  # Set the color of y-axis ticks
         )
 
-    def generate(self, tooltips, custom_hover_data) -> Figure:
+    def generate(
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
+    ) -> Figure:
         """
         Generate the plot
         """
@@ -132,14 +134,14 @@ class PLOTLYPlot(BasePlot, ABC):
         self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+            self._add_tooltips(tooltips, custom_hover_data, fixed_tooltip_for_trace)
         return self.canvas
 
     def _add_legend(self, legend):
         pass
 
     def _add_tooltips(
-        self, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=False
+        self, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True
     ):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
         if len(self.fig.data) > 1:

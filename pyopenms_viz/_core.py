@@ -392,7 +392,7 @@ class BasePlot(ABC):
         pass
 
     @abstractmethod
-    def generate(self, tooltips, custom_hover_data):
+    def generate(self, tooltips, custom_hover_data, fixed_tooltip_for_trace):
         """
         Generate the plot
         """
@@ -797,7 +797,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             data=spectrum, by=self.by, color=self.color, config=self._config
         )
 
-        self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
+        self.canvas = spectrumPlot.generate(tooltips, custom_hover_data, False)
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
         )
@@ -828,7 +828,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 [custom_hover_data, reference_custom_hover_data]
             )
 
-            mirrorSpectrumPlot.generate(tooltips, custom_hover_data)
+            mirrorSpectrumPlot.generate(tooltips, custom_hover_data, False)
 
             # Annotations for reference spectrum
             ann_texts, ann_xs, ann_ys, ann_colors = self._get_annotations(

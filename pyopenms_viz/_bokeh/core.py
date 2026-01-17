@@ -223,7 +223,9 @@ class BOKEHPlot(BasePlot, ABC):
         output_notebook()
         show(self.fig)
 
-    def generate(self, tooltips, custom_hover_data) -> figure:
+    def generate(
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
+    ) -> figure:
         """
         Generate the plot
         """
@@ -235,7 +237,7 @@ class BOKEHPlot(BasePlot, ABC):
         self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+            self._add_tooltips(tooltips, custom_hover_data, fixed_tooltip_for_trace)
         return self.canvas
 
     def show_default(self):
