@@ -123,7 +123,7 @@ This example shows a spectrum from extracted data. No binning is applied.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.254 seconds)
+   **Total running time of the script:** (0 minutes 0.257 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_bokeh_plot_spectrum_dia_ms_bokeh.py:
