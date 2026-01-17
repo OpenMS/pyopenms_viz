@@ -228,7 +228,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
             "Matplotlib does not support interactive plots and cannot use method '_add_bounding_vertical_drawer'"
         )
 
-    def generate(self, tooltips, custom_hover_data) -> Axes:
+    def generate(self, tooltips, custom_hover_data, _fixed_tooltip_for_trace) -> Axes:
         """
         Generate the plot
         """
