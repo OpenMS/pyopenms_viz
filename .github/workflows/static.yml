@@ -22,10 +22,10 @@ permissions:
   id-token: write
   pull-requests: write
 
-# Allow only one concurrent deployment per branch/PR
+# Allow only one concurrent deployment per branch/PR, cancel in-progress runs
 concurrency:
   group: "pages-${{ github.ref }}"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   # Build job - runs for both main branch and PRs
