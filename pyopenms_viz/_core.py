@@ -788,14 +788,21 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         # Convert to line plot format
+        print(f"shape of spectrum df before conversion: {spectrum.shape}")
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
         print(f"spectrum df columns after conversion: {spectrum.columns}")
+        print(spectrum.head())
+        print(f"shape of spectrum df after conversion: {spectrum.shape}")
         self.color = self._get_colors(spectrum, kind="peak")
         spectrumPlot = self.get_line_renderer(
             data=spectrum, by=self.by, color=self.color, config=self._config
         )
+        # Repeat custom_hover_data 3 times since each peak is represented by 3 points in line plot
+        custom_hover_data = repeat(custom_hover_data, 3, axis=0)
+
         print(f"tooltips: {tooltips}")
         print(f"custom_hover_data: {custom_hover_data}")
+        print(f"length of custom hover data: {len(custom_hover_data)}")
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors

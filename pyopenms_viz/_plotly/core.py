@@ -141,26 +141,26 @@ class PLOTLYPlot(BasePlot, ABC):
     def _add_tooltips(
         self, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True
     ):
-        # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
-        print(f"len of fig data: {len(self.fig.data)}")
-        if len(self.fig.data) > 1:
-            if fixed_tooltip_for_trace:
-                for i in range(len(self.fig.data)):
-                    self.fig.data[i].update(
-                        hovertemplate=tooltips,
-                        customdata=[custom_hover_data[i, :]] * len(self.fig.data[i].x),
-                    )
-                return
-            else:
-                counter = 0
-                for i in range(len(self.fig.data)):
-                    l = len(self.fig.data[i].x)
-                    self.fig.data[i].update(
-                        hovertemplate=tooltips,
-                        customdata=custom_hover_data[counter : counter + l, :],
-                    )
-                    counter += l
-                return
+        # # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
+        # print(f"len of fig data: {len(self.fig.data)}")
+        # if len(self.fig.data) > 1:
+        #     if fixed_tooltip_for_trace:
+        #         for i in range(len(self.fig.data)):
+        #             self.fig.data[i].update(
+        #                 hovertemplate=tooltips,
+        #                 customdata=[custom_hover_data[i, :]] * len(self.fig.data[i].x),
+        #             )
+        #         return
+        #     else:
+        #         counter = 0
+        #         for i in range(len(self.fig.data)):
+        #             l = len(self.fig.data[i].x)
+        #             self.fig.data[i].update(
+        #                 hovertemplate=tooltips,
+        #                 customdata=custom_hover_data[counter : counter + l, :],
+        #             )
+        #             counter += l
+        #         return
         self.fig.update_traces(hovertemplate=tooltips, customdata=custom_hover_data)
 
     def _add_bounding_box_drawer(self, **kwargs):
