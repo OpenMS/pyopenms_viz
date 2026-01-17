@@ -220,7 +220,7 @@ class BasePlot(ABC):
     def _check_and_aggregate_duplicates(self):
         """
         Check if duplicate data is present and aggregate if specified.
-        Properly handles data types and only aggregates relevent columns
+        Properly handles data types and only aggregates relevant columns
         """
         # Determine intensity column and relevant grouping columns
         intensity_col = self.z if self._kind == "peakmap" else self.y
@@ -535,7 +535,7 @@ class BaseMSPlot(BasePlot, ABC):
 
         Parameters:
             entries (dict): Which data to put in tool tip and how display it with labels as keys and column names as values.
-            index (bool, optional): Wether to show dataframe index in tooltip. Defaults to True.
+            index (bool, optional): Whether to show dataframe index in tooltip. Defaults to True.
 
         Returns:
             Tooltip text.
@@ -774,7 +774,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # color generation is more complex for spectrum plots, so it has its own methods
 
-        # Peak colors are determined by peak_color column (highest priorty) or ion_annotation column (second priority) or "by" column (lowest priority)
+        # Peak colors are determined by peak_color column (highest priority) or ion_annotation column (second priority) or "by" column (lowest priority)
         if self.peak_color is not None and self.peak_color in self.data.columns:
             self.by = self.peak_color
         elif (
