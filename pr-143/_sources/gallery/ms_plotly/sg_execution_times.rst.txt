@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:03.655** total execution time for 9 files **from gallery/ms_plotly**:
+**00:03.664** total execution time for 9 files **from gallery/ms_plotly**:
 
 .. container::
 
@@ -33,29 +33,29 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_marginals_ms_plotly.py` (``plot_peakmap_marginals_ms_plotly.py``)
-     - 00:01.439
+     - 00:01.428
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spyogenes_subplots_ms_plotly.py` (``plot_spyogenes_subplots_ms_plotly.py``)
-     - 00:00.695
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_ms_plotly.py` (``plot_peakmap_ms_plotly.py``)
-     - 00:00.403
+     - 00:00.790
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_highlight_peptide_ms_plotly.py` (``plot_peakmap_3D_highlight_peptide_ms_plotly.py``)
-     - 00:00.399
+     - 00:00.488
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_dia_ms_plotly.py` (``plot_spectrum_dia_ms_plotly.py``)
-     - 00:00.293
+     - 00:00.294
      - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_chromatogram_ms_plotly.py` (``plot_chromatogram_ms_plotly.py``)
-     - 00:00.184
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``plot_peakmap_3D_ms_plotly.py``)
-     - 00:00.093
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_ms_plotly.py` (``plot_peakmap_ms_plotly.py``)
+     - 00:00.268
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_ms_plotly.py` (``plot_spectrum_ms_plotly.py``)
-     - 00:00.088
+     - 00:00.122
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_chromatogram_ms_plotly.py` (``plot_chromatogram_ms_plotly.py``)
+     - 00:00.117
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``plot_peakmap_3D_ms_plotly.py``)
+     - 00:00.094
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_mobilogram_ms_plotly.py` (``plot_mobilogram_ms_plotly.py``)
-     - 00:00.061
+     - 00:00.062
      - 0.0
