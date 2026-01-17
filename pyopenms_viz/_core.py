@@ -787,22 +787,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
             spectrum, self.x, self.y
         )
 
-        # Convert to line plot format
-        print(f"shape of spectrum df before conversion: {spectrum.shape}")
-        spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-        print(f"spectrum df columns after conversion: {spectrum.columns}")
-        print(spectrum.head())
-        print(f"shape of spectrum df after conversion: {spectrum.shape}")
+        # Convert to line plot format, and update custom hover data accordingly. We modify the spectrum df to plot line plots, such that each peak is represented by 3 points (x, 0), (x, y), (x, 0). custom hover data is repeated accordingly to match (also matches order when grouped by "by" column)
+        spectrum, custom_hover_data = self.convert_for_line_plots(
+            spectrum, self.x, self.y, custom_hover_data
+        )
+
         self.color = self._get_colors(spectrum, kind="peak")
         spectrumPlot = self.get_line_renderer(
             data=spectrum, by=self.by, color=self.color, config=self._config
         )
-        # Repeat custom_hover_data 3 times since each peak is represented by 3 points in line plot
-        custom_hover_data = repeat(custom_hover_data, 3, axis=0)
 
-        print(f"tooltips: {tooltips}")
-        print(f"custom_hover_data: {custom_hover_data}")
-        print(f"length of custom hover data: {len(custom_hover_data)}")
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
@@ -1004,7 +998,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         if self.annotation_color is None:
             data["annotation_color"] = "black"
-        print(f"Annotation color: {self.annotation_color}")
+
         annotation_color_column = (
             "annotation_color"
             if self.annotation_color is None
@@ -1085,17 +1079,32 @@ class SpectrumPlot(BaseMSPlot, ABC):
         y[::3] = y[2::3] = 0
         return x, y
 
-    def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
+    def convert_for_line_plots(
+        self, data: DataFrame, x: str, y: str, custom_hover_data=None
+    ) -> DataFrame:
+        from numpy import vstack
+
         if self.by is None:
-            print("Converting data for line plot without grouping")
             x_data, y_data = self.to_line(data[x], data[y])
-            return DataFrame({x: x_data, y: y_data})
+            # Repeat custom_hover_data 3 times if provided, to match line plot format
+            if custom_hover_data is not None:
+                custom_hover_data = repeat(custom_hover_data, 3, axis=0)
+            return DataFrame({x: x_data, y: y_data}), custom_hover_data
         else:
             dfs = []
+            hover_data_list = []
+            # Track the original indices for each group to reorder hover data
             for name, df in data.groupby(self.by, sort=False):
                 x_data, y_data = self.to_line(df[x], df[y])
                 dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
-            return concat(dfs)
+                if custom_hover_data is not None:
+                    group_hover_data = custom_hover_data[df.index]
+                    hover_data_list.append(repeat(group_hover_data, 3, axis=0))
+
+            # Stack all hover data arrays vertically
+            if custom_hover_data is not None:
+                custom_hover_data = vstack(hover_data_list)
+            return concat(dfs), custom_hover_data
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
         """Get tooltip data for a spectrum plot."""
