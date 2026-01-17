@@ -11,9 +11,13 @@ from pyopenms_viz.util import download_file
 
 pd.options.plotting.backend = "ms_matplotlib"
 
-url = "https://zenodo.org/records/17904352/files/TestMSExperimentDf.tsv?download=1"
+# GitHub raw URL (primary) with Zenodo as backup
+url = "https://raw.githubusercontent.com/OpenMS/pyopenms_viz/main/test/test_data/TestMSExperimentDf.tsv"
+backup_url = (
+    "https://zenodo.org/records/17904352/files/TestMSExperimentDf.tsv?download=1"
+)
 local_path = "TestMSExperimentDf.tsv"
-download_file(url, local_path)
+download_file(url, local_path, backup_url=backup_url)
 df = pd.read_csv(local_path, sep="\t")
 
 
@@ -23,7 +27,6 @@ fig, axs = plt.subplots(3, 1, figsize=(5, 15), sharex=True, sharey=True)
 binning_levels = [(10, 10), (40, 40), (100, 100)]
 
 for ax, (num_x_bins, num_y_bins) in zip(axs, binning_levels):
-
     df.plot(
         kind="peakmap",
         x="RT",
