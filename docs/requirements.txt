@@ -148,7 +148,7 @@ packaging==24.2
     #   plotly
     #   pytest
     #   sphinx
-pandas==2.2.3
+pandas==2.3.3
     # via
     #   bokeh
     #   pyopenms_viz (pyproject.toml)
