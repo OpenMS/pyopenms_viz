@@ -24,7 +24,7 @@ beautifulsoup4==4.14.3
     #   pydata-sphinx-theme
 bleach[css]==6.2.0
     # via nbconvert
-bokeh==3.6.2
+bokeh==3.8.2
     # via pyopenms_viz (pyproject.toml)
 cairocffi==1.7.1
     # via cairosvg
@@ -295,5 +295,5 @@ webencodings==0.5.1
     #   bleach
     #   cssselect2
     #   tinycss2
-xyzservices==2024.9.0
+xyzservices==2025.11.0
     # via bokeh
