@@ -73,7 +73,7 @@ imagesize==1.4.1
     # via sphinx
 iniconfig==2.0.0
     # via pytest
-ipykernel==6.29.5
+ipykernel==7.1.0
     # via pyopenms_viz (pyproject.toml)
 ipython==8.31.0
     # via
@@ -173,7 +173,7 @@ pluggy==1.5.0
     # via pytest
 prompt-toolkit==3.0.48
     # via ipython
-psutil==6.1.1
+psutil==7.2.1
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -207,7 +207,7 @@ pytz==2024.2
     # via pandas
 pyyaml==6.0.2
     # via bokeh
-pyzmq==26.2.0
+pyzmq==27.1.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -265,7 +265,7 @@ tinycss2==1.5.1
     #   bleach
     #   cairosvg
     #   cssselect2
-tornado==6.4.2
+tornado==6.5.4
     # via
     #   bokeh
     #   ipykernel
