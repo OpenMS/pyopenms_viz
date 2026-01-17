@@ -28,7 +28,7 @@ bokeh==3.6.2
     # via pyopenms_viz (pyproject.toml)
 cairocffi==1.7.1
     # via cairosvg
-cairosvg==2.7.1
+cairosvg==2.8.2
     # via pyopenms_viz (pyproject.toml)
 certifi==2026.1.4
     # via requests
@@ -260,7 +260,7 @@ syrupy==4.8.0
     # via pyopenms_viz (pyproject.toml)
 tenacity==9.0.0
     # via plotly
-tinycss2==1.4.0
+tinycss2==1.5.1
     # via
     #   bleach
     #   cairosvg
