@@ -789,11 +789,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Convert to line plot format
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
-
+        print(f"spectrum df columns after conversion: {spectrum.columns}")
         self.color = self._get_colors(spectrum, kind="peak")
         spectrumPlot = self.get_line_renderer(
             data=spectrum, by=self.by, color=self.color, config=self._config
         )
+        print(f"tooltips: {tooltips}")
+        print(f"custom_hover_data: {custom_hover_data}")
         self.canvas = spectrumPlot.generate(tooltips, custom_hover_data)
         spectrumPlot._add_annotations(
             self.canvas, ann_texts, ann_xs, ann_ys, ann_colors
@@ -1078,6 +1080,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
         if self.by is None:
+            print("Converting data for line plot without grouping")
             x_data, y_data = self.to_line(data[x], data[y])
             return DataFrame({x: x_data, y: y_data})
         else:

@@ -142,6 +142,7 @@ class PLOTLYPlot(BasePlot, ABC):
         self, tooltips, custom_hover_data=None, fixed_tooltip_for_trace=True
     ):
         # In case figure is constructed of multiple traces (e.g. one trace per MS peak) add annotation for each point in trace
+        print(f"len of fig data: {len(self.fig.data)}")
         if len(self.fig.data) > 1:
             if fixed_tooltip_for_trace:
                 for i in range(len(self.fig.data)):
@@ -533,9 +534,14 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
         )
 
     def _create_tooltips(self, entries, index=True):
+        print(f"entries: {entries}")
+        print(f"index: {index}")
+        print(f"columns of data obj: {self.data.columns}")
+
         custom_hover_data = []
         # Add data from index if required
         if index:
+            print("adding index to custom hover data")
             custom_hover_data.append(self.data.index)
         # Get the rest of the columns
         custom_hover_data += [self.data[col] for col in entries.values()]
@@ -543,11 +549,16 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
         tooltips = []
         # Add tooltip text for index if required
         if index:
+            print("adding index to tooltips")
             tooltips.append("index: %{customdata[0]}")
 
         custom_hover_data_index = 1 if index else 0
 
+        print(f"custom_hover_data_index starts at: {custom_hover_data_index}")
+
         for key in entries.keys():
+            print(f"adding tooltip for key: {key}")
+            print(f"custom_hover_data_index: {custom_hover_data_index}")
             tooltips.append(
                 f"{key}" + ": %{customdata[" + str(custom_hover_data_index) + "]}"
             )
