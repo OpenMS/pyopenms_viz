@@ -798,7 +798,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
             spectrum, self.x, self.y
         )
 
-        # Convert to line plot format, and update custom hover data accordingly. We modify the spectrum df to plot line plots, such that each peak is represented by 3 points (x, 0), (x, y), (x, 0). custom hover data is repeated accordingly to match (also matches order when grouped by "by" column)
+        # Convert to line plot format, and update custom hover data accordingly. We modify the spectrum df to plot line plots, such that each peak is represented by 3 points (x, 0), (x, y), (x, 0).
+        # Custom hover data is repeated accordingly to match (also matches order when grouped by "by" column)
         spectrum, custom_hover_data = self.convert_for_line_plots(
             spectrum, self.x, self.y, custom_hover_data
         )
