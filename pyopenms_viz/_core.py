@@ -395,6 +395,17 @@ class BasePlot(ABC):
     def generate(self, tooltips, custom_hover_data, fixed_tooltip_for_trace):
         """
         Generate the plot
+
+        Args:
+            tooltips: Tooltip specifications for the plot. For Plotly, this is a
+                hovertemplate string. For Bokeh, this is a list of (label, field)
+                tuples. Ignored by Matplotlib (no interactive tooltips).
+            custom_hover_data: Additional data array for hover tooltips. Used by
+                Plotly to populate customdata fields referenced in the hovertemplate.
+                Ignored by Bokeh and Matplotlib backends.
+            fixed_tooltip_for_trace (bool): Whether to use fixed tooltip data per
+                trace (True) or varying tooltip data that matches each point in the
+                trace (False). This parameter is only used by the Plotly backend.
         """
         raise NotImplementedError
 

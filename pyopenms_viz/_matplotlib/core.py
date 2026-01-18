@@ -229,10 +229,24 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         )
 
     def generate(
-        self, tooltips, custom_hover_data, _fixed_tooltip_for_trace=True
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
     ) -> Axes:
         """
-        Generate the plot
+        Generate the Matplotlib plot.
+
+        Note: Matplotlib does not support interactive tooltips, so the tooltip-related
+        parameters are accepted for API compatibility but are not used.
+
+        Args:
+            tooltips: Not used by Matplotlib backend (no interactive hover support).
+                Accepted for API compatibility with other backends.
+            custom_hover_data: Not used by Matplotlib backend.
+                Accepted for API compatibility with other backends.
+            fixed_tooltip_for_trace (bool): Not used by Matplotlib backend.
+                Accepted for API compatibility with other backends.
+
+        Returns:
+            Axes: The generated Matplotlib axes object.
         """
         self._load_extension()
         if self.ax is None:

@@ -124,7 +124,19 @@ class PLOTLYPlot(BasePlot, ABC):
         self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
     ) -> Figure:
         """
-        Generate the plot
+        Generate the Plotly plot with optional interactive tooltips.
+
+        Args:
+            tooltips: A Plotly hovertemplate string that defines the tooltip format.
+                Can reference customdata fields using %{customdata[0]}, etc.
+            custom_hover_data: A numpy array of additional data for hover tooltips.
+                Shape depends on fixed_tooltip_for_trace setting.
+            fixed_tooltip_for_trace (bool): If True, each trace gets one row of
+                custom_hover_data repeated for all points. If False, custom_hover_data
+                rows are distributed sequentially across all trace points.
+
+        Returns:
+            Figure: The generated Plotly figure.
         """
         self._load_extension()
         if self.canvas is None:

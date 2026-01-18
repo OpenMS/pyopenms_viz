@@ -227,7 +227,18 @@ class BOKEHPlot(BasePlot, ABC):
         self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
     ) -> figure:
         """
-        Generate the plot
+        Generate the Bokeh plot with optional interactive tooltips.
+
+        Args:
+            tooltips: A list of (label, field) tuples defining the HoverTool tooltips.
+                Example: [("X", "@x"), ("Y", "@y")].
+            custom_hover_data: Not currently used by the Bokeh backend. Accepted for
+                API compatibility with other backends.
+            fixed_tooltip_for_trace (bool): Not currently used by the Bokeh backend.
+                Accepted for API compatibility with other backends.
+
+        Returns:
+            figure: The generated Bokeh figure.
         """
         self._load_extension()
         if self.canvas is None:
