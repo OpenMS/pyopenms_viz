@@ -1120,7 +1120,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def convert_for_line_plots(
         self, data: DataFrame, x: str, y: str, custom_hover_data=None
-    ) -> DataFrame:
+    ) -> Tuple[DataFrame, np.ndarray | None]:
         if self.by is None:
             x_data, y_data = self.to_line(data[x], data[y])
             # Repeat custom_hover_data 3 times if provided, to match line plot format
