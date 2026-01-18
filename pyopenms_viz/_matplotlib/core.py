@@ -229,7 +229,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         )
 
     def generate(
-        self, tooltips, custom_hover_data, _fixed_tooltip_for_trace=True
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
     ) -> Axes:
         """
         Generate the plot
