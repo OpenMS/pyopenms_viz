@@ -530,9 +530,9 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
     @abstractmethod
-    def _create_tooltips(self, entries: dict, index: bool = True):
+    def _create_tooltips(self, entries: dict, index: bool = True, data: DataFrame = None):
         """
-        Create tooltipis based on entries dictionary with keys: label for tooltip and values: column names.
+        Create tooltips based on entries dictionary with keys: label for tooltip and values: column names.
 
         entries = {
             "m/z": "mz"
@@ -546,7 +546,10 @@ class BaseMSPlot(BasePlot, ABC):
 
         Parameters:
             entries (dict): Which data to put in tool tip and how display it with labels as keys and column names as values.
-            index (bool, optional): Wether to show dataframe index in tooltip. Defaults to True.
+            index (bool, optional): Whether to show dataframe index in tooltip. Defaults to True.
+            data (DataFrame, optional): The data to use for tooltip values. Defaults to None, which uses self.data.
+                When peak binning is enabled, pass the prepared/binned DataFrame to ensure tooltip data
+                matches the plotted data.
 
         Returns:
             Tooltip text.
@@ -763,24 +766,27 @@ class SpectrumPlot(BaseMSPlot, ABC):
     def plot(self):
         """Standard spectrum plot with m/z on x-axis, intensity on y-axis and optional mirror spectrum."""
 
-        # Prepare data
+        # Prepare data (may bin peaks, which changes the number of rows)
         spectrum = self._prepare_data(self.data)
         if self.reference_spectrum is not None:
             reference_spectrum = self._prepare_data(self.reference_spectrum)
         else:
             reference_spectrum = None
 
+        # Build tooltip entries using prepared spectrum to ensure data consistency
+        # (especially when peak binning is enabled)
         entries = {"m/z": self.x, "intensity": self.y}
         for optional in (
             "native_id",
             self.ion_annotation,
             self.sequence_annotation,
         ):
-            if optional in self.data.columns:
+            if optional in spectrum.columns:
                 entries[optional.replace("_", " ")] = optional
 
+        # Pass prepared spectrum to ensure tooltip data matches plotted data
         tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
+            entries=entries, index=False, data=spectrum
         )
 
         # color generation is more complex for spectrum plots, so it has its own methods
@@ -956,8 +962,10 @@ class SpectrumPlot(BaseMSPlot, ABC):
             label_suffix (str, optional): The suffix to add to the label. Defaults to "", Only for plotly backend
 
         Returns:
-            DataFrame: The prepared data.
+            DataFrame: The prepared data with sequential indices (0, 1, 2, ...).
         """
+        # Make a copy to avoid modifying the original data
+        df = df.copy()
 
         # Convert to relative intensity if required
         if self.relative_intensity or self.mirror_spectrum:
@@ -966,6 +974,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Bin peaks if required
         if self.bin_peaks == True or (self.bin_peaks == "auto"):
             df = self._bin_peaks(df)
+
+        # Reset index to ensure sequential indices for tooltip data alignment
+        df = df.reset_index(drop=True)
 
         return df
 
@@ -1125,12 +1136,21 @@ class SpectrumPlot(BaseMSPlot, ABC):
             return concat(dfs), custom_hover_data
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
-        """Get tooltip data for a spectrum plot."""
+        """Get tooltip data for a spectrum plot.
+        
+        Args:
+            spectrum: The prepared spectrum DataFrame (may be binned).
+            x: The column name for x-axis (m/z).
+            y: The column name for y-axis (intensity).
+            
+        Returns:
+            Tuple of (tooltips, custom_hover_data) for the spectrum.
+        """
 
         # Need to group data in correct order for tooltips
         if self.by is not None:
             grouped = spectrum.groupby(self.by, sort=False)
-            self.data = concat([group for _, group in grouped], ignore_index=True)
+            spectrum = concat([group for _, group in grouped], ignore_index=True)
 
         # Hover tooltips with m/z, intensity and optional information
         entries = {"m/z": x, "intensity": y}
@@ -1139,11 +1159,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
             self.ion_annotation,
             self.sequence_annotation,
         ):
-            if optional in self.data.columns:
+            if optional in spectrum.columns:
                 entries[optional.replace("_", " ")] = optional
         # Create tooltips and custom hover data with backend specific formatting
+        # Pass spectrum data to ensure tooltip data matches plotted data
         tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
+            entries=entries, index=False, data=spectrum
         )
 
         return tooltips, custom_hover_data

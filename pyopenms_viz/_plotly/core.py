@@ -546,13 +546,17 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
             y=0, line_color=line_color, line=dict(width=line_width), opacity=opacity
         )
 
-    def _create_tooltips(self, entries, index=True):
+    def _create_tooltips(self, entries, index=True, data=None):
+        # Use provided data or fall back to self.data
+        if data is None:
+            data = self.data
+        
         custom_hover_data = []
         # Add data from index if required
         if index:
-            custom_hover_data.append(self.data.index)
+            custom_hover_data.append(data.index)
         # Get the rest of the columns
-        custom_hover_data += [self.data[col] for col in entries.values()]
+        custom_hover_data += [data[col] for col in entries.values()]
 
         tooltips = []
         # Add tooltip text for index if required

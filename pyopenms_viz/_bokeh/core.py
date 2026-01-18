@@ -467,8 +467,9 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
         )
         fig.add_layout(zero_line)
 
-    def _create_tooltips(self, entries, index=True):
-        # Tooltips for interactive information
+    def _create_tooltips(self, entries, index=True, data=None):
+        # Note: data parameter is accepted for API compatibility but not used by Bokeh
+        # Bokeh tooltips reference column names directly via @ syntax
         tooltips = []
         if index:
             tooltips.append(("index", "$index"))

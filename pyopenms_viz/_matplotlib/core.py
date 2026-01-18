@@ -504,8 +504,9 @@ class MATPLOTLIB_MSPlot(BaseMSPlot, MATPLOTLIBPlot, ABC):
             alpha=opacity,
         )
 
-    def _create_tooltips(self, entries, index=True):
+    def _create_tooltips(self, entries, index=True, data=None):
         # No tooltips for MATPLOTLIB because it is not interactive
+        # data parameter is accepted for API compatibility but not used
         return None, None
 
 
