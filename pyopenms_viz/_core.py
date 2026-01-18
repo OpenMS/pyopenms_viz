@@ -530,7 +530,9 @@ class BaseMSPlot(BasePlot, ABC):
         pass
 
     @abstractmethod
-    def _create_tooltips(self, entries: dict, index: bool = True, data: DataFrame = None):
+    def _create_tooltips(
+        self, entries: dict, index: bool = True, data: DataFrame = None
+    ):
         """
         Create tooltips based on entries dictionary with keys: label for tooltip and values: column names.
 
@@ -841,10 +843,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 data=reference_spectrum, color=color_mirror, config=self._config
             )
 
-            # Stack reference custom hover data to custom hover data
-            custom_hover_data = np.vstack(
-                [custom_hover_data, reference_custom_hover_data]
-            )
+            # Stack reference custom hover data to custom hover data (only for interactive backends)
+            if (
+                custom_hover_data is not None
+                and reference_custom_hover_data is not None
+            ):
+                custom_hover_data = np.vstack(
+                    [custom_hover_data, reference_custom_hover_data]
+                )
+            else:
+                custom_hover_data = None
 
             mirrorSpectrumPlot.generate(tooltips, custom_hover_data, False)
 
@@ -1137,12 +1145,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
         """Get tooltip data for a spectrum plot.
-        
+
         Args:
             spectrum: The prepared spectrum DataFrame (may be binned).
             x: The column name for x-axis (m/z).
             y: The column name for y-axis (intensity).
-            
+
         Returns:
             Tuple of (tooltips, custom_hover_data) for the spectrum.
         """
