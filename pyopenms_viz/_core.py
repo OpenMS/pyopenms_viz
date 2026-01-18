@@ -754,6 +754,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Prepare data
         spectrum = self._prepare_data(self.data)
+        self.data = spectrum  # update self.data with prepared data
         if self.reference_spectrum is not None:
             reference_spectrum = self._prepare_data(self.reference_spectrum)
         else:
@@ -767,10 +768,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         ):
             if optional in self.data.columns:
                 entries[optional.replace("_", " ")] = optional
-
-        tooltips, custom_hover_data = self._create_tooltips(
-            entries=entries, index=False
-        )
 
         # color generation is more complex for spectrum plots, so it has its own methods
 
@@ -789,6 +786,12 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         # Convert to line plot format
         spectrum = self.convert_for_line_plots(spectrum, self.x, self.y)
+
+        self.data = spectrum  # rewrite self.data with actual data to be plotted
+        print("data", self.data.columns)
+        tooltips, custom_hover_data = self._create_tooltips(
+            entries=entries, index=False
+        )
 
         self.color = self._get_colors(spectrum, kind="peak")
         spectrumPlot = self.get_line_renderer(
@@ -995,7 +998,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         if self.annotation_color is None:
             data["annotation_color"] = "black"
-        print(f"Annotation color: {self.annotation_color}")
         annotation_color_column = (
             "annotation_color"
             if self.annotation_color is None
@@ -1070,22 +1072,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         return [get_ion_color(ion) for ion in ion_annotations]
 
-    def to_line(self, x, y):
-        x = repeat(x, 3)
-        y = repeat(y, 3)
-        y[::3] = y[2::3] = 0
-        return x, y
-
     def convert_for_line_plots(self, data: DataFrame, x: str, y: str) -> DataFrame:
-        if self.by is None:
-            x_data, y_data = self.to_line(data[x], data[y])
-            return DataFrame({x: x_data, y: y_data})
-        else:
-            dfs = []
-            for name, df in data.groupby(self.by, sort=False):
-                x_data, y_data = self.to_line(df[x], df[y])
-                dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
-            return concat(dfs)
+        # Repeat all columns
+        out = data.loc[data.index.repeat(3)].reset_index(drop=True)
+
+        # Zero out baseline for y (same logic as before)
+        out.loc[out.index % 3 != 1, y] = 0
+
+        return out
 
     def get_spectrum_tooltip_data(self, spectrum: DataFrame, x: str, y: str):
         """Get tooltip data for a spectrum plot."""

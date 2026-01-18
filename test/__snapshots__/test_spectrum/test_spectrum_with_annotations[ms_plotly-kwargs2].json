@@ -20,19 +20,19 @@
       "customdata": [
         [
           50.989,
-          10,
+          0,
           "spec_0",
           "a+"
         ],
         [
           50.989,
-          10,
+          0,
           "spec_0",
           "a+"
         ],
         [
           50.989,
-          10,
+          0,
           "spec_0",
           "a+"
         ]
@@ -58,22 +58,22 @@
       "type": "scatter",
       "customdata": [
         [
-          74.1324,
-          20,
+          50.989,
+          10,
           "spec_0",
-          "b3+"
+          "a+"
         ],
         [
-          74.1324,
-          20,
+          50.989,
+          10,
           "spec_0",
-          "b3+"
+          "a+"
         ],
         [
-          74.1324,
-          20,
+          50.989,
+          10,
           "spec_0",
-          "b3+"
+          "a+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -109,58 +109,58 @@
       "type": "scatter",
       "customdata": [
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ],
         [
-          100.5332,
-          25,
+          50.989,
+          0,
           "spec_0",
-          "c5+"
+          "a+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -184,22 +184,22 @@
       "type": "scatter",
       "customdata": [
         [
-          101.545,
-          12,
+          74.1324,
+          0,
           "spec_0",
-          "c5+"
+          "b3+"
         ],
         [
-          101.545,
-          12,
+          74.1324,
+          0,
           "spec_0",
-          "c5+"
+          "b3+"
         ],
         [
-          101.545,
-          12,
+          74.1324,
+          0,
           "spec_0",
-          "c5+"
+          "b3+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -223,22 +223,22 @@
       "type": "scatter",
       "customdata": [
         [
-          102.5343,
-          6,
+          74.1324,
+          20,
           "spec_0",
-          "c5+"
+          "b3+"
         ],
         [
-          102.5343,
-          6,
+          74.1324,
+          20,
           "spec_0",
-          "c5+"
+          "b3+"
         ],
         [
-          102.5343,
-          6,
+          74.1324,
+          20,
           "spec_0",
-          "c5+"
+          "b3+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
@@ -268,40 +268,40 @@
       "type": "scatter",
       "customdata": [
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ],
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ],
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ],
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ],
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ],
         [
-          160.2,
-          13,
+          74.1324,
+          0,
           "spec_0",
-          "y9+"
+          "b3+"
         ]
       ],
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}\u003cbr\u003enative id: %{customdata[2]}\u003cbr\u003eion annotation: %{customdata[3]}"
