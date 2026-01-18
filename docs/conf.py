@@ -295,7 +295,7 @@ def bokeh_scraper(block, block_vars, gallery_conf, **kwargs):
             + "from bokeh.plotting import show\n"
             + str(block[1])
         )
-        # add indendation
+        # add indentation
         code_block = code_block.replace("\n", "\n    ")
 
         return code_block

@@ -22,7 +22,7 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 - Consistent API across different plotting backends for easy switching between static and interactive plots
 - Suitable for use in scripts, Jupyter notebooks, and web applications
 
-## Suported Plots
+## Supported Plots
 | **Plot Type**   | **Required Dimensions** | **pyopenms_viz Name**                                     | **Matplotlib** | **Bokeh** | **Plotly** |
 |-----------------|-------------------------|-----------------------------------------------------------|----------------|-----------|------------|
 | Chromatogram    | x, y                    | chromatogram                                              | ✓              | ✓         | ✓          |
@@ -36,7 +36,7 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 
 The recommended way of installing pyopenms_viz is through the Python Package Index (PyPI). We recommend installing pyopenms_viz in its own virtual environment using Anaconda to avoid packaging conflicts.
 
-First create a new environemnt:
+First create a new environment:
 
 ```bash
 conda create --name=pyopenms_viz python=3.12

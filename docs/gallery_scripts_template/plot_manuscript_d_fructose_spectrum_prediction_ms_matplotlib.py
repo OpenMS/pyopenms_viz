@@ -49,12 +49,13 @@ pd.options.plotting.backend = "ms_matplotlib"
 
 from pyopenms_viz.util import download_file, unzip_file
 
-# URL of the ZIP file
-url = "https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1"
-
-# Download and extract the ZIP file
+# GitHub release asset (primary) with Zenodo as backup
+url = "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/d_fructose_example.zip"
+backup_url = (
+    "https://zenodo.org/records/17904512/files/d_fructose_example.zip?download=1"
+)
 zip_filename = "d_fructose_example.zip"
-download_file(url, zip_filename)
+download_file(url, zip_filename, backup_url=backup_url)
 unzip_file(zip_filename, ".")  # Extract to current directory
 
 

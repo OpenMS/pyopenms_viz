@@ -65,7 +65,7 @@ class MATPLOTLIBPlot(BasePlot, ABC):
         Create a figure and axes objects,
         for consistency with other backends, the fig object stores the matplotlib axes object
         """
-        # TODO why is self.heigh and self.width checked if no alternatives
+        # TODO why is self.height and self.width checked if no alternatives
         if self.width is not None and self.height is not None and not self.plot_3d:
             self.fig, self.ax = plt.subplots(
                 figsize=(self.width / 100, self.height / 100), dpi=100
