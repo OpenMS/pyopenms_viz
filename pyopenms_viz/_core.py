@@ -1119,8 +1119,16 @@ class SpectrumPlot(BaseMSPlot, ABC):
         return x, y
 
     def convert_for_line_plots(
-        self, data: DataFrame, x: str, y: str, custom_hover_data=None
+        self,
+        data: DataFrame,
+        x: str,
+        y: str,
+        custom_hover_data: np.ndarray | None = None,
     ) -> Tuple[DataFrame, np.ndarray | None]:
+        # Reset index to ensure positional consistency for hover data slicing
+        # This prevents issues when DataFrame has non-contiguous or non-integer indices
+        data = data.reset_index(drop=True)
+
         if self.by is None:
             x_data, y_data = self.to_line(data[x], data[y])
             # Repeat custom_hover_data 3 times if provided, to match line plot format
@@ -1135,7 +1143,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
                 x_data, y_data = self.to_line(df[x], df[y])
                 dfs.append(DataFrame({x: x_data, y: y_data, self.by: name}))
                 if custom_hover_data is not None:
-                    group_hover_data = custom_hover_data[df.index]
+                    # Use .to_numpy() to get positional indices for numpy array slicing
+                    group_hover_data = custom_hover_data[df.index.to_numpy()]
                     hover_data_list.append(repeat(group_hover_data, 3, axis=0))
 
             # Stack all hover data arrays vertically
