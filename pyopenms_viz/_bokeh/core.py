@@ -223,9 +223,22 @@ class BOKEHPlot(BasePlot, ABC):
         output_notebook()
         show(self.fig)
 
-    def generate(self, tooltips, custom_hover_data) -> figure:
+    def generate(
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
+    ) -> figure:
         """
-        Generate the plot
+        Generate the Bokeh plot with optional interactive tooltips.
+
+        Args:
+            tooltips: A list of (label, field) tuples defining the HoverTool tooltips.
+                Example: [("X", "@x"), ("Y", "@y")].
+            custom_hover_data: Not currently used by the Bokeh backend. Accepted for
+                API compatibility with other backends.
+            fixed_tooltip_for_trace (bool): Not currently used by the Bokeh backend.
+                Accepted for API compatibility with other backends.
+
+        Returns:
+            figure: The generated Bokeh figure.
         """
         self._load_extension()
         if self.canvas is None:
@@ -235,7 +248,7 @@ class BOKEHPlot(BasePlot, ABC):
         self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+            self._add_tooltips(tooltips, custom_hover_data, fixed_tooltip_for_trace)
         return self.canvas
 
     def show_default(self):
@@ -454,8 +467,9 @@ class BOKEH_MSPlot(BaseMSPlot, BOKEHPlot, ABC):
         )
         fig.add_layout(zero_line)
 
-    def _create_tooltips(self, entries, index=True):
-        # Tooltips for interactive information
+    def _create_tooltips(self, entries, index=True, data=None):
+        # Note: data parameter is accepted for API compatibility but not used by Bokeh
+        # Bokeh tooltips reference column names directly via @ syntax
         tooltips = []
         if index:
             tooltips.append(("index", "$index"))
