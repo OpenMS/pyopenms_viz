@@ -24,7 +24,7 @@ beautifulsoup4==4.14.3
     #   pydata-sphinx-theme
 bleach[css]==6.3.0
     # via nbconvert
-bokeh==3.6.0
+bokeh==3.8.2
     # via pyopenms_viz (pyproject.toml)
 cairocffi==1.7.1
     # via cairosvg
@@ -120,7 +120,7 @@ matplotlib-inline==0.2.1
     #   ipython
 mistune==3.1.4
     # via nbconvert
-narwhals==2.13.0
+narwhals==2.15.0
     # via
     #   bokeh
     #   plotly
