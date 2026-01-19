@@ -38,7 +38,7 @@ charset-normalizer==3.4.1
     # via requests
 comm==0.2.3
     # via ipykernel
-contourpy==1.3.1
+contourpy==1.3.2
     # via
     #   bokeh
     #   matplotlib
@@ -65,7 +65,7 @@ executing==2.1.0
     # via stack-data
 fastjsonschema==2.21.2
     # via nbformat
-fonttools==4.55.3
+fonttools==4.61.1
     # via matplotlib
 idna==3.10
     # via requests
@@ -73,7 +73,7 @@ imagesize==1.4.1
     # via sphinx
 iniconfig==2.0.0
     # via pytest
-ipykernel==6.29.5
+ipykernel==7.1.0
     # via pyopenms_viz (pyproject.toml)
 ipython==8.31.0
     # via
@@ -104,15 +104,15 @@ jupyter-core==5.9.1
     #   nbformat
 jupyterlab-pygments==0.3.0
     # via nbconvert
-kiwisolver==1.4.8
+kiwisolver==1.4.9
     # via matplotlib
 markupsafe==3.0.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib==3.10.0
+matplotlib==3.10.8
     # via pyopenms_viz (pyproject.toml)
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via
     #   ipykernel
     #   ipython
@@ -131,7 +131,7 @@ nbsphinx==0.9.6
     # via pyopenms_viz (pyproject.toml)
 nest-asyncio==1.6.0
     # via ipykernel
-numpy==2.2.1
+numpy==2.2.6
     # via
     #   bokeh
     #   contourpy
@@ -148,7 +148,7 @@ packaging==25.0
     #   plotly
     #   pytest
     #   sphinx
-pandas==2.2.3
+pandas==2.3.3
     # via
     #   bokeh
     #   pyopenms_viz (pyproject.toml)
@@ -173,7 +173,7 @@ pluggy==1.5.0
     # via pytest
 prompt-toolkit==3.0.48
     # via ipython
-psutil==6.1.1
+psutil==7.2.1
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -190,7 +190,7 @@ pygments==2.19.2
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pymzml==2.5.10
+pymzml==2.6.0
     # via pyopenms_viz (pyproject.toml)
 pyparsing==3.3.1
     # via matplotlib
@@ -207,7 +207,7 @@ pytz==2025.2
     # via pandas
 pyyaml==6.0.3
     # via bokeh
-pyzmq==26.2.0
+pyzmq==27.1.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -265,7 +265,7 @@ tinycss2==1.4.0
     #   bleach
     #   cairosvg
     #   cssselect2
-tornado==6.4.2
+tornado==6.5.4
     # via
     #   bokeh
     #   ipykernel
