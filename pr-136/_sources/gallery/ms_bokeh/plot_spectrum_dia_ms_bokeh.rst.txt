@@ -57,12 +57,6 @@ This example shows a spectrum from extracted data. No binning is applied.
     )
     
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Annotation color: None
-
 
 .. raw:: html
 
@@ -87,10 +81,6 @@ This example shows a spectrum from extracted data. No binning is applied.
     </div>
     <br />
     <br />
-
-
-
-|
 
 .. code-block:: Python
 
@@ -123,7 +113,7 @@ This example shows a spectrum from extracted data. No binning is applied.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.263 seconds)
+   **Total running time of the script:** (0 minutes 0.259 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_bokeh_plot_spectrum_dia_ms_bokeh.py:

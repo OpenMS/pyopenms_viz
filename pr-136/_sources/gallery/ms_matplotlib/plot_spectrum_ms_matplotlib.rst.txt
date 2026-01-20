@@ -38,7 +38,6 @@ We can add the ion_annotation and sequence annotation by specifying these column
 
  .. code-block:: none
 
-    Annotation color: None
 
     <Axes: title={'center': 'Mass Spectrum'}, xlabel='mass-to-charge', ylabel='Intensity'>
 

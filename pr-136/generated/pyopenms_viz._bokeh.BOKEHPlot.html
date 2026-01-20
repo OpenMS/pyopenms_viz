@@ -644,8 +644,26 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyopenms_viz._bokeh.BOKEHPlot.generate">
-<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tooltips</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_hover_data</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">figure</span></span></span><a class="headerlink" href="#pyopenms_viz._bokeh.BOKEHPlot.generate" title="Link to this definition">#</a></dt>
-<dd><p>Generate the plot</p>
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tooltips</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_hover_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_tooltip_for_trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">figure</span></span></span><a class="headerlink" href="#pyopenms_viz._bokeh.BOKEHPlot.generate" title="Link to this definition">#</a></dt>
+<dd><p>Generate the Bokeh plot with optional interactive tooltips.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tooltips</strong> – A list of (label, field) tuples defining the HoverTool tooltips.
+Example: [(“X”, “&#64;x”), (“Y”, “&#64;y”)].</p></li>
+<li><p><strong>custom_hover_data</strong> – Not currently used by the Bokeh backend. Accepted for
+API compatibility with other backends.</p></li>
+<li><p><strong>fixed_tooltip_for_trace</strong> (<em>bool</em>) – Not currently used by the Bokeh backend.
+Accepted for API compatibility with other backends.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated Bokeh figure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>figure</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

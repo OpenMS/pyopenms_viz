@@ -37,7 +37,7 @@ This example shows a chromatogram colored by mass trace. Since all fragment ion 
 
  .. code-block:: none
 
-    /home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_core.py:571: UserWarning:
+    /home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_core.py:587: UserWarning:
 
     Duplicate data detected, data will not be aggregated which may lead to unexpected plots. To enable aggregation set `aggregate_duplicates=True`.
 
@@ -76,7 +76,7 @@ This example shows a chromatogram colored by mass trace. Since all fragment ion 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.152 seconds)
+   **Total running time of the script:** (0 minutes 0.154 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_chromatogram_ms_matplotlib.py:
