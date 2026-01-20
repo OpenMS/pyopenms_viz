@@ -120,9 +120,23 @@ class PLOTLYPlot(BasePlot, ABC):
             tickcolor="black",  # Set the color of y-axis ticks
         )
 
-    def generate(self, tooltips, custom_hover_data) -> Figure:
+    def generate(
+        self, tooltips, custom_hover_data, fixed_tooltip_for_trace=True
+    ) -> Figure:
         """
-        Generate the plot
+        Generate the Plotly plot with optional interactive tooltips.
+
+        Args:
+            tooltips: A Plotly hovertemplate string that defines the tooltip format.
+                Can reference customdata fields using %{customdata[0]}, etc.
+            custom_hover_data: A numpy array of additional data for hover tooltips.
+                Shape depends on fixed_tooltip_for_trace setting.
+            fixed_tooltip_for_trace (bool): If True, each trace gets one row of
+                custom_hover_data repeated for all points. If False, custom_hover_data
+                rows are distributed sequentially across all trace points.
+
+        Returns:
+            Figure: The generated Plotly figure.
         """
         self._load_extension()
         if self.canvas is None:
@@ -132,7 +146,7 @@ class PLOTLYPlot(BasePlot, ABC):
         self._update_plot_aes()
 
         if tooltips is not None and self._interactive:
-            self._add_tooltips(tooltips, custom_hover_data)
+            self._add_tooltips(tooltips, custom_hover_data, fixed_tooltip_for_trace)
         return self.canvas
 
     def _add_legend(self, legend):
@@ -532,13 +546,17 @@ class PLOTLY_MSPlot(BaseMSPlot, PLOTLYPlot, ABC):
             y=0, line_color=line_color, line=dict(width=line_width), opacity=opacity
         )
 
-    def _create_tooltips(self, entries, index=True):
+    def _create_tooltips(self, entries, index=True, data=None):
+        # Use provided data or fall back to self.data
+        if data is None:
+            data = self.data
+        
         custom_hover_data = []
         # Add data from index if required
         if index:
-            custom_hover_data.append(self.data.index)
+            custom_hover_data.append(data.index)
         # Get the rest of the columns
-        custom_hover_data += [self.data[col] for col in entries.values()]
+        custom_hover_data += [data[col] for col in entries.values()]
 
         tooltips = []
         # Add tooltip text for index if required
