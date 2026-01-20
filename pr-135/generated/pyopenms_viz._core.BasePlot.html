@@ -697,8 +697,23 @@ Properly handles data types and only aggregates relevant columns</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyopenms_viz._core.BasePlot.generate">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tooltips</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_hover_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyopenms_viz._core.BasePlot.generate" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tooltips</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_hover_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_tooltip_for_trace</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyopenms_viz._core.BasePlot.generate" title="Link to this definition">#</a></dt>
 <dd><p>Generate the plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tooltips</strong> – Tooltip specifications for the plot. For Plotly, this is a
+hovertemplate string. For Bokeh, this is a list of (label, field)
+tuples. Ignored by Matplotlib (no interactive tooltips).</p></li>
+<li><p><strong>custom_hover_data</strong> – Additional data array for hover tooltips. Used by
+Plotly to populate customdata fields referenced in the hovertemplate.
+Ignored by Bokeh and Matplotlib backends.</p></li>
+<li><p><strong>fixed_tooltip_for_trace</strong> (<em>bool</em>) – Whether to use fixed tooltip data per
+trace (True) or varying tooltip data that matches each point in the
+trace (False). This parameter is only used by the Plotly backend.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
