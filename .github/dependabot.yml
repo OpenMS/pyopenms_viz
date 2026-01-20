@@ -58,8 +58,6 @@ updates:
           - "pillow"
           - "cairosvg"
           - "cairocffi"
-          - "cssselect2"
-          - "tinycss2"
           - "defusedxml"
         update-types: ["patch", "minor"]
 
@@ -145,6 +143,8 @@ updates:
           - "pygments"
           - "mistune"
           - "pandocfilters"
+          - "tinycss2"
+          - "cssselect2"
 
       # ===============================
       # Low-risk plumbing
