@@ -294,7 +294,7 @@ typing-extensions==4.15.0
     #   beautifulsoup4
     #   pydata-sphinx-theme
     #   referencing
-tzdata==2025.2
+tzdata==2025.3
     # via pandas
 urllib3==2.6.1
     # via requests
