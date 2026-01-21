@@ -185,7 +185,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pycparser==2.23
+pycparser==3.0
     # via cffi
 pydata-sphinx-theme==0.16.1
     # via pyopenms_viz (pyproject.toml)
