@@ -158,7 +158,7 @@ parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==11.1.0
+pillow==12.1.0
     # via
     #   bokeh
     #   cairosvg
