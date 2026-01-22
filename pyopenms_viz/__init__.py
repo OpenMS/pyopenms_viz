@@ -11,7 +11,7 @@ import types
 from pathlib import Path
 from ._core import plot_chromatogram, plot_spectrum, plot_mobilogram, plot_peakmap
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 def TEST_DATA_PATH():

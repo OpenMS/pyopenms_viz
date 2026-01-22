@@ -164,7 +164,7 @@ parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==12.0.0
+pillow==12.1.0
     # via
     #   bokeh
     #   cairosvg
@@ -185,7 +185,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pycparser==2.23
+pycparser==3.0
     # via cffi
 pydata-sphinx-theme==0.16.1
     # via pyopenms_viz (pyproject.toml)
@@ -200,7 +200,7 @@ pygments==2.19.2
     #   sphinx
 pymzml==2.6.0
     # via pyopenms_viz (pyproject.toml)
-pyparsing==3.3.1
+pyparsing==3.3.2
     # via matplotlib
 pytest==9.0.2
     # via
@@ -296,7 +296,7 @@ typing-extensions==4.15.0
     #   referencing
 tzdata==2025.3
     # via pandas
-urllib3==2.6.1
+urllib3==2.6.3
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
