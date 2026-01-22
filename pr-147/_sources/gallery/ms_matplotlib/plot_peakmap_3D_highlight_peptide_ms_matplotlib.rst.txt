@@ -76,7 +76,7 @@ This shows a peakmap across m/z and retention time, plotted in 3D.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.075 seconds)
+   **Total running time of the script:** (0 minutes 3.126 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_peakmap_3D_highlight_peptide_ms_matplotlib.py:
