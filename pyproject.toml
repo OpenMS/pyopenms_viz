@@ -7,7 +7,7 @@ name = "pyopenms_viz"
 authors = [
     {name = "OpenMS Team", email = "webmaster@openms.de"},
 ]
-version = "1.0.0"
+version = "1.0.1"
 description = "A package for visualizing mass spectrometry data using pandas dataframes"
 readme = "README.md"
 classifiers = [
