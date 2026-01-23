@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:03.418** total execution time for 9 files **from gallery/ms_plotly**:
+**00:03.669** total execution time for 9 files **from gallery/ms_plotly**:
 
 .. container::
 
@@ -33,29 +33,29 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_marginals_ms_plotly.py` (``plot_peakmap_marginals_ms_plotly.py``)
-     - 00:01.502
+     - 00:01.447
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spyogenes_subplots_ms_plotly.py` (``plot_spyogenes_subplots_ms_plotly.py``)
-     - 00:00.692
+     - 00:00.783
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_highlight_peptide_ms_plotly.py` (``plot_peakmap_3D_highlight_peptide_ms_plotly.py``)
-     - 00:00.340
+     - 00:00.461
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_dia_ms_plotly.py` (``plot_spectrum_dia_ms_plotly.py``)
-     - 00:00.263
+     - 00:00.280
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_ms_plotly.py` (``plot_peakmap_ms_plotly.py``)
-     - 00:00.227
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``plot_peakmap_3D_ms_plotly.py``)
-     - 00:00.106
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_plotly_plot_chromatogram_ms_plotly.py` (``plot_chromatogram_ms_plotly.py``)
-     - 00:00.106
+     - 00:00.246
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_spectrum_ms_plotly.py` (``plot_spectrum_ms_plotly.py``)
-     - 00:00.105
+     - 00:00.137
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_chromatogram_ms_plotly.py` (``plot_chromatogram_ms_plotly.py``)
+     - 00:00.135
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_plotly_plot_peakmap_3D_ms_plotly.py` (``plot_peakmap_3D_ms_plotly.py``)
+     - 00:00.103
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_plotly_plot_mobilogram_ms_plotly.py` (``plot_mobilogram_ms_plotly.py``)
-     - 00:00.079
+     - 00:00.077
      - 0.0
