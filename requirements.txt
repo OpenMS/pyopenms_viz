@@ -173,7 +173,7 @@ pillow==12.1.0
     #   sphinx-gallery
 platformdirs==4.5.1
     # via jupyter-core
-plotly==5.24.1
+plotly==6.5.2
     # via pyopenms_viz (pyproject.toml)
 pluggy==1.6.0
     # via pytest
