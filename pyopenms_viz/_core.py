@@ -932,7 +932,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Group by the temporary bin column and aggregate
         # FIX: Aggregate self.x using 'mean' to preserve the true m/z center of mass
         df = (
-            df.groupby(cols, observed=True)
+            df.groupby(cols, observed=True, dropna=False)
             .agg({
                 self.y: self.aggregation_method,
                 self.x: "mean"
