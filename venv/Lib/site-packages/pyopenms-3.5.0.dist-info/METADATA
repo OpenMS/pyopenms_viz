@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: pyopenms
+Version: 3.5.0
+Summary: Python wrapper for C++ LC-MS library OpenMS
+Home-page: https://openms.de
+Author: OpenMS team
+Author-email: webmaster@openms.de
+Maintainer: The OpenMS team
+Maintainer-email: open-ms-general@lists.sourceforge.net
+License: http://opensource.org/licenses/BSD-3-Clause
+Project-URL: Documentation, https://pyopenms.readthedocs.io
+Project-URL: Source Code, https://github.com/OpenMS/OpenMS/tree/develop/src/pyOpenMS
+Project-URL: Tracker, https://github.com/OpenMS/OpenMS/issues
+Project-URL: Documentation Source, https://github.com/OpenMS/pyopenms-docs
+Platform: any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Description-Content-Type: text/x-rst
+Requires-Dist: numpy>=1.25.0
+Requires-Dist: pandas
+Requires-Dist: matplotlib>=3.5
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: maintainer
+Dynamic: maintainer-email
+Dynamic: platform
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: summary
+
+This package contains Python bindings for a large part of the OpenMS library
+for mass spectrometry based proteomics.  It thus provides providing facile
+access to a feature-rich, open-source algorithm library for mass-spectrometry
+based proteomics analysis. These Python bindings allow raw access to the
+data-structures and algorithms implemented in OpenMS, specifically those for
+file access (mzXML, mzML, TraML, mzIdentML among others), basic signal
+processing (smoothing, filtering, de-isotoping and peak-picking) and complex
+data analysis (including label-free, SILAC, iTRAQ and SWATH analysis tools).
+
+You can install pyopenms using::
+
+  pip install pyopenms
+
+Please see https://pyopenms.readthedocs.io/en/latest/index.html for more information.
+

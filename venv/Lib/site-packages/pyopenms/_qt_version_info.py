@@ -1,0 +1,2 @@
+info='QMake version 3.1\nUsing Qt version 6.8.3 in D:/a/OpenMS/Qt/6.8.3/msvc2022_64/lib'
+

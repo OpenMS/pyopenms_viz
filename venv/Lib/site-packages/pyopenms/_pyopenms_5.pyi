@@ -1,0 +1,6362 @@
+from __future__ import annotations
+from typing import overload, Any, List, Dict, Tuple, Set, Sequence, Union
+from pyopenms import *  # pylint: disable=wildcard-import; lgtm(py/polluting-import)
+import numpy as _np
+from pyopenms import *  # pylint: disable=wildcard-import; lgtm(py/polluting-import)
+import numpy as _np
+
+from enum import IntEnum as _PyEnum
+
+
+def __static_IonIdentityMolecularNetworking_annotateConsensusMap(consensus_map: ConsensusMap ) -> None:
+    """
+    Cython signature: void annotateConsensusMap(ConsensusMap & consensus_map)
+        Annotate ConsensusMap for ion identity molecular networking (IIMN) workflow by GNPS.
+        
+        Adds meta values Constants::UserParams::IIMN_ROW_ID (unique index for each feature), Constants::UserParams::IIMN_ADDUCT_PARTNERS (related features row IDs)
+        and Constants::UserParams::IIMN_ANNOTATION_NETWORK_NUMBER (all related features with different adduct states) get the same network number).
+        This method requires the features annotated with the Constants::UserParams::IIMN_LINKED_GROUPS meta value.
+        If at least one of the features has an annotation for Constants::UserParam::IIMN_LINKED_GROUPS, annotate ConsensusMap for IIMN.
+        
+        
+        :param consensus_map: Input ConsensusMap without IIMN annotations.
+    """
+    ...
+
+def __static_InternalCalibration_applyTransformation(pcs: List[Precursor] , trafo: MZTrafoModel ) -> None:
+    """
+    Cython signature: void applyTransformation(libcpp_vector[Precursor] & pcs, MZTrafoModel & trafo)
+    """
+    ...
+
+def __static_InternalCalibration_applyTransformation(spec: MSSpectrum , target_mslvl: List[int] , trafo: MZTrafoModel ) -> None:
+    """
+    Cython signature: void applyTransformation(MSSpectrum & spec, IntList & target_mslvl, MZTrafoModel & trafo)
+    """
+    ...
+
+def __static_InternalCalibration_applyTransformation(exp: MSExperiment , target_mslvl: List[int] , trafo: MZTrafoModel ) -> None:
+    """
+    Cython signature: void applyTransformation(MSExperiment & exp, IntList & target_mslvl, MZTrafoModel & trafo)
+    """
+    ...
+
+def __static_IonIdentityMolecularNetworking_writeSupplementaryPairTable(consensus_map: ConsensusMap , output_file: Union[bytes, str, String] ) -> None:
+    """
+    Cython signature: void writeSupplementaryPairTable(const ConsensusMap & consensus_map, const String & output_file)
+        Write supplementary pair table (csv file) from a ConsensusMap with edge annotations for connected features. Required for GNPS IIMN.
+        
+        The table contains the columns "ID 1" (row ID of first feature), "ID 2" (row ID of second feature), "EdgeType" (MS1/2 annotation),
+        "Score" (the number of direct partners from both connected features) and "Annotation" (adducts and delta m/z between two connected features).
+        
+        
+        :param consensus_map: Input ConsensusMap annotated with IonIdentityMolecularNetworking.annotateConsensusMap.
+        :param output_file: Output file path for the supplementary pair table.
+    """
+    ...
+
+
+class ChannelInfo:
+    """
+    Cython implementation of _ChannelInfo
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1ChannelInfo.html>`_
+    """
+    
+    description: bytes
+    
+    name: int
+    
+    id: int
+    
+    center: float
+    
+    active: bool 
+
+
+class ChargedIndexSet:
+    """
+    Cython implementation of _ChargedIndexSet
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1ChargedIndexSet.html>`_
+    """
+    
+    charge: int
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void ChargedIndexSet()
+        Index set with associated charge estimate
+        """
+        ... 
+
+
+class CoarseIsotopePatternGenerator:
+    """
+    Cython implementation of _CoarseIsotopePatternGenerator
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1CoarseIsotopePatternGenerator.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void CoarseIsotopePatternGenerator()
+        """
+        ...
+    
+    @overload
+    def __init__(self, max_isotope: int ) -> None:
+        """
+        Cython signature: void CoarseIsotopePatternGenerator(size_t max_isotope)
+        """
+        ...
+    
+    @overload
+    def __init__(self, max_isotope: int , round_masses: bool ) -> None:
+        """
+        Cython signature: void CoarseIsotopePatternGenerator(size_t max_isotope, bool round_masses)
+        """
+        ...
+    
+    def run(self, in_0: EmpiricalFormula ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution run(EmpiricalFormula)
+        """
+        ...
+    
+    def getRoundMasses(self) -> bool:
+        """
+        Cython signature: bool getRoundMasses()
+        Returns the current value of the flag to round masses to integer values (true) or return accurate masses (false)
+        """
+        ...
+    
+    def setRoundMasses(self, round_masses_: bool ) -> None:
+        """
+        Cython signature: void setRoundMasses(bool round_masses_)
+        Sets the round_masses_ flag to round masses to integer values (true) or return accurate masses (false)
+        """
+        ...
+    
+    def getMaxIsotope(self) -> int:
+        """
+        Cython signature: size_t getMaxIsotope()
+        Returns the currently set maximum isotope
+        """
+        ...
+    
+    def setMaxIsotope(self, max_isotope: int ) -> None:
+        """
+        Cython signature: void setMaxIsotope(size_t max_isotope)
+        Sets the maximal isotope with 'max_isotope'
+        """
+        ...
+    
+    def estimateFromPeptideWeight(self, average_weight: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromPeptideWeight(double average_weight)
+        Estimate Peptide Isotopedistribution from weight and number of isotopes that should be reported
+        """
+        ...
+    
+    def estimateFromPeptideWeightAndS(self, average_weight: float , S: int ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromPeptideWeightAndS(double average_weight, unsigned int S)
+        Estimate peptide IsotopeDistribution from average weight and exact number of sulfurs
+        """
+        ...
+    
+    def estimateFromRNAWeight(self, average_weight: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromRNAWeight(double average_weight)
+        Estimate Nucleotide Isotopedistribution from weight
+        """
+        ...
+    
+    def estimateFromDNAWeight(self, average_weight: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromDNAWeight(double average_weight)
+        Estimate Nucleotide Isotopedistribution from weight
+        """
+        ...
+    
+    def estimateFromWeightAndComp(self, average_weight: float , C: float , H: float , N: float , O: float , S: float , P: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromWeightAndComp(double average_weight, double C, double H, double N, double O, double S, double P)
+        """
+        ...
+    
+    def estimateFromWeightAndCompAndS(self, average_weight: float , S: int , C: float , H: float , N: float , O: float , P: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateFromWeightAndCompAndS(double average_weight, unsigned int S, double C, double H, double N, double O, double P)
+        Estimate IsotopeDistribution from weight, exact number of sulfurs, and average remaining composition
+        """
+        ...
+    
+    def estimateForFragmentFromPeptideWeight(self, average_weight_precursor: float , average_weight_fragment: float , precursor_isotopes: Set[int] ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateForFragmentFromPeptideWeight(double average_weight_precursor, double average_weight_fragment, libcpp_set[unsigned int] & precursor_isotopes)
+        Estimate peptide fragment IsotopeDistribution from the precursor's average weight, fragment's average weight, and a set of isolated precursor isotopes
+        """
+        ...
+    
+    def estimateForFragmentFromPeptideWeightAndS(self, average_weight_precursor: float , S_precursor: int , average_weight_fragment: float , S_fragment: int , precursor_isotopes: Set[int] ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateForFragmentFromPeptideWeightAndS(double average_weight_precursor, unsigned int S_precursor, double average_weight_fragment, unsigned int S_fragment, libcpp_set[unsigned int] & precursor_isotopes)
+        Estimate peptide fragment IsotopeDistribution from the precursor's average weight,
+        number of sulfurs in the precursor, fragment's average weight, number of sulfurs in the fragment,
+        and a set of isolated precursor isotopes.
+        """
+        ...
+    
+    def approximateFromPeptideWeight(self, mass: float , num_peaks: int , charge: int ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution approximateFromPeptideWeight(double mass, unsigned int num_peaks, unsigned int charge)
+        Roughly approximate peptide IsotopeDistribution from monoisotopic weight using Poisson distribution.
+        m/z values approximated by adding one neutron mass (divided by charge) for every peak, starting at
+        the given monoisotopic weight. Foundation from: Bellew et al, https://dx.doi.org/10.1093/bioinformatics/btl276
+        This method is around 50 times faster than estimateFromPeptideWeight, but only an approximation.
+        The following are the intensities of the first 6 peaks generated for a monoisotopic mass of 1000:
+        estimateFromPeptideWeight:    0.571133000;0.306181000;0.095811100;0.022036900;0.004092170;0.000644568
+        approximateFromPeptideWeight: 0.573753000;0.318752000;0.088542200;0.016396700;0.002277320;0.000253036
+        KL divergences of the first 20 intensities of estimateFromPeptideWeight and this approximation range from 4.97E-5 for a
+        monoisotopic mass of 20 to 0.0144 for a mass of 2500. For comparison, when comparing an observed pattern with a
+        theoretical ground truth, the observed pattern is said to be an isotopic pattern if the KL between the two is below 0.05
+        for 2 peaks and below 0.6 for >=6 peaks by Guo Ci Teo et al.
+        """
+        ...
+    
+    def approximateIntensities(self, mass: float , num_peaks: int ) -> List[float]:
+        """
+        Cython signature: libcpp_vector[double] approximateIntensities(double mass, unsigned int num_peaks)
+        Roughly approximate peptidic isotope pattern intensities from monoisotopic weight using Poisson distribution.
+        Foundation from: Bellew et al, https://dx.doi.org/10.1093/bioinformatics/btl276
+        This method is around 100 times faster than estimateFromPeptideWeight, but only an approximation, see approximateFromPeptideWeight.
+        """
+        ...
+    
+    def estimateForFragmentFromRNAWeight(self, average_weight_precursor: float , average_weight_fragment: float , precursor_isotopes: Set[int] ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateForFragmentFromRNAWeight(double average_weight_precursor, double average_weight_fragment, libcpp_set[unsigned int] & precursor_isotopes)
+        Estimate RNA fragment IsotopeDistribution from the precursor's average weight,
+        fragment's average weight, and a set of isolated precursor isotopes
+        """
+        ...
+    
+    def estimateForFragmentFromDNAWeight(self, average_weight_precursor: float , average_weight_fragment: float , precursor_isotopes: Set[int] ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateForFragmentFromDNAWeight(double average_weight_precursor, double average_weight_fragment, libcpp_set[unsigned int] & precursor_isotopes)
+        Estimate DNA fragment IsotopeDistribution from the precursor's average weight,
+        fragment's average weight, and a set of isolated precursor isotopes.
+        """
+        ...
+    
+    def estimateForFragmentFromWeightAndComp(self, average_weight_precursor: float , average_weight_fragment: float , precursor_isotopes: Set[int] , C: float , H: float , N: float , O: float , S: float , P: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution estimateForFragmentFromWeightAndComp(double average_weight_precursor, double average_weight_fragment, libcpp_set[unsigned int] & precursor_isotopes, double C, double H, double N, double O, double S, double P)
+        Estimate fragment IsotopeDistribution from the precursor's average weight,
+        fragment's average weight, a set of isolated precursor isotopes, and average composition
+        """
+        ...
+    
+    def calcFragmentIsotopeDist(self, fragment_isotope_dist: IsotopeDistribution , comp_fragment_isotope_dist: IsotopeDistribution , precursor_isotopes: Set[int] , fragment_mono_mass: float ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution calcFragmentIsotopeDist(IsotopeDistribution & fragment_isotope_dist, IsotopeDistribution & comp_fragment_isotope_dist, libcpp_set[unsigned int] & precursor_isotopes, double fragment_mono_mass)
+        Calculate isotopic distribution for a fragment molecule
+        """
+        ... 
+
+
+class FineIsotopePatternGenerator:
+    """
+    Cython implementation of _FineIsotopePatternGenerator
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1FineIsotopePatternGenerator.html>`_
+
+    Isotope pattern generator for fine isotope distributions.
+    Generates isotopes until a stop condition (threshold) is reached,
+    the lower the threshold the more isotopes are generated. The
+    parameter use_total_prob defines whether the stop condition is
+    interpreted as the total probability that the distribution should
+    cover (default) or as a threshold for individual peaks. Finally,
+    the absolute parameter specifies for individual peak thresholding
+    if the threshold is absolute or relative.
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void FineIsotopePatternGenerator()
+        """
+        ...
+    
+    @overload
+    def __init__(self, threshold: float ) -> None:
+        """
+        Cython signature: void FineIsotopePatternGenerator(double threshold)
+        """
+        ...
+    
+    @overload
+    def __init__(self, threshold: float , use_total_prob: bool ) -> None:
+        """
+        Cython signature: void FineIsotopePatternGenerator(double threshold, bool use_total_prob)
+        """
+        ...
+    
+    @overload
+    def __init__(self, threshold: float , use_total_prob: bool , absolute: bool ) -> None:
+        """
+        Cython signature: void FineIsotopePatternGenerator(double threshold, bool use_total_prob, bool absolute)
+        """
+        ...
+    
+    def setThreshold(self, threshold: float ) -> None:
+        """
+        Cython signature: void setThreshold(double threshold)
+        """
+        ...
+    
+    def getThreshold(self) -> float:
+        """
+        Cython signature: double getThreshold()
+        """
+        ...
+    
+    def setAbsolute(self, absolute: bool ) -> None:
+        """
+        Cython signature: void setAbsolute(bool absolute)
+        """
+        ...
+    
+    def getAbsolute(self) -> bool:
+        """
+        Cython signature: bool getAbsolute()
+        """
+        ...
+    
+    def setTotalProbability(self, total: bool ) -> None:
+        """
+        Cython signature: void setTotalProbability(bool total)
+        """
+        ...
+    
+    def getTotalProbability(self) -> bool:
+        """
+        Cython signature: bool getTotalProbability()
+        """
+        ...
+    
+    def run(self, in_0: EmpiricalFormula ) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution run(EmpiricalFormula)
+        """
+        ... 
+
+
+class Instrument:
+    """
+    Cython implementation of _Instrument
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1Instrument.html>`_
+      -- Inherits from ['MetaInfoInterface']
+
+    Description of a MS instrument
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void Instrument()
+        Description of a MS instrument
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: Instrument ) -> None:
+        """
+        Cython signature: void Instrument(Instrument &)
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name of the instrument
+        """
+        ...
+    
+    def setName(self, name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(String name)
+        Sets the name of the instrument
+        """
+        ...
+    
+    def getVendor(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getVendor()
+        Returns the instrument vendor
+        """
+        ...
+    
+    def setVendor(self, vendor: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setVendor(String vendor)
+        Sets the instrument vendor
+        """
+        ...
+    
+    def getModel(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getModel()
+        Returns the instrument model
+        """
+        ...
+    
+    def setModel(self, model: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setModel(String model)
+        Sets the instrument model
+        """
+        ...
+    
+    def getCustomizations(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getCustomizations()
+        Returns a description of customizations
+        """
+        ...
+    
+    def setCustomizations(self, customizations: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setCustomizations(String customizations)
+        Sets the a description of customizations
+        """
+        ...
+    
+    def getIonSources(self) -> List[IonSource]:
+        """
+        Cython signature: libcpp_vector[IonSource] getIonSources()
+        Returns the ion source list
+        """
+        ...
+    
+    def setIonSources(self, ion_sources: List[IonSource] ) -> None:
+        """
+        Cython signature: void setIonSources(libcpp_vector[IonSource] ion_sources)
+        Sets the ion source list
+        """
+        ...
+    
+    def getMassAnalyzers(self) -> List[MassAnalyzer]:
+        """
+        Cython signature: libcpp_vector[MassAnalyzer] getMassAnalyzers()
+        Returns the mass analyzer list
+        """
+        ...
+    
+    def setMassAnalyzers(self, mass_analyzers: List[MassAnalyzer] ) -> None:
+        """
+        Cython signature: void setMassAnalyzers(libcpp_vector[MassAnalyzer] mass_analyzers)
+        Sets the mass analyzer list
+        """
+        ...
+    
+    def getIonDetectors(self) -> List[IonDetector]:
+        """
+        Cython signature: libcpp_vector[IonDetector] getIonDetectors()
+        Returns the ion detector list
+        """
+        ...
+    
+    def setIonDetectors(self, ion_detectors: List[IonDetector] ) -> None:
+        """
+        Cython signature: void setIonDetectors(libcpp_vector[IonDetector] ion_detectors)
+        Sets the ion detector list
+        """
+        ...
+    
+    def getSoftware(self) -> Software:
+        """
+        Cython signature: Software getSoftware()
+        Returns the instrument software
+        """
+        ...
+    
+    def setSoftware(self, software: Software ) -> None:
+        """
+        Cython signature: void setSoftware(Software software)
+        Sets the instrument software
+        """
+        ...
+    
+    def getIonOptics(self) -> int:
+        """
+        Cython signature: IonOpticsType getIonOptics()
+        Returns the ion optics type
+        """
+        ...
+    
+    def setIonOptics(self, ion_optics: int ) -> None:
+        """
+        Cython signature: void setIonOptics(IonOpticsType ion_optics)
+        Sets the ion optics type
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfIonOpticsType() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfIonOpticsType()
+        Returns all ion optics type names known to OpenMS
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: Instrument, op: int) -> Any:
+        ...
+    IonOpticsType : __IonOpticsType 
+
+
+class InstrumentSettings:
+    """
+    Cython implementation of _InstrumentSettings
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1InstrumentSettings.html>`_
+      -- Inherits from ['MetaInfoInterface']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void InstrumentSettings()
+        Description of the settings a MS Instrument was run with
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: InstrumentSettings ) -> None:
+        """
+        Cython signature: void InstrumentSettings(InstrumentSettings &)
+        """
+        ...
+    
+    def getPolarity(self) -> int:
+        """
+        Cython signature: Polarity getPolarity()
+        Returns the polarity
+        """
+        ...
+    
+    def setPolarity(self, in_0: int ) -> None:
+        """
+        Cython signature: void setPolarity(Polarity)
+        Sets the polarity
+        """
+        ...
+    
+    def getScanMode(self) -> int:
+        """
+        Cython signature: ScanMode getScanMode()
+        Returns the scan mode
+        """
+        ...
+    
+    def setScanMode(self, scan_mode: int ) -> None:
+        """
+        Cython signature: void setScanMode(ScanMode scan_mode)
+        Sets the scan mode
+        """
+        ...
+    
+    def getZoomScan(self) -> bool:
+        """
+        Cython signature: bool getZoomScan()
+        Returns if this scan is a zoom (enhanced resolution) scan
+        """
+        ...
+    
+    def setZoomScan(self, zoom_scan: bool ) -> None:
+        """
+        Cython signature: void setZoomScan(bool zoom_scan)
+        Sets if this scan is a zoom (enhanced resolution) scan
+        """
+        ...
+    
+    def getScanWindows(self) -> List[ScanWindow]:
+        """
+        Cython signature: libcpp_vector[ScanWindow] getScanWindows()
+        Returns the m/z scan windows
+        """
+        ...
+    
+    def setScanWindows(self, scan_windows: List[ScanWindow] ) -> None:
+        """
+        Cython signature: void setScanWindows(libcpp_vector[ScanWindow] scan_windows)
+        Sets the m/z scan windows
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfScanMode() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfScanMode()
+        Returns all scan mode names known to OpenMS
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: InstrumentSettings, op: int) -> Any:
+        ...
+    ScanMode : __ScanMode 
+
+
+class IntegerDataArray:
+    """
+    Cython implementation of _IntegerDataArray
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::DataArrays_1_1IntegerDataArray.html>`_
+      -- Inherits from ['MetaInfoDescription']
+
+    The representation of extra integer data attached to a spectrum or chromatogram.
+    Raw data access is proved by `get_peaks` and `set_peaks`, which yields numpy arrays
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IntegerDataArray()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IntegerDataArray ) -> None:
+        """
+        Cython signature: void IntegerDataArray(IntegerDataArray &)
+        """
+        ...
+    
+    def size(self) -> int:
+        """
+        Cython signature: size_t size()
+        """
+        ...
+    
+    def resize(self, n: int ) -> None:
+        """
+        Cython signature: void resize(size_t n)
+        """
+        ...
+    
+    def reserve(self, n: int ) -> None:
+        """
+        Cython signature: void reserve(size_t n)
+        """
+        ...
+    
+    def clear(self) -> None:
+        """
+        Cython signature: void clear()
+        """
+        ...
+    
+    def push_back(self, in_0: int ) -> None:
+        """
+        Cython signature: void push_back(int)
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name of the peak annotations
+        """
+        ...
+    
+    def setName(self, name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(String name)
+        Sets the name of the peak annotations
+        """
+        ...
+    
+    def getDataProcessing(self) -> List[DataProcessing]:
+        """
+        Cython signature: libcpp_vector[shared_ptr[DataProcessing]] getDataProcessing()
+        Returns a reference to the description of the applied processing
+        """
+        ...
+    
+    def setDataProcessing(self, in_0: List[DataProcessing] ) -> None:
+        """
+        Cython signature: void setDataProcessing(libcpp_vector[shared_ptr[DataProcessing]])
+        Sets the description of the applied processing
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: IntegerDataArray, op: int) -> Any:
+        ... 
+
+
+class InternalCalibration:
+    """
+    Cython implementation of _InternalCalibration
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1InternalCalibration.html>`_
+      -- Inherits from ['ProgressLogger']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void InternalCalibration()
+        A mass recalibration method using linear/quadratic interpolation (robust/weighted) of given reference masses
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: InternalCalibration ) -> None:
+        """
+        Cython signature: void InternalCalibration(InternalCalibration &)
+        """
+        ...
+    
+    @overload
+    def fillCalibrants(self, in_0: MSExperiment , in_1: List[InternalCalibration_LockMass] , tol_ppm: float , lock_require_mono: bool , lock_require_iso: bool , failed_lock_masses: CalibrationData , verbose: bool ) -> int:
+        """
+        Cython signature: size_t fillCalibrants(MSExperiment, libcpp_vector[InternalCalibration_LockMass], double tol_ppm, bool lock_require_mono, bool lock_require_iso, CalibrationData & failed_lock_masses, bool verbose)
+        Extract calibrants from Raw data (mzML)\n
+        
+        Lock masses are searched in each spectrum and added to the internal calibrant database\n
+        
+        Filters can be used to exclude spurious peaks, i.e. require the calibrant peak to be monoisotopic or
+        to have a +1 isotope (should not be used for very low abundant calibrants)
+        If a calibrant is not found, it is added to a 'failed_lock_masses' database which is returned and not stored internally.
+        The intensity of the peaks describe the reason for failed detection: 0.0 - peak not found with the given ppm tolerance;
+        1.0 - peak is not monoisotopic (can only occur if 'lock_require_mono' is true)
+        2.0 - peak has no +1 isotope (can only occur if 'lock_require_iso' is true)
+        
+        
+        :param exp: Peak map containing the lock masses
+        :param ref_masses: List of lock masses
+        :param tol_ppm: Search window for lock masses in 'exp'
+        :param lock_require_mono: Require that a lock mass is the monoisotopic peak (i.e. not an isotope peak) -- lock mass is rejected otherwise
+        :param lock_require_iso: Require that a lock mass has isotope peaks to its right -- lock mass is rejected otherwise
+        :param failed_lock_masses: Set of calibration masses which were not found, i.e. their expected m/z and RT positions
+        :param verbose: Print information on 'lock_require_XXX' matches during search
+        :return: Number of calibration masses found
+        """
+        ...
+    
+    @overload
+    def fillCalibrants(self, in_0: FeatureMap , in_1: float ) -> int:
+        """
+        Cython signature: size_t fillCalibrants(FeatureMap, double)
+        Extract calibrants from identifications\n
+        
+        Extracts only the first hit from the first peptide identification of each feature
+        Hits are sorted beforehand
+        Ambiguities should be resolved before, e.g. using IDFilter
+        RT and m/z are taken from the features, not from the identifications (for an exception see below)!\n
+        
+        Unassigned peptide identifications are also taken into account!
+        RT and m/z are naturally taken from the IDs, since to feature is assigned
+        If you do not want these IDs, remove them from the feature map before calling this function\n
+        
+        A filtering step is done in the m/z dimension using 'tol_ppm'
+        Since precursor masses could be annotated wrongly (e.g. isotope peak instead of mono),
+        larger outliers are removed before accepting an ID as calibrant
+        
+        
+        :param fm: FeatureMap with peptide identifications
+        :param tol_ppm: Only accept ID's whose theoretical mass deviates at most this much from annotated
+        :return: Number of calibration masses found
+        """
+        ...
+    
+    @overload
+    def fillCalibrants(self, in_0: PeptideIdentificationList , in_1: float ) -> int:
+        """
+        Cython signature: size_t fillCalibrants(PeptideIdentificationList, double)
+        Extract calibrants from identifications\n
+        
+        Extracts only the first hit from each peptide identification
+        Hits are sorted beforehand
+        Ambiguities should be resolved before, e.g. using IDFilter\n
+        
+        Unassigned peptide identifications are also taken into account!
+        RT and m/z are naturally taken from the IDs, since to feature is assigned
+        If you do not want these IDs, remove them from the feature map before calling this function\n
+        
+        A filtering step is done in the m/z dimension using 'tol_ppm'
+        Since precursor masses could be annotated wrongly (e.g. isotope peak instead of mono),
+        larger outliers are removed before accepting an ID as calibrant
+        
+        
+        :param pep_ids: Peptide ids (e.g. from an idXML file)
+        :param tol_ppm: Only accept ID's whose theoretical mass deviates at most this much from annotated
+        :return: Number of calibration masses found
+        """
+        ...
+    
+    def getCalibrationPoints(self) -> CalibrationData:
+        """
+        Cython signature: CalibrationData getCalibrationPoints()
+        Get container of calibration points\n
+        
+        Filled using fillCalibrants() methods
+        
+        
+        :return: Container of calibration points
+        """
+        ...
+    
+    def calibrate(self, in_0: MSExperiment , in_1: List[int] , in_2: int , rt_chunk: float , use_RANSAC: bool , post_ppm_median: float , post_ppm_MAD: float , file_models: Union[bytes, str, String] , file_models_plot: Union[bytes, str, String] , file_residuals: Union[bytes, str, String] , file_residuals_plot: Union[bytes, str, String] , rscript_executable: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool calibrate(MSExperiment, libcpp_vector[int], MZTrafoModel_MODELTYPE, double rt_chunk, bool use_RANSAC, double post_ppm_median, double post_ppm_MAD, String file_models, String file_models_plot, String file_residuals, String file_residuals_plot, String rscript_executable)
+        Apply calibration to data\n
+        
+        For each spectrum, a calibration model will be computed and applied.
+        Make sure to call fillCalibrants() before, so a model can be created.\n
+        
+        The MSExperiment will be sorted by RT and m/z if unsorted.
+        
+        
+        :param exp: MSExperiment holding the Raw data to calibrate
+        :param target_mslvl: MS-levels where calibration should be applied to
+        :param model_type: Linear or quadratic model; select based on your instrument
+        :param rt_chunk: RT-window size (one-sided) of calibration points to collect around each spectrum. Set to negative values, to build one global model instead.
+        :param use_RANSAC: Remove outliers before fitting a model?!
+        :param post_ppm_median: The median ppm error of the calibrants must be at least this good after calibration; otherwise this method returns false(fail)
+        :param post_ppm_MAD: The median absolute deviation of the calibrants must be at least this good after calibration; otherwise this method returns false(fail)
+        :param file_models: Output CSV filename, where model parameters are written to (pass empty string to skip)
+        :param file_models_plot: Output PNG image model parameters (pass empty string to skip)
+        :param file_residuals: Output CSV filename, where ppm errors of calibrants before and after model fitting parameters are written to (pass empty string to skip)
+        :param file_residuals_plot: Output PNG image of the ppm errors of calibrants (pass empty string to skip)
+        :param rscript_executable: Full path to the Rscript executable
+        :return: true upon successful calibration
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ...
+    
+    applyTransformation: __static_InternalCalibration_applyTransformation
+    
+    applyTransformation: __static_InternalCalibration_applyTransformation
+    
+    applyTransformation: __static_InternalCalibration_applyTransformation 
+
+
+class InternalCalibration_LockMass:
+    """
+    Cython implementation of _InternalCalibration_LockMass
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1InternalCalibration_LockMass.html>`_
+    """
+    
+    mz: float
+    
+    ms_level: int
+    
+    charge: int
+    
+    @overload
+    def __init__(self, mz_: float , lvl_: int , charge_: int ) -> None:
+        """
+        Cython signature: void InternalCalibration_LockMass(double mz_, int lvl_, int charge_)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: InternalCalibration_LockMass ) -> None:
+        """
+        Cython signature: void InternalCalibration_LockMass(InternalCalibration_LockMass &)
+        """
+        ... 
+
+
+class InterpolationModel:
+    """
+    Cython implementation of _InterpolationModel
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1InterpolationModel.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void InterpolationModel()
+        Abstract class for 1D-models that are approximated using linear interpolation
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: InterpolationModel ) -> None:
+        """
+        Cython signature: void InterpolationModel(InterpolationModel &)
+        """
+        ...
+    
+    def getIntensity(self, coord: float ) -> float:
+        """
+        Cython signature: double getIntensity(double coord)
+        Access model predicted intensity at position 'pos'
+        """
+        ...
+    
+    def getScalingFactor(self) -> float:
+        """
+        Cython signature: double getScalingFactor()
+        Returns the interpolation class
+        """
+        ...
+    
+    def setOffset(self, offset: float ) -> None:
+        """
+        Cython signature: void setOffset(double offset)
+        Sets the offset of the model
+        """
+        ...
+    
+    def getCenter(self) -> float:
+        """
+        Cython signature: double getCenter()
+        Returns the "center" of the model, particular definition (depends on the derived model)
+        """
+        ...
+    
+    def setSamples(self) -> None:
+        """
+        Cython signature: void setSamples()
+        Sets sample/supporting points of interpolation wrt params
+        """
+        ...
+    
+    def setInterpolationStep(self, interpolation_step: float ) -> None:
+        """
+        Cython signature: void setInterpolationStep(double interpolation_step)
+        Sets the interpolation step for the linear interpolation of the model
+        """
+        ...
+    
+    def setScalingFactor(self, scaling: float ) -> None:
+        """
+        Cython signature: void setScalingFactor(double scaling)
+        Sets the scaling factor of the model
+        """
+        ...
+    
+    def getInterpolation(self) -> LinearInterpolation:
+        """
+        Cython signature: LinearInterpolation getInterpolation()
+        Returns the interpolation class
+        """
+        ... 
+
+
+class IonDetector:
+    """
+    Cython implementation of _IonDetector
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IonDetector.html>`_
+      -- Inherits from ['MetaInfoInterface']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IonDetector()
+        Description of a ion detector (part of a MS Instrument)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IonDetector ) -> None:
+        """
+        Cython signature: void IonDetector(IonDetector &)
+        """
+        ...
+    
+    def getType(self) -> int:
+        """
+        Cython signature: Type_IonDetector getType()
+        Returns the detector type
+        """
+        ...
+    
+    def setType(self, type_: int ) -> None:
+        """
+        Cython signature: void setType(Type_IonDetector type_)
+        Sets the detector type
+        """
+        ...
+    
+    def getAcquisitionMode(self) -> int:
+        """
+        Cython signature: AcquisitionMode getAcquisitionMode()
+        Returns the acquisition mode
+        """
+        ...
+    
+    def setAcquisitionMode(self, acquisition_mode: int ) -> None:
+        """
+        Cython signature: void setAcquisitionMode(AcquisitionMode acquisition_mode)
+        Sets the acquisition mode
+        """
+        ...
+    
+    def getResolution(self) -> float:
+        """
+        Cython signature: double getResolution()
+        Returns the resolution (in ns)
+        """
+        ...
+    
+    def setResolution(self, resolution: float ) -> None:
+        """
+        Cython signature: void setResolution(double resolution)
+        Sets the resolution (in ns)
+        """
+        ...
+    
+    def getADCSamplingFrequency(self) -> float:
+        """
+        Cython signature: double getADCSamplingFrequency()
+        Returns the analog-to-digital converter sampling frequency (in Hz)
+        """
+        ...
+    
+    def setADCSamplingFrequency(self, ADC_sampling_frequency: float ) -> None:
+        """
+        Cython signature: void setADCSamplingFrequency(double ADC_sampling_frequency)
+        Sets the analog-to-digital converter sampling frequency (in Hz)
+        """
+        ...
+    
+    def getOrder(self) -> int:
+        """
+        Cython signature: int getOrder()
+        Returns the order
+        """
+        ...
+    
+    def setOrder(self, order: int ) -> None:
+        """
+        Cython signature: void setOrder(int order)
+        Sets the order
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfType() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfType()
+        Returns all detector type names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfAcquisitionMode() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfAcquisitionMode()
+        Returns all acquisition mode names known to OpenMS
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: IonDetector, op: int) -> Any:
+        ...
+    AcquisitionMode : __AcquisitionMode
+    Type_IonDetector : __Type_IonDetector 
+
+
+class IonIdentityMolecularNetworking:
+    """
+    Cython implementation of _IonIdentityMolecularNetworking
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IonIdentityMolecularNetworking.html>`_
+
+    Includes the necessary functions to generate filed required for GNPS ion identity molecular networking (IIMN).
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void IonIdentityMolecularNetworking()
+        """
+        ...
+    
+    annotateConsensusMap: __static_IonIdentityMolecularNetworking_annotateConsensusMap
+    
+    writeSupplementaryPairTable: __static_IonIdentityMolecularNetworking_writeSupplementaryPairTable 
+
+
+class IonSource:
+    """
+    Cython implementation of _IonSource
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IonSource.html>`_
+      -- Inherits from ['MetaInfoInterface']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IonSource()
+        Description of an ion source (part of a MS Instrument)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IonSource ) -> None:
+        """
+        Cython signature: void IonSource(IonSource &)
+        """
+        ...
+    
+    def getPolarity(self) -> int:
+        """
+        Cython signature: Polarity getPolarity()
+        Returns the ionization mode
+        """
+        ...
+    
+    def setPolarity(self, polarity: int ) -> None:
+        """
+        Cython signature: void setPolarity(Polarity polarity)
+        Sets the ionization mode
+        """
+        ...
+    
+    def getInletType(self) -> int:
+        """
+        Cython signature: InletType getInletType()
+        Returns the inlet type
+        """
+        ...
+    
+    def setInletType(self, inlet_type: int ) -> None:
+        """
+        Cython signature: void setInletType(InletType inlet_type)
+        Sets the inlet type
+        """
+        ...
+    
+    def getIonizationMethod(self) -> int:
+        """
+        Cython signature: IonizationMethod getIonizationMethod()
+        Returns the ionization method
+        """
+        ...
+    
+    def setIonizationMethod(self, ionization_type: int ) -> None:
+        """
+        Cython signature: void setIonizationMethod(IonizationMethod ionization_type)
+        Sets the ionization method
+        """
+        ...
+    
+    def getOrder(self) -> int:
+        """
+        Cython signature: int getOrder()
+        Returns the position of this part in the whole Instrument
+        
+        Order can be ignored, as long the instrument has this default setup:
+          - one ion source
+          - one or many mass analyzers
+          - one ion detector
+        
+        For more complex instruments, the order should be defined.
+        """
+        ...
+    
+    def setOrder(self, order: int ) -> None:
+        """
+        Cython signature: void setOrder(int order)
+        Sets the order
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfInletType() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfInletType()
+        Returns all inlet type names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfIonizationMethod() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfIonizationMethod()
+        Returns all ionization method names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfPolarity() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfPolarity()
+        Returns all polarity names known to OpenMS
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: IonSource, op: int) -> Any:
+        ...
+    InletType : __InletType
+    IonizationMethod : __IonizationMethod
+    Polarity : __Polarity 
+
+
+class IsobaricChannelExtractor:
+    """
+    Cython implementation of _IsobaricChannelExtractor
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsobaricChannelExtractor.html>`_
+      -- Inherits from ['DefaultParamHandler']
+    """
+    
+    @overload
+    def __init__(self, in_0: IsobaricChannelExtractor ) -> None:
+        """
+        Cython signature: void IsobaricChannelExtractor(IsobaricChannelExtractor &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqEightPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricChannelExtractor(ItraqEightPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqFourPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricChannelExtractor(ItraqFourPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTSixPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricChannelExtractor(TMTSixPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTTenPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricChannelExtractor(TMTTenPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    def extractChannels(self, ms_exp_data: MSExperiment , consensus_map: ConsensusMap ) -> None:
+        """
+        Cython signature: void extractChannels(MSExperiment & ms_exp_data, ConsensusMap & consensus_map)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class IsobaricChannelInformation:
+    """
+    Cython implementation of _IsobaricChannelInformation
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::IsobaricQuantitationMethod_1_1IsobaricChannelInformation.html>`_
+    """
+    
+    name: Union[bytes, str, String]
+    
+    id: int
+    
+    description: Union[bytes, str, String]
+    
+    center: float
+    
+    affected_channels: List[int]
+    
+    @overload
+    def __init__(self, name: Union[bytes, str, String] , id_: int , description: Union[bytes, str, String] , center: float , affected_channels: List[int] ) -> None:
+        """
+        Cython signature: void IsobaricChannelInformation(String name, int id_, String description, double center, libcpp_vector[int] affected_channels)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsobaricChannelInformation ) -> None:
+        """
+        Cython signature: void IsobaricChannelInformation(IsobaricChannelInformation &)
+        """
+        ... 
+
+
+class IsobaricIsotopeCorrector:
+    """
+    Cython implementation of _IsobaricIsotopeCorrector
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsobaricIsotopeCorrector.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsobaricIsotopeCorrector()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsobaricIsotopeCorrector ) -> None:
+        """
+        Cython signature: void IsobaricIsotopeCorrector(IsobaricIsotopeCorrector &)
+        """
+        ...
+    
+    @overload
+    def correctIsotopicImpurities(self, consensus_map_in: ConsensusMap , consensus_map_out: ConsensusMap , quant_method: ItraqEightPlexQuantitationMethod ) -> IsobaricQuantifierStatistics:
+        """
+        Cython signature: IsobaricQuantifierStatistics correctIsotopicImpurities(ConsensusMap & consensus_map_in, ConsensusMap & consensus_map_out, ItraqEightPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def correctIsotopicImpurities(self, consensus_map_in: ConsensusMap , consensus_map_out: ConsensusMap , quant_method: ItraqFourPlexQuantitationMethod ) -> IsobaricQuantifierStatistics:
+        """
+        Cython signature: IsobaricQuantifierStatistics correctIsotopicImpurities(ConsensusMap & consensus_map_in, ConsensusMap & consensus_map_out, ItraqFourPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def correctIsotopicImpurities(self, consensus_map_in: ConsensusMap , consensus_map_out: ConsensusMap , quant_method: TMTSixPlexQuantitationMethod ) -> IsobaricQuantifierStatistics:
+        """
+        Cython signature: IsobaricQuantifierStatistics correctIsotopicImpurities(ConsensusMap & consensus_map_in, ConsensusMap & consensus_map_out, TMTSixPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def correctIsotopicImpurities(self, consensus_map_in: ConsensusMap , consensus_map_out: ConsensusMap , quant_method: TMTTenPlexQuantitationMethod ) -> IsobaricQuantifierStatistics:
+        """
+        Cython signature: IsobaricQuantifierStatistics correctIsotopicImpurities(ConsensusMap & consensus_map_in, ConsensusMap & consensus_map_out, TMTTenPlexQuantitationMethod * quant_method)
+        """
+        ... 
+
+
+class IsobaricNormalizer:
+    """
+    Cython implementation of _IsobaricNormalizer
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsobaricNormalizer.html>`_
+    """
+    
+    @overload
+    def __init__(self, in_0: IsobaricNormalizer ) -> None:
+        """
+        Cython signature: void IsobaricNormalizer(IsobaricNormalizer &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqFourPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricNormalizer(ItraqFourPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqEightPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricNormalizer(ItraqEightPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTSixPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricNormalizer(TMTSixPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTTenPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricNormalizer(TMTTenPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    def normalize(self, consensus_map: ConsensusMap ) -> None:
+        """
+        Cython signature: void normalize(ConsensusMap & consensus_map)
+        """
+        ... 
+
+
+class IsobaricQuantifier:
+    """
+    Cython implementation of _IsobaricQuantifier
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsobaricQuantifier.html>`_
+      -- Inherits from ['DefaultParamHandler']
+    """
+    
+    @overload
+    def __init__(self, in_0: IsobaricQuantifier ) -> None:
+        """
+        Cython signature: void IsobaricQuantifier(IsobaricQuantifier &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqFourPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricQuantifier(ItraqFourPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: ItraqEightPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricQuantifier(ItraqEightPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTSixPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricQuantifier(TMTSixPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    @overload
+    def __init__(self, quant_method: TMTTenPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void IsobaricQuantifier(TMTTenPlexQuantitationMethod * quant_method)
+        """
+        ...
+    
+    def quantify(self, consensus_map_in: ConsensusMap , consensus_map_out: ConsensusMap ) -> None:
+        """
+        Cython signature: void quantify(ConsensusMap & consensus_map_in, ConsensusMap & consensus_map_out)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class IsobaricQuantifierStatistics:
+    """
+    Cython implementation of _IsobaricQuantifierStatistics
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsobaricQuantifierStatistics.html>`_
+    """
+    
+    channel_count: int
+    
+    iso_number_ms2_negative: int
+    
+    iso_number_reporter_negative: int
+    
+    iso_number_reporter_different: int
+    
+    iso_solution_different_intensity: float
+    
+    iso_total_intensity_negative: float
+    
+    number_ms2_total: int
+    
+    number_ms2_empty: int
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsobaricQuantifierStatistics()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsobaricQuantifierStatistics ) -> None:
+        """
+        Cython signature: void IsobaricQuantifierStatistics(IsobaricQuantifierStatistics &)
+        """
+        ...
+    
+    def reset(self) -> None:
+        """
+        Cython signature: void reset()
+        """
+        ... 
+
+
+class IsotopeCluster:
+    """
+    Cython implementation of _IsotopeCluster
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsotopeCluster.html>`_
+    """
+    
+    peaks: ChargedIndexSet
+    
+    scans: List[int]
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsotopeCluster()
+        Stores information about an isotopic cluster (i.e. potential peptide charge variants)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsotopeCluster ) -> None:
+        """
+        Cython signature: void IsotopeCluster(IsotopeCluster &)
+        """
+        ... 
+
+
+class IsotopeDistribution:
+    """
+    Cython implementation of _IsotopeDistribution
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsotopeDistribution.html>`_
+
+    Isotope distribution class
+    
+    A container that holds an isotope distribution. It consists of mass values
+    and their correspondent probabilities (stored in the intensity slot)
+    
+    Isotope distributions can be calculated using either the
+    CoarseIsotopePatternGenerator for quantized atomic masses which group
+    isotopes with the same atomic number. Alternatively, the
+    FineIsotopePatternGenerator can be used that calculates hyperfine isotopic
+    distributions
+    
+    This class only describes the container that holds the isotopic
+    distribution, calculations are done using classes derived from
+    IsotopePatternGenerator
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsotopeDistribution()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsotopeDistribution ) -> None:
+        """
+        Cython signature: void IsotopeDistribution(IsotopeDistribution &)
+        """
+        ...
+    
+    def set(self, distribution: List[Peak1D] ) -> None:
+        """
+        Cython signature: void set(libcpp_vector[Peak1D] & distribution)
+        Overwrites the container which holds the distribution using 'distribution'
+        """
+        ...
+    
+    def insert(self, mass: float , intensity: float ) -> None:
+        """
+        Cython signature: void insert(double mass, float intensity)
+        """
+        ...
+    
+    def getContainer(self) -> List[Peak1D]:
+        """
+        Cython signature: libcpp_vector[Peak1D] & getContainer()
+        Returns the container which holds the distribution
+        """
+        ...
+    
+    def getMax(self) -> float:
+        """
+        Cython signature: double getMax()
+        Returns the maximal weight isotope which is stored in the distribution
+        """
+        ...
+    
+    def getMin(self) -> float:
+        """
+        Cython signature: double getMin()
+        Returns the minimal weight isotope which is stored in the distribution
+        """
+        ...
+    
+    def getMostAbundant(self) -> Peak1D:
+        """
+        Cython signature: Peak1D getMostAbundant()
+        Returns the most abundant isotope which is stored in the distribution
+        """
+        ...
+    
+    def size(self) -> int:
+        """
+        Cython signature: size_t size()
+        Returns the size of the distribution which is the number of isotopes in the distribution
+        """
+        ...
+    
+    def clear(self) -> None:
+        """
+        Cython signature: void clear()
+        Clears the distribution and resets max isotope to 0
+        """
+        ...
+    
+    def renormalize(self) -> None:
+        """
+        Cython signature: void renormalize()
+        Renormalizes the sum of the probabilities of the isotopes to 1
+        """
+        ...
+    
+    def trimRight(self, cutoff: float ) -> None:
+        """
+        Cython signature: void trimRight(double cutoff)
+        Trims the right side of the isotope distribution to isotopes with a significant contribution
+        """
+        ...
+    
+    def trimLeft(self, cutoff: float ) -> None:
+        """
+        Cython signature: void trimLeft(double cutoff)
+        Trims the left side of the isotope distribution to isotopes with a significant contribution
+        """
+        ...
+    
+    def merge(self, in_0: float , in_1: float ) -> None:
+        """
+        Cython signature: void merge(double, double)
+        Merges distributions of arbitrary data points with constant defined resolution
+        """
+        ...
+    
+    def resize(self, size: int ) -> None:
+        """
+        Cython signature: void resize(unsigned int size)
+        Resizes distribution container
+        """
+        ...
+    
+    def trimIntensities(self, cutoff: float ) -> None:
+        """
+        Cython signature: void trimIntensities(double cutoff)
+        Remove intensities below the cutoff
+        """
+        ...
+    
+    def sortByIntensity(self) -> None:
+        """
+        Cython signature: void sortByIntensity()
+        Sort isotope distribution by intensity
+        """
+        ...
+    
+    def sortByMass(self) -> None:
+        """
+        Cython signature: void sortByMass()
+        Sort isotope distribution by mass
+        """
+        ...
+    
+    def averageMass(self) -> float:
+        """
+        Cython signature: double averageMass()
+        Compute average mass of isotope distribution (weighted average of all isotopes)
+        """
+        ...
+    
+    def __iter__(self) -> Peak1D:
+       ...
+    Sorted : __Sorted 
+
+
+class IsotopeFitter1D:
+    """
+    Cython implementation of _IsotopeFitter1D
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsotopeFitter1D.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsotopeFitter1D()
+        Isotope distribution fitter (1-dim.) approximated using linear interpolation
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsotopeFitter1D ) -> None:
+        """
+        Cython signature: void IsotopeFitter1D(IsotopeFitter1D &)
+        """
+        ... 
+
+
+class IsotopeLabelingMDVs:
+    """
+    Cython implementation of _IsotopeLabelingMDVs
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsotopeLabelingMDVs.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsotopeLabelingMDVs()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsotopeLabelingMDVs ) -> None:
+        """
+        Cython signature: void IsotopeLabelingMDVs(IsotopeLabelingMDVs &)
+        """
+        ...
+    
+    def isotopicCorrection(self, normalized_feature: Feature , corrected_feature: Feature , correction_matrix: MatrixDouble , correction_matrix_agent: int ) -> None:
+        """
+        Cython signature: void isotopicCorrection(const Feature & normalized_feature, Feature & corrected_feature, MatrixDouble & correction_matrix, const DerivatizationAgent & correction_matrix_agent)
+        This function performs an isotopic correction to account for unlabeled abundances coming from
+        the derivatization agent (e.g., tBDMS) using correction matrix method and is calculated as follows:
+        
+        
+        :param normalized_feature: Feature with normalized values for each component and unlabeled chemical formula for each component group
+        :param correction_matrix: Square matrix holding correction factors derived either experimentally or theoretically which describe how spectral peaks of naturally abundant 13C contribute to spectral peaks that overlap (or convolve) the spectral peaks of the corrected MDV of the derivatization agent
+        :param correction_matrix_agent: Name of the derivatization agent, the internally stored correction matrix if the name of the agent is supplied, only "TBDMS" is supported for now
+        :return: corrected_feature: Feature with corrected values for each component
+        """
+        ...
+    
+    def isotopicCorrections(self, normalized_featureMap: FeatureMap , corrected_featureMap: FeatureMap , correction_matrix: MatrixDouble , correction_matrix_agent: int ) -> None:
+        """
+        Cython signature: void isotopicCorrections(const FeatureMap & normalized_featureMap, FeatureMap & corrected_featureMap, MatrixDouble & correction_matrix, const DerivatizationAgent & correction_matrix_agent)
+        This function performs an isotopic correction to account for unlabeled abundances coming from
+        the derivatization agent (e.g., tBDMS) using correction matrix method and is calculated as follows:
+        
+        
+        :param normalized_featuremap: FeatureMap with normalized values for each component and unlabeled chemical formula for each component group
+        :param correction_matrix: Square matrix holding correction factors derived either experimentally or theoretically which describe how spectral peaks of naturally abundant 13C contribute to spectral peaks that overlap (or convolve) the spectral peaks of the corrected MDV of the derivatization agent
+        :param correction_matrix_agent: Name of the derivatization agent, the internally stored correction matrix if the name of the agent is supplied, only "TBDMS" is supported for now
+        :return corrected_featuremap: FeatureMap with corrected values for each component
+        """
+        ...
+    
+    def calculateIsotopicPurity(self, normalized_feature: Feature , experiment_data: List[float] , isotopic_purity_name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void calculateIsotopicPurity(const Feature & normalized_feature, const libcpp_vector[double] & experiment_data, const String & isotopic_purity_name)
+        This function calculates the isotopic purity of the MDV using the following formula:
+        isotopic purity of tracer (atom % 13C) = n / [n + (M + n-1)/(M + n)],
+        where n in M+n is represented as the index of the result
+        The formula is extracted from "High-resolution 13C metabolic flux analysis",
+        Long et al, doi:10.1038/s41596-019-0204-0
+        
+        
+        :param normalized_feature: Feature with normalized values for each component and the number of heavy labeled e.g., carbons. Out is a Feature with the calculated isotopic purity for the component group
+        :param experiment_data: Vector of experiment data in percent
+        :param isotopic_purity_name: Name of the isotopic purity tracer to be saved as a meta value
+        """
+        ...
+    
+    def calculateMDVAccuracy(self, normalized_feature: Feature , feature_name: Union[bytes, str, String] , fragment_isotopomer_theoretical_formula: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void calculateMDVAccuracy(const Feature & normalized_feature, const String & feature_name, const String & fragment_isotopomer_theoretical_formula)
+        This function calculates the accuracy of the MDV as compared to the theoretical MDV (only for 12C quality control experiments)
+        using average deviation to the mean. The result is mapped to the meta value "average_accuracy" in the updated feature
+        
+        
+        :param normalized_feature: Feature with normalized values for each component and the chemical formula of the component group. Out is a Feature with the component group accuracy and accuracy for the error for each component
+        :param fragment_isotopomer_measured: Measured scan values
+        :param fragment_isotopomer_theoretical_formula: Empirical formula from which the theoretical values will be generated
+        """
+        ...
+    
+    def calculateMDVAccuracies(self, normalized_featureMap: FeatureMap , feature_name: Union[bytes, str, String] , fragment_isotopomer_theoretical_formulas: Dict[Union[bytes, str], Union[bytes, str]] ) -> None:
+        """
+        Cython signature: void calculateMDVAccuracies(const FeatureMap & normalized_featureMap, const String & feature_name, const libcpp_map[libcpp_utf8_string,libcpp_utf8_string] & fragment_isotopomer_theoretical_formulas)
+        This function calculates the accuracy of the MDV as compared to the theoretical MDV (only for 12C quality control experiments)
+        using average deviation to the mean
+        
+        
+        param normalized_featuremap: FeatureMap with normalized values for each component and the chemical formula of the component group. Out is a FeatureMap with the component group accuracy and accuracy for the error for each component
+        param fragment_isotopomer_measured: Measured scan values
+        param fragment_isotopomer_theoretical_formula: A map of ProteinName/peptideRef to Empirical formula from which the theoretical values will be generated
+        """
+        ...
+    
+    def calculateMDV(self, measured_feature: Feature , normalized_feature: Feature , mass_intensity_type: int , feature_name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void calculateMDV(const Feature & measured_feature, Feature & normalized_feature, const MassIntensityType & mass_intensity_type, const String & feature_name)
+        """
+        ...
+    
+    def calculateMDVs(self, measured_featureMap: FeatureMap , normalized_featureMap: FeatureMap , mass_intensity_type: int , feature_name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void calculateMDVs(const FeatureMap & measured_featureMap, FeatureMap & normalized_featureMap, const MassIntensityType & mass_intensity_type, const String & feature_name)
+        """
+        ... 
+
+
+class IsotopeModel:
+    """
+    Cython implementation of _IsotopeModel
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1IsotopeModel.html>`_
+
+    Isotope distribution approximated using linear interpolation
+    
+    This models a smoothed (widened) distribution, i.e. can be used to sample actual raw peaks (depending on the points you query)
+    If you only want the distribution (no widening), use either
+    EmpiricalFormula::getIsotopeDistribution() // for a certain sum formula
+    or
+    IsotopeDistribution::estimateFromPeptideWeight (double average_weight)  // for averagine
+    
+    Peak widening is achieved by either a Gaussian or Lorentzian shape
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void IsotopeModel()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: IsotopeModel ) -> None:
+        """
+        Cython signature: void IsotopeModel(IsotopeModel &)
+        """
+        ...
+    
+    def getCharge(self) -> int:
+        """
+        Cython signature: unsigned int getCharge()
+        """
+        ...
+    
+    def setOffset(self, offset: float ) -> None:
+        """
+        Cython signature: void setOffset(double offset)
+        Set the offset of the model
+        
+        The whole model will be shifted to the new offset without being computing all over
+        This leaves a discrepancy which is minor in small shifts (i.e. shifting by one or two
+        standard deviations) but can get significant otherwise. In that case use setParameters()
+        which enforces a recomputation of the model
+        """
+        ...
+    
+    def getOffset(self) -> float:
+        """
+        Cython signature: double getOffset()
+        Get the offset of the model
+        """
+        ...
+    
+    def getFormula(self) -> EmpiricalFormula:
+        """
+        Cython signature: EmpiricalFormula getFormula()
+        Return the Averagine peptide formula (mass calculated from mean mass and charge -- use .setParameters() to set them)
+        """
+        ...
+    
+    def setSamples(self, formula: EmpiricalFormula ) -> None:
+        """
+        Cython signature: void setSamples(EmpiricalFormula & formula)
+        Set sample/supporting points of interpolation
+        """
+        ...
+    
+    def getCenter(self) -> float:
+        """
+        Cython signature: double getCenter()
+        Get the center of the Isotope model
+        
+        This is a m/z-value not necessarily the monoisotopic mass
+        """
+        ...
+    
+    def getIsotopeDistribution(self) -> IsotopeDistribution:
+        """
+        Cython signature: IsotopeDistribution getIsotopeDistribution()
+        Get the Isotope distribution (without widening) from the last setSamples() call
+        
+        Useful to determine the number of isotopes that the model contains and their position
+        """
+        ...
+    Averagines : __Averagines 
+
+
+class ItraqConstants:
+    """
+    Cython implementation of _ItraqConstants
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1ItraqConstants.html>`_
+
+    Some constants used throughout iTRAQ classes
+    
+    Constants for iTRAQ experiments and a ChannelInfo structure to store information about a single channel
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void ItraqConstants()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: ItraqConstants ) -> None:
+        """
+        Cython signature: void ItraqConstants(ItraqConstants &)
+        """
+        ...
+    
+    def getIsotopeMatrixAsStringList(self, itraq_type: int , isotope_corrections: List[MatrixDouble] ) -> List[bytes]:
+        """
+        Cython signature: StringList getIsotopeMatrixAsStringList(int itraq_type, libcpp_vector[MatrixDouble] & isotope_corrections)
+        Convert isotope correction matrix to stringlist\n
+        
+        Each line is converted into a string of the format channel:-2Da/-1Da/+1Da/+2Da ; e.g. '114:0/0.3/4/0'
+        Useful for creating parameters or debug output
+        
+        
+        :param itraq_type: Which matrix to stringify. Should be of values from enum ITRAQ_TYPES
+        :param isotope_corrections: Vector of the two matrices (4plex, 8plex)
+        """
+        ...
+    
+    def updateIsotopeMatrixFromStringList(self, itraq_type: int , channels: List[bytes] , isotope_corrections: List[MatrixDouble] ) -> None:
+        """
+        Cython signature: void updateIsotopeMatrixFromStringList(int itraq_type, StringList & channels, libcpp_vector[MatrixDouble] & isotope_corrections)
+        Convert strings to isotope correction matrix rows\n
+        
+        Each string of format channel:-2Da/-1Da/+1Da/+2Da ; e.g. '114:0/0.3/4/0'
+        is parsed and the corresponding channel(row) in the matrix is updated
+        Not all channels need to be present, missing channels will be left untouched
+        Useful to update the matrix with user isotope correction values
+        
+        
+        :param itraq_type: Which matrix to stringify. Should be of values from enum ITRAQ_TYPES
+        :param channels: New channel isotope values as strings
+        :param isotope_corrections: Vector of the two matrices (4plex, 8plex)
+        """
+        ...
+    
+    def translateIsotopeMatrix(self, itraq_type: int , isotope_corrections: List[MatrixDouble] ) -> MatrixDouble:
+        """
+        Cython signature: MatrixDouble translateIsotopeMatrix(int & itraq_type, libcpp_vector[MatrixDouble] & isotope_corrections)
+        """
+        ... 
+
+
+class ItraqEightPlexQuantitationMethod:
+    """
+    Cython implementation of _ItraqEightPlexQuantitationMethod
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1ItraqEightPlexQuantitationMethod.html>`_
+      -- Inherits from ['IsobaricQuantitationMethod']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void ItraqEightPlexQuantitationMethod()
+        iTRAQ 8 plex quantitation to be used with the IsobaricQuantitation
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: ItraqEightPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void ItraqEightPlexQuantitationMethod(ItraqEightPlexQuantitationMethod &)
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        """
+        ...
+    
+    def getChannelInformation(self) -> List[IsobaricChannelInformation]:
+        """
+        Cython signature: libcpp_vector[IsobaricChannelInformation] getChannelInformation()
+        """
+        ...
+    
+    def getNumberOfChannels(self) -> int:
+        """
+        Cython signature: size_t getNumberOfChannels()
+        """
+        ...
+    
+    def getIsotopeCorrectionMatrix(self) -> MatrixDouble:
+        """
+        Cython signature: MatrixDouble getIsotopeCorrectionMatrix()
+        """
+        ...
+    
+    def getReferenceChannel(self) -> int:
+        """
+        Cython signature: size_t getReferenceChannel()
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class ItraqFourPlexQuantitationMethod:
+    """
+    Cython implementation of _ItraqFourPlexQuantitationMethod
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1ItraqFourPlexQuantitationMethod.html>`_
+      -- Inherits from ['IsobaricQuantitationMethod']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void ItraqFourPlexQuantitationMethod()
+        iTRAQ 4 plex quantitation to be used with the IsobaricQuantitation
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: ItraqFourPlexQuantitationMethod ) -> None:
+        """
+        Cython signature: void ItraqFourPlexQuantitationMethod(ItraqFourPlexQuantitationMethod &)
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        """
+        ...
+    
+    def getChannelInformation(self) -> List[IsobaricChannelInformation]:
+        """
+        Cython signature: libcpp_vector[IsobaricChannelInformation] getChannelInformation()
+        """
+        ...
+    
+    def getNumberOfChannels(self) -> int:
+        """
+        Cython signature: size_t getNumberOfChannels()
+        """
+        ...
+    
+    def getIsotopeCorrectionMatrix(self) -> MatrixDouble:
+        """
+        Cython signature: MatrixDouble getIsotopeCorrectionMatrix()
+        """
+        ...
+    
+    def getReferenceChannel(self) -> int:
+        """
+        Cython signature: size_t getReferenceChannel()
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class JavaInfo:
+    """
+    Cython implementation of _JavaInfo
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1JavaInfo.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void JavaInfo()
+        Detect Java and retrieve information
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: JavaInfo ) -> None:
+        """
+        Cython signature: void JavaInfo(JavaInfo &)
+        """
+        ...
+    
+    def canRun(self, java_executable: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool canRun(String java_executable)
+        Determine if Java is installed and reachable\n
+        
+        The call fails if either Java is not installed or if a relative location is given and Java is not on the search PATH
+        
+        
+        :param java_executable: Path to Java executable. Can be absolute, relative or just a filename
+        :return: Returns false if Java executable can not be called; true if Java executable can be executed
+        """
+        ... 
+
+
+class KDTreeFeatureMaps:
+    """
+    Cython implementation of _KDTreeFeatureMaps
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1KDTreeFeatureMaps.html>`_
+      -- Inherits from ['DefaultParamHandler']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void KDTreeFeatureMaps()
+        Stores a set of features, together with a 2D tree for fast search
+        """
+        ...
+    
+    @overload
+    def __init__(self, maps: List[FeatureMap] , param: Param ) -> None:
+        """
+        Cython signature: void KDTreeFeatureMaps(const libcpp_vector[FeatureMap] & maps, const Param & param)
+        """
+        ...
+    
+    @overload
+    def __init__(self, maps: List[ConsensusMap] , param: Param ) -> None:
+        """
+        Cython signature: void KDTreeFeatureMaps(const libcpp_vector[ConsensusMap] & maps, const Param & param)
+        """
+        ...
+    
+    @overload
+    def addMaps(self, maps: List[FeatureMap] ) -> None:
+        """
+        Cython signature: void addMaps(const libcpp_vector[FeatureMap] & maps)
+        Add `maps` and balance kd-tree
+        """
+        ...
+    
+    @overload
+    def addMaps(self, maps: List[ConsensusMap] ) -> None:
+        """
+        Cython signature: void addMaps(const libcpp_vector[ConsensusMap] & maps)
+        """
+        ...
+    
+    def rt(self, i: int ) -> float:
+        """
+        Cython signature: double rt(size_t i)
+        """
+        ...
+    
+    def mz(self, i: int ) -> float:
+        """
+        Cython signature: double mz(size_t i)
+        """
+        ...
+    
+    def intensity(self, i: int ) -> float:
+        """
+        Cython signature: float intensity(size_t i)
+        """
+        ...
+    
+    def charge(self, i: int ) -> int:
+        """
+        Cython signature: int charge(size_t i)
+        """
+        ...
+    
+    def mapIndex(self, i: int ) -> int:
+        """
+        Cython signature: size_t mapIndex(size_t i)
+        """
+        ...
+    
+    def size(self) -> int:
+        """
+        Cython signature: size_t size()
+        """
+        ...
+    
+    def treeSize(self) -> int:
+        """
+        Cython signature: size_t treeSize()
+        """
+        ...
+    
+    def numMaps(self) -> int:
+        """
+        Cython signature: size_t numMaps()
+        """
+        ...
+    
+    def clear(self) -> None:
+        """
+        Cython signature: void clear()
+        """
+        ...
+    
+    def optimizeTree(self) -> None:
+        """
+        Cython signature: void optimizeTree()
+        """
+        ...
+    
+    def getNeighborhood(self, index: int , result_indices: List[int] , rt_tol: float , mz_tol: float , mz_ppm: bool , include_features_from_same_map: bool , max_pairwise_log_fc: float ) -> None:
+        """
+        Cython signature: void getNeighborhood(size_t index, libcpp_vector[size_t] & result_indices, double rt_tol, double mz_tol, bool mz_ppm, bool include_features_from_same_map, double max_pairwise_log_fc)
+        Fill `result` with indices of all features compatible (wrt. RT, m/z, map index) to the feature with `index`
+        """
+        ...
+    
+    def queryRegion(self, rt_low: float , rt_high: float , mz_low: float , mz_high: float , result_indices: List[int] , ignored_map_index: int ) -> None:
+        """
+        Cython signature: void queryRegion(double rt_low, double rt_high, double mz_low, double mz_high, libcpp_vector[size_t] & result_indices, size_t ignored_map_index)
+        """
+        ...
+    
+    def applyTransformations(self, trafos: List[TransformationModelLowess] ) -> None:
+        """
+        Cython signature: void applyTransformations(const libcpp_vector[TransformationModelLowess *] & trafos)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class KDTreeFeatureNode:
+    """
+    Cython implementation of _KDTreeFeatureNode
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1KDTreeFeatureNode.html>`_
+
+    A node of the kD-tree with pointer to corresponding data and index
+    """
+    
+    @overload
+    def __init__(self, in_0: KDTreeFeatureNode ) -> None:
+        """
+        Cython signature: void KDTreeFeatureNode(KDTreeFeatureNode &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, data: KDTreeFeatureMaps , idx: int ) -> None:
+        """
+        Cython signature: void KDTreeFeatureNode(KDTreeFeatureMaps * data, size_t idx)
+        """
+        ...
+    
+    def __getitem__(self, i: int ) -> float:
+        """
+        Cython signature: double operator[](size_t i)
+        """
+        ...
+    
+    def getIndex(self) -> int:
+        """
+        Cython signature: size_t getIndex()
+        Returns index of corresponding feature in data_
+        """
+        ... 
+
+
+class Kernel_MassTrace:
+    """
+    Cython implementation of _Kernel_MassTrace
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1Kernel_MassTrace.html>`_
+    """
+    
+    fwhm_mz_avg: float
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void Kernel_MassTrace()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: Kernel_MassTrace ) -> None:
+        """
+        Cython signature: void Kernel_MassTrace(Kernel_MassTrace &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, trace_peaks: List[Peak2D] ) -> None:
+        """
+        Cython signature: void Kernel_MassTrace(const libcpp_vector[Peak2D] & trace_peaks)
+        """
+        ...
+    
+    def getSize(self) -> int:
+        """
+        Cython signature: size_t getSize()
+        Returns the number of peaks contained in the mass trace
+        """
+        ...
+    
+    def getLabel(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getLabel()
+        Returns label of mass trace
+        """
+        ...
+    
+    def setLabel(self, label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setLabel(String label)
+        Sets label of mass trace
+        """
+        ...
+    
+    def getCentroidMZ(self) -> float:
+        """
+        Cython signature: double getCentroidMZ()
+        Returns the centroid m/z
+        """
+        ...
+    
+    def getCentroidRT(self) -> float:
+        """
+        Cython signature: double getCentroidRT()
+        Returns the centroid RT
+        """
+        ...
+    
+    def getCentroidSD(self) -> float:
+        """
+        Cython signature: double getCentroidSD()
+        Returns the centroid SD
+        """
+        ...
+    
+    def getFWHM(self) -> float:
+        """
+        Cython signature: double getFWHM()
+        Returns FWHM
+        """
+        ...
+    
+    def getTraceLength(self) -> float:
+        """
+        Cython signature: double getTraceLength()
+        Returns the length of the trace (as difference in RT)
+        """
+        ...
+    
+    def getFWHMborders(self) -> List[int, int]:
+        """
+        Cython signature: libcpp_pair[size_t,size_t] getFWHMborders()
+        Returns FWHM boarders
+        """
+        ...
+    
+    def getSmoothedIntensities(self) -> List[float]:
+        """
+        Cython signature: libcpp_vector[double] getSmoothedIntensities()
+        Returns smoothed intensities (empty if no smoothing was explicitly done beforehand!)
+        """
+        ...
+    
+    def getAverageMS1CycleTime(self) -> float:
+        """
+        Cython signature: double getAverageMS1CycleTime()
+        Returns average scan time of mass trace
+        """
+        ...
+    
+    def computeSmoothedPeakArea(self) -> float:
+        """
+        Cython signature: double computeSmoothedPeakArea()
+        Sums all non-negative (smoothed!) intensities in the mass trace
+        """
+        ...
+    
+    def computePeakArea(self) -> float:
+        """
+        Cython signature: double computePeakArea()
+        Sums intensities of all peaks in the mass trace
+        """
+        ...
+    
+    def computeIntensitySum(self) -> float:
+        """
+        Cython signature: double computeIntensitySum()
+        Sum all peak intensities in the mass trace
+        """
+        ...
+    
+    def findMaxByIntPeak(self, in_0: bool ) -> int:
+        """
+        Cython signature: size_t findMaxByIntPeak(bool)
+        Returns the index of the mass trace's highest peak within the MassTrace container (based either on raw or smoothed intensities)
+        """
+        ...
+    
+    def estimateFWHM(self, in_0: bool ) -> int:
+        """
+        Cython signature: size_t estimateFWHM(bool)
+        Estimates FWHM of chromatographic peak in seconds (based on either raw or smoothed intensities)
+        """
+        ...
+    
+    def computeFwhmArea(self) -> float:
+        """
+        Cython signature: double computeFwhmArea()
+        """
+        ...
+    
+    def computeFwhmAreaSmooth(self) -> float:
+        """
+        Cython signature: double computeFwhmAreaSmooth()
+        Computes chromatographic peak area within the FWHM range.
+        """
+        ...
+    
+    def getIntensity(self, in_0: bool ) -> float:
+        """
+        Cython signature: double getIntensity(bool)
+        Returns the intensity
+        """
+        ...
+    
+    def getMaxIntensity(self, in_0: bool ) -> float:
+        """
+        Cython signature: double getMaxIntensity(bool)
+        Returns the max intensity
+        """
+        ...
+    
+    def getConvexhull(self) -> ConvexHull2D:
+        """
+        Cython signature: ConvexHull2D getConvexhull()
+        Returns the mass trace's convex hull
+        """
+        ...
+    
+    def setCentroidSD(self, tmp_sd: float ) -> None:
+        """
+        Cython signature: void setCentroidSD(double & tmp_sd)
+        """
+        ...
+    
+    def setSmoothedIntensities(self, db_vec: List[float] ) -> None:
+        """
+        Cython signature: void setSmoothedIntensities(libcpp_vector[double] & db_vec)
+        Sets smoothed intensities (smoothing is done externally, e.g. by LowessSmoothing)
+        """
+        ...
+    
+    def updateSmoothedMaxRT(self) -> None:
+        """
+        Cython signature: void updateSmoothedMaxRT()
+        """
+        ...
+    
+    def updateWeightedMeanRT(self) -> None:
+        """
+        Cython signature: void updateWeightedMeanRT()
+        Compute & update centroid RT as a intensity-weighted mean of RTs
+        """
+        ...
+    
+    def updateSmoothedWeightedMeanRT(self) -> None:
+        """
+        Cython signature: void updateSmoothedWeightedMeanRT()
+        """
+        ...
+    
+    def updateMedianRT(self) -> None:
+        """
+        Cython signature: void updateMedianRT()
+        Compute & update centroid RT as median position of intensities
+        """
+        ...
+    
+    def updateMedianMZ(self) -> None:
+        """
+        Cython signature: void updateMedianMZ()
+        Compute & update centroid m/z as median of m/z values
+        """
+        ...
+    
+    def updateMeanMZ(self) -> None:
+        """
+        Cython signature: void updateMeanMZ()
+        Compute & update centroid m/z as mean of m/z values
+        """
+        ...
+    
+    def updateWeightedMeanMZ(self) -> None:
+        """
+        Cython signature: void updateWeightedMeanMZ()
+        Compute & update centroid m/z as weighted mean of m/z values
+        """
+        ...
+    
+    def updateWeightedMZsd(self) -> None:
+        """
+        Cython signature: void updateWeightedMZsd()
+        Compute & update m/z standard deviation of mass trace as weighted mean of m/z values
+        
+        Make sure to call update(Weighted)(Mean|Median)MZ() first! <br>
+        use getCentroidSD() to get result
+        """
+        ...
+    
+    def setQuantMethod(self, method: int ) -> None:
+        """
+        Cython signature: void setQuantMethod(MT_QUANTMETHOD method)
+        Determine if area or median is used for quantification
+        """
+        ...
+    
+    def getQuantMethod(self) -> int:
+        """
+        Cython signature: MT_QUANTMETHOD getQuantMethod()
+        Check if area or median is used for quantification
+        """
+        ... 
+
+
+class KroenikFile:
+    """
+    Cython implementation of _KroenikFile
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1KroenikFile.html>`_
+
+    File adapter for Kroenik (HardKloer sibling) files
+    
+    The first line is the header and contains the column names:
+    File,  First Scan,  Last Scan,  Num of Scans,  Charge,  Monoisotopic Mass,  Base Isotope Peak,  Best Intensity,  Summed Intensity,  First RTime,  Last RTime,  Best RTime,  Best Correlation,  Modifications
+    
+    Every subsequent line is a feature
+    
+    All properties in the file are converted to Feature properties, whereas "First Scan", "Last Scan", "Num of Scans" and "Modifications" are stored as
+    metavalues with the following names "FirstScan", "LastScan", "NumOfScans" and "AveragineModifications"
+    
+    The width in m/z of the overall convex hull of each feature is set to 3 Th in lack of a value provided by the Kroenik file
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void KroenikFile()
+        """
+        ...
+    
+    def store(self, filename: Union[bytes, str, String] , spectrum: MSSpectrum ) -> None:
+        """
+        Cython signature: void store(String filename, MSSpectrum & spectrum)
+        Stores a MSExperiment into a Kroenik file
+        """
+        ...
+    
+    def load(self, filename: Union[bytes, str, String] , feature_map: FeatureMap ) -> None:
+        """
+        Cython signature: void load(String filename, FeatureMap & feature_map)
+        Loads a Kroenik file into a featureXML
+        
+        The content of the file is stored in `features`
+        
+        :raises:
+          Exception: FileNotFound is thrown if the file could not be opened
+        :raises:
+          Exception: ParseError is thrown if an error occurs during parsing
+        """
+        ... 
+
+
+class LPWrapper:
+    """
+    Cython implementation of _LPWrapper
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LPWrapper.html>`_
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void LPWrapper()
+        """
+        ...
+    
+    @overload
+    def addRow(self, row_indices: List[int] , row_values: List[float] , name: Union[bytes, str, String] ) -> int:
+        """
+        Cython signature: int addRow(libcpp_vector[int] row_indices, libcpp_vector[double] row_values, const String & name)
+        Adds a row to the LP matrix, returns index
+        """
+        ...
+    
+    @overload
+    def addRow(self, row_indices: List[int] , row_values: List[float] , name: Union[bytes, str, String] , lower_bound: float , upper_bound: float , type_: int ) -> int:
+        """
+        Cython signature: int addRow(const libcpp_vector[int] & row_indices, const libcpp_vector[double] & row_values, const String & name, double lower_bound, double upper_bound, LPWrapper_Type type_)
+        Adds a row with boundaries to the LP matrix, returns index
+        """
+        ...
+    
+    @overload
+    def addColumn(self, ) -> int:
+        """
+        Cython signature: int addColumn()
+        Adds an empty column to the LP matrix, returns index
+        """
+        ...
+    
+    @overload
+    def addColumn(self, column_indices: List[int] , column_values: List[float] , name: Union[bytes, str, String] ) -> int:
+        """
+        Cython signature: int addColumn(libcpp_vector[int] column_indices, libcpp_vector[double] column_values, const String & name)
+        Adds a column to the LP matrix, returns index
+        """
+        ...
+    
+    @overload
+    def addColumn(self, column_indices: List[int] , column_values: List[float] , name: Union[bytes, str, String] , lower_bound: float , upper_bound: float , type_: int ) -> int:
+        """
+        Cython signature: int addColumn(const libcpp_vector[int] & column_indices, const libcpp_vector[double] & column_values, const String & name, double lower_bound, double upper_bound, LPWrapper_Type type_)
+        Adds a column with boundaries to the LP matrix, returns index
+        """
+        ...
+    
+    def deleteRow(self, index: int ) -> None:
+        """
+        Cython signature: void deleteRow(int index)
+        Delete index-th row
+        """
+        ...
+    
+    def setColumnName(self, index: int , name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setColumnName(int index, const String & name)
+        Sets name of the index-th column
+        """
+        ...
+    
+    def getColumnName(self, index: int ) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getColumnName(int index)
+        Returns name of the index-th column
+        """
+        ...
+    
+    def getRowName(self, index: int ) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getRowName(int index)
+        Sets name of the index-th row
+        """
+        ...
+    
+    def getRowIndex(self, name: Union[bytes, str, String] ) -> int:
+        """
+        Cython signature: int getRowIndex(const String & name)
+        Returns index of the row with name
+        """
+        ...
+    
+    def getColumnIndex(self, name: Union[bytes, str, String] ) -> int:
+        """
+        Cython signature: int getColumnIndex(const String & name)
+        Returns index of the column with name
+        """
+        ...
+    
+    def getColumnUpperBound(self, index: int ) -> float:
+        """
+        Cython signature: double getColumnUpperBound(int index)
+        Returns column's upper bound
+        """
+        ...
+    
+    def getColumnLowerBound(self, index: int ) -> float:
+        """
+        Cython signature: double getColumnLowerBound(int index)
+        Returns column's lower bound
+        """
+        ...
+    
+    def getRowUpperBound(self, index: int ) -> float:
+        """
+        Cython signature: double getRowUpperBound(int index)
+        Returns row's upper bound
+        """
+        ...
+    
+    def getRowLowerBound(self, index: int ) -> float:
+        """
+        Cython signature: double getRowLowerBound(int index)
+        Returns row's lower bound
+        """
+        ...
+    
+    def setRowName(self, index: int , name: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setRowName(int index, const String & name)
+        Sets name of the index-th row
+        """
+        ...
+    
+    def setColumnBounds(self, index: int , lower_bound: float , upper_bound: float , type_: int ) -> None:
+        """
+        Cython signature: void setColumnBounds(int index, double lower_bound, double upper_bound, LPWrapper_Type type_)
+        Sets column bounds
+        """
+        ...
+    
+    def setRowBounds(self, index: int , lower_bound: float , upper_bound: float , type_: int ) -> None:
+        """
+        Cython signature: void setRowBounds(int index, double lower_bound, double upper_bound, LPWrapper_Type type_)
+        Sets row bounds
+        """
+        ...
+    
+    def setColumnType(self, index: int , type_: int ) -> None:
+        """
+        Cython signature: void setColumnType(int index, VariableType type_)
+        Sets column/variable type.
+        """
+        ...
+    
+    def getColumnType(self, index: int ) -> int:
+        """
+        Cython signature: VariableType getColumnType(int index)
+        Returns column/variable type.
+        """
+        ...
+    
+    def setObjective(self, index: int , obj_value: float ) -> None:
+        """
+        Cython signature: void setObjective(int index, double obj_value)
+        Sets objective value for column with index
+        """
+        ...
+    
+    def getObjective(self, index: int ) -> float:
+        """
+        Cython signature: double getObjective(int index)
+        Returns objective value for column with index
+        """
+        ...
+    
+    def setObjectiveSense(self, sense: int ) -> None:
+        """
+        Cython signature: void setObjectiveSense(Sense sense)
+        Sets objective direction
+        """
+        ...
+    
+    def getObjectiveSense(self) -> int:
+        """
+        Cython signature: Sense getObjectiveSense()
+        Returns objective sense
+        """
+        ...
+    
+    def getNumberOfColumns(self) -> int:
+        """
+        Cython signature: int getNumberOfColumns()
+        Returns number of columns
+        """
+        ...
+    
+    def getNumberOfRows(self) -> int:
+        """
+        Cython signature: int getNumberOfRows()
+        Returns number of rows
+        """
+        ...
+    
+    def setElement(self, row_index: int , column_index: int , value: float ) -> None:
+        """
+        Cython signature: void setElement(int row_index, int column_index, double value)
+        Sets the element
+        """
+        ...
+    
+    def getElement(self, row_index: int , column_index: int ) -> float:
+        """
+        Cython signature: double getElement(int row_index, int column_index)
+        Returns the element
+        """
+        ...
+    
+    def readProblem(self, filename: Union[bytes, str, String] , format_: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void readProblem(String filename, String format_)
+        Read LP from file
+        
+        
+        :param filename: Filename where to store the LP problem
+        :param format: LP, MPS or GLPK
+        """
+        ...
+    
+    def writeProblem(self, filename: Union[bytes, str, String] , format_: int ) -> None:
+        """
+        Cython signature: void writeProblem(const String & filename, WriteFormat format_)
+        Write LP formulation to a file
+        
+        
+        :param filename: Output filename, if the filename ends with '.gz' it will be compressed
+        :param format: MPS-format is supported by GLPK and COIN-OR; LP and GLPK-formats only by GLPK
+        """
+        ...
+    
+    def solve(self, solver_param: SolverParam , verbose_level: int ) -> int:
+        """
+        Cython signature: int solve(SolverParam & solver_param, size_t verbose_level)
+        Solve problems, parameters like enabled heuristics can be given via solver_param\n
+        
+        The verbose level (0,1,2) determines if the solver prints status messages and internals
+        
+        
+        :param solver_param: Parameters of the solver introduced by SolverParam
+        :param verbose_level: Sets verbose level
+        :return: solver dependent
+        """
+        ...
+    
+    def getStatus(self) -> int:
+        """
+        Cython signature: SolverStatus getStatus()
+        Returns solution status
+        
+        
+        :return: status: 1 - undefined, 2 - integer optimal, 3- integer feasible (no optimality proven), 4- no integer feasible solution
+        """
+        ...
+    
+    def getObjectiveValue(self) -> float:
+        """
+        Cython signature: double getObjectiveValue()
+        """
+        ...
+    
+    def getColumnValue(self, index: int ) -> float:
+        """
+        Cython signature: double getColumnValue(int index)
+        """
+        ...
+    
+    def getNumberOfNonZeroEntriesInRow(self, idx: int ) -> int:
+        """
+        Cython signature: int getNumberOfNonZeroEntriesInRow(int idx)
+        """
+        ...
+    
+    def getMatrixRow(self, idx: int , indexes: List[int] ) -> None:
+        """
+        Cython signature: void getMatrixRow(int idx, libcpp_vector[int] & indexes)
+        """
+        ...
+    
+    def getSolver(self) -> int:
+        """
+        Cython signature: SOLVER getSolver()
+        Returns currently active solver
+        """
+        ...
+    LPWrapper_Type : __LPWrapper_Type
+    SOLVER : __SOLVER
+    Sense : __Sense
+    SolverStatus : __SolverStatus
+    VariableType : __VariableType
+    WriteFormat : __WriteFormat 
+
+
+class LabeledPairFinder:
+    """
+    Cython implementation of _LabeledPairFinder
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LabeledPairFinder.html>`_
+      -- Inherits from ['BaseGroupFinder']
+
+    The LabeledPairFinder allows the matching of labeled features (features with a fixed distance)
+    
+    Finds feature pairs that have a defined distance in RT and m/z in the same map
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void LabeledPairFinder()
+        """
+        ...
+    
+    def run(self, input_maps: List[ConsensusMap] , result_map: ConsensusMap ) -> None:
+        """
+        Cython signature: void run(libcpp_vector[ConsensusMap] & input_maps, ConsensusMap & result_map)
+        Runs the LabeledPairFinder algorithm
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class LightCompound:
+    """
+    Cython implementation of _LightCompound
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenSwath_1_1LightCompound.html>`_
+    """
+    
+    rt: float
+    
+    drift_time: float
+    
+    charge: int
+    
+    sequence: bytes
+    
+    protein_refs: List[bytes]
+    
+    peptide_group_label: bytes
+    
+    id: bytes
+    
+    sum_formula: bytes
+    
+    compound_name: bytes
+    
+    modifications: List[LightModification]
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LightCompound()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LightCompound ) -> None:
+        """
+        Cython signature: void LightCompound(LightCompound &)
+        """
+        ...
+    
+    def setDriftTime(self, d: float ) -> None:
+        """
+        Cython signature: void setDriftTime(double d)
+        """
+        ...
+    
+    def getDriftTime(self) -> float:
+        """
+        Cython signature: double getDriftTime()
+        """
+        ...
+    
+    def getChargeState(self) -> int:
+        """
+        Cython signature: int getChargeState()
+        """
+        ...
+    
+    def isPeptide(self) -> bool:
+        """
+        Cython signature: bool isPeptide()
+        """
+        ...
+    
+    def setChargeState(self, ch: int ) -> None:
+        """
+        Cython signature: void setChargeState(int ch)
+        """
+        ... 
+
+
+class LightModification:
+    """
+    Cython implementation of _LightModification
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenSwath_1_1LightModification.html>`_
+    """
+    
+    location: int
+    
+    unimod_id: int
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LightModification()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LightModification ) -> None:
+        """
+        Cython signature: void LightModification(LightModification &)
+        """
+        ... 
+
+
+class LightProtein:
+    """
+    Cython implementation of _LightProtein
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenSwath_1_1LightProtein.html>`_
+    """
+    
+    id: bytes
+    
+    sequence: bytes
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LightProtein()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LightProtein ) -> None:
+        """
+        Cython signature: void LightProtein(LightProtein &)
+        """
+        ... 
+
+
+class LightTargetedExperiment:
+    """
+    Cython implementation of _LightTargetedExperiment
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenSwath_1_1LightTargetedExperiment.html>`_
+    """
+    
+    transitions: List[LightTransition]
+    
+    compounds: List[LightCompound]
+    
+    proteins: List[LightProtein]
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LightTargetedExperiment()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LightTargetedExperiment ) -> None:
+        """
+        Cython signature: void LightTargetedExperiment(LightTargetedExperiment &)
+        """
+        ...
+    
+    def getTransitions(self) -> List[LightTransition]:
+        """
+        Cython signature: libcpp_vector[LightTransition] getTransitions()
+        """
+        ...
+    
+    def getCompounds(self) -> List[LightCompound]:
+        """
+        Cython signature: libcpp_vector[LightCompound] getCompounds()
+        """
+        ...
+    
+    def getProteins(self) -> List[LightProtein]:
+        """
+        Cython signature: libcpp_vector[LightProtein] getProteins()
+        """
+        ...
+    
+    def getCompoundByRef(self, ref: bytes ) -> LightCompound:
+        """
+        Cython signature: LightCompound getCompoundByRef(libcpp_string & ref)
+        """
+        ...
+    
+    def getPeptideByRef(self, ref: bytes ) -> LightCompound:
+        """
+        Cython signature: LightCompound getPeptideByRef(libcpp_string & ref)
+        """
+        ... 
+
+
+class LightTransition:
+    """
+    Cython implementation of _LightTransition
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenSwath_1_1LightTransition.html>`_
+    """
+    
+    transition_name: bytes
+    
+    peptide_ref: bytes
+    
+    library_intensity: float
+    
+    product_mz: float
+    
+    precursor_mz: float
+    
+    fragment_charge: int
+    
+    decoy: bool
+    
+    detecting_transition: bool
+    
+    quantifying_transition: bool
+    
+    identifying_transition: bool
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LightTransition()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LightTransition ) -> None:
+        """
+        Cython signature: void LightTransition(LightTransition &)
+        """
+        ...
+    
+    def getProductChargeState(self) -> int:
+        """
+        Cython signature: int getProductChargeState()
+        """
+        ...
+    
+    def isProductChargeStateSet(self) -> bool:
+        """
+        Cython signature: bool isProductChargeStateSet()
+        """
+        ...
+    
+    def getNativeID(self) -> bytes:
+        """
+        Cython signature: libcpp_string getNativeID()
+        """
+        ...
+    
+    def getPeptideRef(self) -> bytes:
+        """
+        Cython signature: libcpp_string getPeptideRef()
+        """
+        ...
+    
+    def getLibraryIntensity(self) -> float:
+        """
+        Cython signature: double getLibraryIntensity()
+        """
+        ...
+    
+    def setLibraryIntensity(self, l: float ) -> None:
+        """
+        Cython signature: void setLibraryIntensity(double l)
+        """
+        ...
+    
+    def getProductMZ(self) -> float:
+        """
+        Cython signature: double getProductMZ()
+        """
+        ...
+    
+    def getPrecursorMZ(self) -> float:
+        """
+        Cython signature: double getPrecursorMZ()
+        """
+        ...
+    
+    def getCompoundRef(self) -> bytes:
+        """
+        Cython signature: libcpp_string getCompoundRef()
+        """
+        ...
+    
+    def setDetectingTransition(self, d: bool ) -> None:
+        """
+        Cython signature: void setDetectingTransition(bool d)
+        """
+        ...
+    
+    def isDetectingTransition(self) -> bool:
+        """
+        Cython signature: bool isDetectingTransition()
+        """
+        ...
+    
+    def setQuantifyingTransition(self, q: bool ) -> None:
+        """
+        Cython signature: void setQuantifyingTransition(bool q)
+        """
+        ...
+    
+    def isQuantifyingTransition(self) -> bool:
+        """
+        Cython signature: bool isQuantifyingTransition()
+        """
+        ...
+    
+    def setIdentifyingTransition(self, i: bool ) -> None:
+        """
+        Cython signature: void setIdentifyingTransition(bool i)
+        """
+        ...
+    
+    def isIdentifyingTransition(self) -> bool:
+        """
+        Cython signature: bool isIdentifyingTransition()
+        """
+        ... 
+
+
+class LinearInterpolation:
+    """
+    Cython implementation of _LinearInterpolation[double,double]
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::Math_1_1LinearInterpolation[double,double].html>`_
+
+    Provides access to linearly interpolated values (and
+    derivatives) from discrete data points.  Values beyond the given range
+    of data points are implicitly taken as zero.
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LinearInterpolation()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LinearInterpolation ) -> None:
+        """
+        Cython signature: void LinearInterpolation(LinearInterpolation &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, scale: float , offset: float ) -> None:
+        """
+        Cython signature: void LinearInterpolation(double scale, double offset)
+        """
+        ...
+    
+    def value(self, arg_pos: float ) -> float:
+        """
+        Cython signature: double value(double arg_pos)
+        Returns the interpolated value
+        """
+        ...
+    
+    def addValue(self, arg_pos: float , arg_value: float ) -> None:
+        """
+        Cython signature: void addValue(double arg_pos, double arg_value)
+        Performs linear resampling. The `arg_value` is split up and added to the data points around `arg_pos`
+        """
+        ...
+    
+    def derivative(self, arg_pos: float ) -> float:
+        """
+        Cython signature: double derivative(double arg_pos)
+        Returns the interpolated derivative
+        """
+        ...
+    
+    def getData(self) -> List[float]:
+        """
+        Cython signature: libcpp_vector[double] getData()
+        Returns the internal random access container from which interpolated values are being sampled
+        """
+        ...
+    
+    def setData(self, data: List[float] ) -> None:
+        """
+        Cython signature: void setData(libcpp_vector[double] & data)
+        Assigns data to the internal random access container from which interpolated values are being sampled
+        """
+        ...
+    
+    def empty(self) -> bool:
+        """
+        Cython signature: bool empty()
+        Returns `true` if getData() is empty
+        """
+        ...
+    
+    def key2index(self, pos: float ) -> float:
+        """
+        Cython signature: double key2index(double pos)
+        The transformation from "outside" to "inside" coordinates
+        """
+        ...
+    
+    def index2key(self, pos: float ) -> float:
+        """
+        Cython signature: double index2key(double pos)
+        The transformation from "inside" to "outside" coordinates
+        """
+        ...
+    
+    def getScale(self) -> float:
+        """
+        Cython signature: double getScale()
+        "Scale" is the difference (in "outside" units) between consecutive entries in "Data"
+        """
+        ...
+    
+    def setScale(self, scale: float ) -> None:
+        """
+        Cython signature: void setScale(double & scale)
+        "Scale" is the difference (in "outside" units) between consecutive entries in "Data"
+        """
+        ...
+    
+    def getOffset(self) -> float:
+        """
+        Cython signature: double getOffset()
+        "Offset" is the point (in "outside" units) which corresponds to "Data[0]"
+        """
+        ...
+    
+    def setOffset(self, offset: float ) -> None:
+        """
+        Cython signature: void setOffset(double & offset)
+        "Offset" is the point (in "outside" units) which corresponds to "Data[0]"
+        """
+        ...
+    
+    @overload
+    def setMapping(self, scale: float , inside: float , outside: float ) -> None:
+        """
+        Cython signature: void setMapping(double & scale, double & inside, double & outside)
+        """
+        ...
+    
+    @overload
+    def setMapping(self, inside_low: float , outside_low: float , inside_high: float , outside_high: float ) -> None:
+        """
+        Cython signature: void setMapping(double & inside_low, double & outside_low, double & inside_high, double & outside_high)
+        """
+        ...
+    
+    def getInsideReferencePoint(self) -> float:
+        """
+        Cython signature: double getInsideReferencePoint()
+        """
+        ...
+    
+    def getOutsideReferencePoint(self) -> float:
+        """
+        Cython signature: double getOutsideReferencePoint()
+        """
+        ...
+    
+    def supportMin(self) -> float:
+        """
+        Cython signature: double supportMin()
+        """
+        ...
+    
+    def supportMax(self) -> float:
+        """
+        Cython signature: double supportMax()
+        """
+        ... 
+
+
+class LinearResampler:
+    """
+    Cython implementation of _LinearResampler
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LinearResampler.html>`_
+      -- Inherits from ['DefaultParamHandler', 'ProgressLogger']
+
+    Annotates and filters transitions in a TargetedExperiment
+    
+    
+    :param exp: The input, unfiltered transitions
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void LinearResampler()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: LinearResampler ) -> None:
+        """
+        Cython signature: void LinearResampler(LinearResampler &)
+        """
+        ...
+    
+    def raster(self, input: MSSpectrum ) -> None:
+        """
+        Cython signature: void raster(MSSpectrum & input)
+        Applies the resampling algorithm to an MSSpectrum
+        """
+        ...
+    
+    def rasterExperiment(self, input: MSExperiment ) -> None:
+        """
+        Cython signature: void rasterExperiment(MSExperiment & input)
+        Resamples the data in an MSExperiment
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class LinearResamplerAlign:
+    """
+    Cython implementation of _LinearResamplerAlign
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LinearResamplerAlign.html>`_
+      -- Inherits from ['LinearResampler']
+    """
+    
+    def __init__(self, in_0: LinearResamplerAlign ) -> None:
+        """
+        Cython signature: void LinearResamplerAlign(LinearResamplerAlign &)
+        """
+        ...
+    
+    def raster(self, input: MSSpectrum ) -> None:
+        """
+        Cython signature: void raster(MSSpectrum & input)
+        Applies the resampling algorithm to an MSSpectrum
+        """
+        ...
+    
+    def rasterExperiment(self, input: MSExperiment ) -> None:
+        """
+        Cython signature: void rasterExperiment(MSExperiment & input)
+        Resamples the data in an MSExperiment
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class LogConfigHandler:
+    """
+    Cython implementation of _LogConfigHandler
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LogConfigHandler.html>`_
+    """
+    
+    def parse(self, setting: List[bytes] ) -> Param:
+        """
+        Cython signature: Param parse(const StringList & setting)
+        Translates the given list of parameter settings into a LogStream configuration
+        
+        Translates the given list of parameter settings into a LogStream configuration.
+        Usually this list stems from a command line call.
+        
+        Each element in the stringlist should follow this naming convention
+        
+        <LOG_NAME> <ACTION> <PARAMETER>
+        
+        with
+        - LOG_NAME: DEBUG,INFO,WARNING,ERROR,FATAL_ERROR
+        - ACTION: add,remove,clear
+        - PARAMETER: for 'add'/'remove' it is the stream name (cout, cerr or a filename), 'clear' does not require any further parameter
+        
+        Example:
+        `DEBUG add debug.log`
+        
+        This function will **not** apply to settings to the log handlers. Use configure() for that.
+        
+        :param setting: StringList containing the configuration options
+        :raises ParseError: In case of an invalid configuration.
+        :return: Param object containing all settings, that can be applied using the LogConfigHandler.configure() method
+        """
+        ...
+    
+    def configure(self, param: Param ) -> None:
+        """
+        Cython signature: void configure(const Param & param)
+        Applies the given parameters (@p param) to the current configuration
+        
+        <LOG_NAME> <ACTION> <PARAMETER> <STREAMTYPE>
+        
+        LOG_NAME: DEBUG, INFO, WARNING, ERROR, FATAL_ERROR
+        ACTION: add, remove, clear
+        PARAMETER: for 'add'/'remove' it is the stream name ('cout', 'cerr' or a filename), 'clear' does not require any further parameter
+        STREAMTYPE: FILE, STRING (for a StringStream, which you can grab by this name using getStream() )
+        
+        You cannot specify a file named "cout" or "cerr" even if you specify streamtype 'FILE' - the handler will mistake this for the
+        internal streams, but you can use "./cout" to print to a file named cout.
+        
+        A classical configuration would contain a list of settings e.g.
+        
+        `DEBUG add debug.log FILE`
+        `INFO remove cout FILE` (FILE will be ignored)
+        `INFO add string_stream1 STRING`
+        
+        :raises ElementNotFound: If the LogStream (first argument) does not exist.
+        :raises FileNotWritable: If a file (or stream) should be opened as log file (or stream) that is not accessible.
+        :raises IllegalArgument: If a stream should be registered, that was already registered with a different type.
+        """
+        ...
+    
+    def setLogLevel(self, log_level: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setLogLevel(const String & log_level)
+        Sets a minimum log_level by removing all streams from loggers lower than that level.
+        Valid levels are from low to high: "DEBUG", "INFO", "WARNING", "ERROR", "FATAL_ERROR"
+        """
+        ... 
+
+
+class LowessSmoothing:
+    """
+    Cython implementation of _LowessSmoothing
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1LowessSmoothing.html>`_
+      -- Inherits from ['DefaultParamHandler']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void LowessSmoothing()
+        """
+        ...
+    
+    def smoothData(self, x: List[float] , y: List[float] , y_smoothed: List[float] ) -> None:
+        """
+        Cython signature: void smoothData(libcpp_vector[double] x, libcpp_vector[double] y, libcpp_vector[double] & y_smoothed)
+        Smoothing method that receives x and y coordinates (e.g., RT and intensities) and computes smoothed intensities
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class MapAlignmentAlgorithmIdentification:
+    """
+    Cython implementation of _MapAlignmentAlgorithmIdentification
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentAlgorithmIdentification.html>`_
+      -- Inherits from ['DefaultParamHandler', 'ProgressLogger']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void MapAlignmentAlgorithmIdentification()
+        """
+        ...
+    
+    @overload
+    def align(self, in_0: List[FeatureMap] , in_1: List[TransformationDescription] , in_2: int ) -> None:
+        """
+        Cython signature: void align(const libcpp_vector[FeatureMap] &, libcpp_vector[TransformationDescription] &, int)
+        """
+        ...
+    
+    @overload
+    def align(self, in_0: List[ConsensusMap] , in_1: List[TransformationDescription] , in_2: int ) -> None:
+        """
+        Cython signature: void align(const libcpp_vector[ConsensusMap] &, libcpp_vector[TransformationDescription] &, int)
+        """
+        ...
+    
+    @overload
+    def setReference(self, in_0: FeatureMap ) -> None:
+        """
+        Cython signature: void setReference(FeatureMap &)
+        """
+        ...
+    
+    @overload
+    def setReference(self, in_0: ConsensusMap ) -> None:
+        """
+        Cython signature: void setReference(ConsensusMap &)
+        """
+        ...
+    
+    @overload
+    def setReference(self, in_0: PeptideIdentificationList ) -> None:
+        """
+        Cython signature: void setReference(PeptideIdentificationList &)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class MapAlignmentAlgorithmKD:
+    """
+    Cython implementation of _MapAlignmentAlgorithmKD
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentAlgorithmKD.html>`_
+
+    An efficient reference-free feature map alignment algorithm for unlabeled data
+    
+    This algorithm uses a kd-tree to efficiently compute conflict-free connected components (CCC)
+    in a compatibility graph on feature data. This graph is comprised of nodes corresponding
+    to features and edges connecting features f and f' iff both are within each other's tolerance
+    windows (wrt. RT and m/z difference). CCCs are those CCs that do not contain multiple features
+    from the same input map, and whose features all have the same charge state
+    
+    All CCCs above a user-specified minimum size are considered true sets of corresponding features
+    and based on these, LOWESS transformations are computed for each input map such that the average
+    deviation from the mean retention time within all CCCs is minimized
+    """
+    
+    @overload
+    def __init__(self, num_maps: int , param: Param ) -> None:
+        """
+        Cython signature: void MapAlignmentAlgorithmKD(size_t num_maps, Param & param)
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MapAlignmentAlgorithmKD ) -> None:
+        """
+        Cython signature: void MapAlignmentAlgorithmKD(MapAlignmentAlgorithmKD &)
+        """
+        ...
+    
+    def addRTFitData(self, kd_data: KDTreeFeatureMaps ) -> None:
+        """
+        Cython signature: void addRTFitData(KDTreeFeatureMaps & kd_data)
+        Compute data points needed for RT transformation in the current `kd_data`, add to `fit_data_`
+        """
+        ...
+    
+    def fitLOWESS(self) -> None:
+        """
+        Cython signature: void fitLOWESS()
+        Fit LOWESS to fit_data_, store final models in `transformations_`
+        """
+        ...
+    
+    def transform(self, kd_data: KDTreeFeatureMaps ) -> None:
+        """
+        Cython signature: void transform(KDTreeFeatureMaps & kd_data)
+        Transform RTs for `kd_data`
+        """
+        ... 
+
+
+class MapAlignmentAlgorithmPoseClustering:
+    """
+    Cython implementation of _MapAlignmentAlgorithmPoseClustering
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentAlgorithmPoseClustering.html>`_
+      -- Inherits from ['DefaultParamHandler', 'ProgressLogger']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void MapAlignmentAlgorithmPoseClustering()
+        """
+        ...
+    
+    @overload
+    def align(self, in_0: FeatureMap , in_1: TransformationDescription ) -> None:
+        """
+        Cython signature: void align(FeatureMap, TransformationDescription &)
+        """
+        ...
+    
+    @overload
+    def align(self, in_0: MSExperiment , in_1: TransformationDescription ) -> None:
+        """
+        Cython signature: void align(MSExperiment, TransformationDescription &)
+        """
+        ...
+    
+    @overload
+    def setReference(self, in_0: FeatureMap ) -> None:
+        """
+        Cython signature: void setReference(FeatureMap)
+        Sets the reference for the alignment
+        """
+        ...
+    
+    @overload
+    def setReference(self, in_0: MSExperiment ) -> None:
+        """
+        Cython signature: void setReference(MSExperiment)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class MapAlignmentEvaluationAlgorithmPrecision:
+    """
+    Cython implementation of _MapAlignmentEvaluationAlgorithmPrecision
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentEvaluationAlgorithmPrecision.html>`_
+      -- Inherits from ['MapAlignmentEvaluationAlgorithm']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void MapAlignmentEvaluationAlgorithmPrecision()
+        """
+        ... 
+
+
+class MapAlignmentEvaluationAlgorithmRecall:
+    """
+    Cython implementation of _MapAlignmentEvaluationAlgorithmRecall
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentEvaluationAlgorithmRecall.html>`_
+      -- Inherits from ['MapAlignmentEvaluationAlgorithm']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void MapAlignmentEvaluationAlgorithmRecall()
+        """
+        ... 
+
+
+class MapAlignmentTransformer:
+    """
+    Cython implementation of _MapAlignmentTransformer
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MapAlignmentTransformer.html>`_
+
+    This class collects functions for applying retention time transformations to data structures
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MapAlignmentTransformer()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MapAlignmentTransformer ) -> None:
+        """
+        Cython signature: void MapAlignmentTransformer(MapAlignmentTransformer &)
+        """
+        ...
+    
+    @overload
+    def transformRetentionTimes(self, in_0: MSExperiment , in_1: TransformationDescription , in_2: bool ) -> None:
+        """
+        Cython signature: void transformRetentionTimes(MSExperiment &, TransformationDescription &, bool)
+        Applies the given transformation to a peak map
+        """
+        ...
+    
+    @overload
+    def transformRetentionTimes(self, in_0: FeatureMap , in_1: TransformationDescription , in_2: bool ) -> None:
+        """
+        Cython signature: void transformRetentionTimes(FeatureMap &, TransformationDescription &, bool)
+        Applies the given transformation to a feature map
+        """
+        ...
+    
+    @overload
+    def transformRetentionTimes(self, in_0: ConsensusMap , in_1: TransformationDescription , in_2: bool ) -> None:
+        """
+        Cython signature: void transformRetentionTimes(ConsensusMap &, TransformationDescription &, bool)
+        Applies the given transformation to a consensus map
+        """
+        ...
+    
+    @overload
+    def transformRetentionTimes(self, in_0: PeptideIdentificationList , in_1: TransformationDescription , in_2: bool ) -> None:
+        """
+        Cython signature: void transformRetentionTimes(PeptideIdentificationList &, TransformationDescription &, bool)
+        Applies the given transformation to peptide identifications
+        """
+        ... 
+
+
+class MascotGenericFile:
+    """
+    Cython implementation of _MascotGenericFile
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MascotGenericFile.html>`_
+      -- Inherits from ['ProgressLogger', 'DefaultParamHandler']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MascotGenericFile()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MascotGenericFile ) -> None:
+        """
+        Cython signature: void MascotGenericFile(MascotGenericFile &)
+        """
+        ...
+    
+    def store(self, filename: Union[bytes, str, String] , experiment: MSExperiment ) -> None:
+        """
+        Cython signature: void store(const String & filename, MSExperiment & experiment)
+        """
+        ...
+    
+    def load(self, filename: Union[bytes, str, String] , exp: MSExperiment ) -> None:
+        """
+        Cython signature: void load(const String & filename, MSExperiment & exp)
+        Loads a Mascot Generic File into a PeakMap
+        
+        
+        :param filename: File name which the map should be read from
+        :param exp: The map which is filled with the data from the given file
+        :raises:
+          Exception: FileNotFound is thrown if the given file could not be found
+        """
+        ...
+    
+    def getHTTPPeakListEnclosure(self, filename: Union[bytes, str, String] ) -> List[Union[bytes, str, String], Union[bytes, str, String]]:
+        """
+        Cython signature: libcpp_pair[String,String] getHTTPPeakListEnclosure(const String & filename)
+        Enclosing Strings of the peak list body for HTTP submission\n
+        
+        Can be used to embed custom content into HTTP submission (when writing only the MGF header in HTTP format and then
+        adding the peaks (in whatever format, e.g. mzXML) enclosed in this body
+        The `filename` can later be found in the Mascot response
+        """
+        ...
+    
+    def updateMembers_(self) -> None:
+        """
+        Cython signature: void updateMembers_()
+        Docu in base class
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class MascotXMLFile:
+    """
+    Cython implementation of _MascotXMLFile
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MascotXMLFile.html>`_
+      -- Inherits from ['XMLFile']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MascotXMLFile()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MascotXMLFile ) -> None:
+        """
+        Cython signature: void MascotXMLFile(MascotXMLFile &)
+        """
+        ...
+    
+    def load(self, filename: Union[bytes, str, String] , protein_identification: ProteinIdentification , id_data: PeptideIdentificationList , rt_mapping: SpectrumMetaDataLookup ) -> None:
+        """
+        Cython signature: void load(const String & filename, ProteinIdentification & protein_identification, PeptideIdentificationList & id_data, SpectrumMetaDataLookup & rt_mapping)
+        Loads data from a Mascot XML file
+        
+        
+        :param filename: The file to be loaded
+        :param protein_identification: Protein identifications belonging to the whole experiment
+        :param id_data: The identifications with m/z and RT
+        :param lookup: Helper object for looking up spectrum meta data
+        :raises:
+          Exception: FileNotFound is thrown if the file does not exists
+        :raises:
+          Exception: ParseError is thrown if the file does not suit to the standard
+        """
+        ...
+    
+    def initializeLookup(self, lookup: SpectrumMetaDataLookup , experiment: MSExperiment , scan_regex: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void initializeLookup(SpectrumMetaDataLookup & lookup, MSExperiment & experiment, const String & scan_regex)
+        Initializes a helper object for looking up spectrum meta data (RT, m/z)
+        
+        
+        :param lookup: Helper object to initialize
+        :param experiment: Experiment containing the spectra
+        :param scan_regex: Optional regular expression for extracting information from references to spectra
+        """
+        ...
+    
+    def getVersion(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getVersion()
+        Return the version of the schema
+        """
+        ... 
+
+
+class MassAnalyzer:
+    """
+    Cython implementation of _MassAnalyzer
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MassAnalyzer.html>`_
+      -- Inherits from ['MetaInfoInterface']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MassAnalyzer()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MassAnalyzer ) -> None:
+        """
+        Cython signature: void MassAnalyzer(MassAnalyzer &)
+        """
+        ...
+    
+    def getType(self) -> int:
+        """
+        Cython signature: AnalyzerType getType()
+        Returns the analyzer type
+        """
+        ...
+    
+    def setType(self, type: int ) -> None:
+        """
+        Cython signature: void setType(AnalyzerType type)
+        Sets the analyzer type
+        """
+        ...
+    
+    def getResolutionMethod(self) -> int:
+        """
+        Cython signature: ResolutionMethod getResolutionMethod()
+        Returns the method used for determination of the resolution
+        """
+        ...
+    
+    def setResolutionMethod(self, resolution_method: int ) -> None:
+        """
+        Cython signature: void setResolutionMethod(ResolutionMethod resolution_method)
+        Sets the method used for determination of the resolution
+        """
+        ...
+    
+    def getResolutionType(self) -> int:
+        """
+        Cython signature: ResolutionType getResolutionType()
+        Returns the resolution type
+        """
+        ...
+    
+    def setResolutionType(self, resolution_type: int ) -> None:
+        """
+        Cython signature: void setResolutionType(ResolutionType resolution_type)
+        Sets the resolution type
+        """
+        ...
+    
+    def getScanDirection(self) -> int:
+        """
+        Cython signature: ScanDirection getScanDirection()
+        Returns the direction of scanning
+        """
+        ...
+    
+    def setScanDirection(self, scan_direction: int ) -> None:
+        """
+        Cython signature: void setScanDirection(ScanDirection scan_direction)
+        Sets the direction of scanning
+        """
+        ...
+    
+    def getScanLaw(self) -> int:
+        """
+        Cython signature: ScanLaw getScanLaw()
+        Returns the scan law
+        """
+        ...
+    
+    def setScanLaw(self, scan_law: int ) -> None:
+        """
+        Cython signature: void setScanLaw(ScanLaw scan_law)
+        Sets the scan law
+        """
+        ...
+    
+    def getReflectronState(self) -> int:
+        """
+        Cython signature: ReflectronState getReflectronState()
+        Returns the reflectron state (for TOF)
+        """
+        ...
+    
+    def setReflectronState(self, reflecton_state: int ) -> None:
+        """
+        Cython signature: void setReflectronState(ReflectronState reflecton_state)
+        Sets the reflectron state (for TOF)
+        """
+        ...
+    
+    def getResolution(self) -> float:
+        """
+        Cython signature: double getResolution()
+        Returns the resolution. The maximum m/z value at which two peaks can be resolved, according to one of the standard measures
+        """
+        ...
+    
+    def setResolution(self, resolution: float ) -> None:
+        """
+        Cython signature: void setResolution(double resolution)
+        Sets the resolution
+        """
+        ...
+    
+    def getAccuracy(self) -> float:
+        """
+        Cython signature: double getAccuracy()
+        Returns the mass accuracy i.e. how much the theoretical mass may differ from the measured mass (in ppm)
+        """
+        ...
+    
+    def setAccuracy(self, accuracy: float ) -> None:
+        """
+        Cython signature: void setAccuracy(double accuracy)
+        Sets the accuracy i.e. how much the theoretical mass may differ from the measured mass (in ppm)
+        """
+        ...
+    
+    def getScanRate(self) -> float:
+        """
+        Cython signature: double getScanRate()
+        Returns the scan rate (in s)
+        """
+        ...
+    
+    def setScanRate(self, scan_rate: float ) -> None:
+        """
+        Cython signature: void setScanRate(double scan_rate)
+        Sets the scan rate (in s)
+        """
+        ...
+    
+    def getScanTime(self) -> float:
+        """
+        Cython signature: double getScanTime()
+        Returns the scan time for a single scan (in s)
+        """
+        ...
+    
+    def setScanTime(self, scan_time: float ) -> None:
+        """
+        Cython signature: void setScanTime(double scan_time)
+        Sets the scan time for a single scan (in s)
+        """
+        ...
+    
+    def getTOFTotalPathLength(self) -> float:
+        """
+        Cython signature: double getTOFTotalPathLength()
+        Returns the path length for a TOF mass analyzer (in meter)
+        """
+        ...
+    
+    def setTOFTotalPathLength(self, TOF_total_path_length: float ) -> None:
+        """
+        Cython signature: void setTOFTotalPathLength(double TOF_total_path_length)
+        Sets the path length for a TOF mass analyzer (in meter)
+        """
+        ...
+    
+    def getIsolationWidth(self) -> float:
+        """
+        Cython signature: double getIsolationWidth()
+        Returns the isolation width i.e. in which m/z range the precursor ion is selected for MS to the n (in m/z)
+        """
+        ...
+    
+    def setIsolationWidth(self, isolation_width: float ) -> None:
+        """
+        Cython signature: void setIsolationWidth(double isolation_width)
+        Sets the isolation width i.e. in which m/z range the precursor ion is selected for MS to the n (in m/z)
+        """
+        ...
+    
+    def getFinalMSExponent(self) -> int:
+        """
+        Cython signature: int getFinalMSExponent()
+        Returns the final MS exponent
+        """
+        ...
+    
+    def setFinalMSExponent(self, final_MS_exponent: int ) -> None:
+        """
+        Cython signature: void setFinalMSExponent(int final_MS_exponent)
+        Sets the final MS exponent
+        """
+        ...
+    
+    def getMagneticFieldStrength(self) -> float:
+        """
+        Cython signature: double getMagneticFieldStrength()
+        Returns the strength of the magnetic field (in T)
+        """
+        ...
+    
+    def setMagneticFieldStrength(self, magnetic_field_strength: float ) -> None:
+        """
+        Cython signature: void setMagneticFieldStrength(double magnetic_field_strength)
+        Sets the strength of the magnetic field (in T)
+        """
+        ...
+    
+    def getOrder(self) -> int:
+        """
+        Cython signature: int getOrder()
+        Returns the position of this part in the whole Instrument
+        """
+        ...
+    
+    def setOrder(self, order: int ) -> None:
+        """
+        Cython signature: void setOrder(int order)
+        Sets the order
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfAnalyzerType() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfAnalyzerType()
+        Returns all analyzer type names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfResolutionMethod() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfResolutionMethod()
+        Returns all resolution method names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfResolutionType() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfResolutionType()
+        Returns all resolution type names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfScanDirection() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfScanDirection()
+        Returns all scan direction names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfScanLaw() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfScanLaw()
+        Returns all scan law names known to OpenMS
+        """
+        ...
+    
+    @staticmethod
+    def getAllNamesOfReflectronState() -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getAllNamesOfReflectronState()
+        Returns all reflectron state names known to OpenMS
+        """
+        ...
+    
+    def isMetaEmpty(self) -> bool:
+        """
+        Cython signature: bool isMetaEmpty()
+        Returns if the MetaInfo is empty
+        """
+        ...
+    
+    def clearMetaInfo(self) -> None:
+        """
+        Cython signature: void clearMetaInfo()
+        Removes all meta values
+        """
+        ...
+    
+    def metaRegistry(self) -> MetaInfoRegistry:
+        """
+        Cython signature: MetaInfoRegistry metaRegistry()
+        Returns a reference to the MetaInfoRegistry
+        """
+        ...
+    
+    def getKeys(self, keys: List[bytes] ) -> None:
+        """
+        Cython signature: void getKeys(libcpp_vector[String] & keys)
+        Fills the given vector with a list of all keys for which a value is set
+        """
+        ...
+    
+    def getMetaValue(self, in_0: Union[bytes, str, String] ) -> Union[int, float, bytes, str, List[int], List[float], List[bytes]]:
+        """
+        Cython signature: DataValue getMetaValue(String)
+        Returns the value corresponding to a string, or
+        """
+        ...
+    
+    def setMetaValue(self, in_0: Union[bytes, str, String] , in_1: Union[int, float, bytes, str, List[int], List[float], List[bytes]] ) -> None:
+        """
+        Cython signature: void setMetaValue(String, DataValue)
+        Sets the DataValue corresponding to a name
+        """
+        ...
+    
+    def metaValueExists(self, in_0: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool metaValueExists(String)
+        Returns whether an entry with the given name exists
+        """
+        ...
+    
+    def removeMetaValue(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void removeMetaValue(String)
+        Removes the DataValue corresponding to `name` if it exists
+        """
+        ...
+    
+    def __richcmp__(self, other: MassAnalyzer, op: int) -> Any:
+        ...
+    AnalyzerType : __AnalyzerType
+    ReflectronState : __ReflectronState
+    ResolutionMethod : __ResolutionMethod
+    ResolutionType : __ResolutionType
+    ScanDirection : __ScanDirection
+    ScanLaw : __ScanLaw 
+
+
+class MassDecomposition:
+    """
+    Cython implementation of _MassDecomposition
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MassDecomposition.html>`_
+
+    Class represents a decomposition of a mass into amino acids
+    
+    This class represents a mass decomposition into amino acids. A
+    decomposition are amino acids given with frequencies which add
+    up to a specific mass.
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MassDecomposition()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MassDecomposition ) -> None:
+        """
+        Cython signature: void MassDecomposition(MassDecomposition &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, deco: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void MassDecomposition(const String & deco)
+        """
+        ...
+    
+    def toString(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String toString()
+        Returns the decomposition as a string
+        """
+        ...
+    
+    def toExpandedString(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String toExpandedString()
+        Returns the decomposition as a string; instead of frequencies the amino acids are repeated
+        """
+        ...
+    
+    def getNumberOfMaxAA(self) -> int:
+        """
+        Cython signature: size_t getNumberOfMaxAA()
+        Returns the max frequency of this composition
+        """
+        ...
+    
+    def containsTag(self, tag: Union[bytes, str, String] ) -> bool:
+        """
+        Cython signature: bool containsTag(const String & tag)
+        Returns true if tag is contained in the mass decomposition
+        """
+        ...
+    
+    def compatible(self, deco: MassDecomposition ) -> bool:
+        """
+        Cython signature: bool compatible(MassDecomposition & deco)
+        Returns true if the mass decomposition if contained in this instance
+        """
+        ...
+    
+    def __str__(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String toString()
+        Returns the decomposition as a string
+        """
+        ... 
+
+
+class MassDecompositionAlgorithm:
+    """
+    Cython implementation of _MassDecompositionAlgorithm
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MassDecompositionAlgorithm.html>`_
+      -- Inherits from ['DefaultParamHandler']
+    """
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void MassDecompositionAlgorithm()
+        """
+        ...
+    
+    def getDecompositions(self, decomps: List[MassDecomposition] , weight: float ) -> None:
+        """
+        Cython signature: void getDecompositions(libcpp_vector[MassDecomposition] & decomps, double weight)
+        Returns the possible decompositions given the weight
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class MassExplainer:
+    """
+    Cython implementation of _MassExplainer
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MassExplainer.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MassExplainer()
+        Computes empirical formulas for given mass differences using a set of allowed elements
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MassExplainer ) -> None:
+        """
+        Cython signature: void MassExplainer(MassExplainer &)
+        """
+        ...
+    
+    @overload
+    def __init__(self, adduct_base: List[Adduct] ) -> None:
+        """
+        Cython signature: void MassExplainer(libcpp_vector[Adduct] adduct_base)
+        """
+        ...
+    
+    @overload
+    def __init__(self, q_min: int , q_max: int , max_span: int , thresh_logp: float ) -> None:
+        """
+        Cython signature: void MassExplainer(int q_min, int q_max, int max_span, double thresh_logp)
+        """
+        ...
+    
+    def setAdductBase(self, adduct_base: List[Adduct] ) -> None:
+        """
+        Cython signature: void setAdductBase(libcpp_vector[Adduct] adduct_base)
+        Sets the set of possible adducts
+        """
+        ...
+    
+    def getAdductBase(self) -> List[Adduct]:
+        """
+        Cython signature: libcpp_vector[Adduct] getAdductBase()
+        Returns the set of adducts
+        """
+        ...
+    
+    def getCompomerById(self, id: int ) -> Compomer:
+        """
+        Cython signature: Compomer getCompomerById(size_t id)
+        Returns a compomer by its Id (useful after a query() )
+        """
+        ...
+    
+    def compute(self) -> None:
+        """
+        Cython signature: void compute()
+        Fill map with possible mass-differences along with their explanation
+        """
+        ... 
+
+
+class MassTraceDetection:
+    """
+    Cython implementation of _MassTraceDetection
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MassTraceDetection.html>`_
+      -- Inherits from ['ProgressLogger', 'DefaultParamHandler']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MassTraceDetection()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MassTraceDetection ) -> None:
+        """
+        Cython signature: void MassTraceDetection(MassTraceDetection &)
+        """
+        ...
+    
+    def run(self, input_map: MSExperiment , traces: List[Kernel_MassTrace] , max_traces: int ) -> None:
+        """
+        Cython signature: void run(MSExperiment & input_map, libcpp_vector[Kernel_MassTrace] & traces, size_t max_traces)
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ... 
+
+
+class MasstraceCorrelator:
+    """
+    Cython implementation of _MasstraceCorrelator
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MasstraceCorrelator.html>`_
+      -- Inherits from ['DefaultParamHandler', 'ProgressLogger']
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MasstraceCorrelator()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MasstraceCorrelator ) -> None:
+        """
+        Cython signature: void MasstraceCorrelator(MasstraceCorrelator &)
+        """
+        ...
+    
+    def createPseudoSpectra(self, map_: ConsensusMap , pseudo_spectra: MSExperiment , min_peak_nr: int , min_correlation: float , max_lag: int , max_rt_apex_difference: float ) -> None:
+        """
+        Cython signature: void createPseudoSpectra(const ConsensusMap & map_, MSExperiment & pseudo_spectra, size_t min_peak_nr, double min_correlation, int max_lag, double max_rt_apex_difference)
+        Compute pseudo-spectra from a set of (MS2) masstraces
+        
+        This function will take a set of masstraces (consensus map) as input and
+        produce a vector of pseudo spectra as output (pseudo_spectra result
+        vector).
+        
+        It basically makes an all-vs-all comparison of all masstraces against
+        each other and scores them on how similar they are in their mass traces.
+        
+        This assumes that the consensus feature is only from one (SWATH) map
+        This assumes that the consensus map is sorted by intensity
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    
+    def setLogType(self, in_0: int ) -> None:
+        """
+        Cython signature: void setLogType(LogType)
+        Sets the progress log that should be used. The default type is NONE!
+        """
+        ...
+    
+    def getLogType(self) -> int:
+        """
+        Cython signature: LogType getLogType()
+        Returns the type of progress log being used
+        """
+        ...
+    
+    def startProgress(self, begin: int , end: int , label: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void startProgress(ptrdiff_t begin, ptrdiff_t end, String label)
+        """
+        ...
+    
+    def setProgress(self, value: int ) -> None:
+        """
+        Cython signature: void setProgress(ptrdiff_t value)
+        Sets the current progress
+        """
+        ...
+    
+    def endProgress(self) -> None:
+        """
+        Cython signature: void endProgress()
+        Ends the progress display
+        """
+        ...
+    
+    def nextProgress(self) -> None:
+        """
+        Cython signature: void nextProgress()
+        Increment progress by 1 (according to range begin-end)
+        """
+        ... 
+
+
+class MatrixDouble:
+    """
+    Cython implementation of _Matrix[double]
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1Matrix[double].html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MatrixDouble()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MatrixDouble ) -> None:
+        """
+        Cython signature: void MatrixDouble(MatrixDouble)
+        """
+        ...
+    
+    @overload
+    def __init__(self, rows: int , cols: int , value: float ) -> None:
+        """
+        Cython signature: void MatrixDouble(size_t rows, size_t cols, double value)
+        """
+        ...
+    
+    def getValue(self, i: int , j: int ) -> float:
+        """
+        Cython signature: double getValue(size_t i, size_t j)
+        """
+        ...
+    
+    def setValue(self, i: int , j: int , value: float ) -> None:
+        """
+        Cython signature: void setValue(size_t i, size_t j, double value)
+        """
+        ...
+    
+    def rows(self) -> int:
+        """
+        Cython signature: size_t rows()
+        """
+        ...
+    
+    def cols(self) -> int:
+        """
+        Cython signature: size_t cols()
+        """
+        ...
+    
+    def size(self) -> int:
+        """
+        Cython signature: size_t size()
+        """
+        ...
+    
+    def resize(self, rows: int , cols: int ) -> None:
+        """
+        Cython signature: void resize(size_t rows, size_t cols)
+        """
+        ... 
+
+
+class MetaboliteFeatureDeconvolution:
+    """
+    Cython implementation of _MetaboliteFeatureDeconvolution
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1MetaboliteFeatureDeconvolution.html>`_
+      -- Inherits from ['DefaultParamHandler']
+
+    An algorithm to decharge small molecule features (i.e. as found by FeatureFinder)
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void MetaboliteFeatureDeconvolution()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: MetaboliteFeatureDeconvolution ) -> None:
+        """
+        Cython signature: void MetaboliteFeatureDeconvolution(MetaboliteFeatureDeconvolution &)
+        """
+        ...
+    
+    def compute(self, fm_in: FeatureMap , fm_out: FeatureMap , cons_map: ConsensusMap , cons_map_p: ConsensusMap ) -> None:
+        """
+        Cython signature: void compute(FeatureMap & fm_in, FeatureMap & fm_out, ConsensusMap & cons_map, ConsensusMap & cons_map_p)
+        Compute a zero-charge feature map from a set of charged features
+        
+        Find putative ChargePairs, then score them and hand over to ILP
+        
+        
+        :param fm_in: Input feature-map
+        :param fm_out: Output feature-map (sorted by position and augmented with user params)
+        :param cons_map: Output of grouped features belonging to a charge group
+        :param cons_map_p: Output of paired features connected by an edge
+        """
+        ...
+    
+    def getSubsections(self) -> List[bytes]:
+        """
+        Cython signature: libcpp_vector[String] getSubsections()
+        """
+        ...
+    
+    def setParameters(self, param: Param ) -> None:
+        """
+        Cython signature: void setParameters(Param & param)
+        Sets the parameters
+        """
+        ...
+    
+    def getParameters(self) -> Param:
+        """
+        Cython signature: Param getParameters()
+        Returns the parameters
+        """
+        ...
+    
+    def getDefaults(self) -> Param:
+        """
+        Cython signature: Param getDefaults()
+        Returns the default parameters
+        """
+        ...
+    
+    def getName(self) -> Union[bytes, str, String]:
+        """
+        Cython signature: String getName()
+        Returns the name
+        """
+        ...
+    
+    def setName(self, in_0: Union[bytes, str, String] ) -> None:
+        """
+        Cython signature: void setName(const String &)
+        Sets the name
+        """
+        ...
+    CHARGEMODE_MFD : __CHARGEMODE_MFD 
+
+
+class SolverParam:
+    """
+    Cython implementation of _SolverParam
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS_1_1SolverParam.html>`_
+    """
+    
+    message_level: int
+    
+    branching_tech: int
+    
+    backtrack_tech: int
+    
+    preprocessing_tech: int
+    
+    enable_feas_pump_heuristic: bool
+    
+    enable_gmi_cuts: bool
+    
+    enable_mir_cuts: bool
+    
+    enable_cov_cuts: bool
+    
+    enable_clq_cuts: bool
+    
+    mip_gap: float
+    
+    time_limit: int
+    
+    output_freq: int
+    
+    output_delay: int
+    
+    enable_presolve: bool
+    
+    enable_binarization: bool
+    
+    def __init__(self) -> None:
+        """
+        Cython signature: void SolverParam()
+        Hold the parameters of the LP solver
+        """
+        ... 
+
+
+class _Interfaces_BinaryDataArray:
+    """
+    Cython implementation of _BinaryDataArray
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::Interfaces_1_1BinaryDataArray.html>`_
+    """
+    
+    data: List[float]
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void _Interfaces_BinaryDataArray()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: _Interfaces_BinaryDataArray ) -> None:
+        """
+        Cython signature: void _Interfaces_BinaryDataArray(_Interfaces_BinaryDataArray &)
+        """
+        ... 
+
+
+class _Interfaces_Chromatogram:
+    """
+    Cython implementation of _Chromatogram
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::Interfaces_1_1Chromatogram.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void _Interfaces_Chromatogram()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: _Interfaces_Chromatogram ) -> None:
+        """
+        Cython signature: void _Interfaces_Chromatogram(_Interfaces_Chromatogram &)
+        """
+        ... 
+
+
+class _Interfaces_Spectrum:
+    """
+    Cython implementation of _Spectrum
+
+    Original C++ documentation is available `here <http://www.openms.de/current_doxygen/html/classOpenMS::Interfaces_1_1Spectrum.html>`_
+    """
+    
+    @overload
+    def __init__(self, ) -> None:
+        """
+        Cython signature: void _Interfaces_Spectrum()
+        """
+        ...
+    
+    @overload
+    def __init__(self, in_0: _Interfaces_Spectrum ) -> None:
+        """
+        Cython signature: void _Interfaces_Spectrum(_Interfaces_Spectrum &)
+        """
+        ... 
+
+
+class __AcquisitionMode:
+    None
+    ACQMODENULL : int
+    PULSECOUNTING : int
+    ADC : int
+    TDC : int
+    TRANSIENTRECORDER : int
+    SIZE_OF_ACQUISITIONMODE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __AnalyzerType:
+    None
+    ANALYZERNULL : int
+    QUADRUPOLE : int
+    PAULIONTRAP : int
+    RADIALEJECTIONLINEARIONTRAP : int
+    AXIALEJECTIONLINEARIONTRAP : int
+    TOF : int
+    SECTOR : int
+    FOURIERTRANSFORM : int
+    IONSTORAGE : int
+    ESA : int
+    IT : int
+    SWIFT : int
+    CYCLOTRON : int
+    ORBITRAP : int
+    LIT : int
+    SIZE_OF_ANALYZERTYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __Averagines:
+    None
+    C : int
+    H : int
+    N : int
+    O : int
+    S : int
+    AVERAGINE_NUM : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __CHARGEMODE_MFD:
+    None
+    QFROMFEATURE : int
+    QHEURISTIC : int
+    QALL : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __DerivatizationAgent:
+    None
+    NOT_SELECTED : int
+    TBDMS : int
+    SIZE_OF_DERIVATIZATIONAGENT : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ...
+    DerivatizationAgent : __DerivatizationAgent 
+
+
+class ITRAQ_TYPES:
+    None
+    FOURPLEX : int
+    EIGHTPLEX : int
+    TMT_SIXPLEX : int
+    SIZE_OF_ITRAQ_TYPES : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __InletType:
+    None
+    INLETNULL : int
+    DIRECT : int
+    BATCH : int
+    CHROMATOGRAPHY : int
+    PARTICLEBEAM : int
+    MEMBRANESEPARATOR : int
+    OPENSPLIT : int
+    JETSEPARATOR : int
+    SEPTUM : int
+    RESERVOIR : int
+    MOVINGBELT : int
+    MOVINGWIRE : int
+    FLOWINJECTIONANALYSIS : int
+    ELECTROSPRAYINLET : int
+    THERMOSPRAYINLET : int
+    INFUSION : int
+    CONTINUOUSFLOWFASTATOMBOMBARDMENT : int
+    INDUCTIVELYCOUPLEDPLASMA : int
+    MEMBRANE : int
+    NANOSPRAY : int
+    SIZE_OF_INLETTYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __IonOpticsType:
+    None
+    UNKNOWN : int
+    MAGNETIC_DEFLECTION : int
+    DELAYED_EXTRACTION : int
+    COLLISION_QUADRUPOLE : int
+    SELECTED_ION_FLOW_TUBE : int
+    TIME_LAG_FOCUSING : int
+    REFLECTRON : int
+    EINZEL_LENS : int
+    FIRST_STABILITY_REGION : int
+    FRINGING_FIELD : int
+    KINETIC_ENERGY_ANALYZER : int
+    STATIC_FIELD : int
+    SIZE_OF_IONOPTICSTYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __IonizationMethod:
+    None
+    IONMETHODNULL : int
+    ESI : int
+    EI : int
+    CI : int
+    FAB : int
+    TSP : int
+    LD : int
+    FD : int
+    FI : int
+    PD : int
+    SI : int
+    TI : int
+    API : int
+    ISI : int
+    CID : int
+    CAD : int
+    HN : int
+    APCI : int
+    APPI : int
+    ICP : int
+    NESI : int
+    MESI : int
+    SELDI : int
+    SEND : int
+    FIB : int
+    MALDI : int
+    MPI : int
+    DI : int
+    FA : int
+    FII : int
+    GD_MS : int
+    NICI : int
+    NRMS : int
+    PI : int
+    PYMS : int
+    REMPI : int
+    AI : int
+    ASI : int
+    AD : int
+    AUI : int
+    CEI : int
+    CHEMI : int
+    DISSI : int
+    LSI : int
+    PEI : int
+    SOI : int
+    SPI : int
+    SUI : int
+    VI : int
+    AP_MALDI : int
+    SILI : int
+    SALDI : int
+    SIZE_OF_IONIZATIONMETHOD : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __LPWrapper_Type:
+    None
+    UNBOUNDED : int
+    LOWER_BOUND_ONLY : int
+    UPPER_BOUND_ONLY : int
+    DOUBLE_BOUNDED : int
+    FIXED : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class MT_QUANTMETHOD:
+    None
+    MT_QUANT_AREA : int
+    MT_QUANT_MEDIAN : int
+    SIZE_OF_MT_QUANTMETHOD : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __MassIntensityType:
+    None
+    NORM_MAX : int
+    NORM_SUM : int
+    SIZE_OF_MASSINTENSITYTYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ...
+    MassIntensityType : __MassIntensityType 
+
+
+class __Polarity:
+    None
+    POLNULL : int
+    POSITIVE : int
+    NEGATIVE : int
+    SIZE_OF_POLARITY : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ReflectronState:
+    None
+    REFLSTATENULL : int
+    ON : int
+    OFF : int
+    NONE : int
+    SIZE_OF_REFLECTRONSTATE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ResolutionMethod:
+    None
+    RESMETHNULL : int
+    FWHM : int
+    TENPERCENTVALLEY : int
+    BASELINE : int
+    SIZE_OF_RESOLUTIONMETHOD : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ResolutionType:
+    None
+    RESTYPENULL : int
+    CONSTANT : int
+    PROPORTIONAL : int
+    SIZE_OF_RESOLUTIONTYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __SOLVER:
+    None
+    SOLVER_GLPK : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ScanDirection:
+    None
+    SCANDIRNULL : int
+    UP : int
+    DOWN : int
+    SIZE_OF_SCANDIRECTION : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ScanLaw:
+    None
+    SCANLAWNULL : int
+    EXPONENTIAL : int
+    LINEAR : int
+    QUADRATIC : int
+    SIZE_OF_SCANLAW : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __ScanMode:
+    None
+    UNKNOWN : int
+    MASSSPECTRUM : int
+    MS1SPECTRUM : int
+    MSNSPECTRUM : int
+    SIM : int
+    SRM : int
+    CRM : int
+    CNG : int
+    CNL : int
+    PRECURSOR : int
+    EMC : int
+    TDF : int
+    EMR : int
+    EMISSION : int
+    ABSORPTION : int
+    SIZE_OF_SCANMODE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __Sense:
+    None
+    MIN : int
+    MAX : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __SolverStatus:
+    None
+    UNDEFINED : int
+    OPTIMAL : int
+    FEASIBLE : int
+    NO_FEASIBLE_SOL : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __Sorted:
+    None
+    INTENSITY : int
+    MASS : int
+    UNDEFINED : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __Type_IonDetector:
+    None
+    TYPENULL : int
+    ELECTRONMULTIPLIER : int
+    PHOTOMULTIPLIER : int
+    FOCALPLANEARRAY : int
+    FARADAYCUP : int
+    CONVERSIONDYNODEELECTRONMULTIPLIER : int
+    CONVERSIONDYNODEPHOTOMULTIPLIER : int
+    MULTICOLLECTOR : int
+    CHANNELELECTRONMULTIPLIER : int
+    CHANNELTRON : int
+    DALYDETECTOR : int
+    MICROCHANNELPLATEDETECTOR : int
+    ARRAYDETECTOR : int
+    CONVERSIONDYNODE : int
+    DYNODE : int
+    FOCALPLANECOLLECTOR : int
+    IONTOPHOTONDETECTOR : int
+    POINTCOLLECTOR : int
+    POSTACCELERATIONDETECTOR : int
+    PHOTODIODEARRAYDETECTOR : int
+    INDUCTIVEDETECTOR : int
+    ELECTRONMULTIPLIERTUBE : int
+    SIZE_OF_TYPE : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __VariableType:
+    None
+    CONTINUOUS : int
+    INTEGER : int
+    BINARY : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+
+
+class __WriteFormat:
+    None
+    FORMAT_LP : int
+    FORMAT_MPS : int
+    FORMAT_GLPK : int
+
+    def getMapping(self) -> Dict[int, str]:
+       ... 
+

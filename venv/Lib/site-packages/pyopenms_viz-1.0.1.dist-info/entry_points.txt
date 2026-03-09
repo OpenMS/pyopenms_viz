@@ -1,0 +1,5 @@
+[pandas_plotting_backends]
+ms_bokeh=pyopenms_viz._bokeh
+ms_matplotlib=pyopenms_viz._matplotlib
+ms_plotly=pyopenms_viz._plotly
+

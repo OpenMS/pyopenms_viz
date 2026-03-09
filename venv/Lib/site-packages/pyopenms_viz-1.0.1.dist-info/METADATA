@@ -1,0 +1,105 @@
+Metadata-Version: 2.4
+Name: pyopenms_viz
+Version: 1.0.1
+Summary: A package for visualizing mass spectrometry data using pandas dataframes
+Author-email: OpenMS Team <webmaster@openms.de>
+Requires-Python: >=3.10, <3.13
+Description-Content-Type: text/markdown
+License-Expression: BSD-3-Clause
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+License-File: LICENSE
+Requires-Dist: pandas>=0.17
+Requires-Dist: bokeh>=3.4.1 ; extra == "all"
+Requires-Dist: plotly ; extra == "all"
+Requires-Dist: matplotlib ; extra == "all"
+Requires-Dist: bokeh>=3.4.1 ; extra == "bokeh"
+Requires-Dist: sphinx ; extra == "docs"
+Requires-Dist: sphinx-gallery ; extra == "docs"
+Requires-Dist: sphinx-copybutton ; extra == "docs"
+Requires-Dist: pydata_sphinx_theme ; extra == "docs"
+Requires-Dist: nbsphinx ; extra == "docs"
+Requires-Dist: rdkit ; extra == "docs"
+Requires-Dist: cairosvg ; extra == "docs"
+Requires-Dist: pymzml ; extra == "docs"
+Requires-Dist: ipython ; extra == "docs"
+Requires-Dist: ipykernel ; extra == "docs"
+Requires-Dist: docstring_parser ; extra == "docs"
+Requires-Dist: matplotlib ; extra == "matplotlib"
+Requires-Dist: plotly ; extra == "plotly"
+Requires-Dist: pytest ; extra == "testing"
+Requires-Dist: syrupy ; extra == "testing"
+Project-URL: Homepage, https://github.com/OpenMS/pyopenms_viz/
+Provides-Extra: all
+Provides-Extra: bokeh
+Provides-Extra: docs
+Provides-Extra: matplotlib
+Provides-Extra: plotly
+Provides-Extra: testing
+
+<div align="center">
+    <img src="https://github.com/OpenMS/pyopenms_viz/blob/main/docs/img/pyOpenMSviz_logo_color.png" alt="description" width="300"/>
+</div>
+
+# pyOpenMS-viz: The Python Pandas-Based Mass Spectrometry Visualization Library
+[![pypipv](https://img.shields.io/pypi/pyversions/pyopenms_viz.svg)](https://img.shields.io/pypi/pyversions/pyopenms_viz)
+[![pypiv](https://img.shields.io/pypi/v/pyopenms_viz.svg)](https://img.shields.io/pypi/v/pyopenms_viz
+)
+[![pypidownload](https://img.shields.io/pypi/dm/pyopenms_viz?color=orange)](https://pypistats.org/packages/pyopenms_viz)
+[![continuous-integration](https://github.com/OpenMS/pyopenms_viz/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenMS/pyopenms_viz/actions/workflows/ci.yml)
+[![readthedocs](https://img.shields.io/readthedocs/pyopenms_viz)](https://pyopenms-viz.readthedocs.io/en/latest/index.html)
+
+
+pyOpenMS-Viz is a Python library that provides a simple interface for extending the plotting capabilities of Pandas DataFrames for creating static or interactive visualizations of mass spectrometry data. It integrates seamlessly with various plotting library backends (matpotlib, bokeh and plotly) and leverages the power of Pandas for data manipulation and representation.
+
+## Features
+
+- Flexible plotting API that interfaces directly with Pandas DataFrames
+- Support for multiple plotting backends: matplotlib (static), bokeh and plotly (interactive)
+- Visualization of various mass spectrometry data types, including 1D chromatograms, spectra, and 2D peak maps
+- Versatile column selection for easy adaptation to different data formats
+- Consistent API across different plotting backends for easy switching between static and interactive plots
+- Suitable for use in scripts, Jupyter notebooks, and web applications
+
+## Supported Plots
+| **Plot Type**   | **Required Dimensions** | **pyopenms_viz Name**                                     | **Matplotlib** | **Bokeh** | **Plotly** |
+|-----------------|-------------------------|-----------------------------------------------------------|----------------|-----------|------------|
+| Chromatogram    | x, y                    | chromatogram                                              | ✓              | ✓         | ✓          |
+| Mobilogram      | x, y                    | mobilogram                                                | ✓              | ✓         | ✓          |
+| Spectrum        | x, y                    | spectrum                                                  | ✓              | ✓         | ✓          |
+| PeakMap 2D      | x, y, z                 | peakmap                                                   | ✓              | ✓         | ✓          |
+| PeakMap 3D      | x, y, z                 | peakmap (plot3d=True)                                     | ✓              |           | ✓          |
+
+
+## (Recommended) Pip Installation
+
+The recommended way of installing pyopenms_viz is through the Python Package Index (PyPI). We recommend installing pyopenms_viz in its own virtual environment using Anaconda to avoid packaging conflicts.
+
+First create a new environment:
+
+```bash
+conda create --name=pyopenms_viz python=3.12
+conda activate pyopenms_viz 
+```
+Then in the new environment install pyopenms_viz.
+
+```bash
+pip install pyopenms_viz --upgrade
+```
+
+## Documentation
+
+Documentation can be found [here](https://pyopenms-viz.readthedocs.io/en/latest/index.html)
+
+## References
+
+- Sing, J., Charkow, J., Walter, A. et al. pyOpenMS-viz: Streamlining Mass Spectrometry Data Visualization with pandas. Journal of Proteome Research, (2025) [https://doi.org/10.1021/acs.jproteome.4c00873](https://pubs.acs.org/doi/10.1021/acs.jproteome.4c00873)
+- Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods 21, 365–367 (2024). [https://doi.org/10.1038/s41592-024-02197-7](https://doi.org/10.1038/s41592-024-02197-7)
+
+- Röst HL, Schmitt U, Aebersold R, Malmström L. pyOpenMS: a Python-based interface to the OpenMS mass-spectrometry algorithm library. Proteomics. 2014 Jan;14(1):74-7. [https://doi.org/10.1002/pmic.201300246](https://doi.org/10.1002/pmic.201300246). PMID: [24420968](https://pubmed.ncbi.nlm.nih.gov/24420968/).
+
