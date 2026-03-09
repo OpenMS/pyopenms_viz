@@ -900,7 +900,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         import pandas as pd
 
         # Create a temporary column to hold the bin groups
-        bin_col = "__pyopenms_viz_temp_bin__"
+        bin_col = f"__temp_bin_{id(self)}__"
 
         if self._peak_bins is not None:
             def assign_bin(value):
@@ -932,7 +932,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # Group by the temporary bin column and aggregate
         # FIX: Aggregate self.x using 'mean' to preserve the true m/z center of mass
         df = (
-            df.groupby(cols, observed=True, dropna=False)
+            df.groupby(cols, observed=True)
             .agg({
                 self.y: self.aggregation_method,
                 self.x: "mean"
@@ -942,12 +942,8 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         df = df.drop(columns=[bin_col])
         
-        # Only fill missing values in numeric measurement columns to preserve metadata NaNs
-        numeric_cols = df.select_dtypes(include=['number']).columns
-        df[numeric_cols] = df[numeric_cols].fillna(0)
-        
-        # Round m/z to 6 decimal places to prevent JSON serialization artifacts
-        df[self.x] = df[self.x].round(6)
+        # Only fill missing values in the intensity column to avoid corrupting m/z or metadata
+        df[self.y] = df[self.y].fillna(0)
         
         return df
 
