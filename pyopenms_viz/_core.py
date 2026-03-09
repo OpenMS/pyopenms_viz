@@ -906,7 +906,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
             def assign_bin(value):
                 for low, high in self._peak_bins:
                     if low <= value <= high:
-                        return (low, high)"
+                        return (low, high)
                 return np.nan
             df[bin_col] = df[self.x].apply(assign_bin)
         else:
