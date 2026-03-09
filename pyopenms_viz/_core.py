@@ -912,7 +912,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         else:
             bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
             # Use pd.cut for performance, map to interval's mid to avoid Plotly JSON serialization errors
-            cut_bins = pd.cut(df[self.x], bins=bins)
+            cut_bins = pd.cut(df[self.x], bins=bins, include_lowest=True)
             df[bin_col] = cut_bins.apply(lambda interval: interval.mid if pd.notna(interval) else np.nan)
 
         cols = [bin_col]
@@ -942,7 +942,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
 
         df = df.drop(columns=[bin_col])
         df = df.fillna(0)
-        
+        df[self.x] = df[self.x].round(6)
         return df
 
     def _prepare_data(self, df, label_suffix=""):
