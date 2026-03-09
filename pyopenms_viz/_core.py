@@ -913,7 +913,9 @@ class SpectrumPlot(BaseMSPlot, ABC):
             bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
             # Use pd.cut for performance, map to interval's mid to avoid Plotly JSON serialization errors
             cut_bins = pd.cut(df[self.x], bins=bins)
-            df[bin_col] = cut_bins.apply(lambda interval: interval.mid if pd.notna(interval) else np.nan)
+            # Vectorized mapping from Interval categories to their midpoints
+            interval_to_mid = {interval: interval.mid for interval in cut_bins.cat.categories}
+            df[bin_col] = cut_bins.cat.rename_categories(interval_to_mid)
 
         cols = [bin_col]
         if self.by is not None:
