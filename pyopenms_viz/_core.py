@@ -900,13 +900,13 @@ class SpectrumPlot(BaseMSPlot, ABC):
         import pandas as pd
 
         # Create a temporary column to hold the bin groups
-        bin_col = "_bin_label"
+        bin_col = "__pyopenms_viz_temp_bin__"
 
         if self._peak_bins is not None:
             def assign_bin(value):
                 for low, high in self._peak_bins:
                     if low <= value <= high:
-                        return f"{low:.4f}-{high:.4f}"
+                        return (low, high)"
                 return np.nan
             df[bin_col] = df[self.x].apply(assign_bin)
         else:
@@ -941,8 +941,14 @@ class SpectrumPlot(BaseMSPlot, ABC):
         )
 
         df = df.drop(columns=[bin_col])
-        df = df.fillna(0)
+        
+        # Only fill missing values in numeric measurement columns to preserve metadata NaNs
+        numeric_cols = df.select_dtypes(include=['number']).columns
+        df[numeric_cols] = df[numeric_cols].fillna(0)
+        
+        # Round m/z to 6 decimal places to prevent JSON serialization artifacts
         df[self.x] = df[self.x].round(6)
+        
         return df
 
     def _prepare_data(self, df, label_suffix=""):
