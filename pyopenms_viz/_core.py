@@ -896,9 +896,6 @@ class SpectrumPlot(BaseMSPlot, ABC):
         Returns:
             DataFrame: The binned data.
         """
-        import numpy as np
-        import pandas as pd
-
         # Create a temporary column to hold the bin groups
         bin_col = f"__temp_bin_{id(self)}__"
 
