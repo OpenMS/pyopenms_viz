@@ -3,8 +3,6 @@ Polars namespace extension for pyopenms_viz.
 Provides a thin wrapper to bridge Polars DataFrames with the existing 
 Pandas-based plotting architecture.
 """
-import warnings
-
 try:
     import polars as pl
     POLARS_AVAILABLE = True
@@ -21,5 +19,9 @@ if POLARS_AVAILABLE:
             self._df = df
 
         def __call__(self, *args, **kwargs):
-            pandas_df = self._df.to_pandas()
+            # Convert to Pandas using Arrow-backed extension arrays for 
+            # better performance and null handling 
+            pandas_df = self._df.to_pandas(use_pyarrow_extension_array=True)
+            
+            # Delegate to Pandas' native plot method
             return pandas_df.plot(*args, **kwargs)
