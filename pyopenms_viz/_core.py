@@ -891,43 +891,28 @@ class SpectrumPlot(BaseMSPlot, ABC):
         Bin peaks based on x-axis values.
 
         Args:
-            data (DataFrame): The data to bin.
-            x (str): The column name for the x-axis data.
-            y (str): The column name for the y-axis data.
+            df (DataFrame): The data to bin.
 
         Returns:
             DataFrame: The binned data.
         """
+        # Create a temporary column to hold the bin groups
+        bin_col = f"__temp_bin_{id(self)}__"
 
-        # if _peak_bins is set that they are used as the bins over the num_bins parameter
         if self._peak_bins is not None:
-            # Function to assign each value to a bin
             def assign_bin(value):
                 for low, high in self._peak_bins:
                     if low <= value <= high:
-                        return f"{low:.4f}-{high:.4f}"
-                return nan  # For values that don't fall into any bin
-
-            # Apply the binning
-            df[self.x] = df[self.x].apply(assign_bin)
-        else:  # use computed number of bins, bins evenly spaced
+                        return (low, high)
+                return np.nan
+            df[bin_col] = df[self.x].apply(assign_bin)
+        else:
             bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
+            # Use pd.cut for performance, map to interval's mid to avoid Plotly JSON serialization errors
+            cut_bins = pd.cut(df[self.x], bins=bins, include_lowest=True)
+            df[bin_col] = cut_bins.apply(lambda interval: interval.mid if pd.notna(interval) else np.nan)
 
-            def assign_bin(value):
-                for low_idx in range(len(bins) - 1):
-                    if bins[low_idx] <= value <= bins[low_idx + 1]:
-                        return f"{bins[low_idx]:.4f}-{bins[low_idx + 1]:.4f}"
-                return nan  # For values that don't fall into any bin
-
-            # Apply the binning
-            df[self.x] = df[self.x].apply(assign_bin)
-
-            # TODO I am not sure why "cut" method seems to be failing with plotly so created a workaround for now
-            # error is that object is not JSON serializable because of Interval type
-            # df[self.x] = cut(df[self.x], bins=self._computed_num_bins)
-
-        # TODO: Find a better way to retain other columns
-        cols = [self.x]
+        cols = [bin_col]
         if self.by is not None:
             cols.append(self.by)
         if self.peak_color is not None:
@@ -941,24 +926,22 @@ class SpectrumPlot(BaseMSPlot, ABC):
         if self.annotation_color is not None:
             cols.append(self.annotation_color)
 
-        # Group by x bins and calculate the sum intensity within each bin
+        # Group by the temporary bin column and aggregate
+        # FIX: Aggregate self.x using 'mean' to preserve the true m/z center of mass
         df = (
             df.groupby(cols, observed=True)
-            .agg({self.y: self.aggregation_method})
+            .agg({
+                self.y: self.aggregation_method,
+                self.x: "mean"
+            })
             .reset_index()
         )
 
-        def convert_to_numeric(value):
-            if isinstance(value, Interval):
-                return value.mid
-            elif isinstance(value, str):
-                return mean([float(i) for i in value.split("-")])
-            else:
-                return value
-
-        df[self.x] = df[self.x].apply(convert_to_numeric).astype(float)
-
-        df = df.fillna(0)
+        df = df.drop(columns=[bin_col])
+        
+        # Only fill missing values in the intensity column to avoid corrupting m/z or metadata
+        df[self.y] = df[self.y].fillna(0)
+        
         return df
 
     def _prepare_data(self, df, label_suffix=""):
