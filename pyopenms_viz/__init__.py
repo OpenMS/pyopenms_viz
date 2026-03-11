@@ -1,7 +1,7 @@
 """
 init
 """
-
+from . import _polars_accessor
 from pandas.plotting._core import PlotAccessor
 from pandas.core.frame import DataFrame
 from typing import Any
