@@ -4,7 +4,7 @@ import pytest
 pl = pytest.importorskip("polars")
 pytest.importorskip("pyarrow")
 
-import pyopenms_viz 
+import pyopenms_viz
 
 def test_polars_ms_plot_accessor():
     """
