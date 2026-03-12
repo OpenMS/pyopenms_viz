@@ -7,6 +7,14 @@ pytest.importorskip("pyarrow")
 
 import pyopenms_viz
 
+@pytest.fixture(autouse=True)
+def load_backend():
+    """
+    Override the parametrized autouse `load_backend` fixture from `conftest.py`
+    so that tests in this module run only once. These tests explicitly pass
+    backend="ms_plotly", so no additional setup is required here.
+    """
+    yield
 def test_polars_ms_plot_accessor():
     """
     Test that the ms_plot namespace is properly registered for Polars DataFrames
