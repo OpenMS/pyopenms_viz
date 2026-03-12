@@ -22,7 +22,7 @@ def test_polars_ms_plot_accessor():
         kind="spectrum", 
         x="m/z", 
         y="intensity", 
-        backend="ms_plotly"
+        backend="plotly"
     )
     
     # 3. Assert that the delegation worked and returned a valid Figure object
