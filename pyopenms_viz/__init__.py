@@ -1,7 +1,7 @@
 """
 init
 """
-from . import _polars_accessor
+from . import _polars_accessor  # Import for side effects: registers pandas accessors. noqa: F401
 from pandas.plotting._core import PlotAccessor
 from pandas.core.frame import DataFrame
 from typing import Any
