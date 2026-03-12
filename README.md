@@ -33,7 +33,7 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 
 
 ### Note on Polars DataFrames
-`pyopenms_viz` fully supports [Polars](https://pola.rs/) DataFrames via an Arrow-backed zero-copy conversion. However, due to API differences, you must use the `.ms_plot()` namespace instead of `.plot()` when working with Polars.
+`pyopenms_viz` can work with [Polars](https://pola.rs/) DataFrames by internally converting them to pandas, often via an Arrow-backed representation where possible. This conversion may involve data copies depending on data types and configuration, and plotting is ultimately delegated to the pandas-based plotting backends. Due to API differences, you must use the `.ms_plot()` namespace instead of `.plot()` when working with Polars.
 
 **Pandas:**
 ```python
