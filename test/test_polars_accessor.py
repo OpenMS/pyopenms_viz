@@ -1,22 +1,23 @@
 import pytest
 import pandas as pd
-import json
-if not str(pd.options.plotting.backend).startswith("ms_"):
-    pd.options.plotting.backend = "ms_plotly"
+
 # Skip these tests if the user doesn't have Polars or PyArrow installed
 pl = pytest.importorskip("polars")
 pytest.importorskip("pyarrow")
-
-import pyopenms_viz
-
 @pytest.fixture(autouse=True)
 def load_backend():
     """
-    Override the parametrized autouse `load_backend` fixture from `conftest.py`
-    so that tests in this module run only once. These tests explicitly pass
-    backend="ms_plotly", so no additional setup is required.
+    Safely override the global backend so the syrupy snapshot fixture
+    in conftest.py knows which extension to load, then reset it
+    to avoid leaking state to other tests.
     """
+    original_backend = pd.options.plotting.backend
+    pd.options.plotting.backend = "ms_plotly"
+    
     yield
+    
+    # Teardown: restore the original state
+    pd.options.plotting.backend = original_backend
 
 def test_polars_ms_plot_accessor():
     """
@@ -41,7 +42,7 @@ def test_polars_ms_plot_accessor():
 
 def test_polars_ms_plot_snapshot(snapshot):
     """
-    Test that Polars ms_plot() generates a stable figure
+    Test that Polars ms_plot() generates a stable Plotly figure
     using the syrupy snapshot testing framework.
     """
     data = {
@@ -56,13 +57,9 @@ def test_polars_ms_plot_snapshot(snapshot):
         kind="spectrum", 
         x="m/z", 
         y="intensity", 
+        backend="ms_plotly",  # Explicitly set backend to avoid global state leaks
         show_plot=False
     )
-    
-    # Apply tight layout to matplotlib to ensure it is not cut off (matches repo standards)
-    if pd.options.plotting.backend == "ms_matplotlib":
-        fig = out.get_figure()
-        fig.tight_layout()
 
     # Let syrupy handle the serialization and comparison
     assert snapshot == out
