@@ -177,6 +177,8 @@ plotly==5.24.1
     # via pyopenms_viz (pyproject.toml)
 pluggy==1.6.0
     # via pytest
+polars==1.38.1
+
 prompt-toolkit==3.0.52
     # via ipython
 psutil==7.2.2
@@ -185,6 +187,8 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
+pyarrow==23.0.1
+    # via polars
 pycparser==3.0
     # via cffi
 pydata-sphinx-theme==0.16.1
@@ -215,6 +219,7 @@ pytz==2025.2
     # via pandas
 pyyaml==6.0.3
     # via bokeh
+    
 pyzmq==27.1.0
     # via
     #   ipykernel
@@ -307,3 +312,4 @@ webencodings==0.5.1
     #   tinycss2
 xyzservices==2025.11.0
     # via bokeh
+
