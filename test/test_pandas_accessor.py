@@ -1,6 +1,4 @@
 import pandas as pd
-import pytest
-import pyopenms_viz
 
 def test_pandas_ms_plot_snapshot(snapshot):
     """
@@ -23,10 +21,20 @@ def test_pandas_ms_plot_snapshot(snapshot):
         show_plot=False
     )
 
-    # Apply tight layout to matplotlib to ensure it is not cut off (matches repo standards)
+    # 1. Matplotlib handling
     if pd.options.plotting.backend == "ms_matplotlib":
         fig = out.get_figure()
         fig.tight_layout()
+        assert snapshot == out
 
-    # Let syrupy handle the serialization and comparison
-    assert snapshot == out
+    # 2. Plotly handling (CodeRabbit Fix)
+    elif pd.options.plotting.backend == "ms_plotly":
+        # Convert to dictionary and strip version-sensitive template data
+        fig_dict = out.to_dict()
+        if "layout" in fig_dict and "template" in fig_dict["layout"]:
+            del fig_dict["layout"]["template"]
+        assert snapshot == fig_dict
+
+    # 3. Default handling (Bokeh, etc.)
+    else:
+        assert snapshot == out

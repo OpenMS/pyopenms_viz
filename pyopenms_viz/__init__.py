@@ -10,7 +10,7 @@ import importlib
 import types
 from pathlib import Path
 from ._core import plot_chromatogram, plot_spectrum, plot_mobilogram, plot_peakmap
-from . import _pandas_accessor  # Import for side effects: registers Pandas 'ms_plot' namespace. noqa: F401
+from . import _pandas_accessor  # noqa: F401
 
 __version__ = "1.0.1"
 
