@@ -28,7 +28,7 @@ bokeh==3.6.0
     # via pyopenms_viz (pyproject.toml)
 cairocffi==1.7.1
     # via cairosvg
-cairosvg==2.8.2
+cairosvg==2.9.0
     # via pyopenms_viz (pyproject.toml)
 certifi==2026.1.4
     # via requests
@@ -164,7 +164,7 @@ parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==12.1.0
+pillow==12.1.1
     # via
     #   bokeh
     #   cairosvg
