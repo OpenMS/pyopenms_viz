@@ -190,7 +190,7 @@ pygments==2.19.2
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pymzml==2.6.0
+pymzml==2.6.1
     # via pyopenms_viz (pyproject.toml)
 pyparsing==3.3.2
     # via matplotlib
