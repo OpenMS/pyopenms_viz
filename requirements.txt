@@ -65,7 +65,7 @@ executing==2.2.1
     # via stack-data
 fastjsonschema==2.21.2
     # via nbformat
-fonttools==4.61.1
+fonttools==4.63.0
     # via matplotlib
 idna==3.11
     # via requests
@@ -106,15 +106,15 @@ jupyter-core==5.9.1
     #   nbformat
 jupyterlab-pygments==0.3.0
     # via nbconvert
-kiwisolver==1.4.9
+kiwisolver==1.5.0
     # via matplotlib
 markupsafe==3.0.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib==3.10.8
+matplotlib==3.10.9
     # via pyopenms_viz (pyproject.toml)
-matplotlib-inline==0.2.1
+matplotlib-inline==0.2.2
     # via
     #   ipykernel
     #   ipython
