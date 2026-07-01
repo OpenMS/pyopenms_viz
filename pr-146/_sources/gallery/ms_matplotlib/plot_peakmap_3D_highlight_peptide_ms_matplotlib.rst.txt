@@ -37,10 +37,8 @@ This shows a peakmap across m/z and retention time, plotted in 3D.
 
  .. code-block:: none
 
-    /home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_matplotlib/core.py:263: UserWarning:
-
-    The figure layout has changed to tight
-
+    /home/runner/work/pyopenms_viz/pyopenms_viz/pyopenms_viz/_matplotlib/core.py:263: UserWarning: The figure layout has changed to tight
+      self.ax.get_figure().tight_layout()
 
     <Axes3D: title={'center': 'PeakMap'}, xlabel='Retention Time', ylabel='mass-to-charge', zlabel='Intensity'>
 
@@ -76,7 +74,7 @@ This shows a peakmap across m/z and retention time, plotted in 3D.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.340 seconds)
+   **Total running time of the script:** (0 minutes 3.324 seconds)
 
 
 .. _sphx_glr_download_gallery_ms_matplotlib_plot_peakmap_3D_highlight_peptide_ms_matplotlib.py:
