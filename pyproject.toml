@@ -21,8 +21,8 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
-requires-python = ">=3.10, <3.13"
-dependencies = ["pandas>=0.17"]
+requires-python = ">=3.10"
+dependencies = ["pandas>=0.17", "numpy", "pillow"]
 
 [project.urls]
 Homepage = "https://github.com/OpenMS/pyopenms_viz/"
