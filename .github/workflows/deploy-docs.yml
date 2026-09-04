@@ -4,6 +4,9 @@ on:
   workflow_run:
     workflows: ["Build Documentation"]
     types: [completed]
+  pull_request_target:
+    types: [closed]
+    branches: ["main"]
 
 permissions:
   contents: write
