@@ -43,6 +43,9 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             pyproject.toml
+
+      - name: Debug var
+        run: echo "id is '${{ vars.OPENMS_GITHUB_APP_ID }}'" 
           
       - name: Install dependencies
         run: |
