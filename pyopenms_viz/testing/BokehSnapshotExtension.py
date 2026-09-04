@@ -4,6 +4,7 @@ pyopenms-viz/testing/BokehSnapshotExtension
 """
 
 import base64
+import io
 import math
 from typing import Any
 import numpy as np
@@ -159,6 +160,33 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         )
 
     @staticmethod
+    def _compare_data_uri_image(a: str, b: str, path: str):
+        """
+        Compare two base64 data-uri images by their pixels.
+
+        Bokeh re-encodes PIL images (the custom tool icons) to PNG when it
+        serialises a document, and PNG encoding is not byte-stable across zlib
+        versions and platforms. The encoded text therefore differs between a
+        snapshot recorded on one OS and a run on another even though the image
+        is identical, so compare what the image actually contains.
+
+        Returns None when the images cannot be decoded, so that the caller can
+        fall back to comparing the strings.
+        """
+        try:
+            from PIL import Image
+
+            left = Image.open(io.BytesIO(base64.b64decode(a.split(",", 1)[1])))
+            right = Image.open(io.BytesIO(base64.b64decode(b.split(",", 1)[1])))
+            if left.size != right.size:
+                return False, f"{path}: image sizes differ, {left.size} != {right.size}"
+            if left.convert("RGBA").tobytes() == right.convert("RGBA").tobytes():
+                return True, ""
+        except Exception:
+            return None
+        return False, f"{path}: image pixels differ, size {left.size}"
+
+    @staticmethod
     def _compare(a, b, path: str):
         """
         Recursively compare two bokeh json values.
@@ -214,6 +242,16 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                     # is the most useful location to point a human at.
                     return False, next(r for matches, r in positional if not matches)
             return True, ""
+
+        if (
+            isinstance(a, str)
+            and isinstance(b, str)
+            and a.startswith("data:image/")
+            and b.startswith("data:image/")
+        ):
+            result = BokehSnapshotExtension._compare_data_uri_image(a, b, path)
+            if result is not None:
+                return result
 
         # Coordinates are floats that go through a serialisation round trip and
         # are recomputed on a different machine, so compare them by value rather

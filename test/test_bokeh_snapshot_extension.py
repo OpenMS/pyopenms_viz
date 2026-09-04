@@ -99,3 +99,39 @@ class TestNdarrayComparison:
 
     def test_differing_dtype_does_not_match(self):
         assert not compare(ndarray_node([1, 2], "int32"), ndarray_node([1, 2], "float64"))
+
+
+class TestDataUriImages:
+    """
+    Bokeh re-encodes the PIL tool icons to PNG on serialisation, and PNG
+    encoding is not byte-stable across platforms. Compare pixels, not bytes.
+    """
+
+    @staticmethod
+    def data_uri(image, **save_kwargs):
+        import io as _io
+
+        buf = _io.BytesIO()
+        image.save(buf, format="PNG", **save_kwargs)
+        return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+    @pytest.fixture
+    def image(self):
+        Image = pytest.importorskip("PIL.Image")
+        return Image.new("RGBA", (8, 8), (10, 20, 30, 255))
+
+    def test_same_image_encoded_differently_matches(self, image):
+        a = self.data_uri(image, compress_level=6)
+        b = self.data_uri(image, compress_level=9)
+        assert a != b, "the encodings should differ, otherwise this proves nothing"
+        assert compare({"icon": a}, {"icon": b})
+
+    def test_different_image_does_not_match(self, image):
+        Image = pytest.importorskip("PIL.Image")
+        other = Image.new("RGBA", (8, 8), (200, 20, 30, 255))
+        assert not compare({"icon": self.data_uri(image)}, {"icon": self.data_uri(other)})
+
+    def test_different_size_does_not_match(self, image):
+        Image = pytest.importorskip("PIL.Image")
+        other = Image.new("RGBA", (9, 9), (10, 20, 30, 255))
+        assert not compare({"icon": self.data_uri(image)}, {"icon": self.data_uri(other)})
