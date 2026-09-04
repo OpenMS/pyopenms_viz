@@ -48,6 +48,7 @@ jobs:
         run: |
           echo "id is '${{ vars.OPENMS_GITHUB_APP_ID }}'" 
           echo "repository is '${{ github.repository }}'" 
+          echo "repository is '${{ vars.TEST_VARIABLE }}'" 
           
       - name: Install dependencies
         run: |
