@@ -1,0 +1,209 @@
+# Deploys documentation built by "Build Documentation" - only job with secrets/token access
+name: Deploy Documentation
+on:
+  workflow_run:
+    workflows: ["Build Documentation"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  # Deploy to main GitHub Pages (only for main branch)
+  deploy-main:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-${{ github.event.workflow_run.head_sha }}
+          path: _build/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _build/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Deploy PR preview using subdirectories in gh_pages
+  deploy-preview:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.OPENMS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.OPENMS_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Download PR number
+        uses: actions/download-artifact@v4
+        with:
+          name: pr_number
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR number
+        id: pr_info
+        run: echo "pr_number=$(cat pr_number.txt)" >> $GITHUB_OUTPUT
+
+      - name: Checkout gh_pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh_pages
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-${{ github.event.workflow_run.head_sha }}
+          path: _temp_build/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy PR preview to subdirectory
+        run: |
+          PR_NUMBER="${{ steps.pr_info.outputs.pr_number }}"
+          PR_DIR="pr-${PR_NUMBER}"
+
+          # Remove existing PR directory if it exists
+          rm -rf "$PR_DIR"
+
+          # Create PR directory and copy files
+          mkdir -p "$PR_DIR"
+          cp -r _temp_build/* "$PR_DIR/"
+
+          # Clean up temp directory
+          rm -rf _temp_build
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add and commit changes
+          git add "$PR_DIR"
+          git commit -m "Deploy PR #${PR_NUMBER} preview [skip ci]" || echo "No changes to commit"
+
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+          git push origin gh_pages
+
+      - name: Comment on PR with preview link
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = "${{ steps.pr_info.outputs.pr_number }}";
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            const previewUrl = `https://${repoOwner}.github.io/${repoName}/pr-${prNumber}/`;
+
+            // Check if we already commented
+            const comments = await github.rest.issues.listComments({
+              owner: repoOwner,
+              repo: repoName,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.data.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('📖 Documentation Preview')
+            );
+
+            const commentBody = `📖 **Documentation Preview**
+            
+            The documentation for this PR has been built and is available at:
+            🔗 **[View Preview](${previewUrl})**
+            
+            This preview will be updated automatically when you push new commits to this PR.
+            
+            ---
+            *Preview built from commit: \`${context.sha.substring(0, 7)}\`*`;
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: repoOwner,
+                repo: repoName,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: repoOwner,
+                repo: repoName,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+  # Cleanup old PR preview branches - safe on pull_request_target since it never runs fork code
+  cleanup-previews:
+    if: github.event_name == 'pull_request_target' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.OPENMS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.OPENMS_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Delete PR preview directory
+        run: |
+          PR_NUMBER="${{ github.event.number }}"
+          PR_DIR="pr-${PR_NUMBER}"
+
+          # Checkout gh_pages branch
+          git checkout gh_pages
+
+          # Remove PR directory if it exists
+          if [ -d "$PR_DIR" ]; then
+            rm -rf "$PR_DIR"
+            git add "$PR_DIR"
+            git commit -m "Remove PR #${PR_NUMBER} preview [skip ci]"
+            git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+            git push origin gh_pages
+            echo "Deleted preview directory: $PR_DIR"
+          else
+            echo "Preview directory $PR_DIR not found"
+          fi
+
+      - name: Comment cleanup notification
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = context.payload.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🧹 **Preview Cleanup**
+              
+              The documentation preview for this PR has been cleaned up and is no longer available.`
+            });

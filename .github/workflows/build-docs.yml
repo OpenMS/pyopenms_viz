@@ -1,0 +1,54 @@
+# Builds documentation - runs untrusted PR code, no secrets access
+name: Build Documentation
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          sudo apt install pandoc
+          pip install -r requirements.txt 
+          pip install ipykernel rdkit cairosvg pymzml
+          pip install .
+
+      - name: Build Documentation
+        run: sphinx-build -b html ./docs ./_build
+
+      - name: Copy binder files
+        run: cp -r ./.binder ./_build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: _build/
+          retention-days: 30
+
+      - name: Save PR number
+        if: github.event_name == 'pull_request'
+        run: echo "${{ github.event.number }}" > pr_number.txt
+
+      - name: Upload PR number
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_number
+          path: pr_number.txt
