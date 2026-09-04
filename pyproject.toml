@@ -16,12 +16,13 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
-requires-python = ">=3.10, <3.13"
+requires-python = ">=3.10, <3.14"
 dependencies = ["pandas>=0.17"]
 
 [project.urls]
