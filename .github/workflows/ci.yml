@@ -1,32 +1,56 @@
-name: continuous-integration
-
-on: [push, pull_request]
-
-# Cancel in-progress runs when a new push is made to the same branch/PR
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+name: Windows Python 3.14 diagnostic
+on: [push]
+permissions:
+  contents: read
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
+  diagnose:
+    runs-on: windows-latest
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest] # note mac-latest tests fail due to slight differences in images
-        python-version: ["3.14"]
+        dependencies: [original, updated]
+    env:
+      PYTHONFAULTHANDLER: "1"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: pwsh
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt # visual tests are very finiky so fix the versions
-        pip install . # install pyopenms-viz
-    - name: Test
-      shell: cmd
-      run: |
-        python -m pytest --snapshot-warn-unused test/ # do not fail if unused snapshot, just warn
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.14"
+      - name: Prepare diagnostic requirements
+        if: matrix.dependencies == 'updated'
+        run: |
+          $requirements = Get-Content requirements.txt -Raw
+          $requirements = $requirements.Replace('numpy==2.2.6', 'numpy==2.3.3').Replace('contourpy==1.3.2', 'contourpy==1.3.3')
+          Set-Content requirements.txt $requirements
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ('${{ matrix.dependencies }}' -eq 'updated') {
+            python -m pip install --only-binary=numpy,contourpy -r requirements.txt
+          } else {
+            python -m pip install -r requirements.txt
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip freeze
+      - name: Import NumPy
+        continue-on-error: true
+        run: python -X faulthandler -c "import numpy; print(numpy.__version__)"
+      - name: Import pandas
+        continue-on-error: true
+        run: python -X faulthandler -c "import pandas; print(pandas.__version__)"
+      - name: Import ContourPy
+        continue-on-error: true
+        run: python -X faulthandler -c "import contourpy; print(contourpy.__version__)"
+      - name: Import Matplotlib
+        continue-on-error: true
+        run: python -X faulthandler -c "import matplotlib.pyplot; print('Matplotlib import succeeded')"
+      - name: Run tests with crash reporting
+        run: python -X faulthandler -m pytest -vv -s --snapshot-warn-unused test/
