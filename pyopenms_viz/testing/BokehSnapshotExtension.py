@@ -3,7 +3,11 @@ pyopenms-viz/testing/BokehSnapshotExtension
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import base64
+import io
+import math
 from typing import Any
+import numpy as np
 from bokeh.embed import file_html
 import json
 from syrupy.data import SnapshotCollection
@@ -79,10 +83,14 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         parser.feed(html)
         return json.loads(parser.bokehJson)
 
+    # Bokeh regenerates these identifiers on every render, so they carry no
+    # meaning for the comparison.
+    IGNORED_KEYS = frozenset({"id", "root_ids"})
+
     @staticmethod
     def compare_json(json1, json2):
         """
-        Compare two bokeh json objects. This function acts recursively
+        Compare two bokeh json objects, ignoring generated identifiers.
 
         Args:
             json1: first object
@@ -91,50 +99,178 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         Returns:
            bool: True if the objects are equal, False otherwise
         """
-        if isinstance(json1, dict) and isinstance(json2, dict):
-            for key in json1.keys():
-                if key not in json2:
-                    print(f"Key {key} not in second json")
-                    return False
-                elif key in ["id", "root_ids"]:  # add keys to ignore here
-                    pass
-                elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
-                    print(f"Values for key {key} not equal")
-                    return False
-            return True
-        elif isinstance(json1, list) and isinstance(json2, list):
-            if len(json1) != len(json2):
-                print("Lists have different lengths")
-                return False
-            # lists are unordered so we need to compare every element one by one
-            for idx, i in enumerate(json1):
-                check = True
-                if isinstance(i, dict):
-                    if (
-                        "type" not in i.keys()
-                    ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
-                        check = False
-                        pass
-                    if check:  # find corresponding entry in json2 only if check is true
-                        for j in json2:
-                            if (
-                                "type" not in j.keys()
-                            ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
-                                check = False
-                            if check and (j["type"] == i["type"]):
-                                if not BokehSnapshotExtension.compare_json(i, j):
-                                    print(f"Element {i} not equal to {j}")
-                                    return False
-                                return True
-                        print(f"Element {i} not in second list")
-                        return False
+        matches, reason = BokehSnapshotExtension._compare(json1, json2, "$")
+        if not matches:
+            print(f"Snapshot mismatch at {reason}")
+        return matches
+
+    @staticmethod
+    def _brief(value, limit: int = 120) -> str:
+        """Render a value for an error message without dumping a whole array."""
+        text = repr(value)
+        return text if len(text) <= limit else f"{text[:limit]}..."
+
+    @staticmethod
+    def _decode_ndarray(node):
+        """Decode a bokeh ndarray node into a numpy array, or None if not possible."""
+        array = node.get("array")
+        dtype = node.get("dtype", "float64")
+        if isinstance(array, dict) and array.get("type") == "bytes":
+            try:
+                decoded = np.frombuffer(base64.b64decode(array["data"]), dtype=dtype)
+            except (ValueError, TypeError):
+                return None
+            if node.get("order") == "big":
+                decoded = decoded.byteswap()
+            return decoded
+        if isinstance(array, list):
+            return np.asarray(array)
+        return None
+
+    @staticmethod
+    def _compare_ndarray(a, b, path: str):
+        """Compare two bokeh ndarray nodes by value rather than by encoding."""
+        for key in ("dtype", "shape", "order"):
+            if a.get(key) != b.get(key):
+                return False, f"{path}.{key}: {a.get(key)!r} != {b.get(key)!r}"
+
+        left, right = (
+            BokehSnapshotExtension._decode_ndarray(a),
+            BokehSnapshotExtension._decode_ndarray(b),
+        )
+        if left is None or right is None:
+            # Not something we can decode; fall back to comparing the raw nodes.
+            return (
+                (True, "")
+                if a.get("array") == b.get("array")
+                else (False, f"{path}.array: encoded arrays differ")
+            )
+        if left.shape != right.shape:
+            return False, f"{path}.array: shapes differ, {left.shape} != {right.shape}"
+        if np.issubdtype(left.dtype, np.floating):
+            if np.allclose(left, right, rtol=1e-9, atol=0.0, equal_nan=True):
+                return True, ""
+        elif np.array_equal(left, right):
+            return True, ""
+        idx = np.flatnonzero(left != right)
+        first = int(idx[0]) if idx.size else 0
+        return False, (
+            f"{path}.array[{first}]: {left[first]!r} != {right[first]!r} "
+            f"({idx.size} of {left.size} values differ)"
+        )
+
+    @staticmethod
+    def _compare_data_uri_image(a: str, b: str, path: str):
+        """
+        Compare two base64 data-uri images by their pixels.
+
+        Bokeh re-encodes PIL images (the custom tool icons) to PNG when it
+        serialises a document, and PNG encoding is not byte-stable across zlib
+        versions and platforms. The encoded text therefore differs between a
+        snapshot recorded on one OS and a run on another even though the image
+        is identical, so compare what the image actually contains.
+
+        Returns None when the images cannot be decoded, so that the caller can
+        fall back to comparing the strings.
+        """
+        try:
+            from PIL import Image
+
+            left = Image.open(io.BytesIO(base64.b64decode(a.split(",", 1)[1])))
+            right = Image.open(io.BytesIO(base64.b64decode(b.split(",", 1)[1])))
+            if left.size != right.size:
+                return False, f"{path}: image sizes differ, {left.size} != {right.size}"
+            if left.convert("RGBA").tobytes() == right.convert("RGBA").tobytes():
+                return True, ""
+        except Exception:
+            return None
+        return False, f"{path}: image pixels differ, size {left.size}"
+
+    @staticmethod
+    def _compare(a, b, path: str):
+        """
+        Recursively compare two bokeh json values.
+
+        Returns:
+            tuple[bool, str]: whether they match, and where they first differ.
+        """
+        if isinstance(a, dict) and isinstance(b, dict):
+            # Bokeh encodes numeric arrays as base64. Comparing the encoded text
+            # makes a one-ulp difference look like a wholesale mismatch, so decode
+            # and compare the numbers instead.
+            if a.get("type") == "ndarray" and b.get("type") == "ndarray":
+                return BokehSnapshotExtension._compare_ndarray(a, b, path)
+
+            keys_a = {k for k in a if k not in BokehSnapshotExtension.IGNORED_KEYS}
+            keys_b = {k for k in b if k not in BokehSnapshotExtension.IGNORED_KEYS}
+            if keys_a != keys_b:
+                return False, f"{path}: keys differ, {sorted(keys_a ^ keys_b)} on one side only"
+            for key in sorted(keys_a):
+                matches, reason = BokehSnapshotExtension._compare(
+                    a[key], b[key], f"{path}.{key}"
+                )
+                if not matches:
+                    return False, reason
+            return True, ""
+
+        if isinstance(a, list) and isinstance(b, list):
+            if len(a) != len(b):
+                return False, f"{path}: lists differ in length, {len(a)} != {len(b)}"
+
+            # Bokeh serialises a document deterministically, so elements normally
+            # line up. Comparing positionally first keeps the reported location of
+            # a real mismatch precise.
+            positional = [
+                BokehSnapshotExtension._compare(x, y, f"{path}[{i}]")
+                for i, (x, y) in enumerate(zip(a, b))
+            ]
+            if all(matches for matches, _ in positional):
+                return True, ""
+
+            # Otherwise fall back to order-insensitive matching, so a list holding
+            # the same elements in a different order still compares equal. Each
+            # element of `b` may only be consumed once, so this stays a genuine
+            # comparison rather than a subset check.
+            unmatched = list(b)
+            for x in a:
+                for idx, y in enumerate(unmatched):
+                    if BokehSnapshotExtension._compare(x, y, path)[0]:
+                        del unmatched[idx]
+                        break
                 else:
-                    return json1[idx] == json2[idx]
-            return True
-        else:
-            if json1 != json2:
-                print(f"Values not equal: {json1} != {json2}")
-            return json1 == json2
+                    # Report where the positional comparison first disagreed; it
+                    # is the most useful location to point a human at.
+                    return False, next(r for matches, r in positional if not matches)
+            return True, ""
+
+        if (
+            isinstance(a, str)
+            and isinstance(b, str)
+            and a.startswith("data:image/")
+            and b.startswith("data:image/")
+        ):
+            result = BokehSnapshotExtension._compare_data_uri_image(a, b, path)
+            if result is not None:
+                return result
+
+        # Coordinates are floats that go through a serialisation round trip and
+        # are recomputed on a different machine, so compare them by value rather
+        # than by exact bit pattern (101.5375 vs 101.53750000000001).
+        numeric = (int, float)
+        if (
+            isinstance(a, numeric)
+            and isinstance(b, numeric)
+            and not isinstance(a, bool)
+            and not isinstance(b, bool)
+        ):
+            if math.isclose(a, b, rel_tol=1e-9):
+                return True, ""
+            return False, f"{path}: {a!r} != {b!r}"
+
+        if a != b:
+            brief = BokehSnapshotExtension._brief
+            return False, f"{path}: {brief(a)} != {brief(b)}"
+        return True, ""
 
     def read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str

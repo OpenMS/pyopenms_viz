@@ -4,7 +4,6 @@ from enum import Enum, auto
 from itertools import cycle
 from typing import Literal
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -63,6 +62,19 @@ class ColorGenerator:
                 if colormap.lower() == "grayscale":
                     colors = self._get_n_grayscale_colors(n)
                 else:
+                    # matplotlib is an optional dependency, and it is only
+                    # needed to resolve a named matplotlib colormap. Import it
+                    # here so that the plotly and bokeh backends work without it.
+                    try:
+                        import matplotlib.pyplot as plt
+                    except ImportError as e:
+                        raise ImportError(
+                            f"the colormap '{colormap}' is a matplotlib colormap, "
+                            "which requires matplotlib. Install it with "
+                            "`pip install pyopenms-viz[matplotlib]`, or pass a list "
+                            "of colors instead."
+                        ) from e
+
                     cmap = plt.get_cmap(colormap, n)
                     colors = cmap(np.linspace(0, 1, n))
                     colors = [
