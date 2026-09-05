@@ -56,7 +56,7 @@ defusedxml==0.7.1
     #   nbconvert
 docstring-parser==0.17.0
     # via pyopenms_viz (pyproject.toml)
-docutils==0.21.2
+docutils==0.23
     # via
     #   nbsphinx
     #   pydata-sphinx-theme
@@ -69,7 +69,7 @@ fonttools==4.63.0
     # via matplotlib
 idna==3.11
     # via requests
-imagesize==1.4.1
+imagesize==2.0.0
     # via sphinx
 iniconfig==2.3.0
     # via pytest
@@ -187,7 +187,7 @@ pure-eval==0.2.3
     # via stack-data
 pycparser==3.0
     # via cffi
-pydata-sphinx-theme==0.16.1
+pydata-sphinx-theme==0.19.0
     # via pyopenms_viz (pyproject.toml)
 pygments==2.19.2
     # via
@@ -237,7 +237,7 @@ rpds-py==0.30.0
     #   referencing
 six==1.17.0
     # via python-dateutil
-snowballstemmer==3.0.1
+snowballstemmer==3.1.1
     # via sphinx
 soupsieve==2.8.3
     # via beautifulsoup4
@@ -250,7 +250,7 @@ sphinx==9.0.4
     #   sphinx-gallery
 sphinx-copybutton==0.5.2
     # via pyopenms_viz (pyproject.toml)
-sphinx-gallery==0.20.0
+sphinx-gallery==0.21.0
     # via pyopenms_viz (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
