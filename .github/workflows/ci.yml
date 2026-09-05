@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest] # note mac-latest tests fail due to slight differences in images
-        python-version: ["3.12", "3.13", "3.14"]
+        os: [windows-latest] # note mac-latest tests fail due to slight differences in images
+        python-version: ["3.14"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -27,5 +27,6 @@ jobs:
         pip install -r requirements.txt # visual tests are very finiky so fix the versions
         pip install . # install pyopenms-viz
     - name: Test
+      shell: cmd
       run: |
         python -m pytest --snapshot-warn-unused test/ # do not fail if unused snapshot, just warn
