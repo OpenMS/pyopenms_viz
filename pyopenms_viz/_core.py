@@ -588,9 +588,9 @@ class ChromatogramPlot(BaseMSPlot, ABC):
 
         # sort data by x so in order
         if self.by is not None:
-            self.data.sort_values(by=[self.by, self.x], inplace=True)
+            self.data.sort_values(by=[self.by, self.x], inplace=True, kind="stable")
         else:
-            self.data.sort_values(by=self.x, inplace=True)
+            self.data.sort_values(by=self.x, inplace=True, kind="stable")
 
         # Convert to relative intensity if required
         if self.relative_intensity:
@@ -900,17 +900,21 @@ class SpectrumPlot(BaseMSPlot, ABC):
         bin_col = f"__temp_bin_{id(self)}__"
 
         if self._peak_bins is not None:
+
             def assign_bin(value):
                 for low, high in self._peak_bins:
                     if low <= value <= high:
                         return (low, high)
                 return np.nan
+
             df[bin_col] = df[self.x].apply(assign_bin)
         else:
             bins = np.histogram_bin_edges(df[self.x], self._computed_num_bins)
             # Use pd.cut for performance, map to interval's mid to avoid Plotly JSON serialization errors
             cut_bins = pd.cut(df[self.x], bins=bins, include_lowest=True)
-            df[bin_col] = cut_bins.apply(lambda interval: interval.mid if pd.notna(interval) else np.nan)
+            df[bin_col] = cut_bins.apply(
+                lambda interval: interval.mid if pd.notna(interval) else np.nan
+            )
 
         cols = [bin_col]
         if self.by is not None:
@@ -930,18 +934,15 @@ class SpectrumPlot(BaseMSPlot, ABC):
         # FIX: Aggregate self.x using 'mean' to preserve the true m/z center of mass
         df = (
             df.groupby(cols, observed=True)
-            .agg({
-                self.y: self.aggregation_method,
-                self.x: "mean"
-            })
+            .agg({self.y: self.aggregation_method, self.x: "mean"})
             .reset_index()
         )
 
         df = df.drop(columns=[bin_col])
-        
+
         # Only fill missing values in the intensity column to avoid corrupting m/z or metadata
         df[self.y] = df[self.y].fillna(0)
-        
+
         return df
 
     def _prepare_data(self, df, label_suffix=""):
@@ -1236,7 +1237,7 @@ class PeakMapPlot(BaseMSPlot, ABC):
 
         # Sort values by intensity in ascending order to plot highest intensity peaks last
         if self.z is not None:
-            self.data = self.data.sort_values(self.z)
+            self.data = self.data.sort_values([self.z, self.x], kind="stable")
 
     def plot(self):
         if self.add_marginals:
