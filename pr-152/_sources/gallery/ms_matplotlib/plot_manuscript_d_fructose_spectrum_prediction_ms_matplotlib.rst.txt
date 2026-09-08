@@ -350,7 +350,7 @@ Load .mzML using pymzml
 
  .. code-block:: none
 
-    [Warning] Not index found and build_index_from_scratch is False
+    No index found and build_index_from_scratch is False
     term not found (MS:1000031)
     term not found (MS:1000031)
 
