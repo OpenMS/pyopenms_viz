@@ -11,8 +11,8 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         os: [ubuntu-latest, windows-latest] # note mac-latest tests fail due to slight differences in images
         python-version: ["3.12", "3.13", "3.14"]
     steps:
