@@ -5,7 +5,7 @@ on: [push, pull_request]
 # Cancel in-progress runs when a new push is made to the same branch/PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test:
