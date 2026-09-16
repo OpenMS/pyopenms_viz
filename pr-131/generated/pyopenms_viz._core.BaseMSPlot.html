@@ -566,8 +566,8 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyopenms_viz._core.BaseMSPlot._create_tooltips">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_create_tooltips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyopenms_viz._core.BaseMSPlot._create_tooltips" title="Link to this definition">#</a></dt>
-<dd><p>Create tooltipis based on entries dictionary with keys: label for tooltip and values: column names.</p>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_create_tooltips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyopenms_viz._core.BaseMSPlot._create_tooltips" title="Link to this definition">#</a></dt>
+<dd><p>Create tooltips based on entries dictionary with keys: label for tooltip and values: column names.</p>
 <dl class="simple">
 <dt>entries = {</dt><dd><p>“m/z”: “mz”
 “Retention Time: “RT”</p>
@@ -582,6 +582,9 @@ Retention Time: 50.1</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>entries</strong> (<em>dict</em>) – Which data to put in tool tip and how display it with labels as keys and column names as values.</p></li>
 <li><p><strong>index</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to show dataframe index in tooltip. Defaults to True.</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em><em>, </em><em>optional</em>) – The data to use for tooltip values. Defaults to None, which uses self.data.
+When peak binning is enabled, pass the prepared/binned DataFrame to ensure tooltip data
+matches the plotted data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
