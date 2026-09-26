@@ -4,7 +4,6 @@ from enum import Enum, auto
 from itertools import cycle
 from typing import Literal
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -63,6 +62,16 @@ class ColorGenerator:
                 if colormap.lower() == "grayscale":
                     colors = self._get_n_grayscale_colors(n)
                 else:
+                    # matplotlib is an optional extra, and this module is
+                    # imported by every backend, so only load it when a
+                    # named colormap actually needs it.
+                    try:
+                        import matplotlib.pyplot as plt
+                    except ImportError:
+                        raise ImportError(
+                            f"The colormap '{colormap}' needs matplotlib. "
+                            "Install it with: pip install 'pyopenms_viz[matplotlib]'"
+                        ) from None
                     cmap = plt.get_cmap(colormap, n)
                     colors = cmap(np.linspace(0, 1, n))
                     colors = [
