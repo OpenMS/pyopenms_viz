@@ -67,11 +67,11 @@ class ColorGenerator:
                     # named colormap actually needs it.
                     try:
                         import matplotlib.pyplot as plt
-                    except ImportError:
+                    except ImportError as err:
                         raise ImportError(
                             f"The colormap '{colormap}' needs matplotlib. "
                             "Install it with: pip install 'pyopenms_viz[matplotlib]'"
-                        ) from None
+                        ) from err
                     cmap = plt.get_cmap(colormap, n)
                     colors = cmap(np.linspace(0, 1, n))
                     colors = [
