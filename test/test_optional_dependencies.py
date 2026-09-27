@@ -60,7 +60,7 @@ def test_named_colormap_without_matplotlib_names_the_extra():
 
 
 def test_boundary_icons_load_on_first_access():
-    from PIL import Image
+    Image = pytest.importorskip("PIL.Image")
 
     from pyopenms_viz import constants
 
