@@ -6,9 +6,13 @@ test/test_peakmap3d
 import pytest
 import pandas as pd
 
+from conftest import backend_params
+
 
 # Override load_backend so only test with matplotlib and plotly
-@pytest.fixture(scope="session", autouse=True, params=["ms_matplotlib", "ms_plotly"])
+@pytest.fixture(
+    scope="session", autouse=True, params=backend_params("ms_matplotlib", "ms_plotly")
+)
 def load_backend(request):
     import pandas as pd
 
