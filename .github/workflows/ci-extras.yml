@@ -28,8 +28,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         # requirements.txt only constrains versions here (visual tests are
-        # sensitive to them); it does not install the other extras.
-        pip install -c requirements.txt ".[${{ matrix.extra }},testing]"
+        # sensitive to them); it does not install the other extras. pip does
+        # not accept extras in a constraints file, so drop them first.
+        sed -E 's/^([A-Za-z0-9_.-]+)\[[^]]*\]/\1/' requirements.txt > constraints.txt
+        pip install -c constraints.txt ".[${{ matrix.extra }},testing]"
     - name: Test
       run: |
         python -m pytest --snapshot-warn-unused test/
