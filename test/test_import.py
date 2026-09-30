@@ -24,3 +24,11 @@ def test_import_backend(backend):
     module = {"ms_matplotlib": "_matplotlib", "ms_bokeh": "_bokeh", "ms_plotly": "_plotly"}[backend]
     importlib.import_module(f"pyopenms_viz.{module}")
 
+
+@pytest.mark.requires_backend("ms_matplotlib")
+@pytest.mark.parametrize("n", [1, 2, 3, 5, 8, 9, 20])
+def test_dark2_fallback_matches_matplotlib(n):
+    """Without matplotlib, the default Dark2 colors must be the same."""
+    from pyopenms_viz._misc import ColorGenerator, _sample_dark2
+
+    assert _sample_dark2(n) == ColorGenerator(colormap="Dark2", n=n).colors
