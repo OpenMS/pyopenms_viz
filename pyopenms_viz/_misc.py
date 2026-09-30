@@ -4,8 +4,31 @@ from enum import Enum, auto
 from itertools import cycle
 from typing import Literal
 
-import matplotlib.pyplot as plt
 import numpy as np
+
+
+# matplotlib's "Dark2" (ColorBrewer), as the hex strings ColorGenerator makes.
+DARK2 = [
+    "#1B9E77",
+    "#D95F02",
+    "#7570B3",
+    "#E7298A",
+    "#66A61E",
+    "#E6AB02",
+    "#A6761D",
+    "#666666",
+]
+
+
+def _sample_dark2(n):
+    """Pick n Dark2 colors the way matplotlib's get_cmap("Dark2", n) does."""
+    if n is None:
+        return list(DARK2)
+    # Same float-to-index lookup as matplotlib's Colormap.__call__.
+    index = np.linspace(0, 1, n) * len(DARK2)
+    index[index == len(DARK2)] = len(DARK2) - 1
+    index = np.clip(index, 0, len(DARK2) - 1).astype(int)
+    return [DARK2[i] for i in index]
 
 
 class ColorGenerator:
@@ -63,14 +86,31 @@ class ColorGenerator:
                 if colormap.lower() == "grayscale":
                     colors = self._get_n_grayscale_colors(n)
                 else:
-                    cmap = plt.get_cmap(colormap, n)
-                    colors = cmap(np.linspace(0, 1, n))
-                    colors = [
-                        "#{:02X}{:02X}{:02X}".format(
-                            int(r * 255), int(g * 255), int(b * 255)
-                        )
-                        for r, g, b, _ in colors
-                    ]
+                    # matplotlib is an optional extra, and this module is
+                    # imported by every backend, so only load it when a
+                    # named colormap actually needs it.
+                    try:
+                        import matplotlib.pyplot as plt
+                    except ImportError as err:
+                        # Dark2 is the default annotation colormap, so keep
+                        # it working for bokeh- and plotly-only installs.
+                        if colormap != "Dark2":
+                            raise ImportError(
+                                f"The colormap '{colormap}' needs matplotlib. "
+                                "Install it with: pip install 'pyopenms_viz[matplotlib]'"
+                            ) from err
+                        plt = None
+                    if plt is None:
+                        colors = _sample_dark2(n)
+                    else:
+                        cmap = plt.get_cmap(colormap, n)
+                        colors = cmap(np.linspace(0, 1, n))
+                        colors = [
+                            "#{:02X}{:02X}{:02X}".format(
+                                int(r * 255), int(g * 255), int(b * 255)
+                            )
+                            for r, g, b, _ in colors
+                        ]
             else:
                 colors = colormap
         if n is not None:
