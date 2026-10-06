@@ -960,7 +960,7 @@ class SpectrumPlot(BaseMSPlot, ABC):
         df = df.copy()
 
         # Convert to relative intensity if required
-        if self.relative_intensity or self.mirror_spectrum:
+        if self.relative_intensity:
             df[self.y] = df[self.y] / df[self.y].max() * 100
 
         # Bin peaks if required
