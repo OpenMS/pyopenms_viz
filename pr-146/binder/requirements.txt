@@ -131,7 +131,7 @@ nbsphinx==0.9.6
     # via pyopenms_viz (pyproject.toml)
 nest-asyncio==1.6.0
     # via ipykernel
-numpy==2.2.6
+numpy==2.5.3
     # via
     #   bokeh
     #   contourpy
@@ -167,7 +167,7 @@ pillow==12.1.1
     #   sphinx-gallery
 platformdirs==4.5.1
     # via jupyter-core
-plotly==7.0.0
+plotly==7.1.0
     # via pyopenms_viz (pyproject.toml)
 pluggy==1.6.0
     # via pytest
