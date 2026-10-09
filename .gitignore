@@ -11,3 +11,7 @@ docs/generated
 docs/gallery_scripts
 docs/_build
 .DS_Store
+venv/
+.venv/
+_build/
+tmpclaude-c0db-cwd

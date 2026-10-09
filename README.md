@@ -32,6 +32,19 @@ pyOpenMS-Viz is a Python library that provides a simple interface for extending 
 | PeakMap 3D      | x, y, z                 | peakmap (plot3d=True)                                     | ✓              |           | ✓          |
 
 
+### Note on Polars DataFrames
+`pyopenms_viz` can work with [Polars](https://pola.rs/) DataFrames by internally converting them to pandas, often via an Arrow-backed representation where possible. This conversion may involve data copies depending on data types and configuration, and plotting is ultimately delegated to the pandas-based plotting backends. Due to API differences, you must use the `.ms_plot()` namespace instead of `.plot()` when working with Polars.
+
+**Pandas:**
+```python
+df_pandas.plot(kind="spectrum", x="m/z", y="intensity", backend="ms_plotly")
+```
+
+**Polars:**
+```python
+df_polars.ms_plot(kind="spectrum", x="m/z", y="intensity", backend="ms_plotly")
+```
+
 ## (Recommended) Pip Installation
 
 The recommended way of installing pyopenms_viz is through the Python Package Index (PyPI). We recommend installing pyopenms_viz in its own virtual environment using Anaconda to avoid packaging conflicts.
