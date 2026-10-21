@@ -3,6 +3,7 @@ test/test_spectrum
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import numpy as np
 import pytest
 import pandas as pd
 import pyopenms_viz as oms_viz
@@ -88,6 +89,30 @@ def test_mirror_spectrum(spectrum_data, snapshot, **kwargs):
         fig.tight_layout()
 
     assert snapshot == out
+
+
+@pytest.mark.parametrize(
+    "relative_intensity, expected", [(False, (-8, 10)), (True, (-100, 100))]
+)
+def test_mirror_spectrum_intensity_scale(relative_intensity, expected):
+    # A mirror plot only converts to relative intensity when it is requested (#184)
+    if pd.options.plotting.backend != "ms_matplotlib":
+        pytest.skip("reads the plotted values from the matplotlib Axes")
+    spectrum = pd.DataFrame(
+        {"mz": [100.0, 200.0, 300.0], "intensity": [2.0, 10.0, 5.0]}
+    )
+    reference = pd.DataFrame({"mz": [100.0, 250.0], "intensity": [4.0, 8.0]})
+    ax = spectrum.plot(
+        x="mz",
+        y="intensity",
+        kind="spectrum",
+        mirror_spectrum=True,
+        reference_spectrum=reference,
+        relative_intensity=relative_intensity,
+        show_plot=False,
+    )
+    ys = np.concatenate([line.get_ydata() for line in ax.lines])
+    assert (ys.min(), ys.max()) == expected
 
 
 @pytest.mark.parametrize(
