@@ -72,7 +72,14 @@ def test_spectrum_binning(spectrum_data, snapshot, kwargs):
     assert snapshot == out
 
 
-def test_mirror_spectrum(spectrum_data, snapshot, **kwargs):
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        dict(),
+        dict(relative_intensity=True),
+    ],
+)
+def test_mirror_spectrum(spectrum_data, snapshot, kwargs):
     out = spectrum_data.plot(
         x="mz",
         y="intensity",
