@@ -1,0 +1,37 @@
+name: continuous-integration-extras
+
+# pyopenms_viz only requires pandas; each plotting library is an extra.
+# Install one extra at a time and run the tests, so a hard dependency on
+# another extra (e.g. importing matplotlib at package import) is caught.
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extra: [matplotlib, bokeh, plotly]
+    name: test (pyopenms_viz[${{ matrix.extra }}])
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+    - name: Install pyopenms_viz[${{ matrix.extra }}]
+      run: |
+        python -m pip install --upgrade pip
+        # requirements.txt only constrains versions here (visual tests are
+        # sensitive to them); it does not install the other extras. pip does
+        # not accept extras in a constraints file, so drop them first.
+        sed -E 's/^([A-Za-z0-9_.-]+)\[[^]]*\]/\1/' requirements.txt > constraints.txt
+        pip install -c constraints.txt ".[${{ matrix.extra }},testing]"
+    - name: Test
+      run: |
+        python -m pytest --snapshot-warn-unused test/
