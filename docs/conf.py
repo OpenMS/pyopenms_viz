@@ -312,7 +312,8 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "OpenMS",
         "repo": "pyopenms_viz",
-        "branch": "gh_pages",
+        # Use the source branch for Binder launches; gh_pages is a deploy artifact branch.
+        "branch": "main",
         "binderhub_url": "https://notebooks.gesis.org/binder",
         "dependencies": "./requirements.txt",
     },
