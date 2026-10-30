@@ -5,121 +5,20 @@
         "color": "#4575B4"
       },
       "mode": "lines",
-      "x": [
-        50.989,
-        50.989,
-        50.989,
-        74.1324,
-        74.1324,
-        74.1324,
-        101.5375,
-        101.5375,
-        101.5375,
-        160.2,
-        160.2,
-        160.2,
-        175.993,
-        175.993,
-        175.993,
-        200.6732,
-        200.6732,
-        200.6732
-      ],
-      "y": [
-        0,
-        10,
-        0,
-        0,
-        20,
-        0,
-        0,
-        25,
-        0,
-        0,
-        13,
-        0,
-        0,
-        8,
-        0,
-        0,
-        17,
-        0
-      ],
+      "x": {
+        "dtype": "f8",
+        "bdata": "O99PjZd+SUA730+Nl35JQDvfT42XfklAY3\u002fZPXmIUkBjf9k9eYhSQGN\u002f2T15iFJAZ2ZmZmZiWUBnZmZmZmJZQGdmZmZmYllAZmZmZmYGZEBmZmZmZgZkQGZmZmZmBmRAsp3vp8b\u002fZUCyne+nxv9lQLKd76fG\u002f2VAWvW52ooVaUBa9bnaihVpQFr1udqKFWlA"
+      },
+      "y": {
+        "dtype": "i1",
+        "bdata": "AAoAABQAABkAAA0AAAgAABEA"
+      },
       "type": "scatter",
-      "customdata": [
-        [
-          50.989,
-          10.0
-        ],
-        [
-          50.989,
-          10.0
-        ],
-        [
-          50.989,
-          10.0
-        ],
-        [
-          74.1324,
-          20.0
-        ],
-        [
-          74.1324,
-          20.0
-        ],
-        [
-          74.1324,
-          20.0
-        ],
-        [
-          101.5375,
-          25.0
-        ],
-        [
-          101.5375,
-          25.0
-        ],
-        [
-          101.5375,
-          25.0
-        ],
-        [
-          160.2,
-          13.0
-        ],
-        [
-          160.2,
-          13.0
-        ],
-        [
-          160.2,
-          13.0
-        ],
-        [
-          175.993,
-          8.0
-        ],
-        [
-          175.993,
-          8.0
-        ],
-        [
-          175.993,
-          8.0
-        ],
-        [
-          200.6732,
-          17.0
-        ],
-        [
-          200.6732,
-          17.0
-        ],
-        [
-          200.6732,
-          17.0
-        ]
-      ],
+      "customdata": {
+        "dtype": "f8",
+        "bdata": "O99PjZd+SUAAAAAAAAAkQDvfT42XfklAAAAAAAAAJEA730+Nl35JQAAAAAAAACRAY3\u002fZPXmIUkAAAAAAAAA0QGN\u002f2T15iFJAAAAAAAAANEBjf9k9eYhSQAAAAAAAADRAZ2ZmZmZiWUAAAAAAAAA5QGdmZmZmYllAAAAAAAAAOUBnZmZmZmJZQAAAAAAAADlAZmZmZmYGZEAAAAAAAAAqQGZmZmZmBmRAAAAAAAAAKkBmZmZmZgZkQAAAAAAAACpAsp3vp8b\u002fZUAAAAAAAAAgQLKd76fG\u002f2VAAAAAAAAAIECyne+nxv9lQAAAAAAAACBAWvW52ooVaUAAAAAAAAAxQFr1udqKFWlAAAAAAAAAMUBa9bnaihVpQAAAAAAAADFA",
+        "shape": "18, 2"
+      },
       "hovertemplate": "m\u002fz: %{customdata[0]}\u003cbr\u003eintensity: %{customdata[1]}"
     }
   ],
@@ -253,58 +152,6 @@
               ]
             ],
             "type": "contour"
-          }
-        ],
-        "heatmapgl": [
-          {
-            "colorbar": {
-              "outlinewidth": 1,
-              "tickcolor": "rgb(36,36,36)",
-              "ticks": "outside"
-            },
-            "colorscale": [
-              [
-                0.0,
-                "#440154"
-              ],
-              [
-                0.1111111111111111,
-                "#482878"
-              ],
-              [
-                0.2222222222222222,
-                "#3e4989"
-              ],
-              [
-                0.3333333333333333,
-                "#31688e"
-              ],
-              [
-                0.4444444444444444,
-                "#26828e"
-              ],
-              [
-                0.5555555555555556,
-                "#1f9e89"
-              ],
-              [
-                0.6666666666666666,
-                "#35b779"
-              ],
-              [
-                0.7777777777777778,
-                "#6ece58"
-              ],
-              [
-                0.8888888888888888,
-                "#b5de2b"
-              ],
-              [
-                1.0,
-                "#fde725"
-              ]
-            ],
-            "type": "heatmapgl"
           }
         ],
         "heatmap": [
@@ -557,7 +404,7 @@
             "type": "scattergl"
           }
         ],
-        "scattermapbox": [
+        "scattermap": [
           {
             "marker": {
               "colorbar": {
@@ -566,7 +413,7 @@
                 "ticks": "outside"
               }
             },
-            "type": "scattermapbox"
+            "type": "scattermap"
           }
         ],
         "scatterpolargl": [
@@ -861,9 +708,6 @@
           "align": "left"
         },
         "hovermode": "closest",
-        "mapbox": {
-          "style": "light"
-        },
         "paper_bgcolor": "white",
         "plot_bgcolor": "white",
         "polar": {
@@ -1065,7 +909,7 @@
         },
         "showarrow": false,
         "text": "101.5375",
-        "x": 101.5375,
+        "x": 101.53750000000001,
         "xanchor": "left",
         "y": 25
       },
