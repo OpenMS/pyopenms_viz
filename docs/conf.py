@@ -314,7 +314,7 @@ sphinx_gallery_conf = {
         "repo": "pyopenms_viz",
         "branch": "gh_pages",
         "binderhub_url": "https://notebooks.gesis.org/binder",
-        "dependencies": "./requirements.txt",
+        "dependencies": "../requirements.txt",
     },
 }
 
