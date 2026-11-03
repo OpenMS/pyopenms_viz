@@ -5,7 +5,11 @@ pyopenms-viz/testing/BokehSnapshotExtension
 
 from typing import Any
 from bokeh.embed import file_html
+import base64
+import gzip
 import json
+import math
+import numpy as np
 from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
@@ -43,6 +47,17 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
 
     file_extension = "html"
 
+    # keys that change between bokeh versions or runs without changing the plot
+    # NOTE: add keys here when a bokeh update introduces a new irrelevant field
+    IGNORED_KEYS = {
+        "id",  # unique identifiers, differ between runs
+        "root_ids",
+        "version",  # bokeh version
+        "config",  # document config, added in bokeh 3.10
+        "sort_by",  # tool attribute, added in bokeh 3.10
+        "icon",  # embedded tool icon images, encoded differently between versions
+    }
+
     def matches(self, *, serialized_data, snapshot_data):
         """
         Determine if the serialized data matches the snapshot data.
@@ -62,8 +77,49 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         key_json_serialized = list(json_serialized.keys())[0]
 
         return BokehSnapshotExtension.compare_json(
-            json_snapshot[key_json_snapshot], json_serialized[key_json_serialized]
+            BokehSnapshotExtension.decode_arrays(json_snapshot[key_json_snapshot]),
+            BokehSnapshotExtension.decode_arrays(
+                json_serialized[key_json_serialized]
+            ),
         )
+
+    @staticmethod
+    def decode_arrays(obj):
+        """
+        Replace base64 encoded (and possibly gzipped) bokeh arrays with lists so arrays
+        are compared by value rather than by their encoding.
+
+        Args:
+            obj: bokeh json object
+
+        Returns:
+            bokeh json object with decoded arrays
+        """
+        if isinstance(obj, dict):
+            array = obj.get("array")
+            if (
+                obj.get("type") == "ndarray"
+                and isinstance(array, dict)
+                and array.get("type") == "bytes"
+            ):
+                raw = base64.b64decode(array["data"])
+                if raw[:2] == b"\x1f\x8b":  # gzip magic number, bokeh >= 3.10
+                    raw = gzip.decompress(raw)
+                byteorder = "<" if obj.get("order", "little") == "little" else ">"
+                values = np.frombuffer(raw, dtype=np.dtype(obj["dtype"]).newbyteorder(byteorder))
+                return {
+                    "type": "ndarray",
+                    "dtype": obj["dtype"],
+                    "shape": obj["shape"],
+                    "array": values.reshape(obj["shape"]).tolist(),
+                }
+            return {
+                key: BokehSnapshotExtension.decode_arrays(value)
+                for key, value in obj.items()
+            }
+        if isinstance(obj, list):
+            return [BokehSnapshotExtension.decode_arrays(i) for i in obj]
+        return obj
 
     def extract_bokeh_json(self, html: str) -> json:
         """
@@ -80,60 +136,57 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         return json.loads(parser.bokehJson)
 
     @staticmethod
-    def compare_json(json1, json2):
+    def compare_json(json1, json2, path="$"):
         """
-        Compare two bokeh json objects. This function acts recursively
+        Compare two bokeh json objects. This function acts recursively.
+        Both objects must have the same keys (apart from IGNORED_KEYS) and lists are compared in order.
 
         Args:
             json1: first object
             json2: second object
+            path (str): location of the objects in the json, used in failure messages
 
         Returns:
            bool: True if the objects are equal, False otherwise
         """
         if isinstance(json1, dict) and isinstance(json2, dict):
-            for key in json1.keys():
-                if key not in json2:
-                    print(f"Key {key} not in second json")
-                    return False
-                elif key in ["id", "root_ids"]:  # add keys to ignore here
-                    pass
-                elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
-                    print(f"Values for key {key} not equal")
-                    return False
-            return True
+            keys1 = set(json1.keys()) - BokehSnapshotExtension.IGNORED_KEYS
+            keys2 = set(json2.keys()) - BokehSnapshotExtension.IGNORED_KEYS
+            if keys1 != keys2:
+                print(
+                    f"{path}: keys only in first json {sorted(keys1 - keys2)}, "
+                    f"only in second json {sorted(keys2 - keys1)}"
+                )
+                return False
+            return all(
+                BokehSnapshotExtension.compare_json(
+                    json1[key], json2[key], f"{path}.{key}"
+                )
+                for key in sorted(keys1)
+            )
         elif isinstance(json1, list) and isinstance(json2, list):
             if len(json1) != len(json2):
-                print("Lists have different lengths")
+                print(f"{path}: lists have different lengths {len(json1)} != {len(json2)}")
                 return False
-            # lists are unordered so we need to compare every element one by one
-            for idx, i in enumerate(json1):
-                check = True
-                if isinstance(i, dict):
-                    if (
-                        "type" not in i.keys()
-                    ):  # if "type" not present than dictionary with only id, do not need to compare, will get key error if check
-                        check = False
-                        pass
-                    if check:  # find corresponding entry in json2 only if check is true
-                        for j in json2:
-                            if (
-                                "type" not in j.keys()
-                            ):  # if "type" not present than dictionary only has id, do not need to compare, will get key error if check
-                                check = False
-                            if check and (j["type"] == i["type"]):
-                                if not BokehSnapshotExtension.compare_json(i, j):
-                                    print(f"Element {i} not equal to {j}")
-                                    return False
-                                return True
-                        print(f"Element {i} not in second list")
-                        return False
-                else:
-                    return json1[idx] == json2[idx]
+            return all(
+                BokehSnapshotExtension.compare_json(i, j, f"{path}[{idx}]")
+                for idx, (i, j) in enumerate(zip(json1, json2))
+            )
+        elif isinstance(json1, float) or isinstance(json2, float):
+            if not (
+                isinstance(json1, (int, float))
+                and isinstance(json2, (int, float))
+                and (
+                    math.isclose(json1, json2)
+                    or (math.isnan(json1) and math.isnan(json2))
+                )
+            ):
+                print(f"{path}: values not equal {json1} != {json2}")
+                return False
             return True
         else:
             if json1 != json2:
-                print(f"Values not equal: {json1} != {json2}")
+                print(f"{path}: values not equal {json1} != {json2}")
             return json1 == json2
 
     def read_snapshot_data_from_location(
