@@ -46,7 +46,7 @@ cssselect2==0.8.0
     # via cairosvg
 cycler==0.12.1
     # via matplotlib
-debugpy==1.8.20
+debugpy==1.8.22
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -73,7 +73,7 @@ imagesize==1.4.1
     # via sphinx
 iniconfig==2.3.0
     # via pytest
-ipykernel==7.1.0
+ipykernel==7.4.0
     # via pyopenms_viz (pyproject.toml)
 ipython==8.38.0
     # via
@@ -215,7 +215,7 @@ pytz==2025.2
     # via pandas
 pyyaml==6.0.3
     # via bokeh
-pyzmq==27.1.0
+pyzmq==27.2.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -273,7 +273,7 @@ tinycss2==1.4.0
     #   bleach
     #   cairosvg
     #   cssselect2
-tornado==6.5.4
+tornado==6.6
     # via
     #   bokeh
     #   ipykernel
