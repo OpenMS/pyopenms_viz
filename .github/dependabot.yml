@@ -19,6 +19,9 @@ updates:
     # --------------------------------------------------
     ignore:
       - dependency-name: "tinycss2"
+      # sphinx 9.1 requires docutils<0.23; lift once sphinx supports newer docutils
+      - dependency-name: "docutils"
+        versions: [">=0.23"]
 
     groups:
       # ===============================
