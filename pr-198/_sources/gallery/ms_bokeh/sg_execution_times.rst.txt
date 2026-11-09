@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:02.388** total execution time for 7 files **from gallery/ms_bokeh**:
+**00:02.148** total execution time for 7 files **from gallery/ms_bokeh**:
 
 .. container::
 
@@ -33,23 +33,23 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spyogenes_subplots_ms_bokeh.py` (``plot_spyogenes_subplots_ms_bokeh.py``)
-     - 00:00.920
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_chromatogram_ms_bokeh.py` (``plot_chromatogram_ms_bokeh.py``)
-     - 00:00.465
+     - 00:00.962
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_ms_bokeh.py` (``plot_peakmap_ms_bokeh.py``)
-     - 00:00.422
-     - 0.0
-   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_ms_bokeh.py` (``plot_spectrum_ms_bokeh.py``)
-     - 00:00.196
+     - 00:00.253
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_dia_ms_bokeh.py` (``plot_spectrum_dia_ms_bokeh.py``)
-     - 00:00.163
+     - 00:00.234
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_chromatogram_ms_bokeh.py` (``plot_chromatogram_ms_bokeh.py``)
+     - 00:00.208
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_peakmap_marginals_ms_bokeh.py` (``plot_peakmap_marginals_ms_bokeh.py``)
-     - 00:00.130
+     - 00:00.185
+     - 0.0
+   * - :ref:`sphx_glr_gallery_ms_bokeh_plot_spectrum_ms_bokeh.py` (``plot_spectrum_ms_bokeh.py``)
+     - 00:00.179
      - 0.0
    * - :ref:`sphx_glr_gallery_ms_bokeh_plot_mobilogram_ms_bokeh.py` (``plot_mobilogram_ms_bokeh.py``)
-     - 00:00.092
+     - 00:00.126
      - 0.0
