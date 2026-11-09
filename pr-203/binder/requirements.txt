@@ -219,7 +219,7 @@ pyzmq==27.3.0
     # via
     #   ipykernel
     #   jupyter-client
-rdkit==2026.3.6
+rdkit==2026.9.1
     # via pyopenms_viz (pyproject.toml)
 referencing==0.37.0
     # via
