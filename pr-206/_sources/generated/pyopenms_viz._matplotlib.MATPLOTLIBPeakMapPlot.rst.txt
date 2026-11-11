@@ -1,0 +1,15 @@
+﻿..
+    The empty line below should not be removed. It is added such that the `rst_prolog`
+    is added before the :mod: directive. Otherwise, the rendering will show as a
+    paragraph instead of a header.
+
+MATPLOTLIBPeakMapPlot
+============================================================
+
+.. currentmodule:: pyopenms_viz._matplotlib
+
+.. autoclass:: MATPLOTLIBPeakMapPlot
+   :members:
+   :special-members:
+   :private-members:
+   :show-inheritance:
