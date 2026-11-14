@@ -1,0 +1,75 @@
+"""
+Plot Spyogenes subplots ms_plotly
+=======================================
+
+Here we show how we can plot multiple chromatograms across runs together. In this rendering the plot is slightly cut off
+"""
+
+import pandas as pd
+import numpy as np
+from plotly.subplots import make_subplots
+from pyopenms_viz.util import download_file, unzip_file
+
+# GitHub release asset (primary) with Zenodo as backup
+url = (
+    "https://github.com/OpenMS/pyopenms_viz/releases/download/manuscript/spyogenes.zip"
+)
+backup_url = "https://zenodo.org/records/17904512/files/spyogenes.zip?download=1"
+zip_filename = "spyogenes.zip"
+zip_dir = "spyogenes"
+
+download_file(url, zip_filename, backup_url=backup_url)
+unzip_file(zip_filename, ".")  # Extract to current directory
+
+annotation_bounds = pd.read_csv(
+    "spyogenes/AADGQTVSGGSILYR3_manual_annotations.tsv", sep="\t"
+)  # contain annotations across all runs
+chrom_df = pd.read_csv(
+    "spyogenes/chroms_AADGQTVSGGSILYR3.tsv", sep="\t"
+)  # contains chromatogram for precursor across all runs
+
+##### Set Plotting Variables #####
+pd.options.plotting.backend = "ms_plotly"
+RUN_NAMES = [
+    "Run #0 Spyogenes 0% human plasma",
+    "Run #1 Spyogenes 0% human plasma",
+    "Run #2 Spyogenes 0% human plasma",
+    "Run #3 Spyogenes 10% human plasma",
+    "Run #4 Spyogenes 10% human plasma",
+    "Run #5 Spyogenes 10% human plasma",
+]
+
+# For each run fill in the axs object with the corresponding chromatogram
+plot_list = []
+for i, run in enumerate(RUN_NAMES):
+    run_df = chrom_df[chrom_df["run_name"] == run]
+    current_bounds = annotation_bounds[annotation_bounds["run"] == run]
+
+    plot_list.append(
+        run_df.plot(
+            kind="chromatogram",
+            x="rt",
+            y="int",
+            grid=False,
+            by="ion_annotation",
+            width=700,
+            xaxis_label_font_size=16,
+            yaxis_label_font_size=16,
+            xaxis_tick_font_size=14,
+            yaxis_tick_font_size=14,
+            relative_intensity=True,
+            annotation_data=current_bounds,
+            xlabel="Retention Time (sec)",
+            ylabel="Relative\nIntensity",
+            show_plot=False,
+            legend_config={"show": True, "title": "Transition"},
+        )
+    )
+
+# Combine all plots into plotly subplot
+fig = make_subplots(rows=len(plot_list), cols=1, subplot_titles=RUN_NAMES)
+for idx, f in enumerate(plot_list):
+    for trace in f.data:
+        fig.add_trace(trace, row=idx + 1, col=1)
+
+fig
