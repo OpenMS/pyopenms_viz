@@ -75,7 +75,7 @@ iniconfig==2.3.1
     # via pytest
 ipykernel==7.4.0
     # via pyopenms_viz (pyproject.toml)
-ipython==9.18.0
+ipython==9.18.1
     # via
     #   ipykernel
     #   pyopenms_viz (pyproject.toml)
@@ -171,7 +171,7 @@ pillow==12.1.1
     #   matplotlib
     #   rdkit
     #   sphinx-gallery
-platformdirs==4.14.2
+platformdirs==4.14.5
     # via jupyter-core
 plotly==7.1.0
     # via pyopenms_viz (pyproject.toml)
