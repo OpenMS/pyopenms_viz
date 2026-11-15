@@ -19,9 +19,6 @@ updates:
     # --------------------------------------------------
     ignore:
       - dependency-name: "tinycss2"
-      # sphinx 9.1 requires docutils<0.23; lift once sphinx supports newer docutils
-      - dependency-name: "docutils"
-        versions: [">=0.23"]
 
     groups:
       # ===============================
@@ -120,12 +117,17 @@ updates:
         patterns:
           - "sphinx*"
           - "nbsphinx"
-          - "docutils"
           - "pydata-sphinx-theme"
           - "alabaster"
           - "imagesize"
           - "snowballstemmer"
           - "roman-numerals"
+
+      # Kept apart from sphinx-updates: Dependabot bumps pins without a
+      # resolver, so a docutils release that sphinx doesn't support yet
+      # would otherwise block the whole sphinx group.
+      docutils-updates:
+        patterns: ["docutils"]
 
       # ===============================
       # HTTP / TLS
