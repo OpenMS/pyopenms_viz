@@ -102,10 +102,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy PR preview to subdirectory
+        id: deploy
         if: steps.pr_info.outputs.deploy == 'true'
         env:
           PR_NUMBER: ${{ steps.pr_info.outputs.pr_number }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           PR_DIR="pr-${PR_NUMBER}"
 
@@ -115,20 +118,29 @@ jobs:
 
           # Previews of other PRs push to gh_pages at the same time (e.g. several
           # Dependabot PRs at once), so a push can be rejected. Each attempt starts
-          # again from the latest gh_pages and replaces only this PR's directory.
+          # again from the latest gh_pages and replaces only this PR's directory,
+          # unless the PR was closed or got a newer head meanwhile (then a newer
+          # preview, or the cleanup, must not be overwritten by this build).
           for attempt in 1 2 3 4 5 6 7 8; do
             git fetch --depth=1 origin gh_pages
             git reset --hard FETCH_HEAD
+            pr_state="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.state + " " + .head.sha')"
+            if [ "$pr_state" != "open ${HEAD_SHA}" ]; then
+              echo "::notice::PR #${PR_NUMBER} is now '${pr_state}', not open at ${HEAD_SHA}; leaving its preview as it is"
+              exit 0
+            fi
             rm -rf "$PR_DIR"
             mkdir -p "$PR_DIR"
             cp -r _temp_build/. "$PR_DIR/"
             git add -A "$PR_DIR"
             if git diff --cached --quiet; then
               echo "No changes to commit"
+              echo "published=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             git commit -q -m "Deploy PR #${PR_NUMBER} preview [skip ci]"
             if git push origin HEAD:gh_pages; then
+              echo "published=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Push rejected (attempt ${attempt}), retrying on the latest gh_pages"
@@ -138,7 +150,7 @@ jobs:
           exit 1
 
       - name: Comment on PR with preview link
-        if: steps.pr_info.outputs.deploy == 'true'
+        if: steps.deploy.outputs.published == 'true'
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ steps.pr_info.outputs.pr_number }}
