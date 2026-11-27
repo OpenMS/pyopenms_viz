@@ -54,6 +54,7 @@ def test_chromatogram_with_annotation(
     assert snapshot == out
 
 # New tests for plot_chromatogram function
+@pytest.mark.requires_backend("ms_matplotlib")
 def test_plot_chromatogram_basic(chromatogram_data):
     fig = oms_viz.plot_chromatogram(
         chromatogram_data, 
@@ -63,6 +64,7 @@ def test_plot_chromatogram_basic(chromatogram_data):
     )
     assert fig is not None
 
+@pytest.mark.requires_backend("ms_matplotlib")
 def test_plot_chromatogram_missing_y(chromatogram_data):
     with pytest.raises(TypeError):
         oms_viz.plot_chromatogram(
@@ -80,6 +82,7 @@ def test_plot_chromatogram_invalid_backend(chromatogram_data):
             backend='invalid_backend'  # Use an invalid backend
         )
 
+@pytest.mark.requires_backend("ms_matplotlib")
 def test_plot_chromatogram_empty_data():
     with pytest.raises(ValueError):
         oms_viz.plot_chromatogram(

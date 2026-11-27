@@ -1,13 +1,53 @@
+import importlib.util
 import pytest
 import pandas as pd
-import matplotlib
 from pathlib import Path
-from pyopenms_viz.testing import (
-    MatplotlibSnapshotExtension,
-    BokehSnapshotExtension,
-    PlotlySnapshotExtension,
-)
-matplotlib.use('Agg')
+
+# Plotting library behind each pandas backend. The libraries are optional
+# extras, so tests for a backend whose library is not installed are skipped.
+BACKEND_LIBRARIES = {
+    "ms_matplotlib": "matplotlib",
+    "ms_bokeh": "bokeh",
+    "ms_plotly": "plotly",
+}
+
+
+def backend_installed(backend):
+    return importlib.util.find_spec(BACKEND_LIBRARIES[backend]) is not None
+
+
+def backend_params(*backends):
+    """Backend fixture params, skipped when the backend's library is missing."""
+    return [
+        pytest.param(
+            backend,
+            marks=pytest.mark.skipif(
+                not backend_installed(backend),
+                reason=f"{BACKEND_LIBRARIES[backend]} is not installed",
+            ),
+        )
+        for backend in backends
+    ]
+
+
+if backend_installed("ms_matplotlib"):
+    import matplotlib
+
+    matplotlib.use("Agg")
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "requires_backend(name): skip unless the library for that backend is installed",
+    )
+
+
+def pytest_runtest_setup(item):
+    for marker in item.iter_markers(name="requires_backend"):
+        for backend in marker.args:
+            if not backend_installed(backend):
+                pytest.skip(f"{BACKEND_LIBRARIES[backend]} is not installed")
 
 def find_git_directory(start_path):
     """Find the full path to the nearest '.git' directory by climbing up the directory tree.
@@ -42,17 +82,25 @@ def test_path():
 def snapshot(snapshot):
     current_backend = pd.options.plotting.backend
     if current_backend == "ms_matplotlib":
+        from pyopenms_viz.testing import MatplotlibSnapshotExtension
+
         return snapshot.use_extension(MatplotlibSnapshotExtension)
     elif current_backend == "ms_bokeh":
+        from pyopenms_viz.testing import BokehSnapshotExtension
+
         return snapshot.use_extension(BokehSnapshotExtension)
     elif current_backend == "ms_plotly":
+        from pyopenms_viz.testing import PlotlySnapshotExtension
+
         return snapshot.use_extension(PlotlySnapshotExtension)
     else:
         raise ValueError(f"Backend {current_backend} not supported")
 
 
 @pytest.fixture(
-    scope="function", autouse=True, params=["ms_matplotlib", "ms_bokeh", "ms_plotly"]
+    scope="function",
+    autouse=True,
+    params=backend_params(*BACKEND_LIBRARIES),
 )
 def load_backend(request):
     import pandas as pd
@@ -88,6 +136,8 @@ def chromatogram_features(test_path):
 @pytest.fixture(autouse=True)
 def close_plots():
     """Close all plots after each test to prevent GUI hangs"""
-    import matplotlib.pyplot as plt
     yield
-    plt.close('all')
+    if backend_installed("ms_matplotlib"):
+        import matplotlib.pyplot as plt
+
+        plt.close("all")
